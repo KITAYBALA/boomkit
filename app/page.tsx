@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,22 +9,12 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import {
-  BarChart3Icon,
-  PackageIcon,
-  ShoppingCartIcon,
-  SettingsIcon,
-  MessageCircleIcon,
-  ShieldIcon,
-  CrownIcon,
-  KeyIcon,
-  CoinsIcon,
-  SendIcon,
-  GavelIcon,
-  NewspaperIcon,
-  CameraIcon,
-} from "lucide-react"
+import { BarChart3Icon, PackageIcon, ShoppingCartIcon, SettingsIcon, MessageCircleIcon, ShieldIcon, CrownIcon, KeyIcon, CoinsIcon, SendIcon, GavelIcon, NewspaperIcon, CameraIcon } from 'lucide-react'
 import { Textarea } from "@/components/ui/textarea"
+
+import RealtimeChat from "@/components/realtime-chat"
+import RealtimeAuctions from "@/components/realtime-auctions"
+import { getSupabaseBrowserClient } from "@/lib/supabase-client"
 
 // Advanced computer identification system
 const generateSystemSignature = (): string => {
@@ -591,6 +581,8 @@ export default function BoomkitGame() {
   const [newRoleColor, setNewRoleColor] = useState("bg-blue-500")
   const [selectedUserForRole, setSelectedUserForRole] = useState("")
 
+  const supabase = useMemo(() => (typeof window !== "undefined" ? getSupabaseBrowserClient() : null), [])
+
   // Badge management states
   const [showBadgeManager, setShowBadgeManager] = useState(false)
   const [selectedUserForBadge, setSelectedUserForBadge] = useState("")
@@ -1088,8 +1080,7 @@ export default function BoomkitGame() {
     alert(`Sold ${selectedBoom} for ${sellPrice} tokens!`)
   }
 
-  // Handle auction listing
-  const handleAuctionList = () => {
+  const handleAuctionList = async () => {
     if (!currentUser || !selectedBoom || !auctionPrice) return
 
     const startingBid = Number.parseInt(auctionPrice)
@@ -1110,21 +1101,10 @@ export default function BoomkitGame() {
       return
     }
 
-    const newAuction: AuctionItem = {
-      id: Date.now().toString(),
-      boomName: selectedBoom,
-      seller: currentUser.username,
-      currentBid: startingBid,
-      timeLeft: duration,
-      bidders: [],
-    }
-
+    // remove one from inventory
     const updatedBooms = { ...currentUser.booms }
-    if (updatedBooms[selectedBoom] > 1) {
-      updatedBooms[selectedBoom] -= 1
-    } else {
-      delete updatedBooms[selectedBoom]
-    }
+    if (updatedBooms[selectedBoom] > 1) updatedBooms[selectedBoom] -= 1
+    else delete updatedBooms[selectedBoom]
 
     const updatedUser = {
       ...currentUser,
@@ -1132,13 +1112,53 @@ export default function BoomkitGame() {
       totalValue: currentUser.totalValue - getBoomValue(selectedBoom),
       boomScore: currentUser.boomScore - getBoomScoreValue(selectedBoom),
     }
-
     updateAndPersistCurrentUser(updatedUser)
-    updateAndPersistAuctions([...auctionItems, newAuction])
+
+    // Try Supabase first
+    const sb = typeof window !== "undefined" ? (await Promise.resolve().then(() => require('@/lib/supabase-client'))) : null
+    const getClient = sb ? (sb as any).getSupabaseBrowserClient : null
+    const supabase = getClient ? getClient() : null
+
+    try {
+      if (supabase) {
+        const endsAt = new Date(Date.now() + duration * 60 * 60 * 1000).toISOString()
+        const { error } = await supabase
+          .from('auction_items')
+          .insert({
+            boom_name: selectedBoom,
+            seller: currentUser.username,
+            current_bid: startingBid,
+            ends_at: endsAt,
+          })
+        if (error) throw error
+        alert(`Listed ${selectedBoom} with starting bid of ${startingBid} tokens!`)
+      } else {
+        // LocalStorage fallback (for preview without env vars)
+        const newAuction = {
+          id: Date.now().toString(),
+          boomName: selectedBoom,
+          seller: currentUser.username,
+          currentBid: startingBid,
+          timeLeft: duration,
+          bidders: [],
+        }
+        const raw = localStorage.getItem('boomkit_auctions')
+        const list = raw ? JSON.parse(raw) : []
+        const next = [...list, newAuction]
+        localStorage.setItem('boomkit_auctions', JSON.stringify(next))
+        // Optional: keep legacy state in sync
+        updateAndPersistAuctions(next)
+        alert(`Listed ${selectedBoom} for auction with starting bid of ${startingBid} tokens!`)
+      }
+    } catch (e) {
+      console.error('Auction insert failed:', e)
+      alert('Failed to create auction.')
+    }
 
     setShowBoomAction(false)
     setSelectedBoom(null)
-    alert(`Listed ${selectedBoom} for auction with starting bid of ${startingBid} tokens!`)
+    setAuctionPrice("")
+    setAuctionDuration("24")
   }
 
   // Get boom value for calculations
@@ -2055,7 +2075,7 @@ export default function BoomkitGame() {
             )}
 
             {/* Chat Page */}
-            {currentPage === "chat" && (
+            {/*{currentPage === "chat" && (
               <div className="space-y-6">
                 <h1 className="text-4xl font-bold text-white">Global Chat</h1>
                 <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
@@ -2096,10 +2116,17 @@ export default function BoomkitGame() {
                   </div>
                 </div>
               </div>
+            )}*/}
+            {currentPage === "chat" && (
+              <RealtimeChat
+                currentUser={currentUser}
+                roleName={currentUser ? getUserRoleName(currentUser) : "Player"}
+                onUsernameClick={handleUsernameClick}
+              />
             )}
 
             {/* Auction Page */}
-            {currentPage === "auction" && (
+            {/*{currentPage === "auction" && (
               <div className="space-y-6">
                 <h1 className="text-4xl font-bold text-white">Auction House</h1>
                 <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
@@ -2129,6 +2156,14 @@ export default function BoomkitGame() {
                   )}
                 </div>
               </div>
+            )}*/}
+            {currentPage === "auction" && (
+              <RealtimeAuctions
+                currentUser={currentUser}
+                getBoomAvatar={getBoomAvatar}
+                getBoomRarity={getBoomRarity}
+                getRarityColor={getRarityColor}
+              />
             )}
 
             {/* Leaderboard Page */}

@@ -2,24 +2,32 @@
 
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
-// Singleton to avoid multiple clients on the browser
-let browserClient: SupabaseClient | null = null
+let client: SupabaseClient | null = null
+let warned = false
 
-export function getSupabaseBrowserClient(): SupabaseClient {
-  if (browserClient) return browserClient
+/**
+ * Safe browser client:
+ * - Returns a Supabase client when env vars exist
+ * - Returns null (and logs a warning) when they don't, so the app can fall back to localStorage
+ */
+export function getSupabaseBrowserClient(): SupabaseClient | null {
+  if (client) return client
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  if (!url || !anonKey) {
-    throw new Error(
-      'Missing Supabase env vars. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.'
-    )
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!url || !anon) {
+    if (!warned) {
+      console.warn(
+        'Supabase is not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to enable Realtime.'
+      )
+      warned = true
+    }
+    return null
   }
-  browserClient = createClient(url, anonKey, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-    },
+
+  client = createClient(url, anon, {
+    auth: { persistSession: true, autoRefreshToken: true },
+    realtime: { params: { eventsPerSecond: 10 } },
   })
-  return browserClient
+  return client
 }
