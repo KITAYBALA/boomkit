@@ -1600,7 +1600,7 @@ export default function BoomkitGame() {
       <div className="w-48 bg-gradient-to-b from-purple-600 to-purple-800 text-white flex flex-col">
         {/* Logo */}
         <div className="p-4 text-center">
-          <h1 className="text-2xl font-bold text-white">Boomkit</h1>
+          <h1 className="text-2xl font-sans font-extrabold text-white">Boomkit  </h1>
         </div>
 
         {/* Navigation */}

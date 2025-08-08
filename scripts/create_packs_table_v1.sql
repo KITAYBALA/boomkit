@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS packs (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  price INTEGER NOT NULL,
+  booms JSONB NOT NULL,
+  color TEXT NOT NULL,
+  image TEXT NOT NULL,
+  rarity TEXT NOT NULL
+);
