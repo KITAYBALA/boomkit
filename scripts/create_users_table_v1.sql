@@ -27,3 +27,31 @@ CREATE TABLE IF NOT EXISTS users (
   ban_reason TEXT,
   last_seen BIGINT NOT NULL DEFAULT 0
 );
+
+-- Enable Row Level Security
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+
+-- Create policy to allow all users to read user data
+CREATE POLICY "Anyone can read users"
+  ON users
+  FOR SELECT
+  USING (true);
+
+-- Create policy to allow anyone to insert users (for registration)
+CREATE POLICY "Anyone can create users"
+  ON users
+  FOR INSERT
+  WITH CHECK (true);
+
+-- Create policy to allow anyone to update users
+CREATE POLICY "Anyone can update users"
+  ON users
+  FOR UPDATE
+  USING (true)
+  WITH CHECK (true);
+
+-- Create indexes for better performance
+CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+CREATE INDEX IF NOT EXISTS idx_users_tokens ON users(tokens DESC);
+CREATE INDEX IF NOT EXISTS idx_users_boom_score ON users(boom_score DESC);
+CREATE INDEX IF NOT EXISTS idx_users_status ON users(status);
