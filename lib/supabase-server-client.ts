@@ -1,26 +1,26 @@
-import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from "@supabase/supabase-js"
 
 /**
-* Server-side Supabase client.
-* Uses SUPABASE_SERVICE_ROLE_KEY when available; falls back to anon for non-admin tasks.
-* Exported name must be "supabaseServerClient".
-*/
+ * Server-side Supabase client.
+ * Uses SUPABASE_SERVICE_ROLE_KEY when available; falls back to anon for non-admin tasks.
+ * Exported name must be "supabaseServerClient".
+ */
 export function supabaseServerClient(): SupabaseClient {
-const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
-if (!url || !key) {
-  throw new Error('Supabase server env vars missing. Ensure NEXT_PUBLIC_SUPABASE_URL and a server key are set.')
-}
+  if (!url || !key) {
+    throw new Error("Supabase server env vars missing. Ensure NEXT_PUBLIC_SUPABASE_URL and a server key are set.")
+  }
 
-return createClient(url, key, {
-  auth: {
-    persistSession: false,
-    autoRefreshToken: false,
-  },
-})
+  return createClient(url, key, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    },
+  })
 }
 
 export function getSupabaseServerClient(): SupabaseClient {
-return supabaseServerClient()
+  return supabaseServerClient()
 }
