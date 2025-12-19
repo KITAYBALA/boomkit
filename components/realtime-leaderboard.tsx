@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { TrophyIcon } from "lucide-react"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 interface LeaderboardUser {
   id: string
@@ -15,28 +16,27 @@ interface LeaderboardUser {
   profile_picture: string
   role: string
   badges: string[]
+  packs_opened: number
 }
 
 export default function RealtimeLeaderboard() {
   const [users, setUsers] = useState<LeaderboardUser[]>([])
   const [loading, setLoading] = useState(true)
+  const [sortBy, setSortBy] = useState<"tokens" | "packs">("tokens")
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient()
 
-    // Initial fetch
     const fetchLeaderboard = async () => {
-      console.log("[v0] Fetching leaderboard data...")
       const { data, error } = await supabase
         .from("users")
-        .select("id, username, tokens, boom_score, profile_picture, role, badges")
+        .select("id, username, tokens, boom_score, profile_picture, role, badges, packs_opened")
         .order("tokens", { ascending: false })
-        .limit(10)
+        .limit(50)
 
       if (error) {
         console.error("[v0] Error fetching leaderboard:", error)
       } else {
-        console.log("[v0] Leaderboard data fetched:", data)
         setUsers(data || [])
       }
       setLoading(false)
@@ -44,22 +44,9 @@ export default function RealtimeLeaderboard() {
 
     fetchLeaderboard()
 
-    // Subscribe to realtime changes
     const channel = supabase
       .channel("leaderboard-changes")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "users",
-        },
-        (payload) => {
-          console.log("[v0] Leaderboard realtime update:", payload)
-          // Refetch leaderboard on any user change
-          fetchLeaderboard()
-        },
-      )
+      .on("postgres_changes", { event: "*", schema: "public", table: "users" }, () => fetchLeaderboard())
       .subscribe()
 
     return () => {
@@ -89,6 +76,14 @@ export default function RealtimeLeaderboard() {
     return `#${index + 1}`
   }
 
+  const sortedUsers = [...users].sort((a, b) => {
+    if (sortBy === "tokens") {
+      return b.tokens - a.tokens
+    } else {
+      return (b.packs_opened || 0) - (a.packs_opened || 0)
+    }
+  })
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -98,52 +93,55 @@ export default function RealtimeLeaderboard() {
   }
 
   return (
-    <ScrollArea className="h-[600px] pr-4">
-      <div className="space-y-2">
-        {users.length === 0 ? (
-          <div className="text-center text-muted-foreground p-8">
-            <TrophyIcon className="mx-auto h-12 w-12 mb-4 opacity-50" />
-            <p>No players yet. Be the first!</p>
-          </div>
-        ) : (
-          users.map((user, index) => (
-            <div
-              key={user.id}
-              className={`flex items-center gap-3 p-3 rounded-lg ${
-                index < 3 ? "bg-primary/10 border border-primary/20" : "bg-muted/50"
-              }`}
-            >
-              <div className="text-2xl font-bold w-12 text-center">{getMedalEmoji(index)}</div>
-              <Avatar className="h-12 w-12 border-2 border-primary">
-                <AvatarFallback className="text-2xl">{user.profile_picture}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="font-semibold truncate">{user.username}</p>
-                  <Badge className={`${getRoleColor(user.role)} text-white text-xs`}>{user.role}</Badge>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    💰 <span className="font-semibold text-foreground">{user.tokens}</span> tokens
-                  </span>
-                  <span className="flex items-center gap-1">
-                    ⭐ <span className="font-semibold text-foreground">{user.boom_score}</span> score
-                  </span>
+    <div className="space-y-4">
+      <Tabs defaultValue="tokens" onValueChange={(v) => setSortBy(v as "tokens" | "packs")}>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="tokens">💰 Most Tokens</TabsTrigger>
+          <TabsTrigger value="packs">📦 Most Packs</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
+      <ScrollArea className="h-[500px] pr-4">
+        <div className="space-y-2">
+          {sortedUsers.length === 0 ? (
+            <div className="text-center text-muted-foreground p-8">
+              <TrophyIcon className="mx-auto h-12 w-12 mb-4 opacity-50" />
+              <p>No players yet. Be the first!</p>
+            </div>
+          ) : (
+            sortedUsers.map((user, index) => (
+              <div
+                key={user.id}
+                className={`flex items-center gap-3 p-3 rounded-lg ${
+                  index < 3 ? "bg-primary/10 border border-primary/20" : "bg-muted/50"
+                }`}
+              >
+                <div className="text-2xl font-bold w-12 text-center">{getMedalEmoji(index)}</div>
+                <Avatar className="h-12 w-12 border-2 border-primary">
+                  <AvatarFallback className="text-2xl">{user.profile_picture}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold truncate">{user.username}</p>
+                    <Badge className={`${getRoleColor(user.role)} text-white text-xs`}>{user.role}</Badge>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                    <span className="flex items-center gap-1">
+                      💰 <span className="font-semibold text-foreground">{user.tokens}</span>
+                    </span>
+                    <span className="flex items-center gap-1">
+                      📦 <span className="font-semibold text-foreground">{user.packs_opened || 0}</span>
+                    </span>
+                    <span className="flex items-center gap-1">
+                      ⭐ <span className="font-semibold text-foreground">{user.boom_score}</span>
+                    </span>
+                  </div>
                 </div>
               </div>
-              {user.badges && user.badges.length > 0 && (
-                <div className="flex gap-1">
-                  {user.badges.slice(0, 3).map((badge, i) => (
-                    <span key={i} className="text-lg">
-                      {badge}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))
-        )}
-      </div>
-    </ScrollArea>
+            ))
+          )}
+        </div>
+      </ScrollArea>
+    </div>
   )
 }

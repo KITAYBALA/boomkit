@@ -639,8 +639,19 @@ export default function BoomkitGame() {
     localStorage.setItem("boomkit_approved_users", JSON.stringify(newUsers))
   }, [])
 
+  // Declaring updateAndPersistAuctions and updateAndPersistChat
+  const updateAndPersistAuctions = useCallback((newAuctions: AuctionItem[]) => {
+    setAuctionItems(newAuctions)
+    localStorage.setItem("boomkit_auctions", JSON.stringify(newAuctions))
+  }, [])
+
+  const updateAndPersistChat = useCallback((newMessages: ChatMessage[]) => {
+    setChatMessages(newMessages)
+    localStorage.setItem("boomkit_chat_messages", JSON.stringify(newMessages))
+  }, [])
+
   const updateAndPersistCurrentUser = useCallback(
-    (updatedUser: GameUser | null) => {
+    async (updatedUser: GameUser | null) => {
       if (updatedUser) {
         // Add or update the lastSeen timestamp on every action
         const userWithActivity = { ...updatedUser, lastSeen: Date.now() }
@@ -650,9 +661,45 @@ export default function BoomkitGame() {
         // Also update the user in the main list
         setUsers((prevUsers) => {
           const newUsers = prevUsers.map((u) => (u.id === userWithActivity.id ? userWithActivity : u))
-          localStorage.setItem("boomkit_approved_users", JSON.JSON.stringify(newUsers))
+          localStorage.setItem("boomkit_approved_users", JSON.stringify(newUsers))
           return newUsers
         })
+
+        try {
+          const supabase = getSupabaseBrowserClient()
+          await supabase.from("users").upsert({
+            id: userWithActivity.id,
+            username: userWithActivity.username,
+            email: userWithActivity.email,
+            age: userWithActivity.age,
+            tokens: userWithActivity.tokens,
+            daily_tokens: userWithActivity.dailyTokens,
+            packs: userWithActivity.packs,
+            booms: userWithActivity.booms,
+            is_owner: userWithActivity.isOwner,
+            is_banned: userWithActivity.isBanned,
+            is_muted: userWithActivity.isMuted,
+            status: userWithActivity.status,
+            reason: userWithActivity.reason,
+            role: userWithActivity.role,
+            join_date: userWithActivity.joinDate,
+            boom_score: userWithActivity.boomScore,
+            total_value: userWithActivity.totalValue,
+            profile_picture: userWithActivity.profilePicture,
+            is_plus_user: userWithActivity.isPlusUser,
+            name_color: userWithActivity.nameColor,
+            banner_color: userWithActivity.bannerColor,
+            last_daily_spin: userWithActivity.lastDailySpin,
+            badges: userWithActivity.badges,
+            mute_expiry: userWithActivity.muteExpiry,
+            ban_expiry: userWithActivity.banExpiry,
+            ban_reason: userWithActivity.banReason,
+            last_seen: userWithActivity.lastSeen,
+            packs_opened: userWithActivity.packs?.length || 0, // Sync packs count
+          })
+        } catch (error) {
+          console.error("[v0] Error syncing user to Supabase:", error)
+        }
       } else {
         setCurrentUser(null)
         localStorage.removeItem("boomkit_current_user")
@@ -660,16 +707,6 @@ export default function BoomkitGame() {
     },
     [setUsers],
   )
-
-  const updateAndPersistChat = useCallback((newMessages: ChatMessage[]) => {
-    setChatMessages(newMessages)
-    localStorage.setItem("boomkit_chat_messages", JSON.stringify(newMessages))
-  }, [])
-
-  const updateAndPersistAuctions = useCallback((newAuctions: AuctionItem[]) => {
-    setAuctionItems(newAuctions)
-    localStorage.setItem("boomkit_auctions", JSON.stringify(newAuctions))
-  }, [])
 
   // Load initial data from localStorage
   useEffect(() => {
@@ -679,7 +716,8 @@ export default function BoomkitGame() {
 
       const storedCurrentUser = localStorage.getItem("boomkit_current_user")
       if (storedCurrentUser) {
-        setCurrentUser(JSON.parse(storedCurrentUser))
+        const parsedUser = JSON.parse(storedCurrentUser)
+        setCurrentUser(parsedUser)
         setCurrentView("game")
       }
 
@@ -2087,48 +2125,6 @@ export default function BoomkitGame() {
             )}
 
             {/* Chat Page */}
-            {/*{currentPage === "chat" && (
-              <div className="space-y-6">
-                <h1 className="text-4xl font-bold text-white">Global Chat</h1>
-                <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
-                  <ScrollArea className="h-96 w-full border border-white/20 rounded p-4 mb-4">
-                    {chatMessages.map((msg) => (
-                      <div key={msg.id} className="mb-3">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <Badge variant="outline" className="text-xs">
-                            {msg.role}
-                          </Badge>
-                          <span
-                            className="text-white font-semibold cursor-pointer hover:underline"
-                            onClick={() => handleUsernameClick(msg.username)}
-                          >
-                            {msg.username}:
-                          </span>
-                        </div>
-                        <p className="text-white/90 ml-2">{msg.message}</p>
-                      </div>
-                    ))}
-                  </ScrollArea>
-                  <div className="flex space-x-2">
-                    <Input
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      placeholder={currentUser?.isMuted ? "You are muted" : "Type a message..."}
-                      disabled={currentUser?.isMuted}
-                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
-                      onKeyPress={(e) => e.key === "Enter" && sendMessage()}
-                    />
-                    <Button
-                      onClick={sendMessage}
-                      disabled={currentUser?.isMuted}
-                      className="bg-blue-600 hover:bg-blue-700"
-                    >
-                      <SendIcon className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}*/}
             {currentPage === "chat" && (
               <RealtimeChat
                 currentUser={currentUser}
@@ -2138,37 +2134,6 @@ export default function BoomkitGame() {
             )}
 
             {/* Auction Page */}
-            {/*{currentPage === "auction" && (
-              <div className="space-y-6">
-                <h1 className="text-4xl font-bold text-white">Auction House</h1>
-                <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
-                  <h2 className="text-2xl font-bold text-white mb-4">Active Auctions</h2>
-                  {auctionItems.length === 0 ? (
-                    <p className="text-white/70 text-center">No active auctions</p>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {auctionItems.map((item) => (
-                        <div key={item.id} className="bg-white/10 rounded-lg p-4">
-                          <div className="flex items-center space-x-3 mb-3">
-                            <span className="text-3xl">{getBoomAvatar(item.boomName)}</span>
-                            <div>
-                              <h3 className="text-white font-bold">{item.boomName}</h3>
-                              <Badge className={`${getRarityColor(getBoomRarity(item.boomName))} text-white text-xs`}>
-                                {getBoomRarity(item.boomName)}
-                              </Badge>
-                            </div>
-                          </div>
-                          <p className="text-white/70">Seller: {item.seller}</p>
-                          <p className="text-white">Current Bid: {item.currentBid} tokens</p>
-                          <p className="text-white/70">Time Left: {item.timeLeft}h</p>
-                          <Button className="w-full mt-2 bg-green-600 hover:bg-green-700">Place Bid</Button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}*/}
             {currentPage === "auction" && (
               <RealtimeAuctions
                 currentUser={currentUser}
