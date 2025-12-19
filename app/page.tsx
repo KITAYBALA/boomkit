@@ -8,12 +8,25 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { BarChart3Icon, PackageIcon, ShoppingCartIcon, SettingsIcon, MessageCircleIcon, ShieldIcon, CrownIcon, KeyIcon, CoinsIcon, SendIcon, GavelIcon, NewspaperIcon, CameraIcon } from 'lucide-react'
+import {
+  BarChart3Icon,
+  PackageIcon,
+  ShoppingCartIcon,
+  SettingsIcon,
+  MessageCircleIcon,
+  ShieldIcon,
+  CrownIcon,
+  KeyIcon,
+  CoinsIcon,
+  GavelIcon,
+  NewspaperIcon,
+  CameraIcon,
+} from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 
 import RealtimeChat from "@/components/realtime-chat"
 import RealtimeAuctions from "@/components/realtime-auctions"
+import RealtimeLeaderboard from "@/components/realtime-leaderboard"
 import { getSupabaseBrowserClient } from "@/lib/supabase-client"
 
 // Advanced computer identification system
@@ -637,7 +650,7 @@ export default function BoomkitGame() {
         // Also update the user in the main list
         setUsers((prevUsers) => {
           const newUsers = prevUsers.map((u) => (u.id === userWithActivity.id ? userWithActivity : u))
-          localStorage.setItem("boomkit_approved_users", JSON.stringify(newUsers))
+          localStorage.setItem("boomkit_approved_users", JSON.JSON.stringify(newUsers))
           return newUsers
         })
       } else {
@@ -1115,21 +1128,20 @@ export default function BoomkitGame() {
     updateAndPersistCurrentUser(updatedUser)
 
     // Try Supabase first
-    const sb = typeof window !== "undefined" ? (await Promise.resolve().then(() => require('@/lib/supabase-client'))) : null
+    const sb =
+      typeof window !== "undefined" ? await Promise.resolve().then(() => require("@/lib/supabase-client")) : null
     const getClient = sb ? (sb as any).getSupabaseBrowserClient : null
     const supabase = getClient ? getClient() : null
 
     try {
       if (supabase) {
         const endsAt = new Date(Date.now() + duration * 60 * 60 * 1000).toISOString()
-        const { error } = await supabase
-          .from('auction_items')
-          .insert({
-            boom_name: selectedBoom,
-            seller: currentUser.username,
-            current_bid: startingBid,
-            ends_at: endsAt,
-          })
+        const { error } = await supabase.from("auction_items").insert({
+          boom_name: selectedBoom,
+          seller: currentUser.username,
+          current_bid: startingBid,
+          ends_at: endsAt,
+        })
         if (error) throw error
         alert(`Listed ${selectedBoom} with starting bid of ${startingBid} tokens!`)
       } else {
@@ -1142,17 +1154,17 @@ export default function BoomkitGame() {
           timeLeft: duration,
           bidders: [],
         }
-        const raw = localStorage.getItem('boomkit_auctions')
+        const raw = localStorage.getItem("boomkit_auctions")
         const list = raw ? JSON.parse(raw) : []
         const next = [...list, newAuction]
-        localStorage.setItem('boomkit_auctions', JSON.stringify(next))
+        localStorage.setItem("boomkit_auctions", JSON.stringify(next))
         // Optional: keep legacy state in sync
         updateAndPersistAuctions(next)
         alert(`Listed ${selectedBoom} for auction with starting bid of ${startingBid} tokens!`)
       }
     } catch (e) {
-      console.error('Auction insert failed:', e)
-      alert('Failed to create auction.')
+      console.error("Auction insert failed:", e)
+      alert("Failed to create auction.")
     }
 
     setShowBoomAction(false)
@@ -1620,7 +1632,7 @@ export default function BoomkitGame() {
       <div className="w-48 bg-gradient-to-b from-purple-600 to-purple-800 text-white flex flex-col">
         {/* Logo */}
         <div className="p-4 text-center">
-          <h1 className="text-2xl font-sans font-extrabold text-white">Boomkit  </h1>
+          <h1 className="text-2xl font-sans font-extrabold text-white">Boomkit </h1>
         </div>
 
         {/* Navigation */}
@@ -2168,266 +2180,16 @@ export default function BoomkitGame() {
 
             {/* Leaderboard Page */}
             {currentPage === "leaderboard" && (
-              <div className="space-y-6">
-                <h1 className="text-4xl font-bold text-white">Leaderboard</h1>
-
-                {/* Token Leaderboard */}
-                <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
-                  <div className="flex items-center mb-4">
-                    <div className="bg-yellow-500 text-white px-4 py-2 rounded-lg font-bold flex items-center">
-                      🪙 Token Leaders
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    {users
-                      .filter((user) => user.status === "approved" && !user.isBanned)
-                      .sort((a, b) => b.tokens - a.tokens)
-                      .slice(0, 10)
-                      .map((user, index) => (
-                        <div
-                          key={user.id}
-                          className={`flex items-center justify-between p-4 rounded-lg transition-all ${
-                            index === 0
-                              ? "bg-gradient-to-r from-yellow-600 to-yellow-800 shadow-lg"
-                              : index === 1
-                                ? "bg-gradient-to-r from-gray-400 to-gray-600"
-                                : index === 2
-                                  ? "bg-gradient-to-r from-orange-600 to-orange-800"
-                                  : "bg-white/10"
-                          }`}
-                        >
-                          <div className="flex items-center space-x-4">
-                            <div className="flex items-center space-x-2">
-                              <div
-                                className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-lg ${
-                                  index === 0
-                                    ? "bg-yellow-400 text-yellow-900"
-                                    : index === 1
-                                      ? "bg-gray-300 text-gray-800"
-                                      : index === 2
-                                        ? "bg-orange-400 text-orange-900"
-                                        : "bg-purple-600 text-white"
-                                }`}
-                              >
-                                {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : index + 1}
-                              </div>
-                            </div>
-                            <div className="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center text-xl">
-                              {user.profilePicture}
-                            </div>
-                            <div>
-                              <div className="flex items-center space-x-2">
-                                <div
-                                  className={`font-bold text-lg ${
-                                    user.nameColor === "rainbow"
-                                      ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent animate-pulse"
-                                      : "text-white"
-                                  }`}
-                                >
-                                  {user.username}
-                                  {user.isOwner && " 👑"}
-                                  {user.isPlusUser && " ✨"}
-                                </div>
-                                {/* Display badges */}
-                                <div className="flex space-x-1">
-                                  {(user.badges ?? []).map((badgeId) => {
-                                    const badge = AVAILABLE_BADGES.find((b) => b.id === badgeId)
-                                    return badge ? (
-                                      <span key={badgeId} className="text-sm" title={badge.name}>
-                                        {badge.emoji}
-                                      </span>
-                                    ) : null
-                                  })}
-                                </div>
-                              </div>
-                              <div className="text-white/70 text-sm">
-                                {Object.keys(user.booms).length} unique booms • Joined {user.joinDate.split(",")[0]}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-yellow-400 font-bold text-xl flex items-center">
-                              <CoinsIcon className="h-5 w-5 mr-1" />
-                              {user.tokens.toLocaleString()}
-                            </div>
-                            <div className="text-white/70 text-sm">tokens</div>
-                          </div>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-
-                {/* Boom Count Leaderboard */}
-                <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
-                  <div className="flex items-center mb-4">
-                    <div className="bg-purple-500 text-white px-4 py-2 rounded-lg font-bold flex items-center">
-                      ⭐ Boom Collectors
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    {users
-                      .filter((user) => user.status === "approved" && !user.isBanned)
-                      .sort((a, b) => Object.keys(b.booms).length - Object.keys(a.booms).length)
-                      .slice(0, 10)
-                      .map((user, index) => (
-                        <div
-                          key={user.id}
-                          className={`flex items-center justify-between p-4 rounded-lg transition-all ${
-                            index === 0
-                              ? "bg-gradient-to-r from-purple-600 to-purple-800 shadow-lg"
-                              : index === 1
-                                ? "bg-gradient-to-r from-blue-500 to-blue-700"
-                                : index === 2
-                                  ? "bg-gradient-to-r from-green-500 to-green-700"
-                                  : "bg-white/10"
-                          }`}
-                        >
-                          <div className="flex items-center space-x-4">
-                            <div className="flex items-center space-x-2">
-                              <div
-                                className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-lg ${
-                                  index === 0
-                                    ? "bg-purple-400 text-purple-900"
-                                    : index === 1
-                                      ? "bg-blue-300 text-blue-800"
-                                      : index === 2
-                                        ? "bg-green-300 text-green-800"
-                                        : "bg-gray-600 text-white"
-                                }`}
-                              >
-                                {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : index + 1}
-                              </div>
-                            </div>
-                            <div className="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center text-xl">
-                              {user.profilePicture}
-                            </div>
-                            <div>
-                              <div className="flex items-center space-x-2">
-                                <div
-                                  className={`font-bold text-lg ${
-                                    user.nameColor === "rainbow"
-                                      ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent animate-pulse"
-                                      : "text-white"
-                                  }`}
-                                >
-                                  {user.username}
-                                  {user.isOwner && " 👑"}
-                                  {user.isPlusUser && " ✨"}
-                                </div>
-                                {/* Display badges */}
-                                <div className="flex space-x-1">
-                                  {(user.badges ?? []).map((badgeId) => {
-                                    const badge = AVAILABLE_BADGES.find((b) => b.id === badgeId)
-                                    return badge ? (
-                                      <span key={badgeId} className="text-sm" title={badge.name}>
-                                        {badge.emoji}
-                                      </span>
-                                    ) : null
-                                  })}
-                                </div>
-                              </div>
-                              <div className="text-white/70 text-sm">
-                                {user.tokens.toLocaleString()} tokens • Score: {user.boomScore}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-purple-400 font-bold text-xl flex items-center">
-                              <PackageIcon className="h-5 w-5 mr-1" />
-                              {Object.keys(user.booms).length}
-                            </div>
-                            <div className="text-white/70 text-sm">unique booms</div>
-                          </div>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-
-                {/* Boom Score Leaderboard */}
-                <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
-                  <div className="flex items-center mb-4">
-                    <div className="bg-orange-500 text-white px-4 py-2 rounded-lg font-bold flex items-center">
-                      🏆 Top Performers
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    {users
-                      .filter((user) => user.status === "approved" && !user.isBanned)
-                      .sort((a, b) => b.boomScore - a.boomScore)
-                      .slice(0, 10)
-                      .map((user, index) => (
-                        <div
-                          key={user.id}
-                          className={`flex items-center justify-between p-4 rounded-lg transition-all ${
-                            index === 0
-                              ? "bg-gradient-to-r from-orange-600 to-red-600 shadow-lg"
-                              : index === 1
-                                ? "bg-gradient-to-r from-pink-500 to-rose-600"
-                                : index === 2
-                                  ? "bg-gradient-to-r from-indigo-500 to-purple-600"
-                                  : "bg-white/10"
-                          }`}
-                        >
-                          <div className="flex items-center space-x-4">
-                            <div className="flex items-center space-x-2">
-                              <div
-                                className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-lg ${
-                                  index === 0
-                                    ? "bg-orange-400 text-orange-900"
-                                    : index === 1
-                                      ? "bg-pink-300 text-pink-800"
-                                      : index === 2
-                                        ? "bg-indigo-300 text-indigo-800"
-                                        : "bg-gray-600 text-white"
-                                }`}
-                              >
-                                {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : index + 1}
-                              </div>
-                            </div>
-                            <div className="w-12 h-12 bg-yellow-500 rounded-lg flex items-center justify-center text-xl">
-                              {user.profilePicture}
-                            </div>
-                            <div>
-                              <div className="flex items-center space-x-2">
-                                <div
-                                  className={`font-bold text-lg ${
-                                    user.nameColor === "rainbow"
-                                      ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent animate-pulse"
-                                      : "text-white"
-                                  }`}
-                                >
-                                  {user.username}
-                                  {user.isOwner && " 👑"}
-                                  {user.isPlusUser && " ✨"}
-                                </div>
-                                {/* Display badges */}
-                                <div className="flex space-x-1">
-                                  {(user.badges ?? []).map((badgeId) => {
-                                    const badge = AVAILABLE_BADGES.find((b) => b.id === badgeId)
-                                    return badge ? (
-                                      <span key={badgeId} className="text-sm" title={badge.name}>
-                                        {badge.emoji}
-                                      </span>
-                                    ) : null
-                                  })}
-                                </div>
-                              </div>
-                              <div className="text-white/70 text-sm">
-                                {Object.keys(user.booms).length} unique booms • {user.tokens.toLocaleString()} tokens
-                              </div>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-orange-400 font-bold text-xl flex items-center">
-                              🏆 {user.boomScore}
-                            </div>
-                            <div className="text-white/70 text-sm">score</div>
-                          </div>
-                        </div>
-                      ))}
-                  </div>
-                </div>
-              </div>
+              <RealtimeLeaderboard
+                users={users}
+                currentUser={currentUser}
+                AVAILABLE_BADGES={AVAILABLE_BADGES}
+                getBoomAvatar={getBoomAvatar}
+                getBoomRarity={getBoomRarity}
+                getRarityColor={getRarityColor}
+                getUserRoleName={getUserRoleName}
+                isOwner={isOwner}
+              />
             )}
 
             {/* Staff Page */}
