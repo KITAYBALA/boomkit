@@ -534,6 +534,14 @@ const PROFILE_PICTURES = [
 
 const NEWS_ITEMS: NewsItem[] = [
   {
+    id: "0",
+    title: "Boomkit V1.0 is Out!",
+    content:
+      "We are thrilled to announce the official release of Boomkit V1.0! This major milestone brings real-time chat, live auctions, global leaderboards, and pack opening features. Thank you to our amazing community for your support. Special thanks to Nazli Abdullazada (Tester) and Oktay Abdullazada (Owner) for making this possible!",
+    date: "2024-12-19",
+    image: "🎉",
+  },
+  {
     id: "1",
     title: "New Game Mode: Boom Battle is Live!",
     content:
@@ -1603,6 +1611,18 @@ export default function BoomkitGame() {
               </Button>
             </form>
 
+            <div className="mt-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
+              <h3 className="text-sm font-semibold text-purple-700 mb-2 text-center">Credentials</h3>
+              <div className="space-y-1 text-sm text-purple-600">
+                <p>
+                  <span className="font-medium">Nazli Abdullazada:</span> Tester
+                </p>
+                <p>
+                  <span className="font-medium">Oktay Abdullazada:</span> Owner
+                </p>
+              </div>
+            </div>
+
             <div className="mt-4 text-center space-y-2">
               <Button variant="link" onClick={() => setCurrentView("login")}>
                 Already have an account? Login
@@ -2601,18 +2621,78 @@ export default function BoomkitGame() {
 
       {/* Privacy Policy Modal */}
       {showPrivacyPolicy && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
-          <Card className="w-full max-w-2xl p-6">
+        <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <CardHeader>
               <CardTitle className="text-2xl font-bold">Privacy Policy</CardTitle>
-              <CardDescription>Our commitment to your privacy</CardDescription>
+              <CardDescription>Last updated: December 19, 2024</CardDescription>
             </CardHeader>
-            <CardContent>
-              <p>
-                This is a placeholder for the privacy policy. In a real application, you would include the actual
-                privacy policy content here.
-              </p>
-              <Button onClick={() => setShowPrivacyPolicy(false)} className="w-full bg-gray-600 hover:bg-gray-700">
+            <CardContent className="space-y-4 text-sm">
+              <section>
+                <h3 className="font-bold text-lg mb-2">1. Introduction</h3>
+                <p>
+                  Welcome to Boomkit. This Privacy Policy explains how we collect, use, disclose, and safeguard your
+                  information when you use our gaming platform. Boomkit is developed and maintained by Oktay Abdullazada
+                  (Owner) with testing support from Nazli Abdullazada.
+                </p>
+              </section>
+
+              <section>
+                <h3 className="font-bold text-lg mb-2">2. Information We Collect</h3>
+                <p className="mb-2">We collect information you provide directly to us, including:</p>
+                <ul className="list-disc pl-6 space-y-1">
+                  <li>Account information (username, email address, age)</li>
+                  <li>Game data (tokens, packs opened, booms collected, leaderboard rankings)</li>
+                  <li>Chat messages sent through our platform</li>
+                  <li>Auction and trading activity</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3 className="font-bold text-lg mb-2">3. How We Use Your Information</h3>
+                <p className="mb-2">We use the information we collect to:</p>
+                <ul className="list-disc pl-6 space-y-1">
+                  <li>Provide, maintain, and improve our services</li>
+                  <li>Process transactions and send related information</li>
+                  <li>Display leaderboards and game statistics</li>
+                  <li>Monitor and analyze usage patterns</li>
+                  <li>Detect and prevent fraud or abuse</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3 className="font-bold text-lg mb-2">4. Data Storage</h3>
+                <p>
+                  Your data is securely stored using Supabase, a trusted database provider. We implement appropriate
+                  security measures to protect your personal information against unauthorized access, alteration, or
+                  destruction.
+                </p>
+              </section>
+
+              <section>
+                <h3 className="font-bold text-lg mb-2">5. Data Sharing</h3>
+                <p>
+                  We do not sell your personal information. Game-related data such as usernames, scores, and rankings
+                  may be publicly visible on leaderboards and in chat.
+                </p>
+              </section>
+
+              <section>
+                <h3 className="font-bold text-lg mb-2">6. Your Rights</h3>
+                <p>
+                  You have the right to access, update, or delete your account information at any time through your
+                  account settings.
+                </p>
+              </section>
+
+              <section>
+                <h3 className="font-bold text-lg mb-2">7. Contact Us</h3>
+                <p>
+                  If you have questions about this Privacy Policy, please contact the Boomkit team through our platform.
+                </p>
+              </section>
+
+              <Button onClick={() => setShowPrivacyPolicy(false)} className="w-full bg-gray-600 hover:bg-gray-700 mt-4">
                 Close
               </Button>
             </CardContent>
@@ -2622,25 +2702,96 @@ export default function BoomkitGame() {
 
       {/* Terms of Service Modal */}
       {showTermsOfService && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
-          <Card className="w-full max-w-2xl p-6">
+        <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <CardHeader>
               <CardTitle className="text-2xl font-bold">Terms of Service</CardTitle>
-              <CardDescription>The legal agreement for using our service</CardDescription>
+              <CardDescription>Last updated: December 19, 2024</CardDescription>
             </CardHeader>
-            <CardContent>
-              <p>
-                This is a placeholder for the terms of service. In a real application, you would include the actual
-                terms of service content here.
-              </p>
-              <Button onClick={() => setShowTermsOfService(false)} className="w-full bg-gray-600 hover:bg-gray-700">
+            <CardContent className="space-y-4 text-sm">
+              <section>
+                <h3 className="font-bold text-lg mb-2">1. Acceptance of Terms</h3>
+                <p>
+                  By accessing and using Boomkit, you agree to be bound by these Terms of Service. Boomkit is owned and
+                  operated by Oktay Abdullazada, with quality assurance by Nazli Abdullazada.
+                </p>
+              </section>
+
+              <section>
+                <h3 className="font-bold text-lg mb-2">2. Description of Service</h3>
+                <p>
+                  Boomkit is an online gaming platform that allows users to collect virtual items called "Booms,"
+                  participate in auctions, engage in real-time chat, and compete on leaderboards. All in-game items and
+                  currencies have no real-world monetary value.
+                </p>
+              </section>
+
+              <section>
+                <h3 className="font-bold text-lg mb-2">3. User Accounts</h3>
+                <p className="mb-2">To use Boomkit, you must:</p>
+                <ul className="list-disc pl-6 space-y-1">
+                  <li>Provide accurate and complete registration information</li>
+                  <li>Be responsible for maintaining the security of your account</li>
+                  <li>Notify us immediately of any unauthorized use</li>
+                  <li>Be at least 13 years of age to create an account</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3 className="font-bold text-lg mb-2">4. User Conduct</h3>
+                <p className="mb-2">You agree NOT to:</p>
+                <ul className="list-disc pl-6 space-y-1">
+                  <li>Use the service for any illegal purpose</li>
+                  <li>Harass, abuse, or harm other users</li>
+                  <li>Use cheats, exploits, or automation software</li>
+                  <li>Attempt to gain unauthorized access to our systems</li>
+                  <li>Impersonate other users or staff members</li>
+                  <li>Share inappropriate content in chat</li>
+                </ul>
+              </section>
+
+              <section>
+                <h3 className="font-bold text-lg mb-2">5. Virtual Items</h3>
+                <p>
+                  All virtual items, including Booms, tokens, and packs, are licensed to you and remain the property of
+                  Boomkit. Virtual items have no real-world value and cannot be exchanged for real currency.
+                </p>
+              </section>
+
+              <section>
+                <h3 className="font-bold text-lg mb-2">6. Moderation</h3>
+                <p>
+                  Our staff team reserves the right to moderate content, mute or ban users who violate these terms, and
+                  take any action necessary to maintain a safe gaming environment.
+                </p>
+              </section>
+
+              <section>
+                <h3 className="font-bold text-lg mb-2">7. Disclaimer</h3>
+                <p>
+                  Boomkit is provided "as is" without warranties of any kind. We are not responsible for any loss of
+                  virtual items or account data.
+                </p>
+              </section>
+
+              <section>
+                <h3 className="font-bold text-lg mb-2">8. Changes to Terms</h3>
+                <p>
+                  We reserve the right to modify these terms at any time. Continued use of Boomkit after changes
+                  constitutes acceptance of the new terms.
+                </p>
+              </section>
+
+              <Button
+                onClick={() => setShowTermsOfService(false)}
+                className="w-full bg-gray-600 hover:bg-gray-700 mt-4"
+              >
                 Close
               </Button>
             </CardContent>
           </Card>
         </div>
       )}
-
       {/* User Stats Modal */}
       {showUserStats && selectedUserStats && (
         <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
