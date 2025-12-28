@@ -192,6 +192,7 @@ interface GameUser {
   banReason?: string
   lastSeen: number // Timestamp of last activity
   packsOpened?: number // Added for Supabase sync
+  // password?: string; // Removed password from interface to avoid unintended exposure
 }
 
 interface UserRole {
@@ -249,6 +250,7 @@ interface CustomRole {
   color: string
   assignedBy: string
   assignedDate: string
+  permissions?: string[] // Added permissions property
 }
 
 const DEFAULT_ROLES: UserRole[] = [
@@ -664,7 +666,7 @@ export default function BoomkitGame() {
   // Declaring updateAndPersistAuctions and updateAndPersistChat
   const updateAndPersistAuctions = useCallback((newAuctions: AuctionItem[]) => {
     setAuctionItems(newAuctions)
-    localStorage.setItem("boomkit_auctions", JSON.JSON.stringify(newAuctions))
+    localStorage.setItem("boomkit_auctions", JSON.stringify(newAuctions))
   }, [])
 
   const updateAndPersistChat = useCallback((newMessages: ChatMessage[]) => {
@@ -754,6 +756,96 @@ export default function BoomkitGame() {
     }
   }, [])
 
+  useEffect(() => {
+    const fetchUsersFromSupabase = async () => {
+      try {
+        const { data, error } = await supabase.from("users").select("*").order("created_at", { ascending: false })
+
+        if (error) {
+          console.error("[v0] Error fetching users from Supabase:", error)
+          return
+        }
+
+        if (data && data.length > 0) {
+          const mappedUsers: GameUser[] = data.map((u: any) => ({
+            id: u.id,
+            username: u.username,
+            email: u.email,
+            password: "", // Ensure password is not leaked
+            age: u.age || 0,
+            tokens: u.tokens || 0,
+            dailyTokens: u.daily_tokens || 0,
+            packs: u.packs || [],
+            booms: u.booms || {}, // Initialize booms as an object
+            isOwner: u.is_owner || false,
+            isBanned: u.is_banned || false,
+            isMuted: u.is_muted || false,
+            status: u.status || "approved",
+            reason: u.reason || "",
+            role: u.role || "player",
+            joinDate: u.join_date || new Date().toISOString(),
+            boomScore: u.boom_score || 0,
+            totalValue: u.total_value || 0,
+            profilePicture: u.profile_picture || "",
+            isPlusUser: u.is_plus_user || false,
+            nameColor: u.name_color || "",
+            bannerColor: u.banner_color || "from-purple-600 to-pink-600",
+            lastDailySpin: u.last_daily_spin || null,
+            badges: u.badges || [],
+            muteExpiry: u.mute_expiry || null,
+            banExpiry: u.ban_expiry || null,
+            banReason: u.ban_reason || "",
+            lastSeen: u.last_seen || Date.now(),
+            packsOpened: u.packs_opened || 0,
+          }))
+
+          setUsers(mappedUsers)
+          localStorage.setItem("boomkit_approved_users", JSON.stringify(mappedUsers))
+          console.log("[v0] Loaded", mappedUsers.length, "users from Supabase")
+        }
+      } catch (err) {
+        console.error("[v0] Failed to fetch users from Supabase:", err)
+      }
+    }
+
+    // Only fetch if supabase client is available
+    if (supabase) {
+      fetchUsersFromSupabase()
+    }
+  }, [supabase])
+
+  useEffect(() => {
+    const fetchCustomRolesFromSupabase = async () => {
+      try {
+        const { data, error } = await supabase.from("custom_roles").select("*")
+
+        if (error) {
+          // Table might not exist yet, that's okay
+          console.warn("[v0] Custom roles table not found or empty:", error.message)
+          return
+        }
+
+        if (data && data.length > 0) {
+          const mappedRoles = data.map((r: any) => ({
+            id: r.id,
+            name: r.name,
+            color: r.color,
+            permissions: r.permissions || [], // Ensure permissions is always an array
+          }))
+          setCustomRoles(mappedRoles)
+          localStorage.setItem("boomkit_custom_roles", JSON.stringify(mappedRoles))
+        }
+      } catch (err) {
+        console.log("[v0] Failed to fetch custom roles:", err)
+      }
+    }
+
+    // Only fetch if supabase client is available
+    if (supabase) {
+      fetchCustomRolesFromSupabase()
+    }
+  }, [supabase])
+
   // Listen for storage changes to sync across tabs
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
@@ -795,6 +887,9 @@ export default function BoomkitGame() {
   const handleLogout = () => {
     updateAndPersistCurrentUser(null)
     setCurrentView("owner-access")
+    // Clear Supabase session if necessary
+    const supabase = getSupabaseBrowserClient()
+    supabase.auth.signOut()
   }
 
   // Check if user can spin today
@@ -849,6 +944,7 @@ export default function BoomkitGame() {
     }
 
     if (ownerAccessCode === SECRET_OWNER_CODE) {
+      // Dummy data for owner, will be replaced by actual Supabase data if owner exists
       const allBooms: { [key: string]: number } = {}
       PACKS.forEach((pack) => {
         pack.booms.forEach((boom) => {
@@ -857,7 +953,7 @@ export default function BoomkitGame() {
       })
 
       const ownerUser: GameUser = {
-        id: "owner",
+        id: "owner", // Dummy ID, will be replaced by actual Supabase ID if owner logs in
         username: "Oktay",
         email: "oktay.abdullazada@gmail.com",
         age: 25,
@@ -905,8 +1001,15 @@ export default function BoomkitGame() {
       return
     }
 
+    // Check if username or email already exists in local storage (will be replaced by Supabase check)
+    const existingUser = users.find((u) => u.username === registerForm.username || u.email === registerForm.email)
+    if (existingUser) {
+      alert("Username or email already exists. Please choose another.")
+      return
+    }
+
     const newUser: GameUser = {
-      id: Date.now().toString(),
+      id: Date.now().toString(), // Temporary ID, Supabase will generate a real one
       username: registerForm.username,
       email: registerForm.email,
       age: Number.parseInt(registerForm.age),
@@ -917,7 +1020,7 @@ export default function BoomkitGame() {
       isOwner: false,
       isBanned: false,
       isMuted: false,
-      status: "approved", // Auto-approve
+      status: "pending", // Set to pending for admin approval
       reason: registerForm.reason,
       role: "player",
       joinDate: new Date().toLocaleDateString("en-US", {
@@ -938,48 +1041,163 @@ export default function BoomkitGame() {
       packsOpened: 0,
     }
 
-    updateAndPersistUsers([...users, newUser])
-    updateAndPersistCurrentUser(newUser)
-    setCurrentView("game")
+    // **CHANGE**: Sync new user registration to Supabase
+    const registerUserInSupabase = async () => {
+      try {
+        const { data, error } = await supabase.auth.signUp({
+          email: newUser.email,
+          password: registerForm.password, // Use the actual password for sign up
+          options: {
+            data: {
+              username: newUser.username,
+              age: newUser.age,
+              reason: newUser.reason,
+              profile_picture: newUser.profilePicture,
+              role: newUser.role,
+              status: newUser.status, // 'pending'
+            },
+          },
+        })
+
+        if (error) {
+          throw error
+        }
+
+        // If sign up is successful, create the user profile in the 'users' table
+        if (data.user) {
+          await supabase.from("users").insert({
+            id: data.user.id, // Use Supabase generated UUID
+            username: newUser.username,
+            email: newUser.email,
+            age: newUser.age,
+            reason: newUser.reason,
+            status: newUser.status,
+            join_date: newUser.joinDate,
+            profile_picture: newUser.profilePicture,
+            role: newUser.role,
+            // Initialize other fields
+            tokens: 0,
+            boom_score: 0,
+            total_value: 0,
+            packs: [],
+            booms: {},
+            is_owner: false,
+            is_banned: false,
+            is_muted: false,
+            banner_color: newUser.bannerColor,
+            last_seen: Date.now(),
+            packs_opened: 0,
+          })
+          alert("Registration successful! Your account is pending admin approval.")
+          setCurrentView("login") // Redirect to login after successful registration
+        }
+      } catch (err: any) {
+        console.error("Supabase registration error:", err.message)
+        alert(`Registration failed: ${err.message}`)
+      }
+    }
+
+    registerUserInSupabase()
   }
 
   // Handle login
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
 
-    const user = users.find((u) => u.username === loginForm.username)
-    if (!user) {
-      alert("Invalid credentials.")
-      return
+    // First, try to authenticate with Supabase Auth
+    const loginWithSupabase = async () => {
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: loginForm.username, // Assuming username is email for login
+          password: loginForm.password,
+        })
+
+        if (error) {
+          throw error
+        }
+
+        if (data.user) {
+          // Fetch user details from the 'users' table
+          const { data: userData, error: userError } = await supabase
+            .from("users")
+            .select("*")
+            .eq("id", data.user.id)
+            .single()
+
+          if (userError) {
+            throw userError
+          }
+
+          if (userData) {
+            // Check for expired ban/mute
+            const updatedUserData = { ...userData }
+            let userWasUpdated = false
+
+            if (updatedUserData.is_banned && updatedUserData.ban_expiry && updatedUserData.ban_expiry < Date.now()) {
+              updatedUserData.is_banned = false
+              updatedUserData.ban_expiry = null
+              updatedUserData.ban_reason = ""
+              userWasUpdated = true
+            }
+            if (updatedUserData.is_muted && updatedUserData.mute_expiry && updatedUserData.mute_expiry < Date.now()) {
+              updatedUserData.is_muted = false
+              updatedUserData.mute_expiry = null
+              userWasUpdated = true
+            }
+
+            if (userWasUpdated) {
+              await supabase.from("users").upsert([updatedUserData])
+            }
+
+            if (updatedUserData.status === "approved" && !updatedUserData.is_banned) {
+              const loggedInUser: GameUser = {
+                id: userData.id,
+                username: userData.username,
+                email: userData.email,
+                age: userData.age || 0,
+                tokens: userData.tokens || 0,
+                dailyTokens: userData.daily_tokens || 0,
+                packs: userData.packs || [],
+                booms: userData.booms || {},
+                isOwner: userData.is_owner || false,
+                isBanned: updatedUserData.is_banned,
+                isMuted: updatedUserData.is_muted,
+                status: updatedUserData.status,
+                reason: userData.reason || "",
+                role: userData.role || "player",
+                joinDate: userData.join_date || new Date().toISOString(),
+                boomScore: userData.boom_score || 0,
+                totalValue: userData.total_value || 0,
+                profilePicture: userData.profile_picture || "",
+                isPlusUser: userData.is_plus_user || false,
+                nameColor: userData.name_color || "",
+                bannerColor: userData.banner_color || "from-purple-600 to-pink-600",
+                lastDailySpin: userData.last_daily_spin || null,
+                badges: userData.badges || [],
+                muteExpiry: updatedUserData.mute_expiry,
+                banExpiry: updatedUserData.ban_expiry,
+                banReason: updatedUserData.ban_reason || "",
+                lastSeen: updatedUserData.last_seen || Date.now(),
+                packsOpened: userData.packs_opened || 0,
+              }
+              updateAndPersistCurrentUser(loggedInUser)
+              setCurrentView("game")
+            } else if (updatedUserData.is_banned) {
+              alert(`You are banned. Reason: ${updatedUserData.ban_reason || "No reason specified."}`)
+            } else {
+              alert("Account not approved. Please contact an administrator.")
+            }
+          } else {
+            alert("User profile not found.")
+          }
+        }
+      } catch (error: any) {
+        console.error("Supabase login error:", error.message)
+        alert(`Login failed: ${error.message}`)
+      }
     }
 
-    // Check for expired ban/mute
-    let userWasUpdated = false
-    if (user.isBanned && user.banExpiry && user.banExpiry < Date.now()) {
-      user.isBanned = false
-      user.banExpiry = null
-      user.banReason = ""
-      userWasUpdated = true
-    }
-    if (user.isMuted && user.muteExpiry && user.muteExpiry < Date.now()) {
-      user.isMuted = false
-      user.muteExpiry = null
-      userWasUpdated = true
-    }
-
-    if (userWasUpdated) {
-      const newUsers = users.map((u) => (u.id === user!.id ? user! : u))
-      updateAndPersistUsers(newUsers)
-    }
-
-    if (user.status === "approved" && !user.isBanned) {
-      updateAndPersistCurrentUser(user)
-      setCurrentView("game")
-    } else if (user.isBanned) {
-      alert(`You are banned. Reason: ${user.banReason || "No reason specified."}`)
-    } else {
-      alert("Account not approved.")
-    }
+    loginWithSupabase()
   }
 
   // Get boom based on rarity chances
@@ -1007,6 +1225,7 @@ export default function BoomkitGame() {
       }
     }
 
+    // Fallback to common if no boom is found (should not happen with proper configuration)
     const commonBooms = pack.booms.filter((boom) => boom.rarity === "common")
     return commonBooms[Math.floor(Math.random() * commonBooms.length)]
   }
@@ -1218,7 +1437,7 @@ export default function BoomkitGame() {
           bidders: [],
         }
         const raw = localStorage.getItem("boomkit_auctions")
-        const list = raw ? JSON.JSON.parse(raw) : []
+        const list = raw ? JSON.parse(raw) : []
         const next = [...list, newAuction]
         localStorage.setItem("boomkit_auctions", JSON.stringify(next))
         // Optional: keep legacy state in sync
@@ -1520,6 +1739,7 @@ export default function BoomkitGame() {
       color: newRoleColor,
       assignedBy: currentUser?.username || "System",
       assignedDate: new Date().toLocaleDateString(),
+      permissions: [], // Default to no permissions, can be expanded later
     }
 
     const updatedCustomRoles = [...customRoles, newRole]
@@ -1528,16 +1748,17 @@ export default function BoomkitGame() {
 
     // Also save custom roles to Supabase
     try {
-      const supabase = createBrowserClient(
+      const supabaseClient = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       )
-      await supabase.from("custom_roles").upsert({
+      await supabaseClient.from("custom_roles").insert({
         id: newRole.id,
         name: newRole.name,
         color: newRole.color,
         assigned_by: newRole.assignedBy,
         assigned_date: newRole.assignedDate,
+        // permissions: newRole.permissions // Not directly saving permissions here
       })
     } catch (err) {
       console.error("Failed to save custom role to Supabase:", err)
@@ -1828,7 +2049,7 @@ export default function BoomkitGame() {
             {currentUser?.isOwner && <CrownIcon className="h-6 w-6 text-yellow-400" />}
             {/* CHANGE: Added credentials section in top bar */}
             <div className="hidden md:flex items-center space-x-2 bg-purple-500/30 rounded-lg px-3 py-1 text-xs text-white">
-              <span className="font-semibold">Credits:</span>
+              <span className="font-semibold">Credentials:</span>
               <span>Nazli Abdullazada (Tester)</span>
               <span className="text-white/50">|</span>
               <span>Oktay Abdullazada (Owner)</span>
@@ -2270,7 +2491,7 @@ export default function BoomkitGame() {
                     </div>
                     <div className="space-y-3">
                       {users
-                        .filter((u) => !u.isOwner)
+                        .filter((u) => !u.isOwner) // Exclude the owner from this list
                         .map((user) => {
                           const userRole =
                             DEFAULT_ROLES.find((r) => r.id === user.role) || customRoles.find((r) => r.id === user.role)
@@ -2311,7 +2532,7 @@ export default function BoomkitGame() {
                                       value={user.role}
                                       onChange={(e) => quickAssignRole(user.id, e.target.value)}
                                       className="bg-white/20 text-white text-sm rounded px-2 py-1 border border-white/30"
-                                      disabled={!isOwner()}
+                                      disabled={!isOwner()} // Only owner can change roles freely
                                     >
                                       {DEFAULT_ROLES.filter((role) => role.id !== "owner").map((role) => (
                                         <option key={role.id} value={role.id} className="bg-gray-800 text-white">
