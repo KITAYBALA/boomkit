@@ -759,10 +759,10 @@ export default function BoomkitGame() {
   useEffect(() => {
     const fetchUsersFromSupabase = async () => {
       try {
-        const { data, error } = await supabase.from("users").select("*").order("created_at", { ascending: false })
+        const { data, error } = await supabase.from("users").select("*")
 
         if (error) {
-          console.error("[v0] Error fetching users from Supabase:", error)
+          console.error("[v0] Error fetching users from Supabase:", error.message)
           return
         }
 
@@ -1176,7 +1176,7 @@ export default function BoomkitGame() {
                 badges: userData.badges || [],
                 muteExpiry: updatedUserData.mute_expiry,
                 banExpiry: updatedUserData.ban_expiry,
-                banReason: updatedUserData.ban_reason || "",
+                banReason: userData.ban_reason || "",
                 lastSeen: updatedUserData.last_seen || Date.now(),
                 packsOpened: userData.packs_opened || 0,
               }
