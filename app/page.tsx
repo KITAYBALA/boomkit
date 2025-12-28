@@ -690,7 +690,7 @@ export default function BoomkitGame() {
         // Also update the user in the main list
         setUsers((prevUsers) => {
           const newUsers = prevUsers.map((u) => (u.id === userWithActivity.id ? userWithActivity : u))
-          localStorage.setItem("boomkit_approved_users", JSON.stringify(newUsers))
+          localStorage.setItem("boomkit_approved_users", JSON.JSON.stringify(newUsers))
           return newUsers
         })
 
@@ -1605,7 +1605,7 @@ export default function BoomkitGame() {
   }
 
   // Quick role assignment
-  const quickAssignRole = (userId: string, roleId: string) => {
+  const quickAssignRole = async (userId: string, roleId: string) => {
     console.log("[v0] quickAssignRole called - userId:", userId, "roleId:", roleId)
 
     const updatedUsers = users.map((u) => {
@@ -1623,9 +1623,45 @@ export default function BoomkitGame() {
       return u
     })
 
-    console.log("[v0] Calling updateAndPersistUsers with", updatedUsers.length, "users")
-    updateAndPersistUsers(updatedUsers)
-    alert(`Role updated successfully!`)
+    setUsers(updatedUsers)
+    localStorage.setItem("boomkit_approved_users", JSON.stringify(updatedUsers))
+
+    const userToUpdate = updatedUsers.find((u) => u.id === userId)
+    if (userToUpdate) {
+      console.log("[v0] Directly syncing user role to Supabase:", userToUpdate.username, "role:", userToUpdate.role)
+      try {
+        const { error } = await supabase.from("users").upsert(
+          {
+            id: userToUpdate.id,
+            username: userToUpdate.username,
+            email: userToUpdate.email,
+            tokens: userToUpdate.tokens,
+            boom_score: userToUpdate.boomScore,
+            role: userToUpdate.role,
+            status: userToUpdate.status,
+            is_banned: userToUpdate.isBanned,
+            is_muted: userToUpdate.isMuted,
+            mute_expiry: userToUpdate.muteExpiry,
+            ban_expiry: userToUpdate.banExpiry,
+            ban_reason: userToUpdate.banReason,
+            banner_color: userToUpdate.bannerColor,
+            packs_opened: userToUpdate.packsOpened || 0,
+            badges: userToUpdate.badges,
+          },
+          { onConflict: "id" },
+        )
+        if (error) {
+          console.error("[v0] Error syncing role to Supabase:", error)
+          alert(`Error saving role: ${error.message}`)
+        } else {
+          console.log("[v0] Successfully saved role to Supabase")
+          alert(`Role updated successfully!`)
+        }
+      } catch (err) {
+        console.error("[v0] Failed to sync role:", err)
+        alert(`Failed to save role: ${err}`)
+      }
+    }
   }
 
   // Assign badge to user
