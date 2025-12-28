@@ -29,6 +29,7 @@ import RealtimeAuctions from "@/components/realtime-auctions"
 import RealtimeLeaderboard from "@/components/realtime-leaderboard"
 import { getSupabaseBrowserClient } from "@/lib/supabase-client"
 import StripeCheckout from "@/components/stripe-checkout"
+import { createBrowserClient } from "@supabase/ssr"
 
 // Advanced computer identification system
 const generateSystemSignature = (): string => {
@@ -190,6 +191,7 @@ interface GameUser {
   banExpiry?: number | null
   banReason?: string
   lastSeen: number // Timestamp of last activity
+  packsOpened?: number // Added for Supabase sync
 }
 
 interface UserRole {
@@ -623,15 +625,46 @@ export default function BoomkitGame() {
 
   // --- DATA PERSISTENCE AND SYNC HOOKS ---
 
-  const updateAndPersistUsers = useCallback((newUsers: GameUser[]) => {
-    setUsers(newUsers)
-    localStorage.setItem("boomkit_approved_users", JSON.stringify(newUsers))
-  }, [])
+  const updateAndPersistUsers = useCallback(
+    async (newUsers: GameUser[]) => {
+      setUsers(newUsers)
+      localStorage.setItem("boomkit_approved_users", JSON.stringify(newUsers))
+
+      // Sync each modified user to Supabase
+      for (const user of newUsers) {
+        try {
+          await supabase.from("users").upsert(
+            {
+              id: user.id,
+              username: user.username,
+              email: user.email,
+              tokens: user.tokens,
+              boom_score: user.boomScore,
+              role: user.role,
+              status: user.status,
+              is_banned: user.isBanned,
+              is_muted: user.isMuted,
+              mute_expiry: user.muteExpiry,
+              ban_expiry: user.banExpiry,
+              ban_reason: user.banReason,
+              banner_color: user.bannerColor,
+              packs_opened: user.packsOpened || 0,
+              badges: user.badges, // Sync badges
+            },
+            { onConflict: "id" },
+          )
+        } catch (err) {
+          console.error("[v0] Failed to sync user to Supabase:", err)
+        }
+      }
+    },
+    [supabase],
+  )
 
   // Declaring updateAndPersistAuctions and updateAndPersistChat
   const updateAndPersistAuctions = useCallback((newAuctions: AuctionItem[]) => {
     setAuctionItems(newAuctions)
-    localStorage.setItem("boomkit_auctions", JSON.stringify(newAuctions))
+    localStorage.setItem("boomkit_auctions", JSON.JSON.stringify(newAuctions))
   }, [])
 
   const updateAndPersistChat = useCallback((newMessages: ChatMessage[]) => {
@@ -643,7 +676,7 @@ export default function BoomkitGame() {
     async (updatedUser: GameUser | null) => {
       if (updatedUser) {
         // Add or update the lastSeen timestamp on every action
-        const userWithActivity = { ...updatedUser, lastSeen: Date.now() }
+        const userWithActivity = { ...updatedUser, lastSeen: Date.now(), packsOpened: updatedUser.packs?.length || 0 }
         setCurrentUser(userWithActivity)
         localStorage.setItem("boomkit_current_user", JSON.stringify(userWithActivity))
 
@@ -684,7 +717,7 @@ export default function BoomkitGame() {
             ban_expiry: userWithActivity.banExpiry,
             ban_reason: userWithActivity.banReason,
             last_seen: userWithActivity.lastSeen,
-            packs_opened: userWithActivity.packs?.length || 0, // Sync packs count
+            packs_opened: userWithActivity.packsOpened || 0, // Sync packs count
           })
         } catch (error) {
           console.error("[v0] Error syncing user to Supabase:", error)
@@ -853,6 +886,7 @@ export default function BoomkitGame() {
         lastDailySpin: "",
         badges: ["developer", "og"],
         lastSeen: Date.now(),
+        packsOpened: PACKS.length * 5, // Initialize with a reasonable value
       }
       updateAndPersistCurrentUser(ownerUser)
       setCurrentView("game")
@@ -901,6 +935,7 @@ export default function BoomkitGame() {
       lastDailySpin: "",
       badges: [],
       lastSeen: Date.now(),
+      packsOpened: 0,
     }
 
     updateAndPersistUsers([...users, newUser])
@@ -1021,6 +1056,7 @@ export default function BoomkitGame() {
                   : randomBoom.rarity === "uncommon"
                     ? 100
                     : 50),
+      packsOpened: (updatedUser.packsOpened || 0) + 1, // Increment packs opened
     }
 
     updateAndPersistCurrentUser(finalUser)
@@ -1182,7 +1218,7 @@ export default function BoomkitGame() {
           bidders: [],
         }
         const raw = localStorage.getItem("boomkit_auctions")
-        const list = raw ? JSON.parse(raw) : []
+        const list = raw ? JSON.JSON.parse(raw) : []
         const next = [...list, newAuction]
         localStorage.setItem("boomkit_auctions", JSON.stringify(next))
         // Optional: keep legacy state in sync
@@ -1346,7 +1382,19 @@ export default function BoomkitGame() {
 
   // Quick role assignment
   const quickAssignRole = (userId: string, roleId: string) => {
-    const updatedUsers = users.map((u) => (u.id === userId ? { ...u, role: roleId } : u))
+    const updatedUsers = users.map((u) => {
+      if (u.id === userId) {
+        // Auto-add staff badge when assigned moderator, senior_moderator, or admin
+        let updatedBadges = u.badges || []
+        if (["moderator", "senior_moderator", "admin"].includes(roleId)) {
+          if (!updatedBadges.includes("staff")) {
+            updatedBadges = [...updatedBadges, "staff"]
+          }
+        }
+        return { ...u, role: roleId, badges: updatedBadges }
+      }
+      return u
+    })
     updateAndPersistUsers(updatedUsers)
     alert(`Role updated successfully!`)
   }
@@ -1454,7 +1502,7 @@ export default function BoomkitGame() {
   }
 
   // Create custom role
-  const createCustomRole = () => {
+  const createCustomRole = async () => {
     if (!newRoleName.trim() || !selectedUserForRole) {
       alert("Please enter role name and select a user!")
       return
@@ -1477,6 +1525,23 @@ export default function BoomkitGame() {
     const updatedCustomRoles = [...customRoles, newRole]
     setCustomRoles(updatedCustomRoles)
     localStorage.setItem("boomkit_custom_roles", JSON.stringify(updatedCustomRoles))
+
+    // Also save custom roles to Supabase
+    try {
+      const supabase = createBrowserClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      )
+      await supabase.from("custom_roles").upsert({
+        id: newRole.id,
+        name: newRole.name,
+        color: newRole.color,
+        assigned_by: newRole.assignedBy,
+        assigned_date: newRole.assignedDate,
+      })
+    } catch (err) {
+      console.error("Failed to save custom role to Supabase:", err)
+    }
 
     const updatedUsers = users.map((u) => (u.id === targetUser.id ? { ...u, role: newRole.id } : u))
     updateAndPersistUsers(updatedUsers)
@@ -2183,27 +2248,6 @@ export default function BoomkitGame() {
                 <div className="space-y-6">
                   <h1 className="text-4xl font-bold text-white">Staff Panel</h1>
 
-                  {/* Active Users Section */}
-                  <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
-                    <h2 className="text-2xl font-bold text-white mb-4">Active Users (Last 5 Mins)</h2>
-                    <div className="flex flex-wrap gap-4">
-                      {users
-                        .filter((u) => Date.now() - u.lastSeen < 300000 && !u.isOwner) // 5 minutes
-                        .map((user) => (
-                          <div key={user.id} className="flex items-center space-x-2 bg-green-500/20 p-2 rounded-lg">
-                            <span className="relative flex h-3 w-3">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                              <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                            </span>
-                            <span className="text-white font-medium">{user.username}</span>
-                          </div>
-                        ))}
-                      {users.filter((u) => Date.now() - u.lastSeen < 300000).length === 0 && (
-                        <p className="text-white/70">No users active in the last 5 minutes.</p>
-                      )}
-                    </div>
-                  </div>
-
                   {/* User Management */}
                   <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
                     <div className="flex justify-between items-center mb-4">
@@ -2230,7 +2274,7 @@ export default function BoomkitGame() {
                         .map((user) => {
                           const userRole =
                             DEFAULT_ROLES.find((r) => r.id === user.role) || customRoles.find((r) => r.id === user.role)
-                          const isActive = Date.now() - user.lastSeen < 300000 // Active in last 5 mins
+                          const isActive = Date.now() - user.lastSeen < 300000
                           return (
                             <div key={user.id} className="flex items-center justify-between p-3 bg-white/10 rounded">
                               <div className="flex items-center space-x-3">
@@ -2242,7 +2286,6 @@ export default function BoomkitGame() {
                                 <Badge className={`${userRole?.color || "bg-gray-500"} text-white text-xs`}>
                                   {userRole?.name || "Unknown"}
                                 </Badge>
-                                {/* Display user badges */}
                                 <div className="flex space-x-1">
                                   {(user.badges ?? []).map((badgeId) => {
                                     const badge = AVAILABLE_BADGES.find((b) => b.id === badgeId)
@@ -2410,8 +2453,7 @@ export default function BoomkitGame() {
         </div>
       </div>
 
-      {/* Modals and Overlays */}
-      {/* News Modal */}
+      {/* MODALS */}
       {showNews && (
         <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
           <Card className="w-full max-w-2xl bg-purple-900 border-purple-700">
@@ -2443,7 +2485,6 @@ export default function BoomkitGame() {
         </div>
       )}
 
-      {/* Pack Opening Animation */}
       {packAnimation.show && (
         <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
           <Card className="w-full max-w-md p-6 text-center">
@@ -2455,7 +2496,7 @@ export default function BoomkitGame() {
               {packAnimation.boom && (
                 <div className="space-y-4">
                   <div
-                    className={`w-32 h-32 mx-auto rounded-full border-4 border-white shadow-lg ${getAnimationClass(packAnimation.boom.rarity)}`}
+                    className={`w-32 h-32 mx-auto rounded-full border-4 border-white shadow-lg flex items-center justify-center text-6xl ${getRarityColor(packAnimation.boom.rarity)} ${getAnimationClass(packAnimation.boom.rarity)}`}
                   >
                     {packAnimation.boom.avatar}
                   </div>
@@ -2470,8 +2511,6 @@ export default function BoomkitGame() {
           </Card>
         </div>
       )}
-
-      {/* Profile Picture Picker */}
       {showProfilePicker && (
         <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
           <Card className="w-full max-w-md p-6">
@@ -2501,8 +2540,6 @@ export default function BoomkitGame() {
           </Card>
         </div>
       )}
-
-      {/* Name Edit Modal */}
       {showNameEdit && (
         <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
           <Card className="w-full max-w-md p-6">
@@ -2528,8 +2565,6 @@ export default function BoomkitGame() {
           </Card>
         </div>
       )}
-
-      {/* Email Edit Modal */}
       {showEmailEdit && (
         <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
           <Card className="w-full max-w-md p-6">
@@ -2560,8 +2595,6 @@ export default function BoomkitGame() {
           </Card>
         </div>
       )}
-
-      {/* Password Edit Modal */}
       {showPasswordEdit && (
         <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
           <Card className="w-full max-w-md p-6">
@@ -2578,8 +2611,6 @@ export default function BoomkitGame() {
               />
               <Button
                 onClick={() => {
-                  // In a real application, you would hash the password before saving it
-                  // For this example, we're just showing a placeholder
                   alert("Password change functionality not implemented in this demo.")
                   setShowPasswordEdit(false)
                 }}
@@ -2594,8 +2625,6 @@ export default function BoomkitGame() {
           </Card>
         </div>
       )}
-
-      {/* Delete Account Confirmation */}
       {showDeleteConfirm && (
         <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
           <Card className="w-full max-w-md p-6">
@@ -2608,7 +2637,6 @@ export default function BoomkitGame() {
             <CardContent className="space-y-4">
               <Button
                 onClick={() => {
-                  // In a real application, you would handle the account deletion logic here
                   alert("Account deletion functionality not implemented in this demo.")
                   setShowDeleteConfirm(false)
                 }}
@@ -2623,8 +2651,6 @@ export default function BoomkitGame() {
           </Card>
         </div>
       )}
-
-      {/* Privacy Policy Modal */}
       {showPrivacyPolicy && (
         <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -2704,8 +2730,6 @@ export default function BoomkitGame() {
           </Card>
         </div>
       )}
-
-      {/* Terms of Service Modal */}
       {showTermsOfService && (
         <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -2749,9 +2773,8 @@ export default function BoomkitGame() {
                   <li>Use the service for any illegal purpose</li>
                   <li>Harass, abuse, or harm other users</li>
                   <li>Use cheats, exploits, or automation software</li>
-                  <li>Attempt to gain unauthorized access to our systems</li>
                   <li>Impersonate other users or staff members</li>
-                  <li>Share inappropriate content in chat</li>
+                  <li>Use inappropriate content in chat</li>
                 </ul>
               </section>
 
@@ -2797,7 +2820,6 @@ export default function BoomkitGame() {
           </Card>
         </div>
       )}
-      {/* User Stats Modal */}
       {showUserStats && selectedUserStats && (
         <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
           <Card className="w-full max-w-md p-6">
@@ -2828,8 +2850,6 @@ export default function BoomkitGame() {
           </Card>
         </div>
       )}
-
-      {/* Mute Dialog */}
       {showMuteDialog && userToModerate && (
         <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
           <Card className="w-full max-w-md p-6">
@@ -2856,8 +2876,6 @@ export default function BoomkitGame() {
           </Card>
         </div>
       )}
-
-      {/* Ban Dialog */}
       {showBanDialog && userToModerate && (
         <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
           <Card className="w-full max-w-md p-6">
@@ -2883,8 +2901,6 @@ export default function BoomkitGame() {
           </Card>
         </div>
       )}
-
-      {/* Custom Role Manager */}
       {showRoleManager && (
         <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
           <Card className="w-full max-w-md p-6">
@@ -2934,8 +2950,6 @@ export default function BoomkitGame() {
           </Card>
         </div>
       )}
-
-      {/* Badge Manager */}
       {showBadgeManager && (
         <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
           <Card className="w-full max-w-md p-6">
@@ -2984,8 +2998,6 @@ export default function BoomkitGame() {
           </Card>
         </div>
       )}
-
-      {/* Boom Action Modal */}
       {showBoomAction && selectedBoom && (
         <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
           <Card className="w-full max-w-md p-6">
