@@ -690,7 +690,7 @@ export default function BoomkitGame() {
         // Also update the user in the main list
         setUsers((prevUsers) => {
           const newUsers = prevUsers.map((u) => (u.id === userWithActivity.id ? userWithActivity : u))
-          localStorage.setItem("boomkit_approved_users", JSON.JSON.stringify(newUsers))
+          localStorage.setItem("boomkit_approved_users", JSON.stringify(newUsers))
           return newUsers
         })
 
@@ -1635,6 +1635,7 @@ export default function BoomkitGame() {
             id: userToUpdate.id,
             username: userToUpdate.username,
             email: userToUpdate.email,
+            age: userToUpdate.age || 18,
             tokens: userToUpdate.tokens,
             boom_score: userToUpdate.boomScore,
             role: userToUpdate.role,
