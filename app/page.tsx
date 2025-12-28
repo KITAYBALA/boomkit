@@ -28,6 +28,7 @@ import RealtimeChat from "@/components/realtime-chat"
 import RealtimeAuctions from "@/components/realtime-auctions"
 import RealtimeLeaderboard from "@/components/realtime-leaderboard"
 import { getSupabaseBrowserClient } from "@/lib/supabase-client"
+import StripeCheckout from "@/components/stripe-checkout"
 
 // Advanced computer identification system
 const generateSystemSignature = (): string => {
@@ -541,26 +542,6 @@ const NEWS_ITEMS: NewsItem[] = [
     date: "2024-12-19",
     image: "🎉",
   },
-  {
-    id: "1",
-    title: "New Game Mode: Boom Battle is Live!",
-    content:
-      "Team up, collect ingredients, and stir up something sweet in Boom Battle, Boomkit's tropical team game mode!",
-    date: "2024-01-15",
-    image: "🥥",
-  },
-  {
-    id: "2",
-    title: "Race to gather ingredients and drop them in your team's cup",
-    content: "Get back to your cup to Stir during the next phase",
-    date: "2024-01-14",
-  },
-  {
-    id: "3",
-    title: "Answer questions to stay energized throughout the game",
-    content: "Boomkit Plus users can host Boom Battle",
-    date: "2024-01-13",
-  },
 ]
 
 export default function BoomkitGame() {
@@ -845,7 +826,7 @@ export default function BoomkitGame() {
       const ownerUser: GameUser = {
         id: "owner",
         username: "Oktay",
-        email: "oktay.abdullazadeh@gmail.com",
+        email: "oktay.abdullazada@gmail.com",
         age: 25,
         tokens: 999999,
         dailyTokens: 0,
@@ -1611,18 +1592,6 @@ export default function BoomkitGame() {
               </Button>
             </form>
 
-            <div className="mt-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
-              <h3 className="text-sm font-semibold text-purple-700 mb-2 text-center">Credentials</h3>
-              <div className="space-y-1 text-sm text-purple-600">
-                <p>
-                  <span className="font-medium">Nazli Abdullazada:</span> Tester
-                </p>
-                <p>
-                  <span className="font-medium">Oktay Abdullazada:</span> Owner
-                </p>
-              </div>
-            </div>
-
             <div className="mt-4 text-center space-y-2">
               <Button variant="link" onClick={() => setCurrentView("login")}>
                 Already have an account? Login
@@ -1792,6 +1761,13 @@ export default function BoomkitGame() {
               {currentUser?.tokens || 0}
             </Badge>
             {currentUser?.isOwner && <CrownIcon className="h-6 w-6 text-yellow-400" />}
+            {/* CHANGE: Added credentials section in top bar */}
+            <div className="hidden md:flex items-center space-x-2 bg-purple-500/30 rounded-lg px-3 py-1 text-xs text-white">
+              <span className="font-semibold">Credits:</span>
+              <span>Nazli Abdullazada (Tester)</span>
+              <span className="text-white/50">|</span>
+              <span>Oktay Abdullazada (Owner)</span>
+            </div>
           </div>
           <div className="flex items-center space-x-4">
             <Button
@@ -2039,6 +2015,27 @@ export default function BoomkitGame() {
                       <div className="text-white font-bold">MARKET</div>
                     </div>
                   </div>
+                </div>
+
+                <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
+                  <h3 className="text-white font-bold text-xl mb-4 flex items-center gap-2">
+                    💳 Buy Tokens with Real Money
+                  </h3>
+                  <p className="text-purple-200 text-sm mb-4">
+                    Purchase tokens instantly with secure Stripe payment. Tokens will be added to your account
+                    immediately.
+                  </p>
+                  {currentUser && (
+                    <StripeCheckout
+                      userId={currentUser.id}
+                      onSuccess={(tokens) => {
+                        if (currentUser) {
+                          const updatedUser = { ...currentUser, tokens: currentUser.tokens + tokens }
+                          setCurrentUser(updatedUser)
+                        }
+                      }}
+                    />
+                  )}
                 </div>
 
                 {/* Rarity Information */}
@@ -2417,23 +2414,31 @@ export default function BoomkitGame() {
       {/* News Modal */}
       {showNews && (
         <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
-          <Card className="w-full max-w-2xl">
+          <Card className="w-full max-w-2xl bg-purple-900 border-purple-700">
             <CardHeader>
-              <CardTitle className="text-2xl font-bold">Boomkit News</CardTitle>
-              <CardDescription>Stay up to date with the latest updates</CardDescription>
+              <CardTitle className="text-2xl font-bold text-white">Boomkit News</CardTitle>
+              <CardDescription className="text-purple-300">Stay up to date with the latest updates</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 max-h-96 overflow-y-auto">
               {NEWS_ITEMS.map((news) => (
-                <div key={news.id} className="bg-white/10 rounded-lg p-4">
-                  <h3 className="text-xl font-bold text-white">{news.title}</h3>
-                  <p className="text-white/70">{news.content}</p>
-                  <p className="text-white/50 text-sm">{news.date}</p>
+                <div key={news.id} className="bg-purple-800/50 rounded-lg p-4 border border-purple-600">
+                  <div className="flex items-center gap-2 mb-2">
+                    {news.image && <span className="text-2xl">{news.image}</span>}
+                    <h3 className="text-xl font-bold text-white">{news.title}</h3>
+                  </div>
+                  <p className="text-purple-200">{news.content}</p>
+                  <p className="text-purple-400 text-sm mt-2">{news.date}</p>
                 </div>
               ))}
-              <Button onClick={() => setShowNews(false)} className="w-full bg-gray-600 hover:bg-gray-700">
+            </CardContent>
+            <div className="p-4 pt-0">
+              <Button
+                onClick={() => setShowNews(false)}
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+              >
                 Close
               </Button>
-            </CardContent>
+            </div>
           </Card>
         </div>
       )}
@@ -2450,7 +2455,7 @@ export default function BoomkitGame() {
               {packAnimation.boom && (
                 <div className="space-y-4">
                   <div
-                    className={`w-32 h-32 mx-auto rounded-full flex items-center justify-center text-6xl border-4 border-white shadow-lg ${getAnimationClass(packAnimation.boom.rarity)}`}
+                    className={`w-32 h-32 mx-auto rounded-full border-4 border-white shadow-lg ${getAnimationClass(packAnimation.boom.rarity)}`}
                   >
                     {packAnimation.boom.avatar}
                   </div>
