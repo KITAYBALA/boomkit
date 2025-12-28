@@ -632,10 +632,10 @@ export default function BoomkitGame() {
       setUsers(newUsers)
       localStorage.setItem("boomkit_approved_users", JSON.stringify(newUsers))
 
-      // Sync each modified user to Supabase
       for (const user of newUsers) {
         try {
-          await supabase.from("users").upsert(
+          console.log("[v0] Syncing user to Supabase:", user.username, "role:", user.role)
+          const { error } = await supabase.from("users").upsert(
             {
               id: user.id,
               username: user.username,
@@ -651,10 +651,15 @@ export default function BoomkitGame() {
               ban_reason: user.banReason,
               banner_color: user.bannerColor,
               packs_opened: user.packsOpened || 0,
-              badges: user.badges, // Sync badges
+              badges: user.badges,
             },
             { onConflict: "id" },
           )
+          if (error) {
+            console.error("[v0] Error syncing user:", user.username, error)
+          } else {
+            console.log("[v0] Successfully synced user:", user.username)
+          }
         } catch (err) {
           console.error("[v0] Failed to sync user to Supabase:", err)
         }
@@ -1601,8 +1606,11 @@ export default function BoomkitGame() {
 
   // Quick role assignment
   const quickAssignRole = (userId: string, roleId: string) => {
+    console.log("[v0] quickAssignRole called - userId:", userId, "roleId:", roleId)
+
     const updatedUsers = users.map((u) => {
       if (u.id === userId) {
+        console.log("[v0] Found user to update:", u.username, "from role:", u.role, "to role:", roleId)
         // Auto-add staff badge when assigned moderator, senior_moderator, or admin
         let updatedBadges = u.badges || []
         if (["moderator", "senior_moderator", "admin"].includes(roleId)) {
@@ -1614,6 +1622,8 @@ export default function BoomkitGame() {
       }
       return u
     })
+
+    console.log("[v0] Calling updateAndPersistUsers with", updatedUsers.length, "users")
     updateAndPersistUsers(updatedUsers)
     alert(`Role updated successfully!`)
   }

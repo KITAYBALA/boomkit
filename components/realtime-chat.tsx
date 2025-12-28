@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { SendIcon } from "lucide-react"
 
 type Props = {
-  currentUser: { username: string; isMuted?: boolean } | null
+  currentUser: { username: string; isMuted?: boolean; role?: string } | null
   roleName: string
   onUsernameClick: (username: string) => void
 }
@@ -19,16 +19,56 @@ type LocalChatRow = { id: string; username: string; message: string; role: strin
 
 const LS_KEY = "boomkit_chat_messages"
 
+const getRoleColor = (role: string) => {
+  switch (role) {
+    case "owner":
+      return "bg-yellow-500 text-black"
+    case "admin":
+      return "bg-purple-500 text-white"
+    case "senior_moderator":
+      return "bg-blue-500 text-white"
+    case "moderator":
+      return "bg-green-500 text-white"
+    case "tester":
+      return "bg-orange-500 text-white"
+    case "staff":
+      return "bg-cyan-500 text-white"
+    default:
+      return "bg-gray-500 text-white"
+  }
+}
+
 export default function RealtimeChat({ currentUser, roleName, onUsernameClick }: Props) {
   const supabase = useMemo(() => getSupabaseBrowserClient(), [])
   const [messages, setMessages] = useState<LocalChatRow[]>([])
   const [text, setText] = useState("")
   const bottomRef = useRef<HTMLDivElement>(null)
+  const [userRoles, setUserRoles] = useState<Record<string, string>>({})
 
   // Scroll to bottom when messages change
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" })
   }, [messages])
+
+  useEffect(() => {
+    const fetchUserRoles = async () => {
+      if (supabase) {
+        const { data } = await supabase.from("users").select("username, role")
+        if (data) {
+          const roles: Record<string, string> = {}
+          data.forEach((u: { username: string; role: string }) => {
+            roles[u.username] = u.role
+          })
+          setUserRoles(roles)
+        }
+      }
+    }
+    fetchUserRoles()
+
+    // Refresh roles every 30 seconds
+    const interval = setInterval(fetchUserRoles, 30000)
+    return () => clearInterval(interval)
+  }, [supabase])
 
   // Load initial data and subscribe to changes
   useEffect(() => {
@@ -111,7 +151,9 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
       return
     }
 
-    console.log("[v0] Sending message:", text.trim())
+    const userRole = currentUser.role || roleName
+
+    console.log("[v0] Sending message:", text.trim(), "with role:", userRole)
 
     if (supabase) {
       const { data, error } = await supabase
@@ -119,7 +161,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
         .insert({
           username: currentUser.username,
           message: text.trim(),
-          role: roleName,
+          role: userRole,
         })
         .select()
 
@@ -134,7 +176,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
         id: Date.now().toString(),
         username: currentUser.username,
         message: text.trim(),
-        role: roleName,
+        role: userRole,
         timestamp: new Date().toISOString(),
       }
       const next = [...messages, entry]
@@ -149,22 +191,23 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
       <h1 className="text-4xl font-bold text-white">Global Chat</h1>
       <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
         <ScrollArea className="h-96 w-full border border-white/20 rounded p-4 mb-4">
-          {messages.map((msg) => (
-            <div key={msg.id} className="mb-3">
-              <div className="flex items-center space-x-2 mb-1">
-                <Badge variant="outline" className="text-xs">
-                  {msg.role}
-                </Badge>
-                <span
-                  className="text-white font-semibold cursor-pointer hover:underline"
-                  onClick={() => onUsernameClick(msg.username)}
-                >
-                  {msg.username}:
-                </span>
+          {messages.map((msg) => {
+            const displayRole = userRoles[msg.username] || msg.role
+            return (
+              <div key={msg.id} className="mb-3">
+                <div className="flex items-center space-x-2 mb-1">
+                  <Badge className={`text-xs ${getRoleColor(displayRole)}`}>{displayRole}</Badge>
+                  <span
+                    className="text-white font-semibold cursor-pointer hover:underline"
+                    onClick={() => onUsernameClick(msg.username)}
+                  >
+                    {msg.username}:
+                  </span>
+                </div>
+                <p className="text-white/90 ml-2">{msg.message}</p>
               </div>
-              <p className="text-white/90 ml-2">{msg.message}</p>
-            </div>
-          ))}
+            )
+          })}
           <div ref={bottomRef} />
         </ScrollArea>
         <div className="flex space-x-2">
