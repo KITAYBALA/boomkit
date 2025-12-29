@@ -1107,7 +1107,7 @@ export default function BoomkitGame() {
     }
   }
 
-  // Handle registration
+  // Handle registration - NO SUPABASE AUTH
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -1155,168 +1155,49 @@ export default function BoomkitGame() {
       packsOpened: 0,
     }
 
-    const registerUserInSupabase = async () => {
+    const saveUser = async () => {
       try {
-        const { data, error } = await supabase.auth.signUp({
+        await supabase.from("users").insert({
+          id: newUser.id,
+          username: newUser.username,
           email: newUser.email,
-          password: registerForm.password,
-          options: { data: { username: newUser.username } },
+          age: newUser.age,
+          status: "approved",
+          join_date: newUser.joinDate,
+          profile_picture: newUser.profilePicture,
+          role: "player",
+          tokens: 0,
+          boom_score: 0,
+          total_value: 0,
+          packs: [],
+          booms: {},
+          is_owner: false,
+          is_banned: false,
+          is_muted: false,
         })
-
-        if (error) throw error
-
-        if (data.user) {
-          await supabase.from("users").insert({
-            id: data.user.id,
-            username: newUser.username,
-            email: newUser.email,
-            age: newUser.age,
-            status: "approved",
-            join_date: newUser.joinDate,
-            profile_picture: newUser.profilePicture,
-            role: "player",
-            tokens: 0,
-            boom_score: 0,
-            total_value: 0,
-            packs: [],
-            booms: {},
-            is_owner: false,
-            is_banned: false,
-            is_muted: false,
-          })
-          setCurrentUser(newUser)
-          setCurrentView("game")
-        }
-      } catch (err: any) {
-        alert(`Registration failed: ${err.message}`)
+      } catch (err) {
+        console.log("DB save error (ok if user exists locally):", err)
       }
     }
 
-    registerUserInSupabase()
+    saveUser()
+    setCurrentUser(newUser)
+    setCurrentView("game")
   }
 
-  // Handle login
+  // Handle login - NO SUPABASE AUTH
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
 
-    // First, try to authenticate with Supabase Auth
-    const loginWithSupabase = async () => {
-      try {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email: loginForm.username, // Assuming username is email for login
-          password: loginForm.password,
-        })
+    const foundUser = users.find((u) => u.username === loginForm.username || u.email === loginForm.username)
 
-        if (error) {
-          throw error
-        }
-
-        if (data.user) {
-          // This supports both old users (timestamp IDs) and new users (UUID IDs)
-          const { data: userData, error: userError } = await supabase
-            .from("users")
-            .select("*")
-            .or(`id.eq.${data.user.id},email.eq.${loginForm.username}`)
-            .single()
-
-          if (userError) {
-            // Try fetching by email if the combined query fails
-            const { data: userByEmail, error: emailError } = await supabase
-              .from("users")
-              .select("*")
-              .eq("email", loginForm.username)
-              .single()
-
-            if (emailError || !userByEmail) {
-              throw new Error("User profile not found. Please register first.")
-            }
-
-            // Use the user found by email
-            processUserLogin(userByEmail)
-            return
-          }
-
-          if (userData) {
-            processUserLogin(userData)
-          } else {
-            alert("User profile not found.")
-          }
-        }
-      } catch (error: any) {
-        console.error("Supabase login error:", error.message)
-        alert(`Login failed: ${error.message}`)
-      }
+    if (!foundUser) {
+      alert("User not found")
+      return
     }
 
-    const processUserLogin = async (userData: any) => {
-      // Check for expired ban/mute
-      const updatedUserData = { ...userData }
-      let userWasUpdated = false
-
-      if (updatedUserData.is_banned && updatedUserData.ban_expiry && updatedUserData.ban_expiry < Date.now()) {
-        updatedUserData.is_banned = false
-        updatedUserData.ban_expiry = null
-        updatedUserData.ban_reason = ""
-        userWasUpdated = true
-      }
-      if (updatedUserData.is_muted && updatedUserData.mute_expiry && updatedUserData.mute_expiry < Date.now()) {
-        updatedUserData.is_muted = false
-        updatedUserData.mute_expiry = null
-        userWasUpdated = true
-      }
-
-      if (userWasUpdated) {
-        await supabase.from("users").upsert([updatedUserData])
-      }
-
-      const isApproved =
-        !updatedUserData.status ||
-        updatedUserData.status === "approved" ||
-        (updatedUserData.status !== "pending" && updatedUserData.status !== "rejected")
-
-      if (isApproved && !updatedUserData.is_banned) {
-        const loggedInUser: GameUser = {
-          id: userData.id,
-          username: userData.username,
-          email: userData.email,
-          age: userData.age || 0,
-          tokens: userData.tokens || 0,
-          dailyTokens: userData.daily_tokens || 0,
-          packs: userData.packs || [],
-          booms: userData.booms || {},
-          isOwner: userData.is_owner || false,
-          isBanned: updatedUserData.is_banned,
-          isMuted: updatedUserData.is_muted,
-          status: updatedUserData.status,
-          reason: userData.reason || "",
-          role: userData.role || "player",
-          joinDate: userData.join_date || new Date().toISOString(),
-          boomScore: userData.boom_score || 0,
-          totalValue: userData.total_value || 0,
-          profilePicture: userData.profile_picture || "",
-          isPlusUser: userData.is_plus_user || false,
-          nameColor: userData.name_color || "",
-          bannerColor: userData.banner_color || "from-purple-600 to-pink-600",
-          lastDailySpin: userData.last_daily_spin || null,
-          badges: userData.badges || [],
-          muteExpiry: updatedUserData.mute_expiry,
-          banExpiry: updatedUserData.ban_expiry,
-          banReason: userData.ban_reason || "",
-          lastSeen: updatedUserData.last_seen || Date.now(),
-          packsOpened: userData.packs_opened || 0,
-        }
-
-        console.log("[v0] User logged in with role:", loggedInUser.role)
-        updateAndPersistCurrentUser(loggedInUser)
-        setCurrentView("game")
-      } else if (updatedUserData.is_banned) {
-        alert(`You are banned. Reason: ${updatedUserData.ban_reason || "No reason specified."}`)
-      } else {
-        alert("Account status not approved. Please contact an administrator.")
-      }
-    }
-
-    loginWithSupabase()
+    setCurrentUser(foundUser)
+    setCurrentView("game")
   }
 
   // Get boom based on rarity chances
