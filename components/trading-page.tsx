@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { createBrowserClient } from "@supabase/ssr"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -17,6 +17,7 @@ import {
   CoinsIcon,
   UserIcon,
   ClockIcon,
+  BellIcon,
 } from "lucide-react"
 
 interface GameUser {
@@ -63,29 +64,50 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
   const [activeTab, setActiveTab] = useState<"incoming" | "outgoing" | "history">("incoming")
   const [newTradeAlert, setNewTradeAlert] = useState(false)
 
-  // Fetch trades
+  const fetchTrades = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("trades")
+      .select("*")
+      .or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`)
+      .order("created_at", { ascending: false })
+
+    if (!error && data) {
+      console.log("[v0] Fetched trades:", data.length)
+      setTrades((prevTrades) => {
+        // Only update if data actually changed
+        if (JSON.stringify(prevTrades) !== JSON.stringify(data)) {
+          return data
+        }
+        return prevTrades
+      })
+    }
+  }, [currentUser.id])
+
+  // Fetch trades and set up realtime subscription
   useEffect(() => {
     fetchTrades()
 
-    const channelName = `trades-${currentUser.id}-${Date.now()}`
+    const channelName = `trades-${currentUser.id}`
+
     const channel = supabase
       .channel(channelName)
       .on("postgres_changes", { event: "*", schema: "public", table: "trades" }, (payload) => {
         console.log("[v0] Trade realtime event:", payload.eventType)
+
         fetchTrades()
 
-        // Show alert for new incoming trades
+        // Show alert and switch to incoming tab for new incoming trades
         if (payload.eventType === "INSERT") {
           const newTrade = payload.new as Trade
           if (newTrade.receiver_id === currentUser.id) {
+            console.log("[v0] New incoming trade for current user!")
             setNewTradeAlert(true)
-            // Play notification sound
+            setActiveTab("incoming") // Switch to incoming tab
             try {
               const audio = new Audio("/notification.mp3")
               audio.volume = 0.5
               audio.play().catch(() => {})
             } catch {}
-            // Auto-hide alert after 5 seconds
             setTimeout(() => setNewTradeAlert(false), 5000)
           }
         }
@@ -97,20 +119,7 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [currentUser.id])
-
-  const fetchTrades = async () => {
-    const { data, error } = await supabase
-      .from("trades")
-      .select("*")
-      .or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`)
-      .order("created_at", { ascending: false })
-
-    if (!error && data) {
-      console.log("[v0] Fetched trades:", data.length)
-      setTrades(data)
-    }
-  }
+  }, [currentUser.id, fetchTrades])
 
   const incomingTrades = trades.filter((t) => t.receiver_id === currentUser.id && t.status === "pending")
   const outgoingTrades = trades.filter((t) => t.sender_id === currentUser.id && t.status === "pending")
@@ -307,6 +316,17 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
 
   return (
     <div className="space-y-6">
+      {newTradeAlert && (
+        <div className="fixed top-4 right-4 z-50 animate-bounce">
+          <Card className="bg-green-500 border-green-400 shadow-lg">
+            <CardContent className="p-4 flex items-center gap-3">
+              <BellIcon className="h-6 w-6 text-white animate-pulse" />
+              <span className="text-white font-bold text-lg">New Trade Offer!</span>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-white flex items-center gap-3">
@@ -320,14 +340,6 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
           New Trade
         </Button>
       </div>
-
-      {newTradeAlert && (
-        <Card className="bg-green-500/30 border-green-500 animate-pulse">
-          <CardContent className="py-3">
-            <p className="text-green-300 font-medium">New trade offer received!</p>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Pending Trade Notification */}
       {incomingTrades.length > 0 && (
