@@ -61,18 +61,38 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
   const [tradeMessage, setTradeMessage] = useState("")
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<"incoming" | "outgoing" | "history">("incoming")
+  const [newTradeAlert, setNewTradeAlert] = useState(false)
 
   // Fetch trades
   useEffect(() => {
     fetchTrades()
 
-    // Subscribe to realtime updates
+    const channelName = `trades-${currentUser.id}-${Date.now()}`
     const channel = supabase
-      .channel("trades")
-      .on("postgres_changes", { event: "*", schema: "public", table: "trades" }, () => {
+      .channel(channelName)
+      .on("postgres_changes", { event: "*", schema: "public", table: "trades" }, (payload) => {
+        console.log("[v0] Trade realtime event:", payload.eventType)
         fetchTrades()
+
+        // Show alert for new incoming trades
+        if (payload.eventType === "INSERT") {
+          const newTrade = payload.new as Trade
+          if (newTrade.receiver_id === currentUser.id) {
+            setNewTradeAlert(true)
+            // Play notification sound
+            try {
+              const audio = new Audio("/notification.mp3")
+              audio.volume = 0.5
+              audio.play().catch(() => {})
+            } catch {}
+            // Auto-hide alert after 5 seconds
+            setTimeout(() => setNewTradeAlert(false), 5000)
+          }
+        }
       })
-      .subscribe()
+      .subscribe((status) => {
+        console.log("[v0] Trade subscription status:", status)
+      })
 
     return () => {
       supabase.removeChannel(channel)
@@ -87,6 +107,7 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
       .order("created_at", { ascending: false })
 
     if (!error && data) {
+      console.log("[v0] Fetched trades:", data.length)
       setTrades(data)
     }
   }
@@ -299,6 +320,14 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
           New Trade
         </Button>
       </div>
+
+      {newTradeAlert && (
+        <Card className="bg-green-500/30 border-green-500 animate-pulse">
+          <CardContent className="py-3">
+            <p className="text-green-300 font-medium">New trade offer received!</p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Pending Trade Notification */}
       {incomingTrades.length > 0 && (
