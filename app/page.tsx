@@ -29,6 +29,7 @@ import RealtimeAuctions from "@/components/realtime-auctions"
 import RealtimeLeaderboard from "@/components/realtime-leaderboard"
 import { getSupabaseBrowserClient } from "@/lib/supabase-client"
 import StripeCheckout from "@/components/stripe-checkout"
+import TradingPage from "@/components/trading-page" // Import TradingPage
 import { createBrowserClient } from "@supabase/ssr"
 
 // Advanced computer identification system
@@ -551,7 +552,17 @@ const NEWS_ITEMS: NewsItem[] = [
 export default function BoomkitGame() {
   const [currentView, setCurrentView] = useState<"register" | "login" | "game" | "owner-access">("owner-access")
   const [currentPage, setCurrentPage] = useState<
-    "stats" | "booms" | "market" | "settings" | "chat" | "auction" | "staff" | "news" | "upgrade" | "leaderboard"
+    | "stats"
+    | "booms"
+    | "market"
+    | "settings"
+    | "chat"
+    | "auction"
+    | "staff"
+    | "news"
+    | "upgrade"
+    | "leaderboard"
+    | "trading"
   >("stats")
   const [currentUser, setCurrentUser] = useState<GameUser | null>(null)
   const [users, setUsers] = useState<GameUser[]>([])
@@ -832,7 +843,8 @@ export default function BoomkitGame() {
     }
   }, [supabase])
 
-  // Find the useEffect that loads users from Supabase and add another one after it
+  // Find the
+
   useEffect(() => {
     // Sync current user's role from Supabase every 10 seconds
     const syncCurrentUserRole = async () => {
@@ -2163,6 +2175,17 @@ export default function BoomkitGame() {
             Leaderboard
           </button>
 
+          {/* Trading Navigation Item */}
+          <button
+            onClick={() => setCurrentPage("trading")}
+            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${
+              currentPage === "trading" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
+            }`}
+          >
+            <PackageIcon className="h-5 w-5 mr-3" />
+            Trading
+          </button>
+
           {(currentUser?.role === "moderator" ||
             currentUser?.role === "senior_moderator" ||
             currentUser?.role === "admin" ||
@@ -2638,6 +2661,24 @@ export default function BoomkitGame() {
                 getRarityColor={getRarityColor}
                 getUserRoleName={getUserRoleName}
                 isOwner={isOwner}
+              />
+            )}
+
+            {/* Trading Page */}
+            {currentPage === "trading" && (
+              <TradingPage
+                currentUser={currentUser!}
+                users={users}
+                onTradeComplete={() => {
+                  // Refresh user data after trade
+                  const fetchUser = async () => {
+                    const { data } = await supabase.from("users").select("*").eq("id", currentUser!.id).single()
+                    if (data) {
+                      setCurrentUser(data)
+                    }
+                  }
+                  fetchUser()
+                }}
               />
             )}
 
