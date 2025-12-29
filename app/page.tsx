@@ -773,6 +773,7 @@ export default function BoomkitGame() {
     }
   }, [])
 
+  // Load users from Supabase on mount
   useEffect(() => {
     const fetchUsersFromSupabase = async () => {
       try {
@@ -830,6 +831,68 @@ export default function BoomkitGame() {
       fetchUsersFromSupabase()
     }
   }, [supabase])
+
+  // Find the useEffect that loads users from Supabase and add another one after it
+  useEffect(() => {
+    // Sync current user's role from Supabase every 10 seconds
+    const syncCurrentUserRole = async () => {
+      if (!currentUser?.id || !supabase) return
+
+      try {
+        const { data, error } = await supabase
+          .from("users")
+          .select("role, badges, is_muted, is_banned, mute_expiry, ban_expiry")
+          .eq("id", currentUser.id)
+          .single()
+
+        if (error) {
+          console.log("[v0] Error syncing user role:", error.message)
+          return
+        }
+
+        if (
+          data &&
+          (data.role !== currentUser.role ||
+            JSON.stringify(data.badges) !== JSON.stringify(currentUser.badges) ||
+            data.is_muted !== currentUser.isMuted ||
+            data.is_banned !== currentUser.isBanned ||
+            data.mute_expiry !== currentUser.muteExpiry ||
+            data.ban_expiry !== currentUser.banExpiry)
+        ) {
+          console.log(
+            "[v0] User data updated from Supabase. Role:",
+            data.role,
+            "Badges:",
+            data.badges,
+            "Muted:",
+            data.is_muted,
+            "Banned:",
+            data.is_banned,
+          )
+          const updatedUser = {
+            ...currentUser,
+            role: data.role || "player",
+            badges: data.badges || [],
+            isMuted: data.is_muted || false,
+            isBanned: data.is_banned || false,
+            muteExpiry: data.mute_expiry,
+            banExpiry: data.ban_expiry,
+          }
+          updateAndPersistCurrentUser(updatedUser)
+        }
+      } catch (err) {
+        console.log("[v0] Error in role sync:", err)
+      }
+    }
+
+    // Sync immediately on mount
+    syncCurrentUserRole()
+
+    // Then sync every 10 seconds
+    const interval = setInterval(syncCurrentUserRole, 10000)
+
+    return () => clearInterval(interval)
+  }, [currentUser, updateAndPersistCurrentUser, supabase])
 
   useEffect(() => {
     const fetchCustomRolesFromSupabase = async () => {
@@ -1134,76 +1197,32 @@ export default function BoomkitGame() {
         }
 
         if (data.user) {
-          // Fetch user details from the 'users' table
+          // This supports both old users (timestamp IDs) and new users (UUID IDs)
           const { data: userData, error: userError } = await supabase
             .from("users")
             .select("*")
-            .eq("id", data.user.id)
+            .or(`id.eq.${data.user.id},email.eq.${loginForm.username}`)
             .single()
 
           if (userError) {
-            throw userError
+            // Try fetching by email if the combined query fails
+            const { data: userByEmail, error: emailError } = await supabase
+              .from("users")
+              .select("*")
+              .eq("email", loginForm.username)
+              .single()
+
+            if (emailError || !userByEmail) {
+              throw new Error("User profile not found. Please register first.")
+            }
+
+            // Use the user found by email
+            processUserLogin(userByEmail)
+            return
           }
 
           if (userData) {
-            // Check for expired ban/mute
-            const updatedUserData = { ...userData }
-            let userWasUpdated = false
-
-            if (updatedUserData.is_banned && updatedUserData.ban_expiry && updatedUserData.ban_expiry < Date.now()) {
-              updatedUserData.is_banned = false
-              updatedUserData.ban_expiry = null
-              updatedUserData.ban_reason = ""
-              userWasUpdated = true
-            }
-            if (updatedUserData.is_muted && updatedUserData.mute_expiry && updatedUserData.mute_expiry < Date.now()) {
-              updatedUserData.is_muted = false
-              updatedUserData.mute_expiry = null
-              userWasUpdated = true
-            }
-
-            if (userWasUpdated) {
-              await supabase.from("users").upsert([updatedUserData])
-            }
-
-            if (updatedUserData.status === "approved" && !updatedUserData.is_banned) {
-              const loggedInUser: GameUser = {
-                id: userData.id,
-                username: userData.username,
-                email: userData.email,
-                age: userData.age || 0,
-                tokens: userData.tokens || 0,
-                dailyTokens: userData.daily_tokens || 0,
-                packs: userData.packs || [],
-                booms: userData.booms || {},
-                isOwner: userData.is_owner || false,
-                isBanned: updatedUserData.is_banned,
-                isMuted: updatedUserData.is_muted,
-                status: updatedUserData.status,
-                reason: userData.reason || "",
-                role: userData.role || "player",
-                joinDate: userData.join_date || new Date().toISOString(),
-                boomScore: userData.boom_score || 0,
-                totalValue: userData.total_value || 0,
-                profilePicture: userData.profile_picture || "",
-                isPlusUser: userData.is_plus_user || false,
-                nameColor: userData.name_color || "",
-                bannerColor: userData.banner_color || "from-purple-600 to-pink-600",
-                lastDailySpin: userData.last_daily_spin || null,
-                badges: userData.badges || [],
-                muteExpiry: updatedUserData.mute_expiry,
-                banExpiry: updatedUserData.ban_expiry,
-                banReason: userData.ban_reason || "",
-                lastSeen: updatedUserData.last_seen || Date.now(),
-                packsOpened: userData.packs_opened || 0,
-              }
-              updateAndPersistCurrentUser(loggedInUser)
-              setCurrentView("game")
-            } else if (updatedUserData.is_banned) {
-              alert(`You are banned. Reason: ${updatedUserData.ban_reason || "No reason specified."}`)
-            } else {
-              alert("Account not approved. Please contact an administrator.")
-            }
+            processUserLogin(userData)
           } else {
             alert("User profile not found.")
           }
@@ -1211,6 +1230,69 @@ export default function BoomkitGame() {
       } catch (error: any) {
         console.error("Supabase login error:", error.message)
         alert(`Login failed: ${error.message}`)
+      }
+    }
+
+    const processUserLogin = async (userData: any) => {
+      // Check for expired ban/mute
+      const updatedUserData = { ...userData }
+      let userWasUpdated = false
+
+      if (updatedUserData.is_banned && updatedUserData.ban_expiry && updatedUserData.ban_expiry < Date.now()) {
+        updatedUserData.is_banned = false
+        updatedUserData.ban_expiry = null
+        updatedUserData.ban_reason = ""
+        userWasUpdated = true
+      }
+      if (updatedUserData.is_muted && updatedUserData.mute_expiry && updatedUserData.mute_expiry < Date.now()) {
+        updatedUserData.is_muted = false
+        updatedUserData.mute_expiry = null
+        userWasUpdated = true
+      }
+
+      if (userWasUpdated) {
+        await supabase.from("users").upsert([updatedUserData])
+      }
+
+      if (updatedUserData.status === "approved" && !updatedUserData.is_banned) {
+        const loggedInUser: GameUser = {
+          id: userData.id,
+          username: userData.username,
+          email: userData.email,
+          age: userData.age || 0,
+          tokens: userData.tokens || 0,
+          dailyTokens: userData.daily_tokens || 0,
+          packs: userData.packs || [],
+          booms: userData.booms || {},
+          isOwner: userData.is_owner || false,
+          isBanned: updatedUserData.is_banned,
+          isMuted: updatedUserData.is_muted,
+          status: updatedUserData.status,
+          reason: userData.reason || "",
+          role: userData.role || "player",
+          joinDate: userData.join_date || new Date().toISOString(),
+          boomScore: userData.boom_score || 0,
+          totalValue: userData.total_value || 0,
+          profilePicture: userData.profile_picture || "",
+          isPlusUser: userData.is_plus_user || false,
+          nameColor: userData.name_color || "",
+          bannerColor: userData.banner_color || "from-purple-600 to-pink-600",
+          lastDailySpin: userData.last_daily_spin || null,
+          badges: userData.badges || [],
+          muteExpiry: updatedUserData.mute_expiry,
+          banExpiry: updatedUserData.ban_expiry,
+          banReason: userData.ban_reason || "",
+          lastSeen: updatedUserData.last_seen || Date.now(),
+          packsOpened: userData.packs_opened || 0,
+        }
+
+        console.log("[v0] User logged in with role:", loggedInUser.role)
+        updateAndPersistCurrentUser(loggedInUser)
+        setCurrentView("game")
+      } else if (updatedUserData.is_banned) {
+        alert(`You are banned. Reason: ${updatedUserData.ban_reason || "No reason specified."}`)
+      } else {
+        alert("Account not approved. Please contact an administrator.")
       }
     }
 
@@ -2205,7 +2287,35 @@ export default function BoomkitGame() {
                       >
                         {currentUser?.username}
                       </h2>
-                      <p className="text-white/70">{currentUser ? getUserRoleName(currentUser) : "Player"}</p>
+                      {/* Update Stats page to show role prominently with badge */}
+                      {/* In the Stats section, after the username display, update to show role with colored badge: */}
+                      {/* Around line 2207, replace the role display line: */}
+                      {/* Old: <p className="text-white/70">{currentUser ? getUserRoleName(currentUser) : "Player"}</p> */}
+                      {/* New: Show role with colored badge */}
+                      <div className="flex items-center gap-2">
+                        <Badge
+                          className={`${
+                            currentUser?.role === "owner"
+                              ? "bg-yellow-500"
+                              : currentUser?.role === "admin"
+                                ? "bg-red-500"
+                                : currentUser?.role === "senior_moderator"
+                                  ? "bg-purple-500"
+                                  : currentUser?.role === "moderator"
+                                    ? "bg-blue-500"
+                                    : currentUser?.role === "tester"
+                                      ? "bg-green-500"
+                                      : // Added test role badge
+                                        "bg-gray-500"
+                          } text-white`}
+                        >
+                          {currentUser ? getUserRoleName(currentUser) : "Player"}
+                        </Badge>
+                        {(currentUser?.role === "moderator" ||
+                          currentUser?.role === "senior_moderator" ||
+                          currentUser?.role === "admin" ||
+                          currentUser?.isOwner) && <Badge className="bg-emerald-500 text-white">Staff</Badge>}
+                      </div>
                       {/* Display badges */}
                       <div className="flex space-x-1 mt-1">
                         {(currentUser?.badges ?? []).map((badgeId) => {
@@ -2368,7 +2478,7 @@ export default function BoomkitGame() {
                   <h1 className="text-4xl font-bold text-white">Market</h1>
                   <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
                     <div className="text-center">
-                      <div className="text-6xl mb-2">🏪</div>
+                      <div className="text-6xl">🏪</div>
                       <div className="text-white font-bold">MARKET</div>
                     </div>
                   </div>
