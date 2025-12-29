@@ -21,6 +21,8 @@ import {
   GavelIcon,
   NewspaperIcon,
   CameraIcon,
+  XIcon,
+  MenuIcon,
 } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 
@@ -571,6 +573,7 @@ export default function BoomkitGame() {
   const [ownerAccessCode, setOwnerAccessCode] = useState("")
   const [auctionItems, setAuctionItems] = useState<AuctionItem[]>([])
   const [showNews, setShowNews] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false) // <-- Added mobile sidebar state
   const [packAnimation, setPackAnimation] = useState<{
     show: boolean
     boom: BoomItem | null
@@ -641,7 +644,7 @@ export default function BoomkitGame() {
   const updateAndPersistUsers = useCallback(
     async (newUsers: GameUser[]) => {
       setUsers(newUsers)
-      localStorage.setItem("boomkit_approved_users", JSON.stringify(newUsers))
+      localStorage.setItem("boomkit_approved_users", JSON.JSON.stringify(newUsers))
 
       for (const user of newUsers) {
         try {
@@ -2106,17 +2109,36 @@ export default function BoomkitGame() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-400 via-purple-500 to-pink-500 flex">
-      {/* Sidebar - Blooket Style */}
-      <div className="w-48 bg-gradient-to-b from-purple-600 to-purple-800 text-white flex flex-col">
+      {/* Mobile Overlay */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={() => setSidebarOpen(false)} />
+      )}
+
+      {/* Sidebar - Hidden on mobile, toggleable */}
+      <div
+        className={`
+        fixed md:relative inset-y-0 left-0 z-50
+        w-48 bg-gradient-to-b from-purple-600 to-purple-800 text-white flex flex-col
+        transform transition-transform duration-300 ease-in-out
+        ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+      `}
+      >
         {/* Logo */}
-        <div className="p-4 text-center">
-          <h1 className="text-2xl font-sans font-extrabold text-white">Boomkit </h1>
+        <div className="p-4 text-center flex items-center justify-between">
+          <h1 className="text-2xl font-sans font-extrabold text-white">Boomkit</h1>
+          {/* Close button on mobile */}
+          <button onClick={() => setSidebarOpen(false)} className="md:hidden p-1 rounded-lg hover:bg-white/10">
+            <XIcon className="h-5 w-5" />
+          </button>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-2 space-y-1">
+        <nav className="flex-1 px-2 space-y-1 overflow-y-auto">
           <button
-            onClick={() => setCurrentPage("stats")}
+            onClick={() => {
+              setCurrentPage("stats")
+              setSidebarOpen(false)
+            }}
             className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${
               currentPage === "stats" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
             }`}
@@ -2126,7 +2148,10 @@ export default function BoomkitGame() {
           </button>
 
           <button
-            onClick={() => setCurrentPage("booms")}
+            onClick={() => {
+              setCurrentPage("booms")
+              setSidebarOpen(false)
+            }}
             className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${
               currentPage === "booms" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
             }`}
@@ -2136,7 +2161,10 @@ export default function BoomkitGame() {
           </button>
 
           <button
-            onClick={() => setCurrentPage("market")}
+            onClick={() => {
+              setCurrentPage("market")
+              setSidebarOpen(false)
+            }}
             className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${
               currentPage === "market" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
             }`}
@@ -2146,7 +2174,10 @@ export default function BoomkitGame() {
           </button>
 
           <button
-            onClick={() => setCurrentPage("chat")}
+            onClick={() => {
+              setCurrentPage("chat")
+              setSidebarOpen(false)
+            }}
             className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${
               currentPage === "chat" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
             }`}
@@ -2156,7 +2187,10 @@ export default function BoomkitGame() {
           </button>
 
           <button
-            onClick={() => setCurrentPage("auction")}
+            onClick={() => {
+              setCurrentPage("auction")
+              setSidebarOpen(false)
+            }}
             className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${
               currentPage === "auction" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
             }`}
@@ -2166,7 +2200,10 @@ export default function BoomkitGame() {
           </button>
 
           <button
-            onClick={() => setCurrentPage("leaderboard")}
+            onClick={() => {
+              setCurrentPage("leaderboard")
+              setSidebarOpen(false)
+            }}
             className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${
               currentPage === "leaderboard" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
             }`}
@@ -2175,9 +2212,11 @@ export default function BoomkitGame() {
             Leaderboard
           </button>
 
-          {/* Trading Navigation Item */}
           <button
-            onClick={() => setCurrentPage("trading")}
+            onClick={() => {
+              setCurrentPage("trading")
+              setSidebarOpen(false)
+            }}
             className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${
               currentPage === "trading" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
             }`}
@@ -2191,7 +2230,10 @@ export default function BoomkitGame() {
             currentUser?.role === "admin" ||
             isOwner()) && (
             <button
-              onClick={() => setCurrentPage("staff")}
+              onClick={() => {
+                setCurrentPage("staff")
+                setSidebarOpen(false)
+              }}
               className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${
                 currentPage === "staff" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
               }`}
@@ -2202,7 +2244,10 @@ export default function BoomkitGame() {
           )}
 
           <button
-            onClick={() => setCurrentPage("settings")}
+            onClick={() => {
+              setCurrentPage("settings")
+              setSidebarOpen(false)
+            }}
             className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${
               currentPage === "settings" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
             }`}
@@ -2214,40 +2259,55 @@ export default function BoomkitGame() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
-        {/* Top Bar */}
-        <div className="bg-white/10 backdrop-blur-md border-b border-white/20 p-4 flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <Badge className="bg-yellow-500 text-white">
-              <CoinsIcon className="h-4 w-4 mr-1" />
+      <div className="flex-1 flex flex-col w-full md:w-auto">
+        {/* Top Bar - Mobile Responsive */}
+        <div className="bg-white/10 backdrop-blur-md border-b border-white/20 p-2 md:p-4 flex justify-between items-center gap-2">
+          {/* Left side - Hamburger + Tokens */}
+          <div className="flex items-center gap-2 md:gap-4">
+            {/* Mobile hamburger menu */}
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="md:hidden p-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              <MenuIcon className="h-5 w-5" />
+            </button>
+
+            <Badge className="bg-yellow-500 text-white text-xs md:text-sm">
+              <CoinsIcon className="h-3 w-3 md:h-4 md:w-4 mr-1" />
               {currentUser?.tokens || 0}
             </Badge>
-            {currentUser?.isOwner && <CrownIcon className="h-6 w-6 text-yellow-400" />}
-            {/* CHANGE: Added credentials section in top bar */}
-            <div className="hidden md:flex items-center space-x-2 bg-purple-500/30 rounded-lg px-3 py-1 text-xs text-white">
+            {currentUser?.isOwner && <CrownIcon className="h-5 w-5 md:h-6 md:w-6 text-yellow-400" />}
+
+            {/* Credentials - Hidden on mobile */}
+            <div className="hidden lg:flex items-center space-x-2 bg-purple-500/30 rounded-lg px-3 py-1 text-xs text-white">
               <span className="font-semibold">Credentials:</span>
               <span>Nazli Abdullazada (Tester)</span>
               <span className="text-white/50">|</span>
               <span>Oktay Abdullazada (Owner)</span>
             </div>
           </div>
-          <div className="flex items-center space-x-4">
+
+          {/* Right side - News, User, Logout */}
+          <div className="flex items-center gap-1 md:gap-4">
+            {/* News button - Icon only on mobile */}
             <Button
               onClick={() => setShowNews(!showNews)}
-              className="bg-cyan-500 hover:bg-cyan-600 text-white"
+              className="bg-cyan-500 hover:bg-cyan-600 text-white p-2 md:px-3"
               size="sm"
             >
-              <NewspaperIcon className="h-4 w-4 mr-2" />
-              Boomkit News
+              <NewspaperIcon className="h-4 w-4 md:mr-2" />
+              <span className="hidden md:inline">Boomkit News</span>
             </Button>
-            <div className="flex items-center space-x-2 bg-purple-600 rounded-lg px-3 py-1">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className="bg-yellow-500 text-white">
+
+            {/* User info - Simplified on mobile */}
+            <div className="flex items-center gap-1 md:gap-2 bg-purple-600 rounded-lg px-2 md:px-3 py-1">
+              <Avatar className="h-6 w-6 md:h-8 md:w-8">
+                <AvatarFallback className="bg-yellow-500 text-white text-xs md:text-sm">
                   {currentUser?.profilePicture || "U"}
                 </AvatarFallback>
               </Avatar>
               <span
-                className={`font-medium ${
+                className={`font-medium text-xs md:text-sm truncate max-w-[60px] md:max-w-none ${
                   currentUser?.nameColor === "rainbow"
                     ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent animate-pulse"
                     : "text-white"
@@ -2255,27 +2315,30 @@ export default function BoomkitGame() {
               >
                 {currentUser?.username}
               </span>
-              {/* Display user badges */}
-              <div className="flex space-x-1">
-                {(currentUser?.badges ?? []).map((badgeId) => {
+              {/* Badges - Hidden on small mobile */}
+              <div className="hidden sm:flex space-x-1">
+                {(currentUser?.badges ?? []).slice(0, 3).map((badgeId) => {
                   const badge = AVAILABLE_BADGES.find((b) => b.id === badgeId)
                   return badge ? (
-                    <span key={badgeId} className="text-sm" title={badge.name}>
+                    <span key={badgeId} className="text-xs md:text-sm" title={badge.name}>
                       {badge.emoji}
                     </span>
                   ) : null
                 })}
               </div>
             </div>
-            <Button onClick={handleLogout} className="bg-red-500 hover:bg-red-600 text-white" size="sm">
-              Logout
+
+            {/* Logout - Icon only on mobile */}
+            <Button onClick={handleLogout} className="bg-red-500 hover:bg-red-600 text-white p-2 md:px-3" size="sm">
+              <XIcon className="h-4 w-4 md:hidden" />
+              <span className="hidden md:inline">Logout</span>
             </Button>
           </div>
         </div>
 
         <div className="flex-1 flex">
           {/* Main Content Area */}
-          <div className="flex-1 p-6 overflow-y-auto">
+          <div className="flex-1 p-3 md:p-6 overflow-y-auto">
             {/* Stats Page */}
             {currentPage === "stats" && (
               <div className="space-y-6">
@@ -2927,7 +2990,6 @@ export default function BoomkitGame() {
           </Card>
         </div>
       )}
-
       {packAnimation.show && (
         <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
           <Card className="w-full max-w-md p-6 text-center">
