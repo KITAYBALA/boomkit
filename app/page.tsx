@@ -1116,15 +1116,14 @@ export default function BoomkitGame() {
       return
     }
 
-    // Check if username or email already exists in local storage (will be replaced by Supabase check)
     const existingUser = users.find((u) => u.username === registerForm.username || u.email === registerForm.email)
     if (existingUser) {
-      alert("Username or email already exists. Please choose another.")
+      alert("Username or email already exists.")
       return
     }
 
     const newUser: GameUser = {
-      id: Date.now().toString(), // Temporary ID, Supabase will generate a real one
+      id: Date.now().toString(),
       username: registerForm.username,
       email: registerForm.email,
       age: Number.parseInt(registerForm.age),
@@ -1156,41 +1155,26 @@ export default function BoomkitGame() {
       packsOpened: 0,
     }
 
-    // **CHANGE**: Sync new user registration to Supabase
     const registerUserInSupabase = async () => {
       try {
         const { data, error } = await supabase.auth.signUp({
           email: newUser.email,
-          password: registerForm.password, // Use the actual password for sign up
-          options: {
-            data: {
-              username: newUser.username,
-              age: newUser.age,
-              reason: newUser.reason,
-              profile_picture: newUser.profilePicture,
-              role: newUser.role,
-              status: "approved",
-            },
-          },
+          password: registerForm.password,
+          options: { data: { username: newUser.username } },
         })
 
-        if (error) {
-          throw error
-        }
+        if (error) throw error
 
-        // If sign up is successful, create the user profile in the 'users' table
         if (data.user) {
           await supabase.from("users").insert({
-            id: data.user.id, // Use Supabase generated UUID
+            id: data.user.id,
             username: newUser.username,
             email: newUser.email,
             age: newUser.age,
-            reason: newUser.reason,
             status: "approved",
             join_date: newUser.joinDate,
             profile_picture: newUser.profilePicture,
-            role: newUser.role,
-            // Initialize other fields
+            role: "player",
             tokens: 0,
             boom_score: 0,
             total_value: 0,
@@ -1199,15 +1183,11 @@ export default function BoomkitGame() {
             is_owner: false,
             is_banned: false,
             is_muted: false,
-            banner_color: newUser.bannerColor,
-            last_seen: Date.now(),
-            packs_opened: 0,
           })
-          alert("Registration successful! Please check your email to verify your account, then you can log in.")
-          setCurrentView("login") // Redirect to login after successful registration
+          setCurrentUser(newUser)
+          setCurrentView("game")
         }
       } catch (err: any) {
-        console.error("Supabase registration error:", err.message)
         alert(`Registration failed: ${err.message}`)
       }
     }
