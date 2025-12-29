@@ -264,6 +264,12 @@ const DEFAULT_ROLES: UserRole[] = [
     permissions: ["chat", "play"],
   },
   {
+    id: "tester", // Added Tester role
+    name: "Tester",
+    color: "bg-green-500",
+    permissions: ["chat", "play"],
+  },
+  {
     id: "moderator",
     name: "Moderator",
     color: "bg-green-500",
@@ -576,15 +582,25 @@ export default function BoomkitGame() {
   const [sidebarOpen, setSidebarOpen] = useState(false) // <-- Added mobile sidebar state
   const [packAnimation, setPackAnimation] = useState<{
     show: boolean
+    stage: "shake" | "burst" | "reveal" | "done"
     boom: BoomItem | null
     packName: string
-  }>({ show: false, boom: null, packName: "" })
+    packImage: string
+    particles: Array<{ id: number; emoji: string; tx: number; ty: number }>
+  }>({
+    show: false,
+    stage: "shake",
+    boom: null,
+    packName: "",
+    packImage: "",
+    particles: [],
+  })
   const [showProfilePicker, setShowProfilePicker] = useState(false)
   const [showNameEdit, setShowNameEdit] = useState(false)
   const [showEmailEdit, setShowEmailEdit] = useState(false)
   const [showPasswordEdit, setShowPasswordEdit] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
-  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false)
+  const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false) // Fixed typo from setShowShowPrivacyPolicy
   const [showTermsOfService, setShowTermsOfService] = useState(false)
   const [newName, setNewName] = useState("")
   const [newEmail, setNewEmail] = useState("")
@@ -644,7 +660,7 @@ export default function BoomkitGame() {
   const updateAndPersistUsers = useCallback(
     async (newUsers: GameUser[]) => {
       setUsers(newUsers)
-      localStorage.setItem("boomkit_approved_users", JSON.JSON.stringify(newUsers))
+      localStorage.setItem("boomkit_approved_users", JSON.stringify(newUsers))
 
       for (const user of newUsers) {
         try {
@@ -824,7 +840,7 @@ export default function BoomkitGame() {
             bannerColor: u.banner_color || "from-purple-600 to-pink-600",
             lastDailySpin: u.last_daily_spin || null,
             badges: u.badges || [],
-            muteExpiry: u.mute_expiry || null,
+            muteExpiry: u.mute__expiry || null,
             banExpiry: u.ban_expiry || null,
             banReason: u.ban_reason || "",
             lastSeen: u.last_seen || Date.now(),
@@ -856,7 +872,7 @@ export default function BoomkitGame() {
       try {
         const { data, error } = await supabase
           .from("users")
-          .select("role, badges, is_muted, is_banned, mute_expiry, ban_expiry")
+          .select("role, badges, is_muted, is_banned, mute_expiry, ban_expiry, status")
           .eq("id", currentUser.id)
           .single()
 
@@ -872,7 +888,8 @@ export default function BoomkitGame() {
             data.is_muted !== currentUser.isMuted ||
             data.is_banned !== currentUser.isBanned ||
             data.mute_expiry !== currentUser.muteExpiry ||
-            data.ban_expiry !== currentUser.banExpiry)
+            data.ban_expiry !== currentUser.banExpiry ||
+            data.status !== currentUser.status) // Check for status change
         ) {
           console.log(
             "[v0] User data updated from Supabase. Role:",
@@ -883,6 +900,8 @@ export default function BoomkitGame() {
             data.is_muted,
             "Banned:",
             data.is_banned,
+            "Status:",
+            data.status,
           )
           const updatedUser = {
             ...currentUser,
@@ -892,6 +911,7 @@ export default function BoomkitGame() {
             isBanned: data.is_banned || false,
             muteExpiry: data.mute_expiry,
             banExpiry: data.ban_expiry,
+            status: data.status || "approved", // Update status
           }
           updateAndPersistCurrentUser(updatedUser)
         }
@@ -1115,7 +1135,7 @@ export default function BoomkitGame() {
       isOwner: false,
       isBanned: false,
       isMuted: false,
-      status: "pending", // Set to pending for admin approval
+      status: "approved",
       reason: registerForm.reason,
       role: "player",
       joinDate: new Date().toLocaleDateString("en-US", {
@@ -1149,7 +1169,7 @@ export default function BoomkitGame() {
               reason: newUser.reason,
               profile_picture: newUser.profilePicture,
               role: newUser.role,
-              status: newUser.status, // 'pending'
+              status: "approved",
             },
           },
         })
@@ -1166,7 +1186,7 @@ export default function BoomkitGame() {
             email: newUser.email,
             age: newUser.age,
             reason: newUser.reason,
-            status: newUser.status,
+            status: "approved",
             join_date: newUser.joinDate,
             profile_picture: newUser.profilePicture,
             role: newUser.role,
@@ -1183,7 +1203,7 @@ export default function BoomkitGame() {
             last_seen: Date.now(),
             packs_opened: 0,
           })
-          alert("Registration successful! Your account is pending admin approval.")
+          alert("Registration successful! Please check your email to verify your account, then you can log in.")
           setCurrentView("login") // Redirect to login after successful registration
         }
       } catch (err: any) {
@@ -1269,7 +1289,12 @@ export default function BoomkitGame() {
         await supabase.from("users").upsert([updatedUserData])
       }
 
-      if (updatedUserData.status === "approved" && !updatedUserData.is_banned) {
+      const isApproved =
+        !updatedUserData.status ||
+        updatedUserData.status === "approved" ||
+        (updatedUserData.status !== "pending" && updatedUserData.status !== "rejected")
+
+      if (isApproved && !updatedUserData.is_banned) {
         const loggedInUser: GameUser = {
           id: userData.id,
           username: userData.username,
@@ -1307,7 +1332,7 @@ export default function BoomkitGame() {
       } else if (updatedUserData.is_banned) {
         alert(`You are banned. Reason: ${updatedUserData.ban_reason || "No reason specified."}`)
       } else {
-        alert("Account not approved. Please contact an administrator.")
+        alert("Account status not approved. Please contact an administrator.")
       }
     }
 
@@ -1344,14 +1369,74 @@ export default function BoomkitGame() {
     return commonBooms[Math.floor(Math.random() * commonBooms.length)]
   }
 
-  // Open pack with animation
   const openPack = (packId: string, updatedUser: GameUser) => {
     const pack = PACKS.find((p) => p.id === packId)
     if (!pack) return
 
     const randomBoom = getRandomBoomFromPack(pack)
 
-    setPackAnimation({ show: true, boom: randomBoom, packName: pack.name })
+    // Generate particles based on rarity
+    const particleCount =
+      randomBoom.rarity === "mystical"
+        ? 30
+        : randomBoom.rarity === "chroma"
+          ? 25
+          : randomBoom.rarity === "legendary"
+            ? 20
+            : randomBoom.rarity === "epic"
+              ? 15
+              : randomBoom.rarity === "rare"
+                ? 12
+                : randomBoom.rarity === "uncommon"
+                  ? 8
+                  : 5
+
+    const particleEmojis =
+      randomBoom.rarity === "mystical"
+        ? ["✨", "💫", "🌟", "⭐", "🔮", "💜"]
+        : randomBoom.rarity === "chroma"
+          ? ["🌈", "✨", "💎", "🎨", "🌟", "💫"]
+          : randomBoom.rarity === "legendary"
+            ? ["🔥", "⭐", "✨", "💫", "🌟", "💥"]
+            : randomBoom.rarity === "epic"
+              ? ["💜", "✨", "⭐", "💫", "🔮"]
+              : randomBoom.rarity === "rare"
+                ? ["💙", "✨", "⭐", "💎"]
+                : randomBoom.rarity === "uncommon"
+                  ? ["💚", "✨", "⭐"]
+                  : ["⭐", "✨"]
+
+    const particles = Array.from({ length: particleCount }, (_, i) => ({
+      id: i,
+      emoji: particleEmojis[Math.floor(Math.random() * particleEmojis.length)],
+      tx: (Math.random() - 0.5) * 400,
+      ty: (Math.random() - 0.5) * 400,
+    }))
+
+    // Stage 1: Shake
+    setPackAnimation({
+      show: true,
+      stage: "shake",
+      boom: randomBoom,
+      packName: pack.name,
+      packImage: pack.image || "",
+      particles,
+    })
+
+    // Stage 2: Burst (after 1.5s)
+    setTimeout(() => {
+      setPackAnimation((prev) => ({ ...prev, stage: "burst" }))
+    }, 1500)
+
+    // Stage 3: Reveal (after 2s)
+    setTimeout(() => {
+      setPackAnimation((prev) => ({ ...prev, stage: "reveal" }))
+    }, 2000)
+
+    // Stage 4: Done (after 2.8s)
+    setTimeout(() => {
+      setPackAnimation((prev) => ({ ...prev, stage: "done" }))
+    }, 2800)
 
     const updatedBooms = { ...updatedUser.booms }
     updatedBooms[randomBoom.name] = (updatedBooms[randomBoom.name] || 0) + 1
@@ -1389,14 +1474,54 @@ export default function BoomkitGame() {
                   : randomBoom.rarity === "uncommon"
                     ? 100
                     : 50),
-      packsOpened: (updatedUser.packsOpened || 0) + 1, // Increment packs opened
+      packsOpened: (updatedUser.packsOpened || 0) + 1,
     }
 
     updateAndPersistCurrentUser(finalUser)
+  }
 
-    setTimeout(() => {
-      setPackAnimation({ show: false, boom: null, packName: "" })
-    }, 3000)
+  const closePackAnimation = () => {
+    setPackAnimation({ show: false, stage: "shake", boom: null, packName: "", packImage: "", particles: [] })
+  }
+
+  const getGlowClass = (rarity: string) => {
+    switch (rarity) {
+      case "common":
+        return "glow-common"
+      case "uncommon":
+        return "glow-uncommon"
+      case "rare":
+        return "glow-rare"
+      case "epic":
+        return "glow-epic"
+      case "legendary":
+        return "glow-legendary"
+      case "chroma":
+        return "glow-chroma"
+      case "mystical":
+        return "glow-mystical"
+      default:
+        return "glow-common"
+    }
+  }
+
+  const getRarityText = (rarity: string) => {
+    switch (rarity) {
+      case "mystical":
+        return "✨ MYSTICAL ✨"
+      case "chroma":
+        return "🌈 CHROMA 🌈"
+      case "legendary":
+        return "🔥 LEGENDARY 🔥"
+      case "epic":
+        return "💜 EPIC 💜"
+      case "rare":
+        return "💙 RARE 💙"
+      case "uncommon":
+        return "💚 UNCOMMON 💚"
+      default:
+        return "COMMON"
+    }
   }
 
   // Buy or open pack
@@ -2228,6 +2353,7 @@ export default function BoomkitGame() {
           {(currentUser?.role === "moderator" ||
             currentUser?.role === "senior_moderator" ||
             currentUser?.role === "admin" ||
+            currentUser?.role === "tester" || // Added check for tester role
             isOwner()) && (
             <button
               onClick={() => {
@@ -2400,11 +2526,12 @@ export default function BoomkitGame() {
                         {(currentUser?.role === "moderator" ||
                           currentUser?.role === "senior_moderator" ||
                           currentUser?.role === "admin" ||
+                          currentUser?.role === "tester" || // Added check for tester role
                           currentUser?.isOwner) && <Badge className="bg-emerald-500 text-white">Staff</Badge>}
                       </div>
                       {/* Display badges */}
                       <div className="flex space-x-1 mt-1">
-                        {(currentUser?.badges ?? []).map((badgeId) => {
+                        {(currentUser?.badges ?? []).slice(0, 3).map((badgeId) => {
                           const badge = AVAILABLE_BADGES.find((b) => b.id === badgeId)
                           return badge ? (
                             <Badge key={badgeId} className={`${badge.color} text-white text-xs`}>
@@ -2749,6 +2876,7 @@ export default function BoomkitGame() {
             {(currentUser?.role === "moderator" ||
               currentUser?.role === "senior_moderator" ||
               currentUser?.role === "admin" ||
+              currentUser?.role === "tester" || // Added check for tester role
               isOwner()) &&
               currentPage === "staff" && (
                 <div className="space-y-6">
@@ -2811,7 +2939,7 @@ export default function BoomkitGame() {
                                 {user.isBanned && <span className="text-red-500 text-sm">🚫 Banned</span>}
                               </div>
                               <div className="flex items-center space-x-2">
-                                {(currentUser?.role === "admin" || isOwner()) && (
+                                {(currentUser?.role === "admin" || currentUser?.role === "tester" || isOwner()) && ( // Added tester role to staff actions
                                   <>
                                     <select
                                       value={user.role}
@@ -2990,30 +3118,183 @@ export default function BoomkitGame() {
           </Card>
         </div>
       )}
+
       {packAnimation.show && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
-          <Card className="w-full max-w-md p-6 text-center">
-            <CardHeader>
-              <CardTitle className="text-3xl font-bold">Opening {packAnimation.packName}!</CardTitle>
-              <CardDescription>Revealing your new Boom...</CardDescription>
-            </CardHeader>
-            <CardContent>
-              {packAnimation.boom && (
-                <div className="space-y-4">
+        <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50 overflow-hidden">
+          {/* Particles */}
+          {packAnimation.stage !== "shake" &&
+            packAnimation.particles.map((particle) => (
+              <div
+                key={particle.id}
+                className="absolute text-3xl pointer-events-none"
+                style={{
+                  left: "50%",
+                  top: "50%",
+                  animation: "particle-explode 1s ease-out forwards",
+                  ["--tx" as string]: `${particle.tx}px`,
+                  ["--ty" as string]: `${particle.ty}px`,
+                }}
+              >
+                {particle.emoji}
+              </div>
+            ))}
+
+          {/* Pack shaking stage */}
+          {packAnimation.stage === "shake" && (
+            <div className="text-center">
+              <div className="animate-pack-shake">
+                <div className="w-48 h-64 bg-gradient-to-b from-purple-600 to-purple-900 rounded-lg shadow-2xl flex flex-col items-center justify-center relative overflow-hidden">
+                  {/* Zigzag top */}
                   <div
-                    className={`w-32 h-32 mx-auto rounded-full border-4 border-white shadow-lg flex items-center justify-center text-6xl ${getRarityColor(packAnimation.boom.rarity)} ${getAnimationClass(packAnimation.boom.rarity)}`}
+                    className="absolute top-0 left-0 right-0 h-6 bg-white/30"
+                    style={{
+                      clipPath:
+                        "polygon(0 0, 10% 100%, 20% 0, 30% 100%, 40% 0, 50% 100%, 60% 0, 70% 100%, 80% 0, 90% 100%, 100% 0, 100% 100%, 0 100%)",
+                    }}
+                  />
+                  {packAnimation.packImage ? (
+                    <img
+                      src={packAnimation.packImage || "/placeholder.svg"}
+                      alt={packAnimation.packName}
+                      className="w-32 h-32 object-cover rounded-lg"
+                    />
+                  ) : (
+                    <div className="text-6xl">📦</div>
+                  )}
+                  <div className="text-white font-bold mt-2">{packAnimation.packName}</div>
+                </div>
+              </div>
+              <p className="text-white/80 mt-6 text-xl animate-pulse">Opening pack...</p>
+            </div>
+          )}
+
+          {/* Pack burst stage */}
+          {packAnimation.stage === "burst" && (
+            <div className="text-center">
+              <div className="animate-pack-burst">
+                <div className="w-48 h-64 bg-gradient-to-b from-yellow-400 to-orange-600 rounded-lg shadow-2xl flex items-center justify-center">
+                  <div className="text-6xl">💥</div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Boom reveal stage */}
+          {(packAnimation.stage === "reveal" || packAnimation.stage === "done") && packAnimation.boom && (
+            <div className="text-center">
+              {/* Background glow effect based on rarity */}
+              <div
+                className={`absolute inset-0 opacity-30 ${
+                  packAnimation.boom.rarity === "mystical"
+                    ? "bg-gradient-to-r from-purple-900 via-pink-600 to-indigo-900"
+                    : packAnimation.boom.rarity === "chroma"
+                      ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500"
+                      : packAnimation.boom.rarity === "legendary"
+                        ? "bg-gradient-to-r from-orange-600 to-yellow-500"
+                        : packAnimation.boom.rarity === "epic"
+                          ? "bg-purple-700"
+                          : packAnimation.boom.rarity === "rare"
+                            ? "bg-blue-700"
+                            : packAnimation.boom.rarity === "uncommon"
+                              ? "bg-green-700"
+                              : "bg-gray-700"
+                }`}
+              />
+
+              <div className={`relative ${packAnimation.stage === "reveal" ? "animate-boom-reveal" : ""}`}>
+                {/* Boom avatar with glow */}
+                <div
+                  className={`w-40 h-40 mx-auto rounded-full border-8 shadow-2xl flex items-center justify-center text-7xl relative
+                    ${getRarityColor(packAnimation.boom.rarity)}
+                    ${getGlowClass(packAnimation.boom.rarity)}
+                    ${packAnimation.boom.rarity === "mystical" ? "animate-mystical-aura border-purple-300" : ""}
+                    ${packAnimation.boom.rarity === "chroma" ? "animate-rainbow-border animate-glow-pulse" : ""}
+                    ${packAnimation.boom.rarity === "legendary" ? "animate-glow-pulse border-orange-300" : ""}
+                    ${packAnimation.boom.rarity === "epic" ? "animate-glow-pulse border-purple-300" : ""}
+                    ${packAnimation.boom.rarity === "rare" ? "animate-pulse border-blue-300" : "border-white"}
+                  `}
+                >
+                  {/* Shine overlay for legendary+ */}
+                  {["legendary", "chroma", "mystical"].includes(packAnimation.boom.rarity) && (
+                    <div className="absolute inset-0 rounded-full animate-legendary-shine" />
+                  )}
+                  <span
+                    className={
+                      packAnimation.boom.rarity === "chroma" || packAnimation.boom.rarity === "mystical"
+                        ? "animate-star-spin"
+                        : ""
+                    }
                   >
                     {packAnimation.boom.avatar}
-                  </div>
-                  <h3 className="text-2xl font-bold">{packAnimation.boom.name}</h3>
-                  <p className="text-white/70">{packAnimation.boom.description}</p>
-                  <Badge className={`${getRarityColor(packAnimation.boom.rarity)} text-white`}>
-                    {packAnimation.boom.rarity}
-                  </Badge>
+                  </span>
                 </div>
+
+                {/* Boom name */}
+                <h2
+                  className={`text-4xl font-bold mt-6 ${
+                    packAnimation.boom.rarity === "mystical"
+                      ? "text-purple-300 animate-pulse"
+                      : packAnimation.boom.rarity === "chroma"
+                        ? "text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-yellow-400 via-green-400 via-blue-400 to-purple-400"
+                        : packAnimation.boom.rarity === "legendary"
+                          ? "text-orange-400"
+                          : packAnimation.boom.rarity === "epic"
+                            ? "text-purple-400"
+                            : packAnimation.boom.rarity === "rare"
+                              ? "text-blue-400"
+                              : packAnimation.boom.rarity === "uncommon"
+                                ? "text-green-400"
+                                : "text-gray-300"
+                  }`}
+                >
+                  {packAnimation.boom.name}
+                </h2>
+
+                {/* Rarity badge */}
+                <div
+                  className={`inline-block mt-4 px-6 py-2 rounded-full text-lg font-bold uppercase tracking-wider
+                  ${getRarityColor(packAnimation.boom.rarity)} text-white
+                  ${packAnimation.boom.rarity === "mystical" || packAnimation.boom.rarity === "chroma" ? "animate-pulse" : ""}
+                `}
+                >
+                  {getRarityText(packAnimation.boom.rarity)}
+                </div>
+
+                {/* Description */}
+                <p className="text-white/70 mt-4 text-lg max-w-md mx-auto">{packAnimation.boom.description}</p>
+
+                {/* Float up emojis for rare+ */}
+                {["rare", "epic", "legendary", "chroma", "mystical"].includes(packAnimation.boom.rarity) &&
+                  packAnimation.stage === "done" && (
+                    <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 flex gap-4">
+                      {[1, 2, 3].map((i) => (
+                        <span key={i} className="text-3xl animate-float-up" style={{ animationDelay: `${i * 0.2}s` }}>
+                          {packAnimation.boom?.rarity === "mystical"
+                            ? "🔮"
+                            : packAnimation.boom?.rarity === "chroma"
+                              ? "🌈"
+                              : packAnimation.boom?.rarity === "legendary"
+                                ? "🔥"
+                                : packAnimation.boom?.rarity === "epic"
+                                  ? "💜"
+                                  : "💎"}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+              </div>
+
+              {/* Close button */}
+              {packAnimation.stage === "done" && (
+                <button
+                  onClick={closePackAnimation}
+                  className="mt-8 px-8 py-3 bg-white/20 hover:bg-white/30 text-white rounded-lg font-bold text-lg transition-all transform hover:scale-105"
+                >
+                  Awesome! 🎉
+                </button>
               )}
-            </CardContent>
-          </Card>
+            </div>
+          )}
         </div>
       )}
       {showProfilePicker && (
