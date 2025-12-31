@@ -24,6 +24,23 @@ export async function POST(request: Request) {
     const { username, message, role } = await request.json()
 
     const supabase = getSupabaseServerClient()
+    
+    // Check if user is muted before allowing message
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("is_muted")
+      .eq("username", username)
+      .single()
+
+    if (userError) {
+      console.error("[v0] Error checking user mute status:", userError)
+      return NextResponse.json({ error: "Failed to verify user status" }, { status: 500 })
+    }
+
+    if (userData?.is_muted) {
+      return NextResponse.json({ error: "You are muted" }, { status: 403 })
+    }
+
     const { data, error } = await supabase.from("chat_messages").insert([{ username, message, role }]).select()
 
     if (error) {

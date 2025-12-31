@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { useState, useEffect, useCallback, useMemo } from "react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -618,6 +619,7 @@ export default function BoomkitGame() {
   const [selectedUserForRole, setSelectedUserForRole] = useState("")
 
   const supabase = useMemo(() => (typeof window !== "undefined" ? getSupabaseBrowserClient() : null), [])
+  const router = useRouter()
 
   // Badge management states
   const [showBadgeManager, setShowBadgeManager] = useState(false)
@@ -789,6 +791,11 @@ export default function BoomkitGame() {
       const storedCurrentUser = localStorage.getItem("boomkit_current_user")
       if (storedCurrentUser) {
         const parsedUser = JSON.parse(storedCurrentUser)
+        // Check if user is banned - redirect immediately
+        if (parsedUser.isBanned) {
+          router.push("/banned")
+          return
+        }
         setCurrentUser(parsedUser)
         setCurrentView("game")
       }
@@ -913,6 +920,11 @@ export default function BoomkitGame() {
             muteExpiry: data.mute_expiry,
             banExpiry: data.ban_expiry,
             status: data.status || "approved", // Update status
+          }
+          // If user got banned, redirect immediately
+          if (data.is_banned) {
+            router.push("/banned")
+            return
           }
           updateAndPersistCurrentUser(updatedUser)
         }
@@ -1197,6 +1209,12 @@ export default function BoomkitGame() {
 
     if (!foundUser) {
       alert("User not found")
+      return
+    }
+
+    // Check if user is banned before allowing login
+    if (foundUser.isBanned) {
+      router.push("/banned")
       return
     }
 
