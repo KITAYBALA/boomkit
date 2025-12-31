@@ -44,6 +44,12 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
   const [text, setText] = useState("")
   const bottomRef = useRef<HTMLDivElement>(null)
   const [userRoles, setUserRoles] = useState<Record<string, string>>({})
+  const [isMuted, setIsMuted] = useState(false)
+
+  // Update mute status from currentUser prop (reuse existing user state)
+  useEffect(() => {
+    setIsMuted(currentUser?.isMuted || false)
+  }, [currentUser?.isMuted])
 
   // Scroll to bottom when messages change
   useEffect(() => {
@@ -146,8 +152,9 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
 
   const send = async () => {
     if (!text.trim() || !currentUser) return
-    if (currentUser.isMuted) {
-      alert("You are muted.")
+    
+    // Client-side check (also enforced server-side)
+    if (isMuted) {
       return
     }
 
@@ -155,35 +162,38 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
 
     console.log("[v0] Sending message:", text.trim(), "with role:", userRole)
 
-    if (supabase) {
-      const { data, error } = await supabase
-        .from("chat_messages")
-        .insert({
+    // Use API route for server-side mute enforcement
+    try {
+      const response = await fetch("/api/chat-messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
           username: currentUser.username,
           message: text.trim(),
           role: userRole,
-        })
-        .select()
+        }),
+      })
 
-      if (error) {
-        console.error("[v0] Error sending message:", error)
-        alert("Failed to send message: " + error.message)
-      } else {
-        console.log("[v0] Message sent successfully:", data)
+      if (!response.ok) {
+        const errorData = await response.json()
+        if (response.status === 403 && errorData.error === "MUTED") {
+          // User got muted - update local state and block message
+          setIsMuted(true)
+          console.log("[v0] Message blocked: User is muted")
+          return
+        }
+        console.error("[v0] Error sending message:", errorData.error)
+        alert("Failed to send message: " + (errorData.error || "Unknown error"))
+        return
       }
-    } else {
-      const entry: LocalChatRow = {
-        id: Date.now().toString(),
-        username: currentUser.username,
-        message: text.trim(),
-        role: userRole,
-        timestamp: new Date().toISOString(),
-      }
-      const next = [...messages, entry]
-      setMessages(next)
-      localStorage.setItem(LS_KEY, JSON.stringify(next))
+
+      const data = await response.json()
+      console.log("[v0] Message sent successfully:", data)
+      setText("")
+    } catch (error) {
+      console.error("[v0] Network error sending message:", error)
+      alert("Failed to send message. Please try again.")
     }
-    setText("")
   }
 
   return (
@@ -214,12 +224,12 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
           <Input
             value={text}
             onChange={(e) => setText(e.target.value)}
-            placeholder={currentUser?.isMuted ? "You are muted" : "Type a message..."}
-            disabled={currentUser?.isMuted}
+            placeholder={isMuted ? "You are muted" : "Type a message..."}
+            disabled={isMuted}
             className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
-            onKeyDown={(e) => e.key === "Enter" && send()}
+            onKeyDown={(e) => e.key === "Enter" && !isMuted && send()}
           />
-          <Button onClick={send} disabled={currentUser?.isMuted} className="bg-blue-600 hover:bg-blue-700">
+          <Button onClick={send} disabled={isMuted} className="bg-blue-600 hover:bg-blue-700">
             <SendIcon className="h-4 w-4" />
           </Button>
         </div>

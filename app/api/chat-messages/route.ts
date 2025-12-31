@@ -37,8 +37,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Failed to verify user status" }, { status: 500 })
     }
 
+    // MUTE ENFORCEMENT: Block muted users from sending messages
     if (userData?.is_muted) {
-      return NextResponse.json({ error: "You are muted" }, { status: 403 })
+      return NextResponse.json({ error: "MUTED" }, { status: 403 })
     }
 
     const { data, error } = await supabase.from("chat_messages").insert([{ username, message, role }]).select()
