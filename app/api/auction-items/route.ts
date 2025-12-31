@@ -3,7 +3,7 @@ import { supabaseServerClient } from '@/lib/supabase-server-client';
 
 export async function GET() {
   try {
-    const { data, error } = await supabaseServerClient
+    const { data, error } = await supabaseServerClient()
       .from('auction_items')
       .select('*');
 
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
   try {
     const { boom_name, seller, current_bid, time_left, bidders } = await request.json();
 
-    const { data, error } = await supabaseServerClient
+    const { data, error } = await supabaseServerClient()
       .from('auction_items')
       .insert([{ boom_name, seller, current_bid, time_left, bidders }])
       .select()

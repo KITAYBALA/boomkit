@@ -3,7 +3,7 @@ import { supabaseServerClient } from '@/lib/supabase-server-client';
 
 export async function GET() {
   try {
-    const { data, error } = await supabaseServerClient
+    const { data, error } = await supabaseServerClient()
       .from('custom_roles')
       .select('*');
 
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
   try {
     const { name, color, assigned_by, assigned_date } = await request.json();
 
-    const { data, error } = await supabaseServerClient
+    const { data, error } = await supabaseServerClient()
       .from('custom_roles')
       .insert([{ name, color, assigned_by, assigned_date }])
       .select()

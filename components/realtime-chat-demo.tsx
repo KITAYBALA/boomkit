@@ -17,6 +17,8 @@ export default function RealtimeChatDemo() {
   const [text, setText] = useState('')
 
   useEffect(() => {
+    if (!supabase) return
+
     // initial load
     supabase
       .from('chat_messages')
@@ -41,6 +43,7 @@ export default function RealtimeChatDemo() {
   }, [supabase])
 
   const send = async () => {
+    if (!supabase) return
     const msg = text.trim()
     if (!msg) return
     setText('')

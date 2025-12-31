@@ -5,15 +5,15 @@ interface Params {
   id: string;
 }
 
-export async function GET(request: Request, { params }: { params: Params }) {
-  const { id } = params;
+export async function GET(request: Request, { params }: { params: Promise<Params> }) {
+  const { id } = await params;
 
   if (!id) {
     return NextResponse.json({ error: "User ID is required" }, { status: 400 });
   }
 
   try {
-    const { data, error } = await supabaseServerClient
+    const { data, error } = await supabaseServerClient()
       .from('users')
       .select('*')
       .eq('id', id)

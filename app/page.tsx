@@ -663,6 +663,7 @@ export default function BoomkitGame() {
       localStorage.setItem("boomkit_approved_users", JSON.stringify(newUsers))
 
       for (const user of newUsers) {
+        if (!supabase) continue
         try {
           console.log("[v0] Syncing user to Supabase:", user.username, "role:", user.role)
           const { error } = await supabase.from("users").upsert(
@@ -1004,7 +1005,9 @@ export default function BoomkitGame() {
     setCurrentView("owner-access")
     // Clear Supabase session if necessary
     const supabase = getSupabaseBrowserClient()
-    supabase.auth.signOut()
+    if (supabase) {
+      supabase.auth.signOut()
+    }
   }
 
   // Check if user can spin today
@@ -1156,6 +1159,7 @@ export default function BoomkitGame() {
     }
 
     const saveUser = async () => {
+      if (!supabase) return
       try {
         await supabase.from("users").insert({
           id: newUser.id,
@@ -2723,6 +2727,7 @@ export default function BoomkitGame() {
                 onTradeComplete={() => {
                   // Refresh user data after trade
                   const fetchUser = async () => {
+                    if (!supabase) return
                     const { data } = await supabase.from("users").select("*").eq("id", currentUser!.id).single()
                     if (data) {
                       setCurrentUser(data)

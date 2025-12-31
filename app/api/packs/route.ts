@@ -3,7 +3,7 @@ import { supabaseServerClient } from '@/lib/supabase-server-client';
 
 export async function GET() {
   try {
-    const { data, error } = await supabaseServerClient
+    const { data, error } = await supabaseServerClient()
       .from('packs')
       .select('*');
 
