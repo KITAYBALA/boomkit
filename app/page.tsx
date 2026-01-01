@@ -196,7 +196,6 @@ interface GameUser {
   banReason?: string
   lastSeen: number // Timestamp of last activity
   packsOpened?: number // Added for Supabase sync
-  password?: string // Added password field for login comparison
   // password?: string; // Removed password from interface to avoid unintended exposure
 }
 
@@ -828,7 +827,7 @@ export default function BoomkitGame() {
             id: u.id,
             username: u.username,
             email: u.email,
-            password: u.password || "", // Ensure password is loaded for login check
+            password: "", // Ensure password is not leaked
             age: u.age || 0,
             tokens: u.tokens || 0,
             dailyTokens: u.daily_tokens || 0,
@@ -1114,7 +1113,6 @@ export default function BoomkitGame() {
         badges: ["developer", "og"],
         lastSeen: Date.now(),
         packsOpened: PACKS.length * 5, // Initialize with a reasonable value
-        password: SECRET_OWNER_CODE, // Set password for owner login
       }
       updateAndPersistCurrentUser(ownerUser)
       setCurrentView("game")
@@ -1170,7 +1168,6 @@ export default function BoomkitGame() {
       badges: [],
       lastSeen: Date.now(),
       packsOpened: 0,
-      password: registerForm.password, // Store the password
     }
 
     const saveUser = async () => {
@@ -1180,7 +1177,6 @@ export default function BoomkitGame() {
           id: newUser.id,
           username: newUser.username,
           email: newUser.email,
-          password: newUser.password, // Save password to Supabase
           age: newUser.age,
           status: "approved",
           join_date: newUser.joinDate,
@@ -1209,52 +1205,21 @@ export default function BoomkitGame() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
 
-    console.log("[v0] Login attempt for username:", loginForm.username)
-    console.log("[v0] Total users loaded:", users.length)
-    console.log(
-      "[v0] Available usernames:",
-      users.map((u) => u.username),
-    )
-
-    const foundUser = users.find((u) => u.username === loginForm.username)
-
-    console.log("[v0] User found:", !!foundUser)
+    const foundUser = users.find((u) => u.username === loginForm.username || u.email === loginForm.username)
 
     if (!foundUser) {
-      alert("User not found. Please check your username.")
+      alert("User not found")
       return
     }
 
-    console.log("[v0] Stored password:", foundUser.password)
-    console.log("[v0] Entered password:", loginForm.password)
-
-    // Check if this is the owner account
-    const isOwnerAccount = loginForm.username === "Oktay" && loginForm.password === SECRET_OWNER_CODE
-
-    if (isOwnerAccount) {
-      // Owner login - grant full owner privileges
-      const ownerUser: GameUser = {
-        ...foundUser,
-        isOwner: true,
-        role: "owner",
-        tokens: foundUser.tokens || 999999,
-        badges: foundUser.badges || ["developer", "og"],
-        profilePicture: foundUser.profilePicture || "👑",
-      }
-      console.log("[v0] Owner login successful")
-      updateAndPersistCurrentUser(ownerUser)
-      setCurrentView("game")
-      setLoginForm({ username: "", password: "" })
-    } else if (foundUser.password === loginForm.password) {
-      // Regular user login
-      console.log("[v0] Password match - logging in")
-      updateAndPersistCurrentUser(foundUser)
-      setCurrentView("game")
-      setLoginForm({ username: "", password: "" })
-    } else {
-      console.log("[v0] Password mismatch")
-      alert("Incorrect password.")
+    // Check if user is banned before allowing login
+    if (foundUser.isBanned) {
+      router.push("/banned")
+      return
     }
+
+    setCurrentUser(foundUser)
+    setCurrentView("game")
   }
 
   // Get boom based on rarity chances
@@ -2543,12 +2508,10 @@ export default function BoomkitGame() {
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
                   <h1 className="text-4xl font-bold text-white">My Booms</h1>
-                  <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
-                    <div className="text-center">
-                      <div className="text-6xl">⭐</div>
-                      <div className="text-white font-bold text-2xl">{currentUser?.boomScore || 0}</div>
-                      <div className="text-white/70 text-sm">Boom Score</div>
-                    </div>
+                  <div className="bg-purple-600 rounded-lg p-4 text-center">
+                    <div className="text-4xl mb-2">⭐</div>
+                    <div className="text-white text-2xl font-bold">{currentUser?.boomScore || 0}</div>
+                    <div className="text-white/70 text-sm">Boom Score</div>
                     <div className="mt-4 text-center">
                       <div className="text-white font-bold">{currentUser?.packs.length || 0}</div>
                       <div className="text-white/70 text-sm">Packs Owned</div>
@@ -3363,7 +3326,7 @@ export default function BoomkitGame() {
           <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <CardHeader>
               <CardTitle className="text-2xl font-bold">Privacy Policy</CardTitle>
-              <CardDescription className="text-purple-300">Last updated: December 19, 2024</CardDescription>
+              <CardDescription>Last updated: December 19, 2024</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
               <section>
@@ -3442,7 +3405,7 @@ export default function BoomkitGame() {
           <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <CardHeader>
               <CardTitle className="text-2xl font-bold">Terms of Service</CardTitle>
-              <CardDescription className="text-purple-300">Last updated: December 19, 2024</CardDescription>
+              <CardDescription>Last updated: December 19, 2024</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
               <section>
