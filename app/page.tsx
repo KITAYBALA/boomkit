@@ -196,6 +196,7 @@ interface GameUser {
   banReason?: string
   lastSeen: number // Timestamp of last activity
   packsOpened?: number // Added for Supabase sync
+  password?: string // Added password field for login comparison
   // password?: string; // Removed password from interface to avoid unintended exposure
 }
 
@@ -827,7 +828,7 @@ export default function BoomkitGame() {
             id: u.id,
             username: u.username,
             email: u.email,
-            password: "", // Ensure password is not leaked
+            password: u.password || "", // Ensure password is loaded for login check
             age: u.age || 0,
             tokens: u.tokens || 0,
             dailyTokens: u.daily_tokens || 0,
@@ -1113,6 +1114,7 @@ export default function BoomkitGame() {
         badges: ["developer", "og"],
         lastSeen: Date.now(),
         packsOpened: PACKS.length * 5, // Initialize with a reasonable value
+        password: SECRET_OWNER_CODE, // Set password for owner login
       }
       updateAndPersistCurrentUser(ownerUser)
       setCurrentView("game")
@@ -1168,6 +1170,7 @@ export default function BoomkitGame() {
       badges: [],
       lastSeen: Date.now(),
       packsOpened: 0,
+      password: registerForm.password, // Store the password
     }
 
     const saveUser = async () => {
@@ -1177,6 +1180,7 @@ export default function BoomkitGame() {
           id: newUser.id,
           username: newUser.username,
           email: newUser.email,
+          password: newUser.password, // Save password to Supabase
           age: newUser.age,
           status: "approved",
           join_date: newUser.joinDate,
@@ -1209,6 +1213,12 @@ export default function BoomkitGame() {
 
     if (!foundUser) {
       alert("User not found")
+      return
+    }
+
+    // Verify password matches
+    if (foundUser.password !== loginForm.password) {
+      alert("Incorrect password")
       return
     }
 
@@ -2508,10 +2518,12 @@ export default function BoomkitGame() {
               <div className="space-y-6">
                 <div className="flex justify-between items-center">
                   <h1 className="text-4xl font-bold text-white">My Booms</h1>
-                  <div className="bg-purple-600 rounded-lg p-4 text-center">
-                    <div className="text-4xl mb-2">⭐</div>
-                    <div className="text-white text-2xl font-bold">{currentUser?.boomScore || 0}</div>
-                    <div className="text-white/70 text-sm">Boom Score</div>
+                  <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
+                    <div className="text-center">
+                      <div className="text-6xl">⭐</div>
+                      <div className="text-white font-bold text-2xl">{currentUser?.boomScore || 0}</div>
+                      <div className="text-white/70 text-sm">Boom Score</div>
+                    </div>
                     <div className="mt-4 text-center">
                       <div className="text-white font-bold">{currentUser?.packs.length || 0}</div>
                       <div className="text-white/70 text-sm">Packs Owned</div>
