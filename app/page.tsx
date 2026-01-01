@@ -196,7 +196,25 @@ interface GameUser {
   banReason?: string
   lastSeen: number // Timestamp of last activity
   packsOpened?: number // Added for Supabase sync
-  // password?: string; // Removed password from interface to avoid unintended exposure
+  password?: string // Local-only password for simple auth
+}
+
+const applyOwnerDefaults = (user: GameUser): GameUser => {
+  const isOwnerUser = user.isOwner || user.role === "owner" || user.id === "owner"
+  if (!isOwnerUser && user.username !== "Oktay") return user
+
+  const existingBadges = user.badges || []
+  const ownerBadges = Array.from(new Set([...existingBadges, "staff", "developer", "og"]))
+
+  return {
+    ...user,
+    isOwner: true,
+    role: "owner",
+    nameColor: user.nameColor || "rainbow",
+    bannerColor: user.bannerColor || "rainbow",
+    profilePicture: user.profilePicture || "👑",
+    badges: ownerBadges,
+  }
 }
 
 interface UserRole {
@@ -661,10 +679,12 @@ export default function BoomkitGame() {
 
   const updateAndPersistUsers = useCallback(
     async (newUsers: GameUser[]) => {
-      setUsers(newUsers)
-      localStorage.setItem("boomkit_approved_users", JSON.stringify(newUsers))
+      const normalizedUsers = newUsers.map(applyOwnerDefaults)
 
-      for (const user of newUsers) {
+      setUsers(normalizedUsers)
+      localStorage.setItem("boomkit_approved_users", JSON.stringify(normalizedUsers))
+
+      for (const user of normalizedUsers) {
         if (!supabase) continue
         try {
           console.log("[v0] Syncing user to Supabase:", user.username, "role:", user.role)
@@ -727,8 +747,13 @@ export default function BoomkitGame() {
   const updateAndPersistCurrentUser = useCallback(
     async (updatedUser: GameUser | null) => {
       if (updatedUser) {
+        const normalizedUser = applyOwnerDefaults(updatedUser)
         // Add or update the lastSeen timestamp on every action
-        const userWithActivity = { ...updatedUser, lastSeen: Date.now(), packsOpened: updatedUser.packs?.length || 0 }
+        const userWithActivity = {
+          ...normalizedUser,
+          lastSeen: Date.now(),
+          packsOpened: normalizedUser.packs?.length || 0,
+        }
         setCurrentUser(userWithActivity)
         localStorage.setItem("boomkit_current_user", JSON.stringify(userWithActivity))
 
@@ -786,11 +811,11 @@ export default function BoomkitGame() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedUsers = localStorage.getItem("boomkit_approved_users")
-      if (storedUsers) setUsers(JSON.parse(storedUsers))
+      if (storedUsers) setUsers(JSON.parse(storedUsers).map(applyOwnerDefaults))
 
       const storedCurrentUser = localStorage.getItem("boomkit_current_user")
       if (storedCurrentUser) {
-        const parsedUser = JSON.parse(storedCurrentUser)
+        const parsedUser = applyOwnerDefaults(JSON.parse(storedCurrentUser))
         // Check if user is banned - redirect immediately
         if (parsedUser.isBanned) {
           router.push("/banned")
@@ -823,37 +848,39 @@ export default function BoomkitGame() {
         }
 
         if (data && data.length > 0) {
-          const mappedUsers: GameUser[] = data.map((u: any) => ({
-            id: u.id,
-            username: u.username,
-            email: u.email,
-            password: "", // Ensure password is not leaked
-            age: u.age || 0,
-            tokens: u.tokens || 0,
-            dailyTokens: u.daily_tokens || 0,
-            packs: u.packs || [],
-            booms: u.booms || {}, // Initialize booms as an object
-            isOwner: u.is_owner || false,
-            isBanned: u.is_banned || false,
-            isMuted: u.is_muted || false,
-            status: u.status || "approved",
-            reason: u.reason || "",
-            role: u.role || "player",
-            joinDate: u.join_date || new Date().toISOString(),
-            boomScore: u.boom_score || 0,
-            totalValue: u.total_value || 0,
-            profilePicture: u.profile_picture || "",
-            isPlusUser: u.is_plus_user || false,
-            nameColor: u.name_color || "",
-            bannerColor: u.banner_color || "from-purple-600 to-pink-600",
-            lastDailySpin: u.last_daily_spin || null,
-            badges: u.badges || [],
-            muteExpiry: u.mute__expiry || null,
-            banExpiry: u.ban_expiry || null,
-            banReason: u.ban_reason || "",
-            lastSeen: u.last_seen || Date.now(),
-            packsOpened: u.packs_opened || 0,
-          }))
+          const mappedUsers: GameUser[] = data.map((u: any) =>
+            applyOwnerDefaults({
+              id: u.id,
+              username: u.username,
+              email: u.email,
+              password: "", // Ensure password is not leaked
+              age: u.age || 0,
+              tokens: u.tokens || 0,
+              dailyTokens: u.daily_tokens || 0,
+              packs: u.packs || [],
+              booms: u.booms || {}, // Initialize booms as an object
+              isOwner: u.is_owner || false,
+              isBanned: u.is_banned || false,
+              isMuted: u.is_muted || false,
+              status: u.status || "approved",
+              reason: u.reason || "",
+              role: u.role || "player",
+              joinDate: u.join_date || new Date().toISOString(),
+              boomScore: u.boom_score || 0,
+              totalValue: u.total_value || 0,
+              profilePicture: u.profile_picture || "",
+              isPlusUser: u.is_plus_user || false,
+              nameColor: u.name_color || "",
+              bannerColor: u.banner_color || "from-purple-600 to-pink-600",
+              lastDailySpin: u.last_daily_spin || null,
+              badges: u.badges || [],
+              muteExpiry: u.mute__expiry || null,
+              banExpiry: u.ban_expiry || null,
+              banReason: u.ban_reason || "",
+              lastSeen: u.last_seen || Date.now(),
+              packsOpened: u.packs_opened || 0,
+            }),
+          )
 
           setUsers(mappedUsers)
           localStorage.setItem("boomkit_approved_users", JSON.stringify(mappedUsers))
@@ -990,7 +1017,7 @@ export default function BoomkitGame() {
         if (currentUser) {
           const updatedSelf = newUsers.find((u: GameUser) => u.id === currentUser.id)
           if (updatedSelf) {
-            setCurrentUser(updatedSelf)
+            setCurrentUser(applyOwnerDefaults(updatedSelf))
           }
         }
       }
@@ -1142,6 +1169,7 @@ export default function BoomkitGame() {
       username: registerForm.username,
       email: registerForm.email,
       age: Number.parseInt(registerForm.age),
+      password: registerForm.password,
       tokens: 0,
       dailyTokens: 0,
       packs: [],
@@ -1197,7 +1225,9 @@ export default function BoomkitGame() {
     }
 
     saveUser()
-    setCurrentUser(newUser)
+    const normalizedNewUser = applyOwnerDefaults(newUser)
+    updateAndPersistUsers([...users, normalizedNewUser])
+    updateAndPersistCurrentUser(normalizedNewUser)
     setCurrentView("game")
   }
 
@@ -1212,13 +1242,20 @@ export default function BoomkitGame() {
       return
     }
 
+    const normalizedUser = applyOwnerDefaults(foundUser)
+    const hasPassword = Boolean(normalizedUser.password)
+    if (hasPassword && normalizedUser.password !== loginForm.password) {
+      alert("Incorrect password")
+      return
+    }
+
     // Check if user is banned before allowing login
-    if (foundUser.isBanned) {
+    if (normalizedUser.isBanned) {
       router.push("/banned")
       return
     }
 
-    setCurrentUser(foundUser)
+    updateAndPersistCurrentUser(normalizedUser)
     setCurrentView("game")
   }
 
@@ -2594,7 +2631,7 @@ export default function BoomkitGame() {
                       onSuccess={(tokens) => {
                         if (currentUser) {
                           const updatedUser = { ...currentUser, tokens: currentUser.tokens + tokens }
-                          setCurrentUser(updatedUser)
+                          updateAndPersistCurrentUser(updatedUser)
                         }
                       }}
                     />
@@ -2748,7 +2785,7 @@ export default function BoomkitGame() {
                     if (!supabase) return
                     const { data } = await supabase.from("users").select("*").eq("id", currentUser!.id).single()
                     if (data) {
-                      setCurrentUser(data)
+                      updateAndPersistCurrentUser(applyOwnerDefaults({ ...(data as GameUser), password: currentUser!.password }))
                     }
                   }
                   fetchUser()
