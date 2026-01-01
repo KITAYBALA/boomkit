@@ -3351,7 +3351,7 @@ export default function BoomkitGame() {
           <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <CardHeader>
               <CardTitle className="text-2xl font-bold">Privacy Policy</CardTitle>
-              <CardDescription>Last updated: December 19, 2024</CardDescription>
+              <CardDescription className="text-purple-300">Last updated: December 19, 2024</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
               <section>
@@ -3430,7 +3430,7 @@ export default function BoomkitGame() {
           <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <CardHeader>
               <CardTitle className="text-2xl font-bold">Terms of Service</CardTitle>
-              <CardDescription>Last updated: December 19, 2024</CardDescription>
+              <CardDescription className="text-purple-300">Last updated: December 19, 2024</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
               <section>
