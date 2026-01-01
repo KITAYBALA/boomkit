@@ -1209,12 +1209,24 @@ export default function BoomkitGame() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
 
+    console.log("[v0] Login attempt with username/email:", loginForm.username)
+    console.log("[v0] Total users loaded:", users.length)
+    console.log(
+      "[v0] Available usernames:",
+      users.map((u) => u.username),
+    )
+
     const foundUser = users.find((u) => u.username === loginForm.username || u.email === loginForm.username)
+
+    console.log("[v0] Found user:", foundUser ? foundUser.username : "NOT FOUND")
 
     if (!foundUser) {
       alert("User not found")
       return
     }
+
+    console.log("[v0] Checking password - Entered:", loginForm.password)
+    console.log("[v0] Checking password - Expected:", foundUser.password)
 
     // Verify password matches
     if (foundUser.password !== loginForm.password) {
@@ -1228,6 +1240,7 @@ export default function BoomkitGame() {
       return
     }
 
+    console.log("[v0] Login successful for:", foundUser.username)
     setCurrentUser(foundUser)
     setCurrentView("game")
   }
