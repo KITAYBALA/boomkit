@@ -1209,40 +1209,52 @@ export default function BoomkitGame() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
 
-    console.log("[v0] Login attempt with username/email:", loginForm.username)
+    console.log("[v0] Login attempt for username:", loginForm.username)
     console.log("[v0] Total users loaded:", users.length)
     console.log(
       "[v0] Available usernames:",
       users.map((u) => u.username),
     )
 
-    const foundUser = users.find((u) => u.username === loginForm.username || u.email === loginForm.username)
+    const foundUser = users.find((u) => u.username === loginForm.username)
 
-    console.log("[v0] Found user:", foundUser ? foundUser.username : "NOT FOUND")
+    console.log("[v0] User found:", !!foundUser)
 
     if (!foundUser) {
-      alert("User not found")
+      alert("User not found. Please check your username.")
       return
     }
 
-    console.log("[v0] Checking password - Entered:", loginForm.password)
-    console.log("[v0] Checking password - Expected:", foundUser.password)
+    console.log("[v0] Stored password:", foundUser.password)
+    console.log("[v0] Entered password:", loginForm.password)
 
-    // Verify password matches
-    if (foundUser.password !== loginForm.password) {
-      alert("Incorrect password")
-      return
+    // Check if this is the owner account
+    const isOwnerAccount = loginForm.username === "Oktay" && loginForm.password === SECRET_OWNER_CODE
+
+    if (isOwnerAccount) {
+      // Owner login - grant full owner privileges
+      const ownerUser: GameUser = {
+        ...foundUser,
+        isOwner: true,
+        role: "owner",
+        tokens: foundUser.tokens || 999999,
+        badges: foundUser.badges || ["developer", "og"],
+        profilePicture: foundUser.profilePicture || "👑",
+      }
+      console.log("[v0] Owner login successful")
+      updateAndPersistCurrentUser(ownerUser)
+      setCurrentView("game")
+      setLoginForm({ username: "", password: "" })
+    } else if (foundUser.password === loginForm.password) {
+      // Regular user login
+      console.log("[v0] Password match - logging in")
+      updateAndPersistCurrentUser(foundUser)
+      setCurrentView("game")
+      setLoginForm({ username: "", password: "" })
+    } else {
+      console.log("[v0] Password mismatch")
+      alert("Incorrect password.")
     }
-
-    // Check if user is banned before allowing login
-    if (foundUser.isBanned) {
-      router.push("/banned")
-      return
-    }
-
-    console.log("[v0] Login successful for:", foundUser.username)
-    setCurrentUser(foundUser)
-    setCurrentView("game")
   }
 
   // Get boom based on rarity chances
