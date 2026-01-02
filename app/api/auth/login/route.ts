@@ -9,7 +9,11 @@ export const dynamic = 'force-dynamic'
  * SECURITY: This route validates passwords server-side to prevent client-side bypass
  */
 export async function POST(request: NextRequest) {
+  const DEBUG_AUTH = process.env.DEBUG_AUTH === 'true' || process.env.NODE_ENV !== 'production'
+  
   try {
+    if (DEBUG_AUTH) console.log('[AUTH DEBUG] LOGIN start')
+    
     const { username, password } = await request.json()
 
     if (!username || !password) {
@@ -31,6 +35,7 @@ export async function POST(request: NextRequest) {
 
     if (userByUsername) {
       userData = userByUsername
+      if (DEBUG_AUTH) console.log('[AUTH DEBUG] User found by username:', username)
     } else {
       // Try email if username didn't match
       const { data: userByEmail, error: errorByEmail } = await supabase
@@ -41,7 +46,13 @@ export async function POST(request: NextRequest) {
       
       userData = userByEmail
       userError = errorByEmail
+      if (DEBUG_AUTH) console.log('[AUTH DEBUG] User found by email:', userData ? 'yes' : 'no')
     }
+
+    if (DEBUG_AUTH) console.log('[AUTH DEBUG] User found:', userData ? 'true' : 'false')
+    if (DEBUG_AUTH) console.log('[AUTH DEBUG] DB column read: password_hash')
+    if (DEBUG_AUTH) console.log('[AUTH DEBUG] Stored password_hash exists:', userData?.password_hash ? 'true' : 'false')
+    if (DEBUG_AUTH) console.log('[AUTH DEBUG] Stored hash length:', userData?.password_hash?.length ?? 0)
 
     if (userError || !userData) {
       // Don't reveal whether user exists - same error message for security
@@ -55,7 +66,7 @@ export async function POST(request: NextRequest) {
 
     // Validate password - if no password_hash exists, reject (accounts need passwords set)
     if (!userData.password_hash) {
-      console.log(`[AUTH] User ${username} found but no password_hash set`)
+      if (DEBUG_AUTH) console.log('[AUTH DEBUG] User found but no password_hash set')
       return NextResponse.json({ success: false, message: 'Invalid username or password' }, { status: 401 })
     }
 
@@ -63,13 +74,17 @@ export async function POST(request: NextRequest) {
     const providedPasswordHash = createHash('sha256').update(password).digest('hex')
     const storedPasswordHash = userData.password_hash.trim() // Remove any whitespace
     
+    if (DEBUG_AUTH) console.log('[AUTH DEBUG] Hashing algorithm: sha256')
+    if (DEBUG_AUTH) console.log('[AUTH DEBUG] Computed hash length:', providedPasswordHash.length)
+    if (DEBUG_AUTH) console.log('[AUTH DEBUG] Comparison result (match):', providedPasswordHash === storedPasswordHash)
+    
     // Compare hashes (both should be hex strings)
     if (providedPasswordHash !== storedPasswordHash) {
-      console.log(`[AUTH] Password mismatch for user ${username}. Stored hash: ${storedPasswordHash.substring(0, 16)}..., Provided hash: ${providedPasswordHash.substring(0, 16)}...`)
+      if (DEBUG_AUTH) console.log('[AUTH DEBUG] Password mismatch - stored hash prefix:', storedPasswordHash.substring(0, 16), 'computed hash prefix:', providedPasswordHash.substring(0, 16))
       return NextResponse.json({ success: false, message: 'Invalid username or password' }, { status: 401 })
     }
 
-    console.log(`[AUTH] Successful login for user ${username}`)
+    if (DEBUG_AUTH) console.log('[AUTH DEBUG] Successful login')
 
     // Password is valid - return user data (excluding password_hash)
     const { password_hash: _, ...userWithoutPassword } = userData

@@ -45,6 +45,8 @@ export async function POST(request: NextRequest) {
 
     // Hash password using SHA-256 (same algorithm as login)
     const passwordHash = createHash('sha256').update(password).digest('hex')
+    const DEBUG_AUTH = process.env.DEBUG_AUTH === 'true' || process.env.NODE_ENV !== 'production'
+    if (DEBUG_AUTH) console.log(`[AUTH DEBUG] Registration - hashing algorithm: sha256, hash length: ${passwordHash.length}, storing in column: password_hash`)
 
     // Create user
     const newUser = {
