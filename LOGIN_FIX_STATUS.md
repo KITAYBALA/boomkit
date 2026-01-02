@@ -44,10 +44,10 @@
 **Purpose:** Set/reset password hash for existing users with NULL password_hash
 
 **Usage:**
-```bash
+\`\`\`bash
 POST /api/auth/set-password
 Body: { "username": "user", "password": "newpassword" }
-```
+\`\`\`
 
 **Features:**
 - Uses same SHA-256 hashing as registration/login
@@ -74,9 +74,9 @@ Body: { "username": "user", "password": "newpassword" }
 ### 5. Debug Log Protection ✅
 
 Debug logs are protected behind:
-```typescript
+\`\`\`typescript
 const DEBUG_AUTH = process.env.DEBUG_AUTH === 'true' || process.env.NODE_ENV !== 'production'
-```
+\`\`\`
 
 Logs only appear when:
 - `DEBUG_AUTH=true` environment variable is set, OR
@@ -114,7 +114,7 @@ After reviewing debug logs:
 ## Expected Behavior
 
 When login works correctly, logs should show:
-```
+\`\`\`
 [AUTH DEBUG] LOGIN start
 [AUTH DEBUG] User found: true
 [AUTH DEBUG] DB column read: password_hash
@@ -124,5 +124,4 @@ When login works correctly, logs should show:
 [AUTH DEBUG] Computed hash length: 64
 [AUTH DEBUG] Comparison result (match): true
 [AUTH DEBUG] Successful login
-```
-
+\`\`\`

@@ -71,4 +71,3 @@ After checking debug logs:
    - Comparison result (match): true
 3. **Login with wrong password** → Comparison result should be false
 4. **Login with existing user (pre-fix)** → password_hash exists should be false → use set-password route
-
