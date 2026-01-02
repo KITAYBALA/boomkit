@@ -41,7 +41,7 @@ Even when users entered the exact same password used during registration:
 - Returns user data (excluding password_hash)
 
 **Key code:**
-```typescript
+\`\`\`typescript
 // Hash password using SHA-256 (same algorithm as login)
 const passwordHash = createHash('sha256').update(password).digest('hex')
 
@@ -51,7 +51,7 @@ const newUser = {
   password_hash: passwordHash, // Store hashed password
   ...
 }
-```
+\`\`\`
 
 #### 2. Updated Client-Side Registration Handler
 **File: `app/page.tsx` - `handleRegister` function**
