@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServerClient } from '@/lib/supabase-server-client'
-import { createHash, timingSafeEqual } from 'crypto'
+import { createHash } from 'crypto'
 
 export const dynamic = 'force-dynamic'
 
@@ -55,23 +55,21 @@ export async function POST(request: NextRequest) {
 
     // Validate password - if no password_hash exists, reject (accounts need passwords set)
     if (!userData.password_hash) {
+      console.log(`[AUTH] User ${username} found but no password_hash set`)
       return NextResponse.json({ success: false, message: 'Invalid username or password' }, { status: 401 })
     }
 
-    // Hash the provided password using SHA-256 (simple but secure for this use case)
-    const passwordHash = createHash('sha256').update(password).digest('hex')
+    // Hash the provided password using SHA-256
+    const providedPasswordHash = createHash('sha256').update(password).digest('hex')
+    const storedPasswordHash = userData.password_hash.trim() // Remove any whitespace
     
-    // Use timing-safe comparison to prevent timing attacks
-    const storedHash = Buffer.from(userData.password_hash, 'hex')
-    const providedHash = Buffer.from(passwordHash, 'hex')
-    
-    if (storedHash.length !== providedHash.length) {
+    // Compare hashes (both should be hex strings)
+    if (providedPasswordHash !== storedPasswordHash) {
+      console.log(`[AUTH] Password mismatch for user ${username}. Stored hash: ${storedPasswordHash.substring(0, 16)}..., Provided hash: ${providedPasswordHash.substring(0, 16)}...`)
       return NextResponse.json({ success: false, message: 'Invalid username or password' }, { status: 401 })
     }
 
-    if (!timingSafeEqual(storedHash, providedHash)) {
-      return NextResponse.json({ success: false, message: 'Invalid username or password' }, { status: 401 })
-    }
+    console.log(`[AUTH] Successful login for user ${username}`)
 
     // Password is valid - return user data (excluding password_hash)
     const { password_hash: _, ...userWithoutPassword } = userData
