@@ -25,13 +25,13 @@ The password verification was failing because:
   - Logs successful login
 
 **New comparison logic:**
-```typescript
+\`\`\`typescript
 const providedPasswordHash = createHash('sha256').update(password).digest('hex')
 const storedPasswordHash = userData.password_hash.trim()
 if (providedPasswordHash !== storedPasswordHash) {
   // reject
 }
-```
+\`\`\`
 
 ## Files Modified
 
