@@ -880,7 +880,7 @@ export default function BoomkitGame() {
       try {
         const { data, error } = await supabase
           .from("users")
-          .select("role, badges, is_muted, is_banned, mute_expiry, ban_expiry, status")
+          .select("role, badges, is_muted, is_banned, is_owner, mute_expiry, ban_expiry, status")
           .eq("id", currentUser.id)
           .single()
 
@@ -895,6 +895,7 @@ export default function BoomkitGame() {
             JSON.stringify(data.badges) !== JSON.stringify(currentUser.badges) ||
             data.is_muted !== currentUser.isMuted ||
             data.is_banned !== currentUser.isBanned ||
+            data.is_owner !== currentUser.isOwner ||
             data.mute_expiry !== currentUser.muteExpiry ||
             data.ban_expiry !== currentUser.banExpiry ||
             data.status !== currentUser.status) // Check for status change
@@ -917,6 +918,7 @@ export default function BoomkitGame() {
             badges: data.badges || [],
             isMuted: data.is_muted || false,
             isBanned: data.is_banned || false,
+            isOwner: data.is_owner || false, // Sync owner status from database
             muteExpiry: data.mute_expiry,
             banExpiry: data.ban_expiry,
             status: data.status || "approved", // Update status
@@ -1201,25 +1203,78 @@ export default function BoomkitGame() {
     setCurrentView("game")
   }
 
-  // Handle login - NO SUPABASE AUTH
-  const handleLogin = (e: React.FormEvent) => {
+  // Handle login - SERVER-SIDE AUTHENTICATION
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    const foundUser = users.find((u) => u.username === loginForm.username || u.email === loginForm.username)
-
-    if (!foundUser) {
-      alert("User not found")
+    if (!loginForm.username || !loginForm.password) {
+      alert("Please enter both username and password")
       return
     }
 
-    // Check if user is banned before allowing login
-    if (foundUser.isBanned) {
-      router.push("/banned")
-      return
-    }
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: loginForm.username,
+          password: loginForm.password,
+        }),
+      })
 
-    setCurrentUser(foundUser)
-    setCurrentView("game")
+      const data = await response.json()
+
+      if (!response.ok || !data.success) {
+        alert(data.message || "Invalid username or password")
+        return
+      }
+
+      // Server returns user data - map it to GameUser format
+      const user = data.user
+      const foundUser: GameUser = {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        password: "", // Never store password in client state
+        age: user.age || 0,
+        tokens: user.tokens || 0,
+        dailyTokens: user.daily_tokens || 0,
+        packs: user.packs || [],
+        booms: user.booms || {},
+        isOwner: user.is_owner || false,
+        isBanned: user.is_banned || false,
+        isMuted: user.is_muted || false,
+        status: user.status || "approved",
+        reason: user.reason || "",
+        role: user.role || "player",
+        joinDate: user.join_date || new Date().toISOString(),
+        boomScore: user.boom_score || 0,
+        totalValue: user.total_value || 0,
+        profilePicture: user.profile_picture || "🎯",
+        isPlusUser: user.is_plus_user || false,
+        nameColor: user.name_color || "text-white",
+        bannerColor: user.banner_color || "from-purple-600 to-pink-600",
+        lastDailySpin: user.last_daily_spin || "",
+        badges: user.badges || [],
+        muteExpiry: user.mute_expiry || null,
+        banExpiry: user.ban_expiry || null,
+        banReason: user.ban_reason || "",
+        lastSeen: user.last_seen || Date.now(),
+        packsOpened: user.packs_opened || 0,
+      }
+
+      // Check if user is banned (double-check from server response)
+      if (foundUser.isBanned) {
+        router.push("/banned")
+        return
+      }
+
+      setCurrentUser(foundUser)
+      setCurrentView("game")
+    } catch (error) {
+      console.error("Login error:", error)
+      alert("Login failed. Please try again.")
+    }
   }
 
   // Get boom based on rarity chances
