@@ -1124,83 +1124,80 @@ export default function BoomkitGame() {
     }
   }
 
-  // Handle registration - NO SUPABASE AUTH
-  const handleRegister = (e: React.FormEvent) => {
+  // Handle registration - SERVER-SIDE AUTHENTICATION
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (Number.parseInt(registerForm.age) < 10) {
-      alert("You must be at least 10 years old to register.")
+    if (!registerForm.username || !registerForm.email || !registerForm.password || !registerForm.age) {
+      alert("Please fill in all required fields")
       return
     }
 
-    const existingUser = users.find((u) => u.username === registerForm.username || u.email === registerForm.email)
-    if (existingUser) {
-      alert("Username or email already exists.")
-      return
-    }
+    try {
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: registerForm.username,
+          email: registerForm.email,
+          password: registerForm.password,
+          age: registerForm.age,
+          reason: registerForm.reason,
+        }),
+      })
 
-    const newUser: GameUser = {
-      id: Date.now().toString(),
-      username: registerForm.username,
-      email: registerForm.email,
-      age: Number.parseInt(registerForm.age),
-      tokens: 0,
-      dailyTokens: 0,
-      packs: [],
-      booms: {},
-      isOwner: false,
-      isBanned: false,
-      isMuted: false,
-      status: "approved",
-      reason: registerForm.reason,
-      role: "player",
-      joinDate: new Date().toLocaleDateString("en-US", {
-        weekday: "long",
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }),
-      boomScore: 0,
-      totalValue: 0,
-      profilePicture: "🎯",
-      isPlusUser: false,
-      nameColor: "white",
-      bannerColor: "purple",
-      lastDailySpin: "",
-      badges: [],
-      lastSeen: Date.now(),
-      packsOpened: 0,
-    }
+      const data = await response.json()
 
-    const saveUser = async () => {
-      if (!supabase) return
-      try {
-        await supabase.from("users").insert({
-          id: newUser.id,
-          username: newUser.username,
-          email: newUser.email,
-          age: newUser.age,
-          status: "approved",
-          join_date: newUser.joinDate,
-          profile_picture: newUser.profilePicture,
-          role: "player",
-          tokens: 0,
-          boom_score: 0,
-          total_value: 0,
-          packs: [],
-          booms: {},
-          is_owner: false,
-          is_banned: false,
-          is_muted: false,
-        })
-      } catch (err) {
-        console.log("DB save error (ok if user exists locally):", err)
+      if (!response.ok || !data.success) {
+        alert(data.message || "Registration failed. Please try again.")
+        return
       }
-    }
 
-    saveUser()
-    setCurrentUser(newUser)
-    setCurrentView("game")
+      // Server returns user data - map it to GameUser format
+      const user = data.user
+      const newUser: GameUser = {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        password: "", // Never store password in client state
+        age: user.age || 0,
+        tokens: user.tokens || 0,
+        dailyTokens: user.daily_tokens || 0,
+        packs: user.packs || [],
+        booms: user.booms || {},
+        isOwner: user.is_owner || false,
+        isBanned: user.is_banned || false,
+        isMuted: user.is_muted || false,
+        status: user.status || "approved",
+        reason: user.reason || "",
+        role: user.role || "player",
+        joinDate: user.join_date || new Date().toLocaleDateString("en-US", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        }),
+        boomScore: user.boom_score || 0,
+        totalValue: user.total_value || 0,
+        profilePicture: user.profile_picture || "🎯",
+        isPlusUser: user.is_plus_user || false,
+        nameColor: user.name_color || "text-white",
+        bannerColor: user.banner_color || "from-purple-600 to-pink-600",
+        lastDailySpin: user.last_daily_spin || "",
+        badges: user.badges || [],
+        muteExpiry: user.mute_expiry || null,
+        banExpiry: user.ban_expiry || null,
+        banReason: user.ban_reason || "",
+        lastSeen: user.last_seen || Date.now(),
+        packsOpened: user.packs_opened || 0,
+      }
+
+      setCurrentUser(newUser)
+      setCurrentView("game")
+    } catch (error) {
+      console.error("Registration error:", error)
+      alert("Registration failed. Please try again.")
+    }
   }
 
   // Handle login - SERVER-SIDE AUTHENTICATION
