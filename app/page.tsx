@@ -1222,6 +1222,11 @@ export default function BoomkitGame() {
       const data = await response.json()
 
       if (!response.ok || !data.success) {
+        // Check if password reset is required
+        if (data.requiresReset) {
+          router.push(`/reset-password?username=${encodeURIComponent(loginForm.username)}`)
+          return
+        }
         alert(data.message || "Invalid username or password")
         return
       }

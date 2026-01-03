@@ -46,7 +46,17 @@ export async function POST(request: NextRequest) {
     // Hash password using SHA-256 (same algorithm as login)
     const passwordHash = createHash('sha256').update(password).digest('hex')
     const DEBUG_AUTH = process.env.DEBUG_AUTH === 'true' || process.env.NODE_ENV !== 'production'
-    if (DEBUG_AUTH) console.log(`[AUTH DEBUG] Registration - hashing algorithm: sha256, hash length: ${passwordHash.length}, storing in column: password_hash`)
+    
+    if (DEBUG_AUTH) {
+      console.log('[AUTH DEBUG] ===== REGISTRATION START =====')
+      console.log('[AUTH DEBUG] Username:', username)
+      console.log('[AUTH DEBUG] Password length:', password.length)
+      console.log('[AUTH DEBUG] Hashing algorithm: sha256')
+      console.log('[AUTH DEBUG] Computed hash length:', passwordHash.length)
+      console.log('[AUTH DEBUG] Computed hash first 16 chars:', passwordHash.substring(0, 16))
+      console.log('[AUTH DEBUG] Storing in table: users')
+      console.log('[AUTH DEBUG] Storing in column: password_hash')
+    }
 
     // Create user
     const newUser = {
@@ -55,6 +65,7 @@ export async function POST(request: NextRequest) {
       email,
       age: Number.parseInt(age),
       password_hash: passwordHash, // Store hashed password
+      password_reset_required: false, // New users don't need reset
       status: 'approved',
       join_date: new Date().toLocaleDateString('en-US', {
         weekday: 'long',
@@ -83,7 +94,18 @@ export async function POST(request: NextRequest) {
 
     if (insertError) {
       console.error('[AUTH] Registration error:', insertError)
+      if (DEBUG_AUTH) {
+        console.error('[AUTH DEBUG] Insert error details:', JSON.stringify(insertError, null, 2))
+      }
       return NextResponse.json({ success: false, message: 'Registration failed' }, { status: 500 })
+    }
+
+    if (DEBUG_AUTH) {
+      console.log('[AUTH DEBUG] User inserted successfully')
+      console.log('[AUTH DEBUG] Inserted user ID:', insertedUser?.id)
+      console.log('[AUTH DEBUG] Inserted password_hash exists:', !!insertedUser?.password_hash)
+      console.log('[AUTH DEBUG] Inserted password_hash length:', insertedUser?.password_hash?.length ?? 0)
+      console.log('[AUTH DEBUG] ===== REGISTRATION SUCCESS =====')
     }
 
     console.log(`[AUTH] User registered: ${username}`)

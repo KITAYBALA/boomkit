@@ -33,10 +33,13 @@ export async function POST(request: NextRequest) {
     // Hash password using SHA-256 (same algorithm as registration/login)
     const passwordHash = createHash('sha256').update(password).digest('hex')
 
-    // Update password_hash
+    // Update password_hash and clear password_reset_required flag
     const { error: updateError } = await supabase
       .from('users')
-      .update({ password_hash: passwordHash })
+      .update({
+        password_hash: passwordHash,
+        password_reset_required: false,
+      })
       .eq('username', username)
 
     if (updateError) {
