@@ -5,4 +5,3 @@ ALTER TABLE users ADD COLUMN IF NOT EXISTS password_reset_required BOOLEAN NOT N
 
 -- Add comment for documentation
 COMMENT ON COLUMN users.password_reset_required IS 'Set to true when password needs to be reset (e.g., after admin reset)';
-

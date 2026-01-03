@@ -71,10 +71,10 @@ Already implemented:
 ### To Test:
 
 1. **Ensure `password_hash` column exists:**
-   ```sql
+   \`\`\`sql
    -- Run in Supabase SQL Editor if not already run:
    ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT;
-   ```
+   \`\`\`
 
 2. **Enable debug logs:**
    - Set `DEBUG_AUTH=true` in `.env`, OR
@@ -102,7 +102,7 @@ Already implemented:
 
 ## Expected Log Output (Successful Login)
 
-```
+\`\`\`
 [AUTH DEBUG] ===== LOGIN START =====
 [AUTH DEBUG] Input username: testuser
 [AUTH DEBUG] Input password length: 8
@@ -125,7 +125,7 @@ Already implemented:
 [AUTH DEBUG] Stored hash first 16 chars: 5e884898da28
 [AUTH DEBUG] Hash comparison result: true
 [AUTH DEBUG] ===== LOGIN SUCCESS =====
-```
+\`\`\`
 
 ## Files Modified
 
@@ -155,4 +155,3 @@ The debug logs will reveal the exact failure point. Most likely causes:
 5. **Apply specific fix** based on what logs reveal
 
 The debug logs will show exactly what's happening at each step, making it impossible to miss the root cause.
-

@@ -35,10 +35,10 @@ Added `password_reset_required` column to track users who need to reset password
 - Returns count of affected users
 
 **Usage:**
-```bash
+\`\`\`bash
 POST /api/admin/auth/reset-all-passwords
 Body: { "username": "system", "secret": "your-admin-reset-secret" }
-```
+\`\`\`
 
 **After use:** Set `ADMIN_RESET_SECRET` to empty string or remove it to disable
 
@@ -52,10 +52,10 @@ Body: { "username": "system", "secret": "your-admin-reset-secret" }
 - Server-side only
 
 **Usage:**
-```bash
+\`\`\`bash
 POST /api/auth/set-password
 Body: { "username": "user", "password": "newpassword" }
-```
+\`\`\`
 
 ### 4. Login Route (Updated)
 
@@ -169,9 +169,9 @@ Body: { "username": "user", "password": "newpassword" }
 ## Environment Variables
 
 Add to `.env`:
-```
+\`\`\`
 ADMIN_RESET_SECRET=your-secure-random-string-here
-```
+\`\`\`
 
 **After use:** Remove or set to empty string to disable the reset route
 
@@ -200,4 +200,3 @@ ADMIN_RESET_SECRET=your-secure-random-string-here
 - Reset mechanism for old users
 - Consistent flow for old and new users
 - Clear separation between reset-required and invalid password errors
-

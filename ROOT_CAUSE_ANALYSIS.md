@@ -86,7 +86,7 @@ Based on the code analysis, here are the most likely issues:
 
 ## Expected Log Output (Success)
 
-```
+\`\`\`
 [AUTH DEBUG] ===== LOGIN START =====
 [AUTH DEBUG] Input username: testuser
 [AUTH DEBUG] Querying table: users
@@ -99,7 +99,7 @@ Based on the code analysis, here are the most likely issues:
 [AUTH DEBUG] Computed hash length: 64
 [AUTH DEBUG] Hash comparison result: true
 [AUTH DEBUG] ===== LOGIN SUCCESS =====
-```
+\`\`\`
 
 ## Files Modified
 
@@ -114,4 +114,3 @@ Based on the code analysis, here are the most likely issues:
 4. Try to login with that user
 5. Check server console for login logs
 6. Identify the exact failure point from logs
-
