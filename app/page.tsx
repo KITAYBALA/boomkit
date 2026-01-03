@@ -601,6 +601,7 @@ export default function BoomkitGame() {
   const [showEmailEdit, setShowEmailEdit] = useState(false)
   const [showPasswordEdit, setShowPasswordEdit] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false) // Fixed typo from setShowShowPrivacyPolicy
   const [showTermsOfService, setShowTermsOfService] = useState(false)
   const [newName, setNewName] = useState("")
@@ -1015,6 +1016,11 @@ export default function BoomkitGame() {
 
   // Handle logout
   const handleLogout = () => {
+    setShowLogoutConfirm(true)
+  }
+
+  // Confirm and execute logout
+  const confirmLogout = () => {
     updateAndPersistCurrentUser(null)
     setCurrentView("owner-access")
     // Clear Supabase session if necessary
@@ -1022,6 +1028,7 @@ export default function BoomkitGame() {
     if (supabase) {
       supabase.auth.signOut()
     }
+    setShowLogoutConfirm(false)
   }
 
   // Check if user can spin today
@@ -2998,9 +3005,6 @@ export default function BoomkitGame() {
                       <Button variant="link" onClick={() => setShowPasswordEdit(true)}>
                         Change Password
                       </Button>
-                      <Button variant="link" onClick={() => setShowDeleteConfirm(true)}>
-                        Delete Account
-                      </Button>
                     </div>
                   </div>
 
@@ -3352,26 +3356,29 @@ export default function BoomkitGame() {
           </Card>
         </div>
       )}
-      {showDeleteConfirm && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
+      {showLogoutConfirm && (
+        <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-4">
           <Card className="w-full max-w-md p-6">
             <CardHeader>
-              <CardTitle className="text-2xl font-bold text-red-500">Delete Account</CardTitle>
-              <CardDescription>
-                Are you sure you want to delete your account? This action cannot be undone.
+              <CardTitle className="text-2xl font-bold text-yellow-500">Are you sure you want to log out?</CardTitle>
+              <CardDescription className="mt-2">
+                <p className="text-red-200">
+                  ⚠️ Important: If you log out, you may NOT be able to log back into this account.
+                  If that happens, the only option is to register a new account.
+                </p>
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-4 mt-4">
               <Button
-                onClick={() => {
-                  alert("Account deletion functionality not implemented in this demo.")
-                  setShowDeleteConfirm(false)
-                }}
+                onClick={confirmLogout}
                 className="w-full bg-red-600 hover:bg-red-700"
               >
-                Confirm Delete
+                Log out anyway
               </Button>
-              <Button onClick={() => setShowDeleteConfirm(false)} className="w-full bg-gray-600 hover:bg-gray-700">
+              <Button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="w-full bg-gray-600 hover:bg-gray-700"
+              >
                 Cancel
               </Button>
             </CardContent>
