@@ -213,14 +213,15 @@ interface Pack {
   booms: BoomItem[]
   color: string
   image: string
-  rarity: "common" | "uncommon" | "rare" | "epic" | "legendary"
+  rarity: "uncommon" | "rare" | "epic" | "legendary"
 }
 
 interface BoomItem {
   name: string
-  rarity: "common" | "uncommon" | "rare" | "epic" | "legendary" | "chroma" | "mystical"
+  rarity: "uncommon" | "rare" | "epic" | "legendary" | "chroma" | "mystical"
   avatar: string
   description: string
+  asset?: string // Path to SVG/PNG asset
 }
 
 interface ChatMessage {
@@ -310,7 +311,6 @@ const PACKS: Pack[] = [
     name: "Bug Pack",
     price: 25,
     booms: [
-      { name: "Ladybug", rarity: "common", avatar: "🐞", description: "A cute spotted beetle" },
       { name: "Butterfly", rarity: "uncommon", avatar: "🦋", description: "Graceful winged beauty" },
       { name: "Bee", rarity: "rare", avatar: "🐝", description: "Busy honey maker" },
       { name: "Spider", rarity: "epic", avatar: "🕷️", description: "Eight-legged web weaver" },
@@ -320,14 +320,13 @@ const PACKS: Pack[] = [
     ],
     color: "from-green-600 to-green-800",
     image: "/images/bug-pack.png",
-    rarity: "common",
+    rarity: "uncommon",
   },
   {
     id: "pirate",
     name: "Pirate Pack",
     price: 25,
     booms: [
-      { name: "Captain", rarity: "common", avatar: "🏴‍☠️", description: "Fearless ship captain" },
       { name: "Parrot", rarity: "uncommon", avatar: "🦜", description: "Colorful talking bird" },
       { name: "Treasure Chest", rarity: "rare", avatar: "💰", description: "Full of gold coins" },
       { name: "Ghost Ship", rarity: "epic", avatar: "👻⛵", description: "Haunted vessel" },
@@ -337,14 +336,13 @@ const PACKS: Pack[] = [
     ],
     color: "from-blue-600 to-blue-800",
     image: "/images/pirate-pack.png",
-    rarity: "common",
+    rarity: "uncommon",
   },
   {
     id: "space",
     name: "Space Pack",
     price: 30,
     booms: [
-      { name: "Rocket", rarity: "common", avatar: "🚀", description: "Fast space vehicle" },
       { name: "Alien", rarity: "uncommon", avatar: "👽", description: "Friendly extraterrestrial" },
       { name: "Planet", rarity: "rare", avatar: "🪐", description: "Mysterious world" },
       { name: "Black Hole", rarity: "epic", avatar: "🕳️", description: "Space-time anomaly" },
@@ -361,7 +359,6 @@ const PACKS: Pack[] = [
     name: "Medieval Pack",
     price: 35,
     booms: [
-      { name: "Knight", rarity: "common", avatar: "⚔️", description: "Brave armored warrior" },
       { name: "Castle", rarity: "uncommon", avatar: "🏰", description: "Mighty stone fortress" },
       { name: "Dragon", rarity: "rare", avatar: "🐲", description: "Fire-breathing beast" },
       { name: "Wizard", rarity: "epic", avatar: "🧙‍♂️", description: "Master of ancient magic" },
@@ -378,7 +375,6 @@ const PACKS: Pack[] = [
     name: "Safari Pack",
     price: 30,
     booms: [
-      { name: "Lion", rarity: "common", avatar: "🦁", description: "King of the jungle" },
       { name: "Elephant", rarity: "uncommon", avatar: "🐘", description: "Gentle giant" },
       { name: "Giraffe", rarity: "rare", avatar: "🦒", description: "Tallest animal" },
       { name: "Rhino", rarity: "epic", avatar: "🦏", description: "Armored powerhouse" },
@@ -388,14 +384,13 @@ const PACKS: Pack[] = [
     ],
     color: "from-orange-600 to-orange-800",
     image: "/images/safari-pack.png",
-    rarity: "common",
+    rarity: "uncommon",
   },
   {
     id: "aquatic",
     name: "Aquatic Pack",
     price: 28,
     booms: [
-      { name: "Shark", rarity: "common", avatar: "🦈", description: "Ocean predator" },
       { name: "Dolphin", rarity: "uncommon", avatar: "🐬", description: "Intelligent sea mammal" },
       { name: "Octopus", rarity: "rare", avatar: "🐙", description: "Eight-armed wonder" },
       { name: "Whale", rarity: "epic", avatar: "🐋", description: "Gentle ocean giant" },
@@ -405,14 +400,13 @@ const PACKS: Pack[] = [
     ],
     color: "from-cyan-600 to-cyan-800",
     image: "/images/aquatic-pack.png",
-    rarity: "common",
+    rarity: "uncommon",
   },
   {
     id: "breakfast",
     name: "Breakfast Pack",
     price: 20,
     booms: [
-      { name: "Pancakes", rarity: "common", avatar: "🥞", description: "Fluffy morning treat" },
       { name: "Bacon", rarity: "uncommon", avatar: "🥓", description: "Crispy strips" },
       { name: "Waffle", rarity: "rare", avatar: "🧇", description: "Golden grid delight" },
       { name: "French Toast", rarity: "epic", avatar: "🍞✨", description: "Sweet bread perfection" },
@@ -422,14 +416,13 @@ const PACKS: Pack[] = [
     ],
     color: "from-yellow-600 to-yellow-800",
     image: "/images/breakfast-pack.png",
-    rarity: "common",
+    rarity: "uncommon",
   },
   {
     id: "dino",
     name: "Dino Pack",
     price: 40,
     booms: [
-      { name: "T-Rex", rarity: "common", avatar: "🦖", description: "King of dinosaurs" },
       { name: "Triceratops", rarity: "uncommon", avatar: "🦕", description: "Three-horned herbivore" },
       { name: "Pterodactyl", rarity: "rare", avatar: "🦅", description: "Flying reptile" },
       { name: "Stegosaurus", rarity: "epic", avatar: "🦴", description: "Spiked back defender" },
@@ -446,7 +439,6 @@ const PACKS: Pack[] = [
     name: "Bot Pack",
     price: 45,
     booms: [
-      { name: "Robot", rarity: "common", avatar: "🤖", description: "Mechanical helper" },
       { name: "Drone", rarity: "uncommon", avatar: "🛸", description: "Flying machine" },
       { name: "Cyborg", rarity: "rare", avatar: "🦾", description: "Half human, half machine" },
       { name: "AI Core", rarity: "epic", avatar: "🧠💻", description: "Artificial intelligence" },
@@ -463,7 +455,6 @@ const PACKS: Pack[] = [
     name: "Wonderland Pack",
     price: 50,
     booms: [
-      { name: "Mad Hatter", rarity: "common", avatar: "🎩", description: "Crazy tea party host" },
       { name: "Cheshire Cat", rarity: "uncommon", avatar: "😸", description: "Grinning feline" },
       { name: "White Rabbit", rarity: "rare", avatar: "🐰⏰", description: "Always late" },
       { name: "Queen of Hearts", rarity: "epic", avatar: "👸♥️", description: "Off with their heads!" },
@@ -480,7 +471,6 @@ const PACKS: Pack[] = [
     name: "Outback Pack",
     price: 32,
     booms: [
-      { name: "Kangaroo", rarity: "common", avatar: "🦘", description: "Hopping marsupial" },
       { name: "Koala", rarity: "uncommon", avatar: "🐨", description: "Eucalyptus lover" },
       { name: "Crocodile", rarity: "rare", avatar: "🐊", description: "Swamp predator" },
       { name: "Dingo", rarity: "epic", avatar: "🐕", description: "Wild Australian dog" },
@@ -497,7 +487,6 @@ const PACKS: Pack[] = [
     name: "Ice Pack",
     price: 38,
     booms: [
-      { name: "Penguin", rarity: "common", avatar: "🐧", description: "Tuxedo bird" },
       { name: "Polar Bear", rarity: "uncommon", avatar: "🐻‍❄️", description: "Arctic hunter" },
       { name: "Seal", rarity: "rare", avatar: "🦭", description: "Playful swimmer" },
       { name: "Yeti", rarity: "epic", avatar: "🦣", description: "Abominable snowman" },
@@ -511,15 +500,14 @@ const PACKS: Pack[] = [
   },
 ]
 
-// Rarity chances for pack opening
+// Rarity chances for pack opening (total = 100%)
 const RARITY_CHANCES = {
-  common: 25,
-  uncommon: 20,
-  rare: 10,
-  epic: 3,
-  legendary: 1,
-  chroma: 0.1,
-  mystical: 0.01,
+  uncommon: 60,
+  rare: 25,
+  epic: 10,
+  legendary: 4,
+  chroma: 0.9,
+  mystical: 0.1,
 }
 
 const DAILY_SPIN_REWARDS = [500, 750, 1000, 1250, 1500, 2000, 2500, 5000]
@@ -631,6 +619,9 @@ export default function BoomkitGame() {
   const [selectedBoom, setSelectedBoom] = useState<string | null>(null)
   const [auctionPrice, setAuctionPrice] = useState("")
   const [auctionDuration, setAuctionDuration] = useState("24")
+  // Multi-sell states
+  const [isSelectMode, setIsSelectMode] = useState(false)
+  const [selectedBoomsForSell, setSelectedBoomsForSell] = useState<Set<string>>(new Set())
 
   // Moderation states
   const [showMuteDialog, setShowMuteDialog] = useState(false)
@@ -1291,7 +1282,6 @@ export default function BoomkitGame() {
       "epic",
       "rare",
       "uncommon",
-      "common",
     ]
 
     for (const rarity of rarityOrder) {
@@ -1304,9 +1294,13 @@ export default function BoomkitGame() {
       }
     }
 
-    // Fallback to common if no boom is found (should not happen with proper configuration)
-    const commonBooms = pack.booms.filter((boom) => boom.rarity === "common")
-    return commonBooms[Math.floor(Math.random() * commonBooms.length)]
+    // Fallback to uncommon if no boom is found (should not happen with proper configuration)
+    const uncommonBooms = pack.booms.filter((boom) => boom.rarity === "uncommon")
+    if (uncommonBooms.length > 0) {
+      return uncommonBooms[Math.floor(Math.random() * uncommonBooms.length)]
+    }
+    // Ultimate fallback - return first boom
+    return pack.booms[0]
   }
 
   const openPack = (packId: string, updatedUser: GameUser) => {
@@ -1314,6 +1308,9 @@ export default function BoomkitGame() {
     if (!pack) return
 
     const randomBoom = getRandomBoomFromPack(pack)
+
+    // Store pack reference for drop rate calculation
+    const packRef = pack
 
     // Generate particles based on rarity
     const particleCount =
@@ -1396,9 +1393,7 @@ export default function BoomkitGame() {
                 ? 25
                 : randomBoom.rarity === "rare"
                   ? 15
-                  : randomBoom.rarity === "uncommon"
-                    ? 10
-                    : 5),
+                  : 10),
       totalValue:
         updatedUser.totalValue +
         (randomBoom.rarity === "mystical"
@@ -1411,9 +1406,7 @@ export default function BoomkitGame() {
                 ? 500
                 : randomBoom.rarity === "rare"
                   ? 250
-                  : randomBoom.rarity === "uncommon"
-                    ? 100
-                    : 50),
+                  : 100),
       packsOpened: (updatedUser.packsOpened || 0) + 1,
     }
 
@@ -1424,10 +1417,43 @@ export default function BoomkitGame() {
     setPackAnimation({ show: false, stage: "shake", boom: null, packName: "", packImage: "", particles: [] })
   }
 
+  // Get drop rate for a boom (percentage)
+  const getBoomDropRate = (boomName: string, pack: Pack): number => {
+    const boom = pack.booms.find((b) => b.name === boomName)
+    if (!boom) return 0
+    const rarityChance = RARITY_CHANCES[boom.rarity as keyof typeof RARITY_CHANCES] || 0
+    const boomsOfSameRarity = pack.booms.filter((b) => b.rarity === boom.rarity).length
+    return boomsOfSameRarity > 0 ? Number((rarityChance / boomsOfSameRarity).toFixed(1)) : 0
+  }
+
+  // Check if boom is new (user doesn't own it)
+  const isBoomNew = (boomName: string): boolean => {
+    if (!currentUser) return true
+    return !currentUser.booms[boomName] || currentUser.booms[boomName] === 0
+  }
+
+  // Get confetti colors by rarity
+  const getConfettiColors = (rarity: string): string[] => {
+    switch (rarity) {
+      case "uncommon":
+        return ["#22c55e", "#16a34a", "#15803d"] // green shades
+      case "rare":
+        return ["#3b82f6", "#2563eb", "#1d4ed8"] // blue shades
+      case "epic":
+        return ["#ef4444", "#dc2626", "#b91c1c"] // red shades
+      case "legendary":
+        return ["#fbbf24", "#f59e0b", "#d97706"] // gold/yellow shades
+      case "chroma":
+        return ["#06b6d4", "#0891b2", "#0e7490", "#ec4899", "#f59e0b"] // cyan/teal + multi
+      case "mystical":
+        return ["#a855f7", "#9333ea", "#7c3aed", "#ec4899", "#f472b6"] // purple/pink + glow
+      default:
+        return ["#22c55e", "#16a34a"]
+    }
+  }
+
   const getGlowClass = (rarity: string) => {
     switch (rarity) {
-      case "common":
-        return "glow-common"
       case "uncommon":
         return "glow-uncommon"
       case "rare":
@@ -1441,7 +1467,7 @@ export default function BoomkitGame() {
       case "mystical":
         return "glow-mystical"
       default:
-        return "glow-common"
+        return "glow-uncommon"
     }
   }
 
@@ -1460,7 +1486,7 @@ export default function BoomkitGame() {
       case "uncommon":
         return "💚 UNCOMMON 💚"
       default:
-        return "COMMON"
+        return "UNCOMMON"
     }
   }
 
@@ -1501,8 +1527,6 @@ export default function BoomkitGame() {
   const getBoomSellPrice = (boomName: string) => {
     const rarity = getBoomRarity(boomName)
     switch (rarity) {
-      case "common":
-        return 15
       case "uncommon":
         return 35
       case "rare":
@@ -1516,42 +1540,98 @@ export default function BoomkitGame() {
       case "mystical":
         return 2000
       default:
-        return 10
+        return 35
     }
   }
 
-  // Handle direct sell
-  const handleDirectSell = () => {
-    if (!currentUser || !selectedBoom) return
+  // Handle direct sell (single or multiple)
+  const handleDirectSell = (boomNames?: string[]) => {
+    if (!currentUser) return
 
-    const sellPrice = getBoomSellPrice(selectedBoom)
-    const currentQuantity = currentUser.booms[selectedBoom] || 0
+    const boomsToSell = boomNames || (selectedBoom ? [selectedBoom] : [])
+    if (boomsToSell.length === 0) return
 
-    if (currentQuantity <= 0) {
-      alert("You don't have this boom!")
-      return
+    let totalTokens = 0
+    let totalValueLost = 0
+    let totalScoreLost = 0
+    const updatedBooms = { ...currentUser.booms }
+    const soldBooms: string[] = []
+
+    for (const boomName of boomsToSell) {
+      const sellPrice = getBoomSellPrice(boomName)
+      const currentQuantity = currentUser.booms[boomName] || 0
+
+      if (currentQuantity <= 0) continue
+
+      totalTokens += sellPrice
+      totalValueLost += getBoomValue(boomName)
+      totalScoreLost += getBoomScoreValue(boomName)
+      soldBooms.push(boomName)
+
+      if (updatedBooms[boomName] > 1) {
+        updatedBooms[boomName] -= 1
+      } else {
+        delete updatedBooms[boomName]
+      }
     }
 
-    const updatedBooms = { ...currentUser.booms }
-    if (updatedBooms[selectedBoom] > 1) {
-      updatedBooms[selectedBoom] -= 1
-    } else {
-      delete updatedBooms[selectedBoom]
+    if (soldBooms.length === 0) {
+      alert("No booms selected to sell!")
+      return
     }
 
     const updatedUser = {
       ...currentUser,
       booms: updatedBooms,
-      tokens: currentUser.tokens + sellPrice,
-      totalValue: currentUser.totalValue - getBoomValue(selectedBoom),
-      boomScore: currentUser.boomScore - getBoomScoreValue(selectedBoom),
+      tokens: currentUser.tokens + totalTokens,
+      totalValue: currentUser.totalValue - totalValueLost,
+      boomScore: currentUser.boomScore - totalScoreLost,
     }
 
     updateAndPersistCurrentUser(updatedUser)
 
-    setShowBoomAction(false)
-    setSelectedBoom(null)
-    alert(`Sold ${selectedBoom} for ${sellPrice} tokens!`)
+    if (boomNames) {
+      // Multi-sell
+      setSelectedBoomsForSell(new Set())
+      setIsSelectMode(false)
+      alert(`Sold ${soldBooms.length} boom(s) for ${totalTokens} tokens!`)
+    } else {
+      // Single sell
+      setShowBoomAction(false)
+      setSelectedBoom(null)
+      alert(`Sold ${selectedBoom} for ${totalTokens} tokens!`)
+    }
+  }
+
+  // Toggle boom selection for multi-sell
+  const toggleBoomSelection = (boomName: string) => {
+    const newSelection = new Set(selectedBoomsForSell)
+    if (newSelection.has(boomName)) {
+      newSelection.delete(boomName)
+    } else {
+      newSelection.add(boomName)
+    }
+    setSelectedBoomsForSell(newSelection)
+  }
+
+  // Select all booms
+  const selectAllBooms = () => {
+    if (!currentUser) return
+    const allBoomNames = Object.keys(currentUser.booms).filter((name) => (currentUser.booms[name] || 0) > 0)
+    setSelectedBoomsForSell(new Set(allBoomNames))
+  }
+
+  // Get total sell value for selected booms
+  const getTotalSellValue = (): number => {
+    if (!currentUser) return 0
+    let total = 0
+    selectedBoomsForSell.forEach((boomName) => {
+      const quantity = currentUser.booms[boomName] || 0
+      if (quantity > 0) {
+        total += getBoomSellPrice(boomName)
+      }
+    })
+    return total
   }
 
   const handleAuctionList = async () => {
@@ -1638,8 +1718,6 @@ export default function BoomkitGame() {
   const getBoomValue = (boomName: string) => {
     const rarity = getBoomRarity(boomName)
     switch (rarity) {
-      case "common":
-        return 50
       case "uncommon":
         return 100
       case "rare":
@@ -1653,7 +1731,7 @@ export default function BoomkitGame() {
       case "mystical":
         return 5000
       default:
-        return 25
+        return 100
     }
   }
 
@@ -1661,8 +1739,6 @@ export default function BoomkitGame() {
   const getBoomScoreValue = (boomName: string) => {
     const rarity = getBoomRarity(boomName)
     switch (rarity) {
-      case "common":
-        return 5
       case "uncommon":
         return 10
       case "rare":
@@ -1676,7 +1752,7 @@ export default function BoomkitGame() {
       case "mystical":
         return 200
       default:
-        return 2
+        return 10
     }
   }
 
@@ -1908,14 +1984,12 @@ export default function BoomkitGame() {
       const boom = pack.booms.find((b) => b.name === boomName)
       if (boom) return boom.rarity
     }
-    return "common"
+    return "uncommon"
   }
 
   // Get rarity color
   const getRarityColor = (rarity: string) => {
     switch (rarity) {
-      case "common":
-        return "bg-gray-500"
       case "uncommon":
         return "bg-green-500"
       case "rare":
@@ -1929,7 +2003,7 @@ export default function BoomkitGame() {
       case "mystical":
         return "bg-gradient-to-r from-purple-900 via-pink-500 to-indigo-900"
       default:
-        return "bg-gray-500"
+        return "bg-green-500"
     }
   }
 
@@ -2563,8 +2637,53 @@ export default function BoomkitGame() {
             {/* Booms Page */}
             {currentPage === "booms" && (
               <div className="space-y-6">
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center flex-wrap gap-4">
                   <h1 className="text-4xl font-bold text-white">My Booms</h1>
+                  <div className="flex gap-2 items-center">
+                    {isSelectMode && (
+                      <>
+                        <Button
+                          onClick={selectAllBooms}
+                          className="bg-blue-600 hover:bg-blue-700 text-white"
+                          size="sm"
+                        >
+                          Select All
+                        </Button>
+                        {selectedBoomsForSell.size > 0 && (
+                          <div className="bg-green-600 rounded-lg px-4 py-2 text-white font-bold">
+                            {selectedBoomsForSell.size} selected • {getTotalSellValue()} tokens
+                          </div>
+                        )}
+                        <Button
+                          onClick={() => handleDirectSell(Array.from(selectedBoomsForSell))}
+                          disabled={selectedBoomsForSell.size === 0}
+                          className="bg-red-600 hover:bg-red-700 text-white"
+                          size="sm"
+                        >
+                          Sell Selected ({selectedBoomsForSell.size})
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            setIsSelectMode(false)
+                            setSelectedBoomsForSell(new Set())
+                          }}
+                          className="bg-gray-600 hover:bg-gray-700 text-white"
+                          size="sm"
+                        >
+                          Cancel
+                        </Button>
+                      </>
+                    )}
+                    {!isSelectMode && (
+                      <Button
+                        onClick={() => setIsSelectMode(true)}
+                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                        size="sm"
+                      >
+                        Select Mode
+                      </Button>
+                    )}
+                  </div>
                   <div className="bg-purple-600 rounded-lg p-4 text-center">
                     <div className="text-4xl mb-2">⭐</div>
                     <div className="text-white text-2xl font-bold">{currentUser?.boomScore || 0}</div>
@@ -2590,20 +2709,38 @@ export default function BoomkitGame() {
                         {pack.booms.map((boom, index) => {
                           const quantity = currentUser?.booms[boom.name] || 0
                           const hasBooom = quantity > 0
+                          const isSelected = selectedBoomsForSell.has(boom.name)
                           return (
                             <div key={index} className="text-center">
                               <div
-                                className={`w-12 h-12 rounded border-2 border-white mb-1 flex items-center justify-center text-lg cursor-pointer transition-transform hover:scale-110 relative ${
+                                className={`w-12 h-12 rounded border-2 mb-1 flex items-center justify-center text-lg transition-transform hover:scale-110 relative ${
                                   hasBooom
-                                    ? `${getRarityColor(boom.rarity)} text-white shadow-lg`
-                                    : "bg-black text-gray-500"
+                                    ? isSelectMode
+                                      ? isSelected
+                                        ? `${getRarityColor(boom.rarity)} text-white shadow-lg border-yellow-400 border-4`
+                                        : `${getRarityColor(boom.rarity)} text-white shadow-lg cursor-pointer border-white`
+                                      : `${getRarityColor(boom.rarity)} text-white shadow-lg cursor-pointer border-white`
+                                    : "bg-black text-gray-500 border-white cursor-not-allowed"
                                 }`}
-                                onClick={() => hasBooom && handleBoomClick(boom.name)}
+                                onClick={() => {
+                                  if (hasBooom) {
+                                    if (isSelectMode) {
+                                      toggleBoomSelection(boom.name)
+                                    } else {
+                                      handleBoomClick(boom.name)
+                                    }
+                                  }
+                                }}
                               >
                                 {hasBooom ? boom.avatar : "🔒"}
                                 {hasBooom && quantity > 1 && (
                                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
                                     {quantity}
+                                  </span>
+                                )}
+                                {isSelectMode && isSelected && (
+                                  <span className="absolute top-0 left-0 w-full h-full bg-yellow-400/30 rounded flex items-center justify-center">
+                                    <span className="text-yellow-400 text-lg">✓</span>
                                   </span>
                                 )}
                               </div>
@@ -2661,38 +2798,34 @@ export default function BoomkitGame() {
                 {/* Rarity Information */}
                 <div className="bg-white/10 backdrop-blur-md rounded-lg p-4">
                   <h3 className="text-white font-bold mb-3">📊 Drop Rates</h3>
-                  <div className="grid grid-cols-4 gap-2 text-sm">
-                    <div className="text-center">
-                      <div className="bg-gray-500 text-white px-2 py-1 rounded text-xs mb-1">Common</div>
-                      <div className="text-white">25%</div>
-                    </div>
+                  <div className="grid grid-cols-3 gap-2 text-sm">
                     <div className="text-center">
                       <div className="bg-green-500 text-white px-2 py-1 rounded text-xs mb-1">Uncommon</div>
-                      <div className="text-white">20%</div>
+                      <div className="text-white">60%</div>
                     </div>
                     <div className="text-center">
                       <div className="bg-blue-500 text-white px-2 py-1 rounded text-xs mb-1">Rare</div>
-                      <div className="text-white">10%</div>
+                      <div className="text-white">25%</div>
                     </div>
                     <div className="text-center">
                       <div className="bg-purple-500 text-white px-2 py-1 rounded text-xs mb-1">Epic</div>
-                      <div className="text-white">3%</div>
+                      <div className="text-white">10%</div>
                     </div>
                     <div className="text-center">
                       <div className="bg-orange-500 text-white px-2 py-1 rounded text-xs mb-1">Legendary</div>
-                      <div className="text-white">1%</div>
+                      <div className="text-white">4%</div>
                     </div>
                     <div className="text-center">
                       <div className="bg-gradient-to-r from-red-500 via-yellow-500 to-purple-500 text-white px-2 py-1 rounded text-xs mb-1">
                         Chroma
                       </div>
-                      <div className="text-white">0.1%</div>
+                      <div className="text-white">0.9%</div>
                     </div>
                     <div className="text-center">
                       <div className="bg-gradient-to-r from-purple-900 via-pink-500 to-indigo-900 text-white px-2 py-1 rounded text-xs mb-1">
                         Mystical
                       </div>
-                      <div className="text-white">0.01%</div>
+                      <div className="text-white">0.1%</div>
                     </div>
                   </div>
                 </div>
@@ -3062,23 +3195,33 @@ export default function BoomkitGame() {
 
       {packAnimation.show && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50 overflow-hidden">
-          {/* Particles */}
+          {/* Confetti particles - colored by rarity */}
           {packAnimation.stage !== "shake" &&
-            packAnimation.particles.map((particle) => (
-              <div
-                key={particle.id}
-                className="absolute text-3xl pointer-events-none"
-                style={{
-                  left: "50%",
-                  top: "50%",
-                  animation: "particle-explode 1s ease-out forwards",
-                  ["--tx" as string]: `${particle.tx}px`,
-                  ["--ty" as string]: `${particle.ty}px`,
-                }}
-              >
-                {particle.emoji}
-              </div>
-            ))}
+            packAnimation.boom &&
+            Array.from({ length: packAnimation.particles.length }).map((_, i) => {
+              const colors = getConfettiColors(packAnimation.boom!.rarity)
+              const color = colors[Math.floor(Math.random() * colors.length)]
+              const angle = (Math.PI * 2 * i) / packAnimation.particles.length
+              const distance = 200 + Math.random() * 150
+              const tx = Math.cos(angle) * distance
+              const ty = Math.sin(angle) * distance
+              return (
+                <div
+                  key={i}
+                  className="absolute pointer-events-none rounded-full"
+                  style={{
+                    left: "50%",
+                    top: "50%",
+                    width: "12px",
+                    height: "12px",
+                    backgroundColor: color,
+                    animation: "particle-explode 1.5s ease-out forwards",
+                    ["--tx" as string]: `${tx}px`,
+                    ["--ty" as string]: `${ty}px`,
+                  }}
+                />
+              )
+            })}
 
           {/* Pack shaking stage */}
           {packAnimation.stage === "shake" && (
@@ -3120,122 +3263,116 @@ export default function BoomkitGame() {
             </div>
           )}
 
-          {/* Boom reveal stage */}
-          {(packAnimation.stage === "reveal" || packAnimation.stage === "done") && packAnimation.boom && (
-            <div className="text-center">
-              {/* Background glow effect based on rarity */}
-              <div
-                className={`absolute inset-0 opacity-30 ${
-                  packAnimation.boom.rarity === "mystical"
-                    ? "bg-gradient-to-r from-purple-900 via-pink-600 to-indigo-900"
-                    : packAnimation.boom.rarity === "chroma"
-                      ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500"
-                      : packAnimation.boom.rarity === "legendary"
-                        ? "bg-gradient-to-r from-orange-600 to-yellow-500"
-                        : packAnimation.boom.rarity === "epic"
-                          ? "bg-purple-700"
-                          : packAnimation.boom.rarity === "rare"
-                            ? "bg-blue-700"
-                            : packAnimation.boom.rarity === "uncommon"
-                              ? "bg-green-700"
-                              : "bg-gray-700"
-                }`}
-              />
-
-              <div className={`relative ${packAnimation.stage === "reveal" ? "animate-boom-reveal" : ""}`}>
-                {/* Boom avatar with glow */}
+          {/* Boom reveal stage - Blooket-style card */}
+          {(packAnimation.stage === "reveal" || packAnimation.stage === "done") && packAnimation.boom && (() => {
+            // Find the pack that contains this boom
+            const pack = PACKS.find((p) => p.booms.some((b) => b.name === packAnimation.boom!.name))
+            const dropRate = pack ? getBoomDropRate(packAnimation.boom.name, pack) : 0
+            const isNew = isBoomNew(packAnimation.boom.name)
+            const revealAnimationClass = 
+              packAnimation.boom.rarity === "mystical" ? "animate-reveal-mystical" :
+              packAnimation.boom.rarity === "chroma" ? "animate-reveal-chroma" :
+              packAnimation.boom.rarity === "legendary" ? "animate-reveal-legendary" :
+              packAnimation.boom.rarity === "epic" ? "animate-reveal-epic" :
+              packAnimation.boom.rarity === "rare" ? "animate-reveal-rare" :
+              "animate-reveal-uncommon"
+            
+            return (
+              <div className="flex items-center justify-center w-full h-full">
+                {/* Centered Card */}
                 <div
-                  className={`w-40 h-40 mx-auto rounded-full border-8 shadow-2xl flex items-center justify-center text-7xl relative
-                    ${getRarityColor(packAnimation.boom.rarity)}
-                    ${getGlowClass(packAnimation.boom.rarity)}
-                    ${packAnimation.boom.rarity === "mystical" ? "animate-mystical-aura border-purple-300" : ""}
-                    ${packAnimation.boom.rarity === "chroma" ? "animate-rainbow-border animate-glow-pulse" : ""}
-                    ${packAnimation.boom.rarity === "legendary" ? "animate-glow-pulse border-orange-300" : ""}
-                    ${packAnimation.boom.rarity === "epic" ? "animate-glow-pulse border-purple-300" : ""}
-                    ${packAnimation.boom.rarity === "rare" ? "animate-pulse border-blue-300" : "border-white"}
-                  `}
-                >
-                  {/* Shine overlay for legendary+ */}
-                  {["legendary", "chroma", "mystical"].includes(packAnimation.boom.rarity) && (
-                    <div className="absolute inset-0 rounded-full animate-legendary-shine" />
-                  )}
-                  <span
-                    className={
-                      packAnimation.boom.rarity === "chroma" || packAnimation.boom.rarity === "mystical"
-                        ? "animate-star-spin"
-                        : ""
-                    }
-                  >
-                    {packAnimation.boom.avatar}
-                  </span>
-                </div>
-
-                {/* Boom name */}
-                <h2
-                  className={`text-4xl font-bold mt-6 ${
-                    packAnimation.boom.rarity === "mystical"
-                      ? "text-purple-300 animate-pulse"
-                      : packAnimation.boom.rarity === "chroma"
-                        ? "text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-yellow-400 via-green-400 via-blue-400 to-purple-400"
-                        : packAnimation.boom.rarity === "legendary"
-                          ? "text-orange-400"
-                          : packAnimation.boom.rarity === "epic"
-                            ? "text-purple-400"
-                            : packAnimation.boom.rarity === "rare"
-                              ? "text-blue-400"
-                              : packAnimation.boom.rarity === "uncommon"
-                                ? "text-green-400"
-                                : "text-gray-300"
+                  className={`relative w-[400px] h-[500px] rounded-2xl shadow-2xl overflow-hidden ${
+                    packAnimation.stage === "reveal" ? revealAnimationClass : ""
                   }`}
+                  style={{
+                    background: 
+                      packAnimation.boom.rarity === "mystical" 
+                        ? "linear-gradient(135deg, #1e1b4b 0%, #581c87 50%, #831843 100%)" :
+                      packAnimation.boom.rarity === "chroma"
+                        ? "linear-gradient(135deg, #0e7490 0%, #0891b2 50%, #ec4899 100%)" :
+                      packAnimation.boom.rarity === "legendary"
+                        ? "linear-gradient(135deg, #ea580c 0%, #f59e0b 50%, #fbbf24 100%)" :
+                      packAnimation.boom.rarity === "epic"
+                        ? "linear-gradient(135deg, #6b21a8 0%, #9333ea 50%, #a855f7 100%)" :
+                      packAnimation.boom.rarity === "rare"
+                        ? "linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%)" :
+                      "linear-gradient(135deg, #166534 0%, #22c55e 50%, #4ade80 100%)"
+                  }}
                 >
-                  {packAnimation.boom.name}
-                </h2>
+                  {/* Card Background Pattern (snowy scene for example) */}
+                  <div className="absolute inset-0 opacity-20">
+                    <div className="absolute bottom-0 left-0 right-0 h-32 bg-white/30 rounded-t-full"></div>
+                    <div className="absolute bottom-8 left-4 w-16 h-16 bg-white/20 rounded-full"></div>
+                    <div className="absolute bottom-12 right-8 w-12 h-12 bg-white/20 rounded-full"></div>
+                  </div>
 
-                {/* Rarity badge */}
-                <div
-                  className={`inline-block mt-4 px-6 py-2 rounded-full text-lg font-bold uppercase tracking-wider
-                  ${getRarityColor(packAnimation.boom.rarity)} text-white
-                  ${packAnimation.boom.rarity === "mystical" || packAnimation.boom.rarity === "chroma" ? "animate-pulse" : ""}
-                `}
-                >
-                  {getRarityText(packAnimation.boom.rarity)}
+                  {/* Boom Art - Centered */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="text-8xl relative z-10">
+                      {packAnimation.boom.avatar}
+                    </div>
+                  </div>
+
+                  {/* Boom Name - Top */}
+                  <div className="absolute top-6 left-0 right-0 text-center z-20">
+                    <h2 className="text-3xl font-bold text-white drop-shadow-lg">
+                      {packAnimation.boom.name}
+                    </h2>
+                  </div>
+
+                  {/* Rarity Label - Under Name */}
+                  <div className="absolute top-20 left-0 right-0 text-center z-20">
+                    <div
+                      className={`inline-block px-4 py-1 rounded-full text-sm font-bold uppercase ${
+                        packAnimation.boom.rarity === "mystical" || packAnimation.boom.rarity === "chroma"
+                          ? "animate-pulse"
+                          : ""
+                      }`}
+                      style={{
+                        background:
+                          packAnimation.boom.rarity === "mystical"
+                            ? "linear-gradient(135deg, #a855f7, #ec4899)"
+                            : packAnimation.boom.rarity === "chroma"
+                              ? "linear-gradient(135deg, #06b6d4, #ec4899, #f59e0b)"
+                              : packAnimation.boom.rarity === "legendary"
+                                ? "#f59e0b"
+                                : packAnimation.boom.rarity === "epic"
+                                  ? "#9333ea"
+                                  : packAnimation.boom.rarity === "rare"
+                                    ? "#3b82f6"
+                                    : "#22c55e",
+                        color: "white",
+                      }}
+                    >
+                      {getRarityText(packAnimation.boom.rarity).replace(/[💚💙💜🔥🌈✨]/g, "").trim()}
+                    </div>
+                  </div>
+
+                  {/* Drop Rate + NEW - Bottom */}
+                  <div className="absolute bottom-6 left-0 right-0 text-center z-20">
+                    <p className="text-white text-lg font-semibold drop-shadow-lg">
+                      {dropRate}%{isNew && " – NEW!"}
+                    </p>
+                  </div>
+
+                  {/* Glow effect for legendary+ */}
+                  {["legendary", "chroma", "mystical"].includes(packAnimation.boom.rarity) && (
+                    <div className="absolute inset-0 animate-glow-pulse opacity-50" />
+                  )}
                 </div>
 
-                {/* Description */}
-                <p className="text-white/70 mt-4 text-lg max-w-md mx-auto">{packAnimation.boom.description}</p>
-
-                {/* Float up emojis for rare+ */}
-                {["rare", "epic", "legendary", "chroma", "mystical"].includes(packAnimation.boom.rarity) &&
-                  packAnimation.stage === "done" && (
-                    <div className="absolute -top-10 left-1/2 transform -translate-x-1/2 flex gap-4">
-                      {[1, 2, 3].map((i) => (
-                        <span key={i} className="text-3xl animate-float-up" style={{ animationDelay: `${i * 0.2}s` }}>
-                          {packAnimation.boom?.rarity === "mystical"
-                            ? "🔮"
-                            : packAnimation.boom?.rarity === "chroma"
-                              ? "🌈"
-                              : packAnimation.boom?.rarity === "legendary"
-                                ? "🔥"
-                                : packAnimation.boom?.rarity === "epic"
-                                  ? "💜"
-                                  : "💎"}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+                {/* Close button */}
+                {packAnimation.stage === "done" && (
+                  <button
+                    onClick={closePackAnimation}
+                    className="absolute bottom-8 left-1/2 transform -translate-x-1/2 px-8 py-3 bg-white/20 hover:bg-white/30 text-white rounded-lg font-bold text-lg transition-all transform hover:scale-105 z-30"
+                  >
+                    Awesome! 🎉
+                  </button>
+                )}
               </div>
-
-              {/* Close button */}
-              {packAnimation.stage === "done" && (
-                <button
-                  onClick={closePackAnimation}
-                  className="mt-8 px-8 py-3 bg-white/20 hover:bg-white/30 text-white rounded-lg font-bold text-lg transition-all transform hover:scale-105"
-                >
-                  Awesome! 🎉
-                </button>
-              )}
-            </div>
-          )}
+            )
+          })()}
         </div>
       )}
       {showProfilePicker && (
