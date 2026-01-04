@@ -24,4 +24,3 @@ Assets are currently using emoji placeholders. To add real assets:
 - Recommended size: 200x200px for SVG, or 400x400px for PNG
 - Use bright, vibrant colors matching rarity themes
 - Ensure assets are original (not copied from Blooket)
-
