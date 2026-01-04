@@ -12,8 +12,8 @@ export async function POST(request: NextRequest) {
   try {
     const { username, email, password, age, reason } = await request.json()
 
-    if (!username || !email || !password || !age) {
-      return NextResponse.json({ success: false, message: 'Username, email, password, and age are required' }, { status: 400 })
+    if (!username || !password || !age) {
+      return NextResponse.json({ success: false, message: 'Username, password, and age are required' }, { status: 400 })
     }
 
     if (Number.parseInt(age) < 10) {
@@ -33,14 +33,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Username already exists' }, { status: 400 })
     }
 
-    const { data: existingByEmail } = await supabase
-      .from('users')
-      .select('id')
-      .ilike('email', email)
-      .maybeSingle()
+    // Check if email already exists (only if email is provided)
+    if (email) {
+      const { data: existingByEmail } = await supabase
+        .from('users')
+        .select('id')
+        .ilike('email', email)
+        .maybeSingle()
 
-    if (existingByEmail) {
-      return NextResponse.json({ success: false, message: 'Email already exists' }, { status: 400 })
+      if (existingByEmail) {
+        return NextResponse.json({ success: false, message: 'Email already exists' }, { status: 400 })
+      }
     }
 
     // Hash password using SHA-256 (same algorithm as login)
@@ -62,7 +65,7 @@ export async function POST(request: NextRequest) {
     const newUser = {
       id: Date.now().toString(),
       username,
-      email,
+      email: email || '', // Email is optional
       age: Number.parseInt(age),
       password_hash: passwordHash, // Store hashed password
       password_reset_required: false, // New users don't need reset

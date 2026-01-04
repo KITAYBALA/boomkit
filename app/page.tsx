@@ -1119,7 +1119,7 @@ export default function BoomkitGame() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!registerForm.username || !registerForm.email || !registerForm.password || !registerForm.age) {
+    if (!registerForm.username || !registerForm.password || !registerForm.age) {
       alert("Please fill in all required fields")
       return
     }
@@ -2150,16 +2150,6 @@ export default function BoomkitGame() {
                 />
               </div>
               <div>
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={registerForm.email}
-                  onChange={(e) => setRegisterForm((prev) => ({ ...prev, email: e.target.value }))}
-                  required
-                />
-              </div>
-              <div>
                 <Label htmlFor="password">Password</Label>
                 <Input
                   id="password"
@@ -2439,8 +2429,8 @@ export default function BoomkitGame() {
               </Avatar>
               <span
                 className={`font-medium text-xs md:text-sm truncate max-w-[60px] md:max-w-none ${currentUser?.nameColor === "rainbow"
-                    ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent animate-pulse"
-                    : "text-white"
+                  ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent animate-pulse"
+                  : "text-white"
                   }`}
               >
                 {currentUser?.username}
@@ -2475,8 +2465,8 @@ export default function BoomkitGame() {
                 {/* User Profile Section */}
                 <div
                   className={`backdrop-blur-md rounded-lg p-6 ${currentUser?.bannerColor === "rainbow"
-                      ? "bg-gradient-to-r from-red-500/20 via-yellow-500/20 via-green-500/20 via-blue-500/20 to-purple-500/20 animate-pulse"
-                      : "bg-white/10"
+                    ? "bg-gradient-to-r from-red-500/20 via-yellow-500/20 via-green-500/20 via-blue-500/20 to-purple-500/20 animate-pulse"
+                    : "bg-white/10"
                     }`}
                 >
                   <div className="flex items-center space-x-4 mb-4">
@@ -2495,8 +2485,8 @@ export default function BoomkitGame() {
                     <div>
                       <h2
                         className={`text-2xl font-bold ${currentUser?.nameColor === "rainbow"
-                            ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent animate-pulse"
-                            : "text-white"
+                          ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent animate-pulse"
+                          : "text-white"
                           }`}
                       >
                         {currentUser?.username}
@@ -2509,17 +2499,17 @@ export default function BoomkitGame() {
                       <div className="flex items-center gap-2">
                         <Badge
                           className={`${currentUser?.role === "owner"
-                              ? "bg-yellow-500"
-                              : currentUser?.role === "admin"
-                                ? "bg-red-500"
-                                : currentUser?.role === "senior_moderator"
-                                  ? "bg-purple-500"
-                                  : currentUser?.role === "moderator"
-                                    ? "bg-blue-500"
-                                    : currentUser?.role === "tester"
-                                      ? "bg-green-500"
-                                      : // Added test role badge
-                                      "bg-gray-500"
+                            ? "bg-yellow-500"
+                            : currentUser?.role === "admin"
+                              ? "bg-red-500"
+                              : currentUser?.role === "senior_moderator"
+                                ? "bg-purple-500"
+                                : currentUser?.role === "moderator"
+                                  ? "bg-blue-500"
+                                  : currentUser?.role === "tester"
+                                    ? "bg-green-500"
+                                    : // Added test role badge
+                                    "bg-gray-500"
                             } text-white`}
                         >
                           {currentUser ? getUserRoleName(currentUser) : "Player"}
@@ -2700,12 +2690,12 @@ export default function BoomkitGame() {
                             <div key={index} className="text-center">
                               <div
                                 className={`w-12 h-12 rounded border-2 mb-1 flex items-center justify-center text-lg transition-transform hover:scale-110 relative ${hasBooom
-                                    ? isSelectMode
-                                      ? isSelected
-                                        ? `${getRarityColor(boom.rarity)} text-white shadow-lg border-yellow-400 border-4`
-                                        : `${getRarityColor(boom.rarity)} text-white shadow-lg cursor-pointer border-white`
+                                  ? isSelectMode
+                                    ? isSelected
+                                      ? `${getRarityColor(boom.rarity)} text-white shadow-lg border-yellow-400 border-4`
                                       : `${getRarityColor(boom.rarity)} text-white shadow-lg cursor-pointer border-white`
-                                    : "bg-black text-gray-500 border-white cursor-not-allowed"
+                                    : `${getRarityColor(boom.rarity)} text-white shadow-lg cursor-pointer border-white`
+                                  : "bg-black text-gray-500 border-white cursor-not-allowed"
                                   }`}
                                 onClick={() => {
                                   if (hasBooom) {
@@ -2851,12 +2841,12 @@ export default function BoomkitGame() {
                         {/* Rarity Badge */}
                         <div
                           className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-bold ${pack.rarity === "uncommon"
-                              ? "bg-green-500"
-                              : pack.rarity === "rare"
-                                ? "bg-blue-500"
-                                : pack.rarity === "epic"
-                                  ? "bg-purple-500"
-                                  : "bg-orange-500"
+                            ? "bg-green-500"
+                            : pack.rarity === "rare"
+                              ? "bg-blue-500"
+                              : pack.rarity === "epic"
+                                ? "bg-purple-500"
+                                : "bg-orange-500"
                             } text-white`}
                         >
                           {pack.rarity.toUpperCase()}
@@ -3305,8 +3295,8 @@ export default function BoomkitGame() {
                   <div className="absolute top-20 left-0 right-0 text-center z-20">
                     <div
                       className={`inline-block px-4 py-1 rounded-full text-sm font-bold uppercase ${packAnimation.boom.rarity === "mystical" || packAnimation.boom.rarity === "chroma"
-                          ? "animate-pulse"
-                          : ""
+                        ? "animate-pulse"
+                        : ""
                         }`}
                       style={{
                         background:
