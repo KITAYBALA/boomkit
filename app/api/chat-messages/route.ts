@@ -25,16 +25,23 @@ export async function POST(request: Request) {
 
     const supabase = getSupabaseServerClient()
 
+    console.log("[v0] Verifying user for chat:", username)
     // Check if user is muted before allowing message
     const { data: userData, error: userError } = await supabase
       .from("users")
       .select("is_muted")
       .ilike("username", username)
-      .single()
+      .maybeSingle()
 
     if (userError) {
       console.error("[v0] Error checking user mute status:", userError)
-      return NextResponse.json({ error: "Failed to verify user status" }, { status: 500 })
+      return NextResponse.json({ error: `Failed to verify user status: ${userError.message}` }, { status: 500 })
+    }
+
+    if (!userData) {
+      console.error("[v0] User not found for chat verification:", username)
+      // If we can't find the user, we should probably block the message or at least know why
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
     // MUTE ENFORCEMENT: Block muted users from sending messages
