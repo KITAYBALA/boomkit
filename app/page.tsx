@@ -2278,9 +2278,8 @@ export default function BoomkitGame() {
               setCurrentPage("stats")
               setSidebarOpen(false)
             }}
-            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${
-              currentPage === "stats" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
-            }`}
+            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "stats" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
+              }`}
           >
             <BarChart3Icon className="h-5 w-5 mr-3" />
             Stats
@@ -2291,9 +2290,8 @@ export default function BoomkitGame() {
               setCurrentPage("booms")
               setSidebarOpen(false)
             }}
-            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${
-              currentPage === "booms" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
-            }`}
+            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "booms" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
+              }`}
           >
             <PackageIcon className="h-5 w-5 mr-3" />
             Booms
@@ -2304,9 +2302,8 @@ export default function BoomkitGame() {
               setCurrentPage("market")
               setSidebarOpen(false)
             }}
-            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${
-              currentPage === "market" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
-            }`}
+            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "market" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
+              }`}
           >
             <ShoppingCartIcon className="h-5 w-5 mr-3" />
             Market
@@ -2317,9 +2314,8 @@ export default function BoomkitGame() {
               setCurrentPage("chat")
               setSidebarOpen(false)
             }}
-            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${
-              currentPage === "chat" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
-            }`}
+            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "chat" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
+              }`}
           >
             <MessageCircleIcon className="h-5 w-5 mr-3" />
             Chat
@@ -2330,9 +2326,8 @@ export default function BoomkitGame() {
               setCurrentPage("auction")
               setSidebarOpen(false)
             }}
-            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${
-              currentPage === "auction" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
-            }`}
+            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "auction" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
+              }`}
           >
             <GavelIcon className="h-5 w-5 mr-3" />
             Auction
@@ -2343,9 +2338,8 @@ export default function BoomkitGame() {
               setCurrentPage("leaderboard")
               setSidebarOpen(false)
             }}
-            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${
-              currentPage === "leaderboard" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
-            }`}
+            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "leaderboard" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
+              }`}
           >
             <BarChart3Icon className="h-5 w-5 mr-3" />
             Leaderboard
@@ -2356,9 +2350,8 @@ export default function BoomkitGame() {
               setCurrentPage("trading")
               setSidebarOpen(false)
             }}
-            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${
-              currentPage === "trading" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
-            }`}
+            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "trading" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
+              }`}
           >
             <PackageIcon className="h-5 w-5 mr-3" />
             Trading
@@ -2369,28 +2362,26 @@ export default function BoomkitGame() {
             currentUser?.role === "admin" ||
             currentUser?.role === "tester" || // Added check for tester role
             isOwner()) && (
-            <button
-              onClick={() => {
-                setCurrentPage("staff")
-                setSidebarOpen(false)
-              }}
-              className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${
-                currentPage === "staff" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
-              }`}
-            >
-              <ShieldIcon className="h-5 w-5 mr-3" />
-              Staff
-            </button>
-          )}
+              <button
+                onClick={() => {
+                  setCurrentPage("staff")
+                  setSidebarOpen(false)
+                }}
+                className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "staff" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
+                  }`}
+              >
+                <ShieldIcon className="h-5 w-5 mr-3" />
+                Staff
+              </button>
+            )}
 
           <button
             onClick={() => {
               setCurrentPage("settings")
               setSidebarOpen(false)
             }}
-            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${
-              currentPage === "settings" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
-            }`}
+            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "settings" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
+              }`}
           >
             <SettingsIcon className="h-5 w-5 mr-3" />
             Settings
@@ -2447,11 +2438,10 @@ export default function BoomkitGame() {
                 </AvatarFallback>
               </Avatar>
               <span
-                className={`font-medium text-xs md:text-sm truncate max-w-[60px] md:max-w-none ${
-                  currentUser?.nameColor === "rainbow"
+                className={`font-medium text-xs md:text-sm truncate max-w-[60px] md:max-w-none ${currentUser?.nameColor === "rainbow"
                     ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent animate-pulse"
                     : "text-white"
-                }`}
+                  }`}
               >
                 {currentUser?.username}
               </span>
@@ -2484,11 +2474,10 @@ export default function BoomkitGame() {
               <div className="space-y-6">
                 {/* User Profile Section */}
                 <div
-                  className={`backdrop-blur-md rounded-lg p-6 ${
-                    currentUser?.bannerColor === "rainbow"
+                  className={`backdrop-blur-md rounded-lg p-6 ${currentUser?.bannerColor === "rainbow"
                       ? "bg-gradient-to-r from-red-500/20 via-yellow-500/20 via-green-500/20 via-blue-500/20 to-purple-500/20 animate-pulse"
                       : "bg-white/10"
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center space-x-4 mb-4">
                     <div className="relative">
@@ -2505,11 +2494,10 @@ export default function BoomkitGame() {
                     </div>
                     <div>
                       <h2
-                        className={`text-2xl font-bold ${
-                          currentUser?.nameColor === "rainbow"
+                        className={`text-2xl font-bold ${currentUser?.nameColor === "rainbow"
                             ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent animate-pulse"
                             : "text-white"
-                        }`}
+                          }`}
                       >
                         {currentUser?.username}
                       </h2>
@@ -2520,8 +2508,7 @@ export default function BoomkitGame() {
                       {/* New: Show role with colored badge */}
                       <div className="flex items-center gap-2">
                         <Badge
-                          className={`${
-                            currentUser?.role === "owner"
+                          className={`${currentUser?.role === "owner"
                               ? "bg-yellow-500"
                               : currentUser?.role === "admin"
                                 ? "bg-red-500"
@@ -2532,8 +2519,8 @@ export default function BoomkitGame() {
                                     : currentUser?.role === "tester"
                                       ? "bg-green-500"
                                       : // Added test role badge
-                                        "bg-gray-500"
-                          } text-white`}
+                                      "bg-gray-500"
+                            } text-white`}
                         >
                           {currentUser ? getUserRoleName(currentUser) : "Player"}
                         </Badge>
@@ -2592,9 +2579,8 @@ export default function BoomkitGame() {
                   </div>
                   <div className="text-center">
                     <div
-                      className={`w-32 h-32 mx-auto mb-4 rounded-full border-4 border-yellow-500 flex items-center justify-center text-4xl ${
-                        spinning ? "animate-spin" : ""
-                      } bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500`}
+                      className={`w-32 h-32 mx-auto mb-4 rounded-full border-4 border-yellow-500 flex items-center justify-center text-4xl ${spinning ? "animate-spin" : ""
+                        } bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500`}
                     >
                       🎯
                     </div>
@@ -2713,15 +2699,14 @@ export default function BoomkitGame() {
                           return (
                             <div key={index} className="text-center">
                               <div
-                                className={`w-12 h-12 rounded border-2 mb-1 flex items-center justify-center text-lg transition-transform hover:scale-110 relative ${
-                                  hasBooom
+                                className={`w-12 h-12 rounded border-2 mb-1 flex items-center justify-center text-lg transition-transform hover:scale-110 relative ${hasBooom
                                     ? isSelectMode
                                       ? isSelected
                                         ? `${getRarityColor(boom.rarity)} text-white shadow-lg border-yellow-400 border-4`
                                         : `${getRarityColor(boom.rarity)} text-white shadow-lg cursor-pointer border-white`
                                       : `${getRarityColor(boom.rarity)} text-white shadow-lg cursor-pointer border-white`
                                     : "bg-black text-gray-500 border-white cursor-not-allowed"
-                                }`}
+                                  }`}
                                 onClick={() => {
                                   if (hasBooom) {
                                     if (isSelectMode) {
@@ -2865,17 +2850,14 @@ export default function BoomkitGame() {
 
                         {/* Rarity Badge */}
                         <div
-                          className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-bold ${
-                            pack.rarity === "common"
-                              ? "bg-gray-500"
-                              : pack.rarity === "uncommon"
-                                ? "bg-green-500"
-                                : pack.rarity === "rare"
-                                  ? "bg-blue-500"
-                                  : pack.rarity === "epic"
-                                    ? "bg-purple-500"
-                                    : "bg-orange-500"
-                          } text-white`}
+                          className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-bold ${pack.rarity === "uncommon"
+                              ? "bg-green-500"
+                              : pack.rarity === "rare"
+                                ? "bg-blue-500"
+                                : pack.rarity === "epic"
+                                  ? "bg-purple-500"
+                                  : "bg-orange-500"
+                            } text-white`}
                         >
                           {pack.rarity.toUpperCase()}
                         </div>
@@ -3269,34 +3251,33 @@ export default function BoomkitGame() {
             const pack = PACKS.find((p) => p.booms.some((b) => b.name === packAnimation.boom!.name))
             const dropRate = pack ? getBoomDropRate(packAnimation.boom.name, pack) : 0
             const isNew = isBoomNew(packAnimation.boom.name)
-            const revealAnimationClass = 
+            const revealAnimationClass =
               packAnimation.boom.rarity === "mystical" ? "animate-reveal-mystical" :
-              packAnimation.boom.rarity === "chroma" ? "animate-reveal-chroma" :
-              packAnimation.boom.rarity === "legendary" ? "animate-reveal-legendary" :
-              packAnimation.boom.rarity === "epic" ? "animate-reveal-epic" :
-              packAnimation.boom.rarity === "rare" ? "animate-reveal-rare" :
-              "animate-reveal-uncommon"
-            
+                packAnimation.boom.rarity === "chroma" ? "animate-reveal-chroma" :
+                  packAnimation.boom.rarity === "legendary" ? "animate-reveal-legendary" :
+                    packAnimation.boom.rarity === "epic" ? "animate-reveal-epic" :
+                      packAnimation.boom.rarity === "rare" ? "animate-reveal-rare" :
+                        "animate-reveal-uncommon"
+
             return (
               <div className="flex items-center justify-center w-full h-full">
                 {/* Centered Card */}
                 <div
-                  className={`relative w-[400px] h-[500px] rounded-2xl shadow-2xl overflow-hidden ${
-                    packAnimation.stage === "reveal" ? revealAnimationClass : ""
-                  }`}
+                  className={`relative w-[400px] h-[500px] rounded-2xl shadow-2xl overflow-hidden ${packAnimation.stage === "reveal" ? revealAnimationClass : ""
+                    }`}
                   style={{
-                    background: 
-                      packAnimation.boom.rarity === "mystical" 
+                    background:
+                      packAnimation.boom.rarity === "mystical"
                         ? "linear-gradient(135deg, #1e1b4b 0%, #581c87 50%, #831843 100%)" :
-                      packAnimation.boom.rarity === "chroma"
-                        ? "linear-gradient(135deg, #0e7490 0%, #0891b2 50%, #ec4899 100%)" :
-                      packAnimation.boom.rarity === "legendary"
-                        ? "linear-gradient(135deg, #ea580c 0%, #f59e0b 50%, #fbbf24 100%)" :
-                      packAnimation.boom.rarity === "epic"
-                        ? "linear-gradient(135deg, #6b21a8 0%, #9333ea 50%, #a855f7 100%)" :
-                      packAnimation.boom.rarity === "rare"
-                        ? "linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%)" :
-                      "linear-gradient(135deg, #166534 0%, #22c55e 50%, #4ade80 100%)"
+                        packAnimation.boom.rarity === "chroma"
+                          ? "linear-gradient(135deg, #0e7490 0%, #0891b2 50%, #ec4899 100%)" :
+                          packAnimation.boom.rarity === "legendary"
+                            ? "linear-gradient(135deg, #ea580c 0%, #f59e0b 50%, #fbbf24 100%)" :
+                            packAnimation.boom.rarity === "epic"
+                              ? "linear-gradient(135deg, #6b21a8 0%, #9333ea 50%, #a855f7 100%)" :
+                              packAnimation.boom.rarity === "rare"
+                                ? "linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%)" :
+                                "linear-gradient(135deg, #166534 0%, #22c55e 50%, #4ade80 100%)"
                   }}
                 >
                   {/* Card Background Pattern (snowy scene for example) */}
@@ -3323,11 +3304,10 @@ export default function BoomkitGame() {
                   {/* Rarity Label - Under Name */}
                   <div className="absolute top-20 left-0 right-0 text-center z-20">
                     <div
-                      className={`inline-block px-4 py-1 rounded-full text-sm font-bold uppercase ${
-                        packAnimation.boom.rarity === "mystical" || packAnimation.boom.rarity === "chroma"
+                      className={`inline-block px-4 py-1 rounded-full text-sm font-bold uppercase ${packAnimation.boom.rarity === "mystical" || packAnimation.boom.rarity === "chroma"
                           ? "animate-pulse"
                           : ""
-                      }`}
+                        }`}
                       style={{
                         background:
                           packAnimation.boom.rarity === "mystical"
