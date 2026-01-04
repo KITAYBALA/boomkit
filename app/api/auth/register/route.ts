@@ -22,23 +22,23 @@ export async function POST(request: NextRequest) {
 
     const supabase = getSupabaseServerClient()
 
-    // Check if user already exists (check username and email separately for safety)
+    // Check if user already exists (case-insensitive like login route)
     const { data: existingByUsername } = await supabase
       .from('users')
       .select('id')
-      .eq('username', username)
+      .ilike('username', username)
       .maybeSingle()
-    
+
     if (existingByUsername) {
       return NextResponse.json({ success: false, message: 'Username already exists' }, { status: 400 })
     }
-    
+
     const { data: existingByEmail } = await supabase
       .from('users')
       .select('id')
-      .eq('email', email)
+      .ilike('email', email)
       .maybeSingle()
-    
+
     if (existingByEmail) {
       return NextResponse.json({ success: false, message: 'Email already exists' }, { status: 400 })
     }
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     // Hash password using SHA-256 (same algorithm as login)
     const passwordHash = createHash('sha256').update(password).digest('hex')
     const DEBUG_AUTH = process.env.DEBUG_AUTH === 'true' || process.env.NODE_ENV !== 'production'
-    
+
     if (DEBUG_AUTH) {
       console.log('[AUTH DEBUG] ===== REGISTRATION START =====')
       console.log('[AUTH DEBUG] Username:', username)

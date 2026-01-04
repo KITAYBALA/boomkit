@@ -19,11 +19,11 @@ export async function POST(request: NextRequest) {
 
     const supabase = getSupabaseServerClient()
 
-    // Find user
+    // Find user (case-insensitive like login route)
     const { data: user, error: userError } = await supabase
       .from('users')
       .select('id, username')
-      .eq('username', username)
+      .ilike('username', username)
       .maybeSingle()
 
     if (userError || !user) {
@@ -34,13 +34,14 @@ export async function POST(request: NextRequest) {
     const passwordHash = createHash('sha256').update(password).digest('hex')
 
     // Update password_hash and clear password_reset_required flag
+    // Use user.id to ensure we update the correct user (not the input username)
     const { error: updateError } = await supabase
       .from('users')
       .update({
         password_hash: passwordHash,
         password_reset_required: false,
       })
-      .eq('username', username)
+      .eq('id', user.id)
 
     if (updateError) {
       console.error('[AUTH] Error setting password:', updateError)
