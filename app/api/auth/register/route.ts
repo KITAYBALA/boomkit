@@ -61,14 +61,14 @@ export async function POST(request: NextRequest) {
       console.log('[AUTH DEBUG] Storing in column: password_hash')
     }
 
-    // Create user
+    // Create user - use only columns that exist in database (matching login route select)
     const newUser = {
       id: Date.now().toString(),
       username,
-      email: email || '', // Email is optional
+      email: email || '',
       age: Number.parseInt(age),
-      password_hash: passwordHash, // Store hashed password
-      password_reset_required: false, // New users don't need reset
+      password_hash: passwordHash,
+      password_reset_required: false,
       status: 'approved',
       join_date: new Date().toLocaleDateString('en-US', {
         weekday: 'long',
@@ -81,11 +81,22 @@ export async function POST(request: NextRequest) {
       tokens: 0,
       boom_score: 0,
       total_value: 0,
+      daily_tokens: 0,
       packs: [],
       booms: {},
+      badges: [],
       is_owner: false,
       is_banned: false,
       is_muted: false,
+      is_plus_user: false,
+      name_color: '',
+      banner_color: 'from-purple-600 to-pink-600',
+      last_daily_spin: null,
+      mute_expiry: null,
+      ban_expiry: null,
+      ban_reason: '',
+      last_seen: Date.now(),
+      packs_opened: 0,
       reason: reason || '',
     }
 
@@ -100,7 +111,11 @@ export async function POST(request: NextRequest) {
       if (DEBUG_AUTH) {
         console.error('[AUTH DEBUG] Insert error details:', JSON.stringify(insertError, null, 2))
       }
-      return NextResponse.json({ success: false, message: 'Registration failed' }, { status: 500 })
+      // Return the actual error message for debugging
+      return NextResponse.json({
+        success: false,
+        message: `Registration failed: ${insertError.message || insertError.code || 'Unknown database error'}`
+      }, { status: 500 })
     }
 
     if (DEBUG_AUTH) {
