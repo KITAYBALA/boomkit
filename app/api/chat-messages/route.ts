@@ -24,12 +24,12 @@ export async function POST(request: Request) {
     const { username, message, role } = await request.json()
 
     const supabase = getSupabaseServerClient()
-    
+
     // Check if user is muted before allowing message
     const { data: userData, error: userError } = await supabase
       .from("users")
       .select("is_muted")
-      .eq("username", username)
+      .ilike("username", username)
       .single()
 
     if (userError) {
