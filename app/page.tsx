@@ -214,6 +214,7 @@ interface Pack {
   color: string
   image: string
   rarity: "uncommon" | "rare" | "epic" | "legendary"
+  emoji?: string // Added emoji property
 }
 
 interface BoomItem {
@@ -247,6 +248,29 @@ interface NewsItem {
   content: string
   date: string
   image?: string
+}
+
+// ... existing code ...
+
+// Get boom sell price
+const getBoomSellPrice = (boomName: string) => {
+  const rarity = getBoomRarity(boomName)
+  switch (rarity) {
+    case "uncommon":
+      return 15
+    case "rare":
+      return 25
+    case "epic":
+      return 75
+    case "legendary":
+      return 250
+    case "chroma":
+      return 500
+    case "mystical":
+      return 1000
+    default:
+      return 15
+  }
 }
 
 interface CustomRole {
@@ -321,6 +345,7 @@ const PACKS: Pack[] = [
     color: "from-green-600 to-green-800",
     image: "/images/bug-pack.png",
     rarity: "uncommon",
+    emoji: "🐛",
   },
   {
     id: "pirate",
@@ -337,11 +362,12 @@ const PACKS: Pack[] = [
     color: "from-blue-600 to-blue-800",
     image: "/images/pirate-pack.png",
     rarity: "uncommon",
+    emoji: "🏴‍☠️",
   },
   {
     id: "space",
     name: "Space Pack",
-    price: 30,
+    price: 25,
     booms: [
       { name: "Alien", rarity: "uncommon", avatar: "👽", description: "Friendly extraterrestrial" },
       { name: "Planet", rarity: "rare", avatar: "🪐", description: "Mysterious world" },
@@ -353,11 +379,12 @@ const PACKS: Pack[] = [
     color: "from-purple-600 to-purple-800",
     image: "/images/space-pack.png",
     rarity: "rare",
+    emoji: "🚀",
   },
   {
     id: "medieval",
     name: "Medieval Pack",
-    price: 35,
+    price: 25,
     booms: [
       { name: "Castle", rarity: "uncommon", avatar: "🏰", description: "Mighty stone fortress" },
       { name: "Dragon", rarity: "rare", avatar: "🐲", description: "Fire-breathing beast" },
@@ -369,11 +396,12 @@ const PACKS: Pack[] = [
     color: "from-amber-600 to-amber-800",
     image: "/images/medieval-pack.png",
     rarity: "uncommon",
+    emoji: "🏰",
   },
   {
     id: "safari",
     name: "Safari Pack",
-    price: 30,
+    price: 25,
     booms: [
       { name: "Elephant", rarity: "uncommon", avatar: "🐘", description: "Gentle giant" },
       { name: "Giraffe", rarity: "rare", avatar: "🦒", description: "Tallest animal" },
@@ -385,11 +413,12 @@ const PACKS: Pack[] = [
     color: "from-orange-600 to-orange-800",
     image: "/images/safari-pack.png",
     rarity: "uncommon",
+    emoji: "🦁",
   },
   {
     id: "aquatic",
     name: "Aquatic Pack",
-    price: 28,
+    price: 25,
     booms: [
       { name: "Dolphin", rarity: "uncommon", avatar: "🐬", description: "Intelligent sea mammal" },
       { name: "Octopus", rarity: "rare", avatar: "🐙", description: "Eight-armed wonder" },
@@ -401,11 +430,12 @@ const PACKS: Pack[] = [
     color: "from-cyan-600 to-cyan-800",
     image: "/images/aquatic-pack.png",
     rarity: "uncommon",
+    emoji: "🌊",
   },
   {
     id: "breakfast",
     name: "Breakfast Pack",
-    price: 20,
+    price: 25,
     booms: [
       { name: "Bacon", rarity: "uncommon", avatar: "🥓", description: "Crispy strips" },
       { name: "Waffle", rarity: "rare", avatar: "🧇", description: "Golden grid delight" },
@@ -417,11 +447,12 @@ const PACKS: Pack[] = [
     color: "from-yellow-600 to-yellow-800",
     image: "/images/breakfast-pack.png",
     rarity: "uncommon",
+    emoji: "🥞",
   },
   {
     id: "dino",
     name: "Dino Pack",
-    price: 40,
+    price: 25,
     booms: [
       { name: "Triceratops", rarity: "uncommon", avatar: "🦕", description: "Three-horned herbivore" },
       { name: "Pterodactyl", rarity: "rare", avatar: "🦅", description: "Flying reptile" },
@@ -433,11 +464,12 @@ const PACKS: Pack[] = [
     color: "from-stone-600 to-stone-800",
     image: "/images/dino-pack.png",
     rarity: "epic",
+    emoji: "🦖",
   },
   {
     id: "bot",
     name: "Bot Pack",
-    price: 45,
+    price: 25,
     booms: [
       { name: "Drone", rarity: "uncommon", avatar: "🛸", description: "Flying machine" },
       { name: "Cyborg", rarity: "rare", avatar: "🦾", description: "Half human, half machine" },
@@ -449,11 +481,12 @@ const PACKS: Pack[] = [
     color: "from-slate-600 to-slate-800",
     image: "/images/bot-pack.png",
     rarity: "rare",
+    emoji: "🤖",
   },
   {
     id: "wonderland",
     name: "Wonderland Pack",
-    price: 50,
+    price: 25,
     booms: [
       { name: "Cheshire Cat", rarity: "uncommon", avatar: "😸", description: "Grinning feline" },
       { name: "White Rabbit", rarity: "rare", avatar: "🐰⏰", description: "Always late" },
@@ -465,11 +498,12 @@ const PACKS: Pack[] = [
     color: "from-pink-600 to-pink-800",
     image: "/images/wonderland-pack.png",
     rarity: "legendary",
+    emoji: "🎩",
   },
   {
     id: "outback",
     name: "Outback Pack",
-    price: 32,
+    price: 25,
     booms: [
       { name: "Koala", rarity: "uncommon", avatar: "🐨", description: "Eucalyptus lover" },
       { name: "Crocodile", rarity: "rare", avatar: "🐊", description: "Swamp predator" },
@@ -481,11 +515,12 @@ const PACKS: Pack[] = [
     color: "from-red-600 to-red-800",
     image: "/images/outback-pack.png",
     rarity: "uncommon",
+    emoji: "🦘",
   },
   {
     id: "ice",
     name: "Ice Pack",
-    price: 38,
+    price: 25,
     booms: [
       { name: "Polar Bear", rarity: "uncommon", avatar: "🐻‍❄️", description: "Arctic hunter" },
       { name: "Seal", rarity: "rare", avatar: "🦭", description: "Playful swimmer" },
@@ -497,6 +532,7 @@ const PACKS: Pack[] = [
     color: "from-blue-400 to-blue-600",
     image: "/images/ice-pack.png",
     rarity: "rare",
+    emoji: "❄️",
   },
 ]
 
@@ -1528,19 +1564,19 @@ export default function BoomkitGame() {
     const rarity = getBoomRarity(boomName)
     switch (rarity) {
       case "uncommon":
-        return 35
+        return 15
       case "rare":
-        return 75
+        return 25
       case "epic":
-        return 150
+        return 75
       case "legendary":
-        return 400
+        return 250
       case "chroma":
-        return 800
+        return 500
       case "mystical":
-        return 2000
+        return 1000
       default:
-        return 35
+        return 15
     }
   }
 
@@ -2820,13 +2856,19 @@ export default function BoomkitGame() {
                           }}
                         ></div>
 
-                        {/* Pack Image */}
-                        <div className="pt-6 pb-4 px-4">
+                        {/* Pack Image with Emoji Overlay */}
+                        <div className="pt-6 pb-4 px-4 relative">
                           <img
                             src={pack.image || "/placeholder.svg"}
                             alt={pack.name}
                             className="w-full h-32 object-cover rounded-lg mb-3"
                           />
+                          {/* Emoji Overlay */}
+                          {pack.emoji && (
+                            <div className="absolute top-8 left-1/2 transform -translate-x-1/2 text-6xl drop-shadow-lg filter hover:scale-110 transition-transform cursor-default">
+                              {pack.emoji}
+                            </div>
+                          )}
                           <div className="text-white text-center">
                             <div className="font-bold text-lg mb-1">{pack.name}</div>
                             <div className="text-sm opacity-80 capitalize">{pack.rarity}</div>
