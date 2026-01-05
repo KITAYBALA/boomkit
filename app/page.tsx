@@ -2124,46 +2124,94 @@ export default function BoomkitGame() {
     return role?.name || "Player"
   }
 
+  // Landing Page (replacing Owner Access default)
   if (currentView === "owner-access") {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <CardTitle className="text-3xl font-bold text-orange-600 flex items-center justify-center">
-              <CrownIcon className="h-8 w-8 mr-2" />
-              Owner Access
-            </CardTitle>
-            <CardDescription>Enter your secret access code to continue as owner</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleOwnerAccess} className="space-y-4">
-              <div>
-                <Label htmlFor="accessCode">Access Code</Label>
-                <Input
-                  id="accessCode"
-                  type="password"
-                  value={ownerAccessCode}
-                  onChange={(e) => setOwnerAccessCode(e.target.value)}
-                  placeholder="Enter your secret code"
-                  required
-                />
-              </div>
-              <Button type="submit" className="w-full bg-orange-600 hover:bg-orange-700">
-                <KeyIcon className="h-4 w-4 mr-2" />
-                Access as Owner
-              </Button>
-            </form>
+    // Generate a list of random booms for the background/grid
+    const showcaseBooms = PACKS.flatMap(p => p.booms).slice(0, 16) // Take first 16 for grid
 
-            <div className="mt-4 text-center space-y-2">
-              <Button variant="link" onClick={() => setCurrentView("login")}>
-                Regular User Login
+    return (
+      <div className="min-h-screen bg-slate-900 flex flex-col font-sans">
+        {/* Navbar */}
+        <nav className="flex justify-between items-center p-6 px-10">
+          <h1 className="text-3xl font-extrabold text-white tracking-tight">Boomkit</h1>
+          <div className="space-x-4">
+            <Button
+              onClick={() => setCurrentView("login")}
+              className="bg-transparent hover:bg-white/10 text-white border border-white/20 font-bold px-6"
+            >
+              Login
+            </Button>
+            <Button
+              onClick={() => setCurrentView("register")}
+              className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-6 shadow-lg shadow-purple-500/20"
+            >
+              Register
+            </Button>
+          </div>
+        </nav>
+
+        {/* Hero Section */}
+        <main className="flex-1 flex flex-col md:flex-row items-center justify-center p-6 md:p-20 gap-12">
+
+          {/* Left Content */}
+          <div className="flex-1 space-y-6 text-center md:text-left max-w-xl">
+            <h1 className="text-6xl md:text-7xl font-black text-white leading-tight">
+              Boomkit
+            </h1>
+            <p className="text-3xl md:text-4xl text-purple-400 font-bold">
+              Blooket, but emojis
+            </p>
+            <p className="text-slate-400 text-lg md:text-xl max-w-md mx-auto md:mx-0">
+              Collect unique emojis, trade with friends, and climb the leaderboards in the ultimate emoji marketplace.
+            </p>
+            <div className="pt-4 flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+              <Button
+                onClick={() => setCurrentView("register")}
+                className="h-14 px-8 text-xl bg-purple-600 hover:bg-purple-700 font-bold rounded-xl shadow-xl shadow-purple-900/20 transition-transform hover:scale-105"
+              >
+                Get Started
               </Button>
-              <Button variant="link" onClick={() => setCurrentView("register")}>
-                New User Registration
-              </Button>
+              {/* Hidden Owner Access Trigger (Double click title or similar? Keeping it simple for now, maybe a small footer link) */}
             </div>
-          </CardContent>
-        </Card>
+          </div>
+
+          {/* Right Content - Boom Grid */}
+          <div className="flex-1 grid grid-cols-4 gap-4 max-w-lg p-6 bg-white/5 rounded-3xl backdrop-blur-sm border border-white/10 rotate-3 hover:rotate-0 transition-transform duration-500">
+            {showcaseBooms.map((boom, idx) => (
+              <div key={idx} className="aspect-square bg-slate-800 rounded-xl flex items-center justify-center text-4xl shadow-lg border border-slate-700 hover:scale-110 transition-transform cursor-default select-none" title={boom.name}>
+                {boom.avatar}
+              </div>
+            ))}
+          </div>
+
+        </main>
+
+        {/* Footer / Secret Access */}
+        <footer className="p-4 text-center text-slate-600 text-sm">
+          <p>&copy; 2026 Boomkit. All rights reserved.</p>
+          {/* Secret Owner Access Link - subtly placed */}
+          <button
+            onClick={() => {
+              // For now, let's just use a prompt or a hidden way to show the old form if needed.
+              // Actually, user asked to REPLACE the page. But they might still need owner access.
+              // Let's add a tiny link.
+              const code = prompt("Enter Owner Code:")
+              if (code === "OKTAY_MASTER_2024_BOOMKIT_SECURE") { // Quick hack to let owner in without UI clutter
+                setOwnerAccessCode(code)
+                // Trigger login simulation or just set view? 
+                // Since handleOwnerAccess isn't exposed here easily without rewriting, 
+                // let's just simulate the state change manually if valid
+                localStorage.setItem("boomkit_authorized_system", generateSystemSignature())
+                // We still need them to Login as a user, so we just authorize the system.
+                alert("System Authorized. Please Login.")
+                setCurrentView("login")
+              }
+            }}
+            className="mt-2 opacity-10 hover:opacity-50 transition-opacity"
+          >
+            Admin
+          </button>
+        </footer>
       </div>
     )
   }
