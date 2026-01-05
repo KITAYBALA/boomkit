@@ -24,6 +24,7 @@ import {
   CameraIcon,
   XIcon,
   MenuIcon,
+  CreditCardIcon, // Added for Shop
 } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 
@@ -2412,6 +2413,18 @@ export default function BoomkitGame() {
             <SettingsIcon className="h-5 w-5 mr-3" />
             Settings
           </button>
+
+          <button
+            onClick={() => {
+              setCurrentPage("shop")
+              setSidebarOpen(false)
+            }}
+            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "shop" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
+              }`}
+          >
+            <CreditCardIcon className="h-5 w-5 mr-3" />
+            Shop
+          </button>
         </nav>
       </div>
 
@@ -2786,24 +2799,11 @@ export default function BoomkitGame() {
                 </div>
 
                 <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
-                  <h3 className="text-white font-bold text-xl mb-4 flex items-center gap-2">
-                    💳 Buy Tokens with Real Money
-                  </h3>
-                  <p className="text-purple-200 text-sm mb-4">
-                    Purchase tokens instantly with secure Stripe payment. Tokens will be added to your account
-                    immediately.
-                  </p>
-                  {currentUser && (
-                    <StripeCheckout
-                      userId={currentUser.id}
-                      onSuccess={(tokens) => {
-                        if (currentUser) {
-                          const updatedUser = { ...currentUser, tokens: currentUser.tokens + tokens }
-                          setCurrentUser(updatedUser)
-                        }
-                      }}
-                    />
-                  )}
+                  <div className="text-center">
+                    <h3 className="text-white font-bold text-xl mb-2">Token Balance</h3>
+                    <div className="text-4xl font-bold text-yellow-400 mb-2">🪙 {currentUser?.tokens || 0}</div>
+                    <p className="text-white/70">Use tokens to buy packs!</p>
+                  </div>
                 </div>
 
                 {/* Rarity Information */}
@@ -3163,6 +3163,33 @@ export default function BoomkitGame() {
                       </Button>
                     </div>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* Shop Page */}
+            {currentPage === "shop" && (
+              <div className="space-y-6">
+                <h1 className="text-4xl font-bold text-white">Shop</h1>
+                <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
+                  <h3 className="text-white font-bold text-xl mb-4 flex items-center gap-2">
+                    💳 Buy Tokens with Real Money
+                  </h3>
+                  <p className="text-purple-200 text-sm mb-4">
+                    Purchase tokens instantly with secure Stripe payment. Tokens will be added to your account
+                    immediately.
+                  </p>
+                  {currentUser && (
+                    <StripeCheckout
+                      userId={currentUser.id}
+                      onSuccess={(tokens) => {
+                        if (currentUser) {
+                          const updatedUser = { ...currentUser, tokens: currentUser.tokens + tokens }
+                          setCurrentUser(updatedUser)
+                        }
+                      }}
+                    />
+                  )}
                 </div>
               </div>
             )}
