@@ -3094,12 +3094,7 @@ export default function BoomkitGame() {
                       <h2 className="text-xl font-bold text-white">Edit Info</h2>
                     </div>
                     <div className="space-y-2">
-                      <Button variant="link" onClick={() => setShowNameEdit(true)}>
-                        Change Username
-                      </Button>
-                      <Button variant="link" onClick={() => setShowEmailEdit(true)}>
-                        Change Email
-                      </Button>
+                      {/* Username and Email change removed as per request */}
                       <Button variant="link" onClick={() => setShowPasswordEdit(true)}>
                         Change Password
                       </Button>
