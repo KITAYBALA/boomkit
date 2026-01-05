@@ -146,285 +146,290 @@ export default function RealtimeAuctions({
     }
   }
 
-  return `${h}h ${m}m`
-}
-
-const createAuction = async () => {
-  if (!currentUser || !selectedBoom) return
-  if ((currentUser.booms[selectedBoom] || 0) < 1) {
-    alert("You don't have this Boom!")
-    return
+  const timeLeftText = (endsAt: string) => {
+    const diff = new Date(endsAt).getTime() - Date.now()
+    if (diff <= 0) return 'Ended'
+    const h = Math.floor(diff / 3600000)
+    const m = Math.floor((diff % 3600000) / 60000)
+    return `${h}h ${m}m`
   }
 
-  setLoading(true)
-
-  const endsAt = new Date(Date.now() + duration * 60 * 60 * 1000).toISOString()
-
-  if (supabase) {
-    // 1. Deduct Boom from User
-    const newBooms = { ...currentUser.booms }
-    if (newBooms[selectedBoom] > 1) {
-      newBooms[selectedBoom]--
-    } else {
-      delete newBooms[selectedBoom]
-    }
-
-    const { error: userError } = await supabase
-      .from('users')
-      .update({ booms: newBooms })
-      .eq('id', currentUser.id)
-
-    if (userError) {
-      alert('Failed to update inventory: ' + userError.message)
-      setLoading(false)
+  const createAuction = async () => {
+    if (!currentUser || !selectedBoom) return
+    if ((currentUser.booms[selectedBoom] || 0) < 1) {
+      alert("You don't have this Boom!")
       return
     }
 
-    // 2. Create Auction
-    const { error: auctionError } = await supabase
-      .from('auction_items')
-      .insert({
-        boom_name: selectedBoom,
-        seller: currentUser.username,
-        current_bid: startingBid,
-        ends_at: endsAt,
-        status: 'active'
-      })
+    setLoading(true)
 
-    if (auctionError) {
-      alert('Failed to create auction: ' + auctionError.message)
-      // Ideally revert boom deduction here, keeping it simple for now
-    } else {
-      alert('Auction created!')
-      setShowCreateModal(false)
-      setSelectedBoom("")
-    }
-  } else {
-    // Local Storage Logic
-    const newId = Math.random().toString(36).substring(7)
-    const newItem: LocalAuction = {
-      id: newId,
-      boomName: selectedBoom,
-      seller: currentUser.username,
-      currentBid: startingBid,
-      timeLeft: duration,
-      bidders: []
-    }
-    const raw = localStorage.getItem(LS_KEY)
-    const local = raw ? (JSON.parse(raw) as LocalAuction[]) : []
-    const updated = [...local, newItem]
-    localStorage.setItem(LS_KEY, JSON.stringify(updated))
-    setItems(convertLocal(updated))
+    const endsAt = new Date(Date.now() + duration * 60 * 60 * 1000).toISOString()
 
-    // Deduct boom locally for display (not persistent properly without full user sync in this mode)
-    alert("Auction created (Local Mode)")
-    setShowCreateModal(false)
-  }
-  setLoading(false)
-}
+    if (supabase) {
+      // 1. Deduct Boom from User
+      const newBooms = { ...currentUser.booms }
+      if (newBooms[selectedBoom] > 1) {
+        newBooms[selectedBoom]--
+      } else {
+        delete newBooms[selectedBoom]
+      }
 
-const claimAuction = async (item: DbAuction) => {
-  if (!currentUser || !supabase) return
-  setLoading(true)
+      const { error: userError } = await supabase
+        .from('users')
+        .update({ booms: newBooms })
+        .eq('id', currentUser.id)
 
-  try {
-    // Double check auction status
-    const { data: auctionData } = await supabase.from('auction_items').select('*').eq('id', item.id).single()
-    if (!auctionData || auctionData.status === 'processed') {
-      alert("Auction already processed.")
-      setLoading(false)
-      return
-    }
-
-    const isWinner = currentUser.username === item.top_bidder
-    const isSeller = currentUser.username === item.seller
-
-    if (isWinner) {
-      // Winner pays tokens, gets boom
-      if (currentUser.tokens < item.current_bid) {
-        alert("You don't have enough tokens to claim this prize!")
+      if (userError) {
+        alert('Failed to update inventory: ' + userError.message)
         setLoading(false)
         return
       }
 
-      // 1. Deduct Tokens & Add Boom for Winner
-      const newTokens = currentUser.tokens - item.current_bid
-      const newBooms = { ...currentUser.booms }
-      newBooms[item.boom_name] = (newBooms[item.boom_name] || 0) + 1
+      // 2. Create Auction
+      const { error: auctionError } = await supabase
+        .from('auction_items')
+        .insert({
+          boom_name: selectedBoom,
+          seller: currentUser.username,
+          current_bid: startingBid,
+          ends_at: endsAt,
+          status: 'active'
+        })
 
-      const { error: winnerError } = await supabase
-        .from('users')
-        .update({ tokens: newTokens, booms: newBooms })
-        .eq('id', currentUser.id)
+      if (auctionError) {
+        alert('Failed to create auction: ' + auctionError.message)
+        // Ideally revert boom deduction here, keeping it simple for now
+      } else {
+        alert('Auction created!')
+        setShowCreateModal(false)
+        setSelectedBoom("")
+      }
+    } else {
+      // Local Storage Logic
+      const newId = Math.random().toString(36).substring(7)
+      const newItem: LocalAuction = {
+        id: newId,
+        boomName: selectedBoom,
+        seller: currentUser.username,
+        currentBid: startingBid,
+        timeLeft: duration,
+        bidders: []
+      }
+      const raw = localStorage.getItem(LS_KEY)
+      const local = raw ? (JSON.parse(raw) as LocalAuction[]) : []
+      const updated = [...local, newItem]
+      localStorage.setItem(LS_KEY, JSON.stringify(updated))
+      setItems(convertLocal(updated))
 
-      if (winnerError) throw winnerError
+      // Deduct boom locally for display (not persistent properly without full user sync in this mode)
+      alert("Auction created (Local Mode)")
+      setShowCreateModal(false)
+    }
+    setLoading(false)
+  }
 
-      // 2. Pay Seller
-      // Need seller ID, but we only have username. In real app, store seller_id. 
-      // Workaround: Find seller by username (unique)
-      const { data: sellerData } = await supabase.from('users').select('id, tokens').eq('username', item.seller).single()
-      if (sellerData) {
-        await supabase.from('users').update({ tokens: sellerData.tokens + item.current_bid }).eq('id', sellerData.id)
+  const claimAuction = async (item: DbAuction) => {
+    if (!currentUser || !supabase) return
+    setLoading(true)
+
+    try {
+      // Double check auction status
+      const { data: auctionData } = await supabase.from('auction_items').select('*').eq('id', item.id).single()
+      if (!auctionData || auctionData.status === 'processed') {
+        alert("Auction already processed.")
+        setLoading(false)
+        return
       }
 
-      // 3. Mark processed
-      await supabase.from('auction_items').update({ status: 'processed' }).eq('id', item.id)
-      alert("Claimed successfully! You received " + item.boom_name)
+      const isWinner = currentUser.username === item.top_bidder
+      const isSeller = currentUser.username === item.seller
 
-    } else if (isSeller) {
-      // If nobody bid, seller reclaims item
-      if (!item.top_bidder) {
+      if (isWinner) {
+        // Winner pays tokens, gets boom
+        if (currentUser.tokens < item.current_bid) {
+          alert("You don't have enough tokens to claim this prize!")
+          setLoading(false)
+          return
+        }
+
+        // 1. Deduct Tokens & Add Boom for Winner
+        const newTokens = currentUser.tokens - item.current_bid
         const newBooms = { ...currentUser.booms }
         newBooms[item.boom_name] = (newBooms[item.boom_name] || 0) + 1
 
-        await supabase.from('users').update({ booms: newBooms }).eq('id', currentUser.id)
-        await supabase.from('auction_items').update({ status: 'processed' }).eq('id', item.id) // Or delete it
-        alert("Item reclaimed!")
-      } else {
-        // Winner exists but hasn't claimed? Logic gap. 
-        // For now, let's assume Winner must claim. Seller just waits.
-        alert("Winner must claim the item to finalize the transaction.")
+        const { error: winnerError } = await supabase
+          .from('users')
+          .update({ tokens: newTokens, booms: newBooms })
+          .eq('id', currentUser.id)
+
+        if (winnerError) throw winnerError
+
+        // 2. Pay Seller
+        // Need seller ID, but we only have username. In real app, store seller_id. 
+        // Workaround: Find seller by username (unique)
+        const { data: sellerData } = await supabase.from('users').select('id, tokens').eq('username', item.seller).single()
+        if (sellerData) {
+          await supabase.from('users').update({ tokens: sellerData.tokens + item.current_bid }).eq('id', sellerData.id)
+        }
+
+        // 3. Mark processed
+        await supabase.from('auction_items').update({ status: 'processed' }).eq('id', item.id)
+        alert("Claimed successfully! You received " + item.boom_name)
+
+      } else if (isSeller) {
+        // If nobody bid, seller reclaims item
+        if (!item.top_bidder) {
+          const newBooms = { ...currentUser.booms }
+          newBooms[item.boom_name] = (newBooms[item.boom_name] || 0) + 1
+
+          await supabase.from('users').update({ booms: newBooms }).eq('id', currentUser.id)
+          await supabase.from('auction_items').update({ status: 'processed' }).eq('id', item.id) // Or delete it
+          alert("Item reclaimed!")
+        } else {
+          // Winner exists but hasn't claimed? Logic gap. 
+          // For now, let's assume Winner must claim. Seller just waits.
+          alert("Winner must claim the item to finalize the transaction.")
+        }
       }
+
+    } catch (e: any) {
+      alert('Error claiming: ' + e.message)
     }
-
-  } catch (e: any) {
-    alert('Error claiming: ' + e.message)
+    setLoading(false)
   }
-  setLoading(false)
-}
 
-return (
-  <div className="space-y-6">
-    <div className="flex justify-between items-center">
-      <h1 className="text-4xl font-bold text-white">Auction House</h1>
-      <Button onClick={() => setShowCreateModal(true)} className="bg-purple-600 hover:bg-purple-700">
-        + Create Auction
-      </Button>
-    </div>
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-4xl font-bold text-white">Auction House</h1>
+        <Button onClick={() => setShowCreateModal(true)} className="bg-purple-600 hover:bg-purple-700">
+          + Create Auction
+        </Button>
+      </div>
 
-    {showCreateModal && (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-        <div className="bg-slate-900 border border-slate-700 p-6 rounded-lg w-full max-w-md">
-          <h2 className="text-2xl font-bold text-white mb-4">Create Auction</h2>
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-slate-700 p-6 rounded-lg w-full max-w-md">
+            <h2 className="text-2xl font-bold text-white mb-4">Create Auction</h2>
 
-          <div className="space-y-4">
-            <div>
-              <label className="text-white block mb-2">Select Boom</label>
-              <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto p-2 bg-black/20 rounded">
-                {currentUser?.booms && Object.keys(currentUser.booms).length > 0 ? (
-                  Object.entries(currentUser.booms).map(([boom, qty]) => (
-                    <Badge
-                      key={boom}
-                      onClick={() => setSelectedBoom(boom)}
-                      className={`cursor-pointer ${selectedBoom === boom ? 'bg-green-600' : 'bg-slate-700'} hover:bg-green-500`}
-                    >
-                      {boom} (x{qty})
-                    </Badge>
-                  ))
-                ) : <span className="text-gray-400">No Booms to sell</span>}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-4">
               <div>
-                <label className="text-white block mb-2">Start Price</label>
-                <input
-                  type="number"
-                  value={startingBid}
-                  onChange={e => setStartingBid(Number(e.target.value))}
-                  className="w-full bg-slate-800 text-white p-2 rounded"
-                  min={10}
-                />
+                <label className="text-white block mb-2">Select Boom</label>
+                <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto p-2 bg-black/20 rounded">
+                  {currentUser?.booms && Object.keys(currentUser.booms).length > 0 ? (
+                    Object.entries(currentUser.booms).map(([boom, qty]) => (
+                      <Badge
+                        key={boom}
+                        onClick={() => setSelectedBoom(boom)}
+                        className={`cursor-pointer ${selectedBoom === boom ? 'bg-green-600' : 'bg-slate-700'} hover:bg-green-500`}
+                      >
+                        {boom} (x{qty})
+                      </Badge>
+                    ))
+                  ) : <span className="text-gray-400">No Booms to sell</span>}
+                </div>
               </div>
-              <div>
-                <label className="text-white block mb-2">Duration (Hrs)</label>
-                <input
-                  type="number"
-                  value={duration}
-                  onChange={e => setDuration(Number(e.target.value))}
-                  className="w-full bg-slate-800 text-white p-2 rounded"
-                  min={1}
-                  max={24}
-                />
-              </div>
-            </div>
 
-            <div className="flex justify-end gap-2 mt-4">
-              <Button variant="outline" onClick={() => setShowCreateModal(false)}>Cancel</Button>
-              <Button onClick={createAuction} disabled={!selectedBoom || loading} className="bg-green-600">
-                {loading ? 'Creating...' : 'Create Auction'}
-              </Button>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-white block mb-2">Start Price</label>
+                  <input
+                    type="number"
+                    value={startingBid}
+                    onChange={e => setStartingBid(Number(e.target.value))}
+                    className="w-full bg-slate-800 text-white p-2 rounded"
+                    min={10}
+                  />
+                </div>
+                <div>
+                  <label className="text-white block mb-2">Duration (Hrs)</label>
+                  <input
+                    type="number"
+                    value={duration}
+                    onChange={e => setDuration(Number(e.target.value))}
+                    className="w-full bg-slate-800 text-white p-2 rounded"
+                    min={1}
+                    max={24}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 mt-4">
+                <Button variant="outline" onClick={() => setShowCreateModal(false)}>Cancel</Button>
+                <Button onClick={createAuction} disabled={!selectedBoom || loading} className="bg-green-600">
+                  {loading ? 'Creating...' : 'Create Auction'}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    )}
-
-    <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
-      <h2 className="text-2xl font-bold text-white mb-4">Active Auctions</h2>
-      {items.length === 0 ? (
-        <p className="text-white/70 text-center">No active auctions</p>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {items.map((item) => {
-            const ended = new Date(item.ends_at).getTime() < Date.now()
-            const isWinner = currentUser?.username === item.top_bidder
-            const isSeller = currentUser?.username === item.seller
-
-            if (item.status === 'processed') return null // Don't show completed ones
-
-            return (
-              <div key={item.id} className={`rounded-lg p-4 ${ended ? 'bg-red-900/40 border border-red-500' : 'bg-white/10'}`}>
-                <div className="flex items-center space-x-3 mb-3">
-                  <span className="text-3xl">{getBoomAvatar(item.boom_name)}</span>
-                  <div>
-                    <h3 className="text-white font-bold">{item.boom_name}</h3>
-                    <Badge className={`${getRarityColor(getBoomRarity(item.boom_name))} text-white text-xs`}>
-                      {getBoomRarity(item.boom_name)}
-                    </Badge>
-                  </div>
-                </div>
-                <p className="text-white/70">Seller: {item.seller}</p>
-                <p className="text-white">Current Bid: {item.current_bid} tokens</p>
-                <p className={`${ended ? 'text-red-400 font-bold' : 'text-white/70'}`}>
-                  Time Left: {timeLeftText(item.ends_at)}
-                </p>
-                {item.top_bidder && <p className="text-green-400 text-sm">Top Bidder: {item.top_bidder}</p>}
-
-                {!ended ? (
-                  <Button
-                    className="w-full mt-2 bg-green-600 hover:bg-green-700"
-                    onClick={() => placeBid(item)}
-                    disabled={isSeller}
-                  >
-                    Place Bid
-                  </Button>
-                ) : (
-                  <div className="mt-2">
-                    {isWinner && (
-                      <Button className="w-full bg-yellow-500 hover:bg-yellow-600 animate-pulse text-black font-bold" onClick={() => claimAuction(item)}>
-                        Claim Prize! 🎁
-                      </Button>
-                    )}
-                    {isSeller && !item.top_bidder && (
-                      <Button className="w-full bg-gray-500 hover:bg-gray-600" onClick={() => claimAuction(item)}>
-                        Reclaim Item ↩️
-                      </Button>
-                    )}
-                    {isSeller && item.top_bidder && !isWinner && (
-                      <p className="text-center text-yellow-200 text-sm">Waiting for winner to claim.</p>
-                    )}
-                    {!isWinner && !isSeller && (
-                      <p className="text-center text-gray-400 text-sm">Auction Ended</p>
-                    )}
-                  </div>
-                )}
-              </div>
-            )
-          })}
-        </div>
       )}
+
+      <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
+        <h2 className="text-2xl font-bold text-white mb-4">Active Auctions</h2>
+        {items.length === 0 ? (
+          <p className="text-white/70 text-center">No active auctions</p>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {items.map((item) => {
+              const ended = new Date(item.ends_at).getTime() < Date.now()
+              const isWinner = currentUser?.username === item.top_bidder
+              const isSeller = currentUser?.username === item.seller
+
+              if (item.status === 'processed') return null // Don't show completed ones
+
+              return (
+                <div key={item.id} className={`rounded-lg p-4 ${ended ? 'bg-red-900/40 border border-red-500' : 'bg-white/10'}`}>
+                  <div className="flex items-center space-x-3 mb-3">
+                    <span className="text-3xl">{getBoomAvatar(item.boom_name)}</span>
+                    <div>
+                      <h3 className="text-white font-bold">{item.boom_name}</h3>
+                      <Badge className={`${getRarityColor(getBoomRarity(item.boom_name))} text-white text-xs`}>
+                        {getBoomRarity(item.boom_name)}
+                      </Badge>
+                    </div>
+                  </div>
+                  <p className="text-white/70">Seller: {item.seller}</p>
+                  <p className="text-white">Current Bid: {item.current_bid} tokens</p>
+                  <p className={`${ended ? 'text-red-400 font-bold' : 'text-white/70'}`}>
+                    Time Left: {timeLeftText(item.ends_at)}
+                  </p>
+                  {item.top_bidder && <p className="text-green-400 text-sm">Top Bidder: {item.top_bidder}</p>}
+
+                  {!ended ? (
+                    <Button
+                      className="w-full mt-2 bg-green-600 hover:bg-green-700"
+                      onClick={() => placeBid(item)}
+                      disabled={isSeller}
+                    >
+                      Place Bid
+                    </Button>
+                  ) : (
+                    <div className="mt-2">
+                      {isWinner && (
+                        <Button className="w-full bg-yellow-500 hover:bg-yellow-600 animate-pulse text-black font-bold" onClick={() => claimAuction(item)}>
+                          Claim Prize! 🎁
+                        </Button>
+                      )}
+                      {isSeller && !item.top_bidder && (
+                        <Button className="w-full bg-gray-500 hover:bg-gray-600" onClick={() => claimAuction(item)}>
+                          Reclaim Item ↩️
+                        </Button>
+                      )}
+                      {isSeller && item.top_bidder && !isWinner && (
+                        <p className="text-center text-yellow-200 text-sm">Waiting for winner to claim.</p>
+                      )}
+                      {!isWinner && !isSeller && (
+                        <p className="text-center text-gray-400 text-sm">Auction Ended</p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
+      </div>
     </div>
-  </div>
-)
+  )
 }
