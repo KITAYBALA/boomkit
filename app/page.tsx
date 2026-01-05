@@ -626,6 +626,7 @@ export default function BoomkitGame() {
   const [showEmailEdit, setShowEmailEdit] = useState(false)
   const [showPasswordEdit, setShowPasswordEdit] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [staffSearchQuery, setStaffSearchQuery] = useState("") // Added for Staff search
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false) // Fixed typo from setShowShowPrivacyPolicy
   const [showTermsOfService, setShowTermsOfService] = useState(false)
   const [newName, setNewName] = useState("")
@@ -2974,25 +2975,34 @@ export default function BoomkitGame() {
                   <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
                     <div className="flex justify-between items-center mb-4">
                       <h2 className="text-2xl font-bold text-white">All Users</h2>
-                      <div className="space-x-2">
-                        {isOwner() && (
-                          <>
-                            <Button
-                              onClick={() => setShowRoleManager(true)}
-                              className="bg-purple-600 hover:bg-purple-700"
-                            >
-                              Create Custom Role
-                            </Button>
-                            <Button onClick={() => setShowBadgeManager(true)} className="bg-blue-600 hover:bg-blue-700">
-                              Manage Badges
-                            </Button>
-                          </>
-                        )}
+                      <div className="flex items-center gap-2">
+                        <Input
+                          placeholder="Search users..."
+                          value={staffSearchQuery}
+                          onChange={(e) => setStaffSearchQuery(e.target.value)}
+                          className="w-48 bg-white/20 border-white/30 text-white placeholder:text-white/50"
+                        />
+                        <div className="space-x-2">
+                          {isOwner() && (
+                            <>
+                              <Button
+                                onClick={() => setShowRoleManager(true)}
+                                className="bg-purple-600 hover:bg-purple-700"
+                              >
+                                Create Custom Role
+                              </Button>
+                              <Button onClick={() => setShowBadgeManager(true)} className="bg-blue-600 hover:bg-blue-700">
+                                Manage Badges
+                              </Button>
+                            </>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <div className="space-y-3">
                       {users
                         .filter((u) => !u.isOwner) // Exclude the owner from this list
+                        .filter((u) => u.username.toLowerCase().includes(staffSearchQuery.toLowerCase())) // Filter by search query
                         .map((user) => {
                           const userRole =
                             DEFAULT_ROLES.find((r) => r.id === user.role) || customRoles.find((r) => r.id === user.role)

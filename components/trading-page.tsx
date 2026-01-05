@@ -63,6 +63,7 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
   const [loading, setLoading] = useState(false)
   const [activeTab, setActiveTab] = useState<"incoming" | "outgoing" | "history">("incoming")
   const [newTradeAlert, setNewTradeAlert] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("") // Added for user search
 
   const fetchTrades = useCallback(async () => {
     const { data, error } = await supabase
@@ -106,8 +107,8 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
             try {
               const audio = new Audio("/notification.mp3")
               audio.volume = 0.5
-              audio.play().catch(() => {})
-            } catch {}
+              audio.play().catch(() => { })
+            } catch { }
             setTimeout(() => setNewTradeAlert(false), 5000)
           }
         }
@@ -444,18 +445,28 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
               {!selectedUser ? (
                 <div>
                   <h3 className="text-white font-medium mb-3">Select a player to trade with:</h3>
+                  <div className="mb-4">
+                    <Input
+                      placeholder="Search users..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="bg-white/10 border-white/20 text-white"
+                    />
+                  </div>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-48 overflow-y-auto">
-                    {otherUsers.map((user) => (
-                      <Button
-                        key={user.id}
-                        variant="outline"
-                        onClick={() => setSelectedUser(user)}
-                        className="justify-start"
-                      >
-                        <UserIcon className="h-4 w-4 mr-2" />
-                        {user.username}
-                      </Button>
-                    ))}
+                    {otherUsers
+                      .filter((u) => u.username.toLowerCase().includes(searchQuery.toLowerCase()))
+                      .map((user) => (
+                        <Button
+                          key={user.id}
+                          variant="outline"
+                          onClick={() => setSelectedUser(user)}
+                          className="justify-start"
+                        >
+                          <UserIcon className="h-4 w-4 mr-2" />
+                          {user.username}
+                        </Button>
+                      ))}
                   </div>
                 </div>
               ) : (
