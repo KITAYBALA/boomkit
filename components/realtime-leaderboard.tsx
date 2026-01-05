@@ -6,7 +6,6 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { TrophyIcon } from "lucide-react"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 interface LeaderboardUser {
   id: string
@@ -22,7 +21,6 @@ interface LeaderboardUser {
 export default function RealtimeLeaderboard() {
   const [users, setUsers] = useState<LeaderboardUser[]>([])
   const [loading, setLoading] = useState(true)
-  const [sortBy, setSortBy] = useState<"tokens" | "packs">("tokens")
 
   useEffect(() => {
     const supabase = getSupabaseBrowserClient()
@@ -31,8 +29,9 @@ export default function RealtimeLeaderboard() {
       const { data, error } = await supabase
         .from("users")
         .select("id, username, tokens, boom_score, profile_picture, role, badges, packs_opened")
+        .eq("is_banned", false)
         .order("tokens", { ascending: false })
-        .limit(50)
+        .limit(10)
 
       if (error) {
         console.error("[v0] Error fetching leaderboard:", error)
@@ -76,14 +75,6 @@ export default function RealtimeLeaderboard() {
     return `#${index + 1}`
   }
 
-  const sortedUsers = [...users].sort((a, b) => {
-    if (sortBy === "tokens") {
-      return b.tokens - a.tokens
-    } else {
-      return (b.packs_opened || 0) - (a.packs_opened || 0)
-    }
-  })
-
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -94,27 +85,21 @@ export default function RealtimeLeaderboard() {
 
   return (
     <div className="space-y-4">
-      <Tabs defaultValue="tokens" onValueChange={(v) => setSortBy(v as "tokens" | "packs")}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="tokens">💰 Most Tokens</TabsTrigger>
-          <TabsTrigger value="packs">📦 Most Packs</TabsTrigger>
-        </TabsList>
-      </Tabs>
+      {/* Tabs removed - leaderboard is now tokens-only */}
 
       <ScrollArea className="h-[500px] pr-4">
         <div className="space-y-2">
-          {sortedUsers.length === 0 ? (
+          {users.length === 0 ? (
             <div className="text-center text-muted-foreground p-8">
               <TrophyIcon className="mx-auto h-12 w-12 mb-4 opacity-50" />
               <p>No players yet. Be the first!</p>
             </div>
           ) : (
-            sortedUsers.map((user, index) => (
+            users.map((user, index) => (
               <div
                 key={user.id}
-                className={`flex items-center gap-3 p-3 rounded-lg ${
-                  index < 3 ? "bg-primary/10 border border-primary/20" : "bg-muted/50"
-                }`}
+                className={`flex items-center gap-3 p-3 rounded-lg ${index < 3 ? "bg-primary/10 border border-primary/20" : "bg-muted/50"
+                  }`}
               >
                 <div className="text-2xl font-bold w-12 text-center">{getMedalEmoji(index)}</div>
                 <Avatar className="h-12 w-12 border-2 border-primary">
