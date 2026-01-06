@@ -24,7 +24,10 @@ import {
   CameraIcon,
   XIcon,
   MenuIcon,
-  CreditCardIcon, // Added for Shop
+  XIcon,
+  MenuIcon,
+  CreditCardIcon,
+  PencilIcon, // Added for Edit User
 } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 
@@ -668,8 +671,13 @@ export default function BoomkitGame() {
   const [muteDuration, setMuteDuration] = useState("1") // in hours
   const [banReason, setBanReason] = useState("")
 
+  // Edit User State
+  const [showEditUserDialog, setShowEditUserDialog] = useState(false)
+  const [editTokenValue, setEditTokenValue] = useState("")
+  const [userToEdit, setUserToEdit] = useState<GameUser | null>(null)
+
   // Secret owner access code
-  const SECRET_OWNER_CODE = "OKTAY2024BOOMKIT"
+
 
   // Registration form state
   const [registerForm, setRegisterForm] = useState({
@@ -1104,54 +1112,11 @@ export default function BoomkitGame() {
       return
     }
 
-    if (ownerAccessCode === SECRET_OWNER_CODE) {
-      // Dummy data for owner, will be replaced by actual Supabase data if owner exists
-      const allBooms: { [key: string]: number } = {}
-      PACKS.forEach((pack) => {
-        pack.booms.forEach((boom) => {
-          allBooms[boom.name] = 5
-        })
-      })
-
-      const ownerUser: GameUser = {
-        id: "owner", // Dummy ID, will be replaced by actual Supabase ID if owner logs in
-        username: "Oktay",
-        email: "oktay.abdullazada@gmail.com",
-        age: 25,
-        tokens: 999999,
-        dailyTokens: 0,
-        packs: PACKS.map((pack) => pack.id),
-        booms: allBooms,
-        isOwner: true,
-        isBanned: false,
-        isMuted: false,
-        status: "approved",
-        reason: "",
-        role: "owner",
-        joinDate: new Date().toLocaleDateString("en-US", {
-          weekday: "long",
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        }),
-        boomScore: 999,
-        totalValue: 50000,
-        profilePicture: "👑",
-        isPlusUser: true,
-        nameColor: "rainbow",
-        bannerColor: "rainbow",
-        lastDailySpin: "",
-        badges: ["developer", "og"],
-        lastSeen: Date.now(),
-        packsOpened: PACKS.length * 5, // Initialize with a reasonable value
-      }
-      updateAndPersistCurrentUser(ownerUser)
-      setCurrentView("game")
-    } else {
-      alert("Invalid access code!")
-      setOwnerAccessCode("")
-    }
+    // Fallback if authorized but not master key (should rely on standard login)
+    alert("Please log in using the standard Login page with your credentials.")
+    setOwnerAccessCode("")
   }
+
 
   // Handle registration - SERVER-SIDE AUTHENTICATION
   const handleRegister = async (e: React.FormEvent) => {
@@ -1890,6 +1855,40 @@ export default function BoomkitGame() {
       return u
     })
     updateAndPersistUsers(updatedUsers)
+  }
+
+  // Edit User Functions
+  const openEditUserDialog = (user: GameUser) => {
+    setUserToEdit(user)
+    setEditTokenValue(user.tokens.toString())
+    setShowEditUserDialog(true)
+  }
+
+  const handleSaveUserTokens = async () => {
+    if (!userToEdit) return
+
+    const newTokens = parseInt(editTokenValue)
+    if (isNaN(newTokens)) {
+      alert("Invalid token amount")
+      return
+    }
+
+    const updatedUsers = users.map((u) => (u.id === userToEdit.id ? { ...u, tokens: newTokens } : u))
+    updateAndPersistUsers(updatedUsers)
+
+    // Update Supabase
+    if (supabase) {
+      const { error } = await supabase.from("users").update({ tokens: newTokens }).eq("id", userToEdit.id)
+      if (error) {
+        console.error("Error updating tokens:", error)
+        alert("Failed to update tokens in database")
+        return
+      }
+    }
+
+    setShowEditUserDialog(false)
+    setUserToEdit(null)
+    alert(`Updated tokens for ${userToEdit.username} to ${newTokens}`)
   }
 
   // Quick role assignment
