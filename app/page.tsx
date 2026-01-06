@@ -3084,6 +3084,17 @@ export default function BoomkitGame() {
                               <div className="flex items-center space-x-2">
                                 {(currentUser?.role === "admin" || currentUser?.role === "tester" || isOwner()) && ( // Added tester role to staff actions
                                   <>
+                                    {isOwner() && (
+                                      <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        onClick={() => openEditUserDialog(user)}
+                                        className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/20"
+                                        title="Edit User Tokens"
+                                      >
+                                        <PencilIcon className="h-4 w-4" />
+                                      </Button>
+                                    )}
                                     <select
                                       value={user.role}
                                       onChange={(e) => quickAssignRole(user.id, e.target.value)}
@@ -3799,6 +3810,36 @@ export default function BoomkitGame() {
               <Button onClick={() => setShowUserStats(false)} className="w-full bg-gray-600 hover:bg-gray-700">
                 Close
               </Button>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+      {showEditUserDialog && userToEdit && (
+        <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
+          <Card className="w-full max-w-md p-6 bg-slate-900 border-purple-500/50">
+            <CardHeader>
+              <CardTitle className="text-2xl font-bold text-purple-400">Edit User: {userToEdit.username}</CardTitle>
+              <CardDescription className="text-slate-400">Manage user tokens and details.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label htmlFor="editTokens" className="text-white">User Tokens</Label>
+                <Input
+                  id="editTokens"
+                  type="number"
+                  value={editTokenValue}
+                  onChange={(e) => setEditTokenValue(e.target.value)}
+                  className="bg-black/50 border-purple-500/30 text-white"
+                />
+              </div>
+              <div className="flex justify-end space-x-2 mt-4">
+                <Button variant="ghost" onClick={() => setShowEditUserDialog(false)} className="text-slate-400 hover:text-white">
+                  Cancel
+                </Button>
+                <Button onClick={handleSaveUserTokens} className="bg-purple-600 hover:bg-purple-700">
+                  Save Changes
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
