@@ -24,10 +24,8 @@ import {
   CameraIcon,
   XIcon,
   MenuIcon,
-  XIcon,
-  MenuIcon,
   CreditCardIcon,
-  PencilIcon, // Added for Edit User
+  PencilIcon,
 } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 
