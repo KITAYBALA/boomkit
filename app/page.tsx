@@ -2938,7 +2938,6 @@ export default function BoomkitGame() {
                     </div>
                     <div className="space-y-3">
                       {users
-                        .filter((u) => !u.isOwner) // Exclude the owner from this list
                         .filter((u) => u.username.toLowerCase().includes(staffSearchQuery.toLowerCase())) // Filter by search query
                         .map((user) => {
                           const userRole = DEFAULT_ROLES.find((r) => r.id === user.role)
@@ -2992,7 +2991,9 @@ export default function BoomkitGame() {
                                       className="bg-white/20 text-white text-sm rounded px-2 py-1 border border-white/30"
                                       disabled={!isOwner()} // Only owner can change roles freely
                                     >
-                                      {DEFAULT_ROLES.filter((role) => role.id !== "owner").map((role) => (
+                                      {DEFAULT_ROLES.filter(
+                                        (role) => role.id !== "owner" || (isOwner() && user.id === currentUser?.id),
+                                      ).map((role) => (
                                         <option key={role.id} value={role.id} className="bg-gray-800 text-white">
                                           {role.name}
                                         </option>
