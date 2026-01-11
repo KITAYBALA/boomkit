@@ -166,8 +166,6 @@ const authorizeCurrentSystem = (): void => {
   console.log("System authorized with signature:", signature)
 }
 
-// Your master authorization key (change this to something unique)
-const MASTER_AUTHORIZATION_KEY = "OKTAY_MASTER_2024_BOOMKIT_SECURE"
 
 interface GameUser {
   id: string
@@ -639,11 +637,7 @@ export default function BoomkitGame() {
   const [showUserStats, setShowUserStats] = useState(false)
   const [selectedUserStats, setSelectedUserStats] = useState<GameUser | null>(null)
   const [systemSignature, setSystemSignature] = useState<string>("")
-  const [customRoles, setCustomRoles] = useState<CustomRole[]>([])
-  const [showRoleManager, setShowRoleManager] = useState(false)
-  const [newRoleName, setNewRoleName] = useState("")
-  const [newRoleColor, setNewRoleColor] = useState("bg-blue-500")
-  const [selectedUserForRole, setSelectedUserForRole] = useState("")
+  // Custom roles feature removed for security reasons
 
   const supabase = useMemo(() => (typeof window !== "undefined" ? getSupabaseBrowserClient() : null), [])
   const router = useRouter()
@@ -841,8 +835,6 @@ export default function BoomkitGame() {
       const storedChat = localStorage.getItem("boomkit_chat_messages")
       if (storedChat) setChatMessages(JSON.parse(storedChat))
 
-      const storedCustomRoles = localStorage.getItem("boomkit_custom_roles")
-      if (storedCustomRoles) setCustomRoles(JSON.parse(storedCustomRoles))
     }
   }, [])
 
@@ -979,37 +971,7 @@ export default function BoomkitGame() {
     return () => clearInterval(interval)
   }, [currentUser, updateAndPersistCurrentUser, supabase])
 
-  useEffect(() => {
-    const fetchCustomRolesFromSupabase = async () => {
-      try {
-        const { data, error } = await supabase.from("custom_roles").select("*")
-
-        if (error) {
-          // Table might not exist yet, that's okay
-          console.warn("[v0] Custom roles table not found or empty:", error.message)
-          return
-        }
-
-        if (data && data.length > 0) {
-          const mappedRoles = data.map((r: any) => ({
-            id: r.id,
-            name: r.name,
-            color: r.color,
-            permissions: r.permissions || [], // Ensure permissions is always an array
-          }))
-          setCustomRoles(mappedRoles)
-          localStorage.setItem("boomkit_custom_roles", JSON.stringify(mappedRoles))
-        }
-      } catch (err) {
-        console.log("[v0] Failed to fetch custom roles:", err)
-      }
-    }
-
-    // Only fetch if supabase client is available
-    if (supabase) {
-      fetchCustomRolesFromSupabase()
-    }
-  }, [supabase])
+  // Custom roles feature removed for security - no longer loading from Supabase
 
   // Listen for storage changes to sync across tabs
   useEffect(() => {
@@ -1091,28 +1053,10 @@ export default function BoomkitGame() {
     }, 2000)
   }
 
-  // Handle owner access code
+  // Handle owner access - redirects to login (master key removed for security)
   const handleOwnerAccess = (e: React.FormEvent) => {
     e.preventDefault()
-
-    if (ownerAccessCode === MASTER_AUTHORIZATION_KEY) {
-      authorizeCurrentSystem()
-      alert("System authorized! You can now use the regular owner access code.")
-      setOwnerAccessCode("")
-      return
-    }
-
-    if (!isAuthorizedSystem()) {
-      alert(
-        `🚫 ACCESS DENIED 🚫\n\nThis computer is not authorized for owner access.\n\nSystem ID: ${systemSignature.substring(0, 12)}...\n\nContact the system administrator for authorization.`,
-      )
-      setOwnerAccessCode("")
-      return
-    }
-
-    // Fallback if authorized but not master key (should rely on standard login)
-    alert("Please log in using the standard Login page with your credentials.")
-    setOwnerAccessCode("")
+    setCurrentView("login")
   }
 
 
@@ -2062,62 +2006,11 @@ export default function BoomkitGame() {
     }
   }
 
-  // Create custom role
-  const createCustomRole = async () => {
-    if (!newRoleName.trim() || !selectedUserForRole) {
-      alert("Please enter role name and select a user!")
-      return
-    }
-
-    const targetUser = users.find((u) => u.username === selectedUserForRole)
-    if (!targetUser) {
-      alert("User not found!")
-      return
-    }
-
-    const newRole: CustomRole = {
-      id: `custom_${Date.now()}`,
-      name: newRoleName,
-      color: newRoleColor,
-      assignedBy: currentUser?.username || "System",
-      assignedDate: new Date().toLocaleDateString(),
-      permissions: [], // Default to no permissions, can be expanded later
-    }
-
-    const updatedCustomRoles = [...customRoles, newRole]
-    setCustomRoles(updatedCustomRoles)
-    localStorage.setItem("boomkit_custom_roles", JSON.stringify(updatedCustomRoles))
-
-    // Also save custom roles to Supabase
-    try {
-      const supabaseClient = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      )
-      await supabaseClient.from("custom_roles").insert({
-        id: newRole.id,
-        name: newRole.name,
-        color: newRole.color,
-        assigned_by: newRole.assignedBy,
-        assigned_date: newRole.assignedDate,
-        // permissions: newRole.permissions // Not directly saving permissions here
-      })
-    } catch (err) {
-      console.error("Failed to save custom role to Supabase:", err)
-    }
-
-    const updatedUsers = users.map((u) => (u.id === targetUser.id ? { ...u, role: newRole.id } : u))
-    updateAndPersistUsers(updatedUsers)
-
-    setNewRoleName("")
-    setNewRoleColor("bg-blue-500")
-    setSelectedUserForRole("")
-    alert(`Custom role "${newRole.name}" created and assigned to ${targetUser.username}!`)
-  }
+  // Custom roles feature removed for security
 
   // Get user role name
   const getUserRoleName = (user: GameUser) => {
-    const role = DEFAULT_ROLES.find((r) => r.id === user.role) || customRoles.find((r) => r.id === user.role)
+    const role = DEFAULT_ROLES.find((r) => r.id === user.role)
     return role?.name || "Player"
   }
 
@@ -3895,55 +3788,7 @@ export default function BoomkitGame() {
           </Card>
         </div>
       )}
-      {showRoleManager && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
-          <Card className="w-full max-w-md p-6">
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold">Create Custom Role</CardTitle>
-              <CardDescription>Define a new role and assign it to a user</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Label htmlFor="roleName">Role Name</Label>
-              <Input
-                id="roleName"
-                placeholder="Role Name"
-                value={newRoleName}
-                onChange={(e) => setNewRoleName(e.target.value)}
-              />
-
-              <Label htmlFor="roleColor">Role Color</Label>
-              <Input
-                type="color"
-                id="roleColor"
-                value={newRoleColor}
-                onChange={(e) => setNewRoleColor(e.target.value)}
-              />
-
-              <Label htmlFor="userForRole">Assign to User</Label>
-              <select
-                id="userForRole"
-                value={selectedUserForRole}
-                onChange={(e) => setSelectedUserForRole(e.target.value)}
-                className="w-full bg-white/20 text-white text-sm rounded px-2 py-1 border border-white/30"
-              >
-                <option value="">Select User</option>
-                {users.map((user) => (
-                  <option key={user.id} value={user.username} className="bg-gray-800 text-white">
-                    {user.username}
-                  </option>
-                ))}
-              </select>
-
-              <Button onClick={createCustomRole} className="w-full bg-green-600 hover:bg-green-700">
-                Create Role
-              </Button>
-              <Button onClick={() => setShowRoleManager(false)} className="w-full bg-gray-600 hover:bg-gray-700">
-                Cancel
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      {/* Custom role manager removed for security */}
       {showBadgeManager && (
         <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
           <Card className="w-full max-w-md p-6">

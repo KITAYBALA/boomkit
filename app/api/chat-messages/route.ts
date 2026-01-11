@@ -19,6 +19,53 @@ export async function GET() {
   }
 }
 
+// Profanity word list for filtering - comprehensive list of inappropriate words
+const PROFANITY_LIST = [
+  // Common swear words (lowercase for case-insensitive matching)
+  "fuck", "shit", "ass", "asshole", "bitch", "bastard", "damn", "dick", "cock",
+  "pussy", "cunt", "whore", "slut", "fag", "faggot", "nigger", "nigga", "retard",
+  "rape", "rapist", "kys", "kill yourself", "suicide", "piss", "prick", "wanker",
+  "twat", "bollocks", "bugger", "arse", "motherfucker", "fucker", "fucking",
+  "shitty", "bullshit", "horseshit", "dumbass", "dipshit", "jackass",
+  // Variations and common obfuscations
+  "f*ck", "sh*t", "b*tch", "a$$", "d!ck", "p*ssy", "c*nt",
+]
+
+// Check if message contains profanity
+function containsProfanity(message: string): boolean {
+  const lowerMessage = message.toLowerCase()
+
+  // Check for exact word matches (with word boundaries)
+  for (const word of PROFANITY_LIST) {
+    // Create a regex that matches the word with word boundaries
+    const regex = new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i')
+    if (regex.test(lowerMessage)) {
+      return true
+    }
+  }
+
+  // Also check for letter substitutions (l33t speak)
+  const normalizedMessage = lowerMessage
+    .replace(/0/g, 'o')
+    .replace(/1/g, 'i')
+    .replace(/3/g, 'e')
+    .replace(/4/g, 'a')
+    .replace(/5/g, 's')
+    .replace(/7/g, 't')
+    .replace(/@/g, 'a')
+    .replace(/\$/g, 's')
+    .replace(/!/g, 'i')
+
+  for (const word of PROFANITY_LIST) {
+    const regex = new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i')
+    if (regex.test(normalizedMessage)) {
+      return true
+    }
+  }
+
+  return false
+}
+
 export async function POST(request: Request) {
   try {
     const { username, message, role } = await request.json()
@@ -29,7 +76,7 @@ export async function POST(request: Request) {
     // Check if user is muted before allowing message
     const { data: userData, error: userError } = await supabase
       .from("users")
-      .select("is_muted")
+      .select("id, is_muted, mute_expiry")
       .ilike("username", username)
       .maybeSingle()
 
@@ -40,13 +87,54 @@ export async function POST(request: Request) {
 
     if (!userData) {
       console.error("[v0] User not found for chat verification:", username)
-      // If we can't find the user, we should probably block the message or at least know why
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
 
-    // MUTE ENFORCEMENT: Block muted users from sending messages
-    if (userData?.is_muted) {
+    // Check if mute has expired
+    if (userData.is_muted && userData.mute_expiry) {
+      const muteExpiry = new Date(userData.mute_expiry)
+      if (muteExpiry <= new Date()) {
+        // Mute has expired, unmute the user
+        await supabase
+          .from("users")
+          .update({ is_muted: false, mute_expiry: null })
+          .eq("id", userData.id)
+        console.log("[v0] Auto-unmuted user (mute expired):", username)
+      } else {
+        // Still muted
+        return NextResponse.json({ error: "MUTED" }, { status: 403 })
+      }
+    } else if (userData.is_muted) {
+      // Permanently muted (no expiry)
       return NextResponse.json({ error: "MUTED" }, { status: 403 })
+    }
+
+    // PROFANITY FILTER: Check message for inappropriate content
+    if (containsProfanity(message)) {
+      console.log("[v0] Profanity detected in message from:", username)
+
+      // Auto-mute the user for 1 hour
+      const muteExpiry = new Date()
+      muteExpiry.setHours(muteExpiry.getHours() + 1)
+
+      const { error: muteError } = await supabase
+        .from("users")
+        .update({
+          is_muted: true,
+          mute_expiry: muteExpiry.toISOString()
+        })
+        .eq("id", userData.id)
+
+      if (muteError) {
+        console.error("[v0] Error auto-muting user:", muteError)
+      } else {
+        console.log("[v0] Auto-muted user for 1 hour due to profanity:", username)
+      }
+
+      return NextResponse.json({
+        error: "PROFANITY_DETECTED",
+        message: "Your message contained inappropriate language. You have been muted for 1 hour."
+      }, { status: 403 })
     }
 
     const { data, error } = await supabase.from("chat_messages").insert([{ username, message, role }]).select()
