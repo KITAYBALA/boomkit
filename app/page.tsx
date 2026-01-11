@@ -1722,8 +1722,7 @@ export default function BoomkitGame() {
       return
     }
 
-    const userRole =
-      DEFAULT_ROLES.find((r) => r.id === currentUser.role) || customRoles.find((r) => r.id === currentUser.role)
+    const userRole = DEFAULT_ROLES.find((r) => r.id === currentUser.role)
 
     const message: ChatMessage = {
       id: Date.now().toString(),
@@ -2942,8 +2941,7 @@ export default function BoomkitGame() {
                         .filter((u) => !u.isOwner) // Exclude the owner from this list
                         .filter((u) => u.username.toLowerCase().includes(staffSearchQuery.toLowerCase())) // Filter by search query
                         .map((user) => {
-                          const userRole =
-                            DEFAULT_ROLES.find((r) => r.id === user.role) || customRoles.find((r) => r.id === user.role)
+                          const userRole = DEFAULT_ROLES.find((r) => r.id === user.role)
                           const isActive = Date.now() - user.lastSeen < 300000
                           return (
                             <div key={user.id} className="flex items-center justify-between p-3 bg-white/10 rounded">
@@ -2995,11 +2993,6 @@ export default function BoomkitGame() {
                                       disabled={!isOwner()} // Only owner can change roles freely
                                     >
                                       {DEFAULT_ROLES.filter((role) => role.id !== "owner").map((role) => (
-                                        <option key={role.id} value={role.id} className="bg-gray-800 text-white">
-                                          {role.name}
-                                        </option>
-                                      ))}
-                                      {customRoles.map((role) => (
                                         <option key={role.id} value={role.id} className="bg-gray-800 text-white">
                                           {role.name}
                                         </option>
