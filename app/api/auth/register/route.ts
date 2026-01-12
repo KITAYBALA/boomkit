@@ -111,6 +111,23 @@ export async function POST(request: NextRequest) {
       if (DEBUG_AUTH) {
         console.error('[AUTH DEBUG] Insert error details:', JSON.stringify(insertError, null, 2))
       }
+
+      // Handle unique constraint violations gracefully
+      if (insertError.code === '23505') { // Postgres unique_violation code
+        if (insertError.message?.includes('users_email_key') || insertError.message?.includes('email')) {
+          return NextResponse.json({
+            success: false,
+            message: 'This email is already registered. Please login or use a different email.'
+          }, { status: 400 })
+        }
+        if (insertError.message?.includes('users_username_key') || insertError.message?.includes('username')) {
+          return NextResponse.json({
+            success: false,
+            message: 'This username is already taken. Please choose another one.'
+          }, { status: 400 })
+        }
+      }
+
       // Return the actual error message for debugging
       return NextResponse.json({
         success: false,
