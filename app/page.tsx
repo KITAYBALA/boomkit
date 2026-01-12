@@ -875,7 +875,7 @@ export default function BoomkitGame() {
             bannerColor: u.banner_color || "from-purple-600 to-pink-600",
             lastDailySpin: u.last_daily_spin || null,
             badges: u.badges || [],
-            muteExpiry: u.mute__expiry || null,
+            muteExpiry: u.mute_expiry || null,
             banExpiry: u.ban_expiry || null,
             banReason: u.ban_reason || "",
             lastSeen: u.last_seen || Date.now(),
@@ -1856,41 +1856,17 @@ export default function BoomkitGame() {
 
     const userToUpdate = updatedUsers.find((u) => u.id === userId)
     if (userToUpdate) {
-      console.log("[v0] Directly syncing user role to Supabase:", userToUpdate.username, "role:", userToUpdate.role)
+      console.log("[v0] Syncing user role to Supabase:", userToUpdate.username, "role:", userToUpdate.role)
       try {
-        const { error } = await supabase.from("users").upsert(
-          {
-            id: userToUpdate.id,
-            username: userToUpdate.username,
-            email: userToUpdate.email || "",
-            age: userToUpdate.age || 18,
-            tokens: userToUpdate.tokens || 0,
-            daily_tokens: userToUpdate.dailyTokens || 0,
-            boom_score: userToUpdate.boomScore || 0,
-            total_value: userToUpdate.totalValue || 0,
+        // ONLY update the role and badges fields to avoid overwriting other data (tokens, pfp, etc.)
+        const { error } = await supabase
+          .from("users")
+          .update({
             role: userToUpdate.role,
-            status: userToUpdate.status || "approved",
-            reason: userToUpdate.reason || "",
-            join_date: userToUpdate.joinDate || new Date().toISOString().split("T")[0],
-            profile_picture: userToUpdate.profilePicture || "🎮",
-            is_owner: userToUpdate.isOwner || false,
-            is_banned: userToUpdate.isBanned || false,
-            is_muted: userToUpdate.isMuted || false,
-            is_plus_user: userToUpdate.isPlusUser || false,
-            mute_expiry: userToUpdate.muteExpiry || null,
-            ban_expiry: userToUpdate.banExpiry || null,
-            ban_reason: userToUpdate.banReason || null,
-            name_color: userToUpdate.nameColor || "text-white",
-            banner_color: userToUpdate.bannerColor || "from-purple-600 to-blue-600",
-            last_daily_spin: userToUpdate.lastDailySpin || "",
-            packs_opened: userToUpdate.packsOpened || 0,
-            badges: userToUpdate.badges || [],
-            packs: userToUpdate.packs || [],
-            booms: userToUpdate.booms || {},
-            last_seen: userToUpdate.lastSeen || Date.now(),
-          },
-          { onConflict: "id" },
-        )
+            badges: userToUpdate.badges,
+          })
+          .eq("id", userId)
+
         if (error) {
           console.error("[v0] Error syncing role to Supabase:", error)
           alert(`Error saving role: ${error.message}`)
