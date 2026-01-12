@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     const newUser = {
       id: Date.now().toString(),
       username,
-      email: email || '',
+      email: email || null,
       age: Number.parseInt(age),
       password_hash: passwordHash,
       password_reset_required: false,
