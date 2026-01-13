@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     const newUser = {
       id: Date.now().toString(),
       username,
-      email: email || null,
+      email: email || `no_email_${username}_${Date.now()}@boomkit.local`,
       age: Number.parseInt(age),
       password_hash: passwordHash,
       password_reset_required: false,
