@@ -1,4 +1,3 @@
-
 // Comprehensive multilingual profanity list
 // Includes variations, common obfuscations, and words from multiple languages
 
