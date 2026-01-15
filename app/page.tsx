@@ -3900,25 +3900,6 @@ export default function BoomkitGame() {
                 Sell for {getBoomSellPrice(selectedBoom)} tokens
               </Button>
 
-              <Label htmlFor="auctionPrice">Starting Bid</Label>
-              <Input
-                id="auctionPrice"
-                placeholder="Starting Bid"
-                value={auctionPrice}
-                onChange={(e) => setAuctionPrice(e.target.value)}
-              />
-
-              <Label htmlFor="auctionDuration">Duration (hours)</Label>
-              <Input
-                id="auctionDuration"
-                placeholder="Duration"
-                value={auctionDuration}
-                onChange={(e) => setAuctionDuration(e.target.value)}
-              />
-
-              <Button onClick={handleAuctionList} className="w-full bg-green-600 hover:bg-green-700">
-                List on Auction House
-              </Button>
               <Button onClick={() => setShowBoomAction(false)} className="w-full bg-gray-600 hover:bg-gray-700">
                 Cancel
               </Button>

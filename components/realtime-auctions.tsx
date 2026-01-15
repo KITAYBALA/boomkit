@@ -280,21 +280,25 @@ export default function RealtimeAuctions({
         alert("Claimed successfully! You received " + item.boom_name)
 
       } else if (isSeller) {
-        // If nobody bid, seller reclaims item
         if (!item.top_bidder) {
-          const newBooms = { ...currentUser.booms }
-          newBooms[item.boom_name] = (newBooms[item.boom_name] || 0) + 1
+          // Seller reclaims item (no bids)
+          const { error: rpcError } = await supabase.rpc('reclaim_auction_item', {
+            p_auction_id: item.id
+          })
 
-          await supabase.from('users').update({ booms: newBooms }).eq('id', currentUser.id)
-          await supabase.from('auction_items').update({ status: 'processed' }).eq('id', item.id) // Or delete it
-          alert("Item reclaimed!")
+          if (rpcError) {
+            console.error("RPC Error:", rpcError)
+            throw rpcError
+          }
+
+          alert("Item reclaimed successfully!")
+          // Subscription will auto-refresh
         } else {
           // Winner exists but hasn't claimed? Logic gap. 
           // For now, let's assume Winner must claim. Seller just waits.
           alert("Winner must claim the item to finalize the transaction.")
         }
       }
-
     } catch (e: any) {
       alert('Error claiming: ' + e.message)
     }
