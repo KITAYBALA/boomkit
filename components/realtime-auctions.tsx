@@ -18,6 +18,7 @@ type Props = {
   getBoomAvatar: (name: string) => string
   getBoomRarity: (name: string) => string
   getRarityColor: (rarity: string) => string
+  onAuctionCreated?: () => void
 }
 
 type DbAuction = {
@@ -47,6 +48,7 @@ export default function RealtimeAuctions({
   getBoomAvatar,
   getBoomRarity,
   getRarityColor,
+  onAuctionCreated,
 }: Props) {
   const supabase = useMemo(() => getSupabaseBrowserClient(), [])
   const [items, setItems] = useState<DbAuction[]>([])
@@ -203,6 +205,7 @@ export default function RealtimeAuctions({
         alert('Auction created!')
         setShowCreateModal(false)
         setSelectedBoom("")
+        if (onAuctionCreated) onAuctionCreated()
       }
     } else {
       // Local Storage Logic

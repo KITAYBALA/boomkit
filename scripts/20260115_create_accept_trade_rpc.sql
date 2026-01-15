@@ -108,13 +108,13 @@ BEGIN
   UPDATE users 
   SET 
     tokens = tokens - v_trade.sender_tokens + v_trade.receiver_tokens,
-    booms = v_sender_booms
+    booms = COALESCE(v_sender_booms, '{}'::jsonb)
   WHERE id = v_trade.sender_id;
 
   UPDATE users 
   SET 
     tokens = tokens - v_trade.receiver_tokens + v_trade.sender_tokens,
-    booms = v_receiver_booms
+    booms = COALESCE(v_receiver_booms, '{}'::jsonb)
   WHERE id = v_trade.receiver_id;
 
   -- Update Trade Status

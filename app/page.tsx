@@ -1627,6 +1627,7 @@ export default function BoomkitGame() {
           seller: currentUser.username,
           current_bid: startingBid,
           ends_at: endsAt,
+          status: "active",
         })
         if (error) throw error
         alert(`Listed ${selectedBoom} with starting bid of ${startingBid} tokens!`)
@@ -2838,6 +2839,50 @@ export default function BoomkitGame() {
                 getBoomAvatar={getBoomAvatar}
                 getBoomRarity={getBoomRarity}
                 getRarityColor={getRarityColor}
+                onAuctionCreated={() => {
+                  // Re-fetch user to update inventory
+                  const fetchUser = async () => {
+                    if (!supabase || !currentUser) return
+                    const { data } = await supabase.from("users").select("*").eq("id", currentUser.id).single()
+                    if (data) {
+                      // Correctly map snake_case DB fields to camelCase GameUser fields
+                      const mappedUser: GameUser = {
+                        id: data.id,
+                        username: data.username,
+                        email: data.email,
+                        password: "",
+                        age: data.age || 0,
+                        tokens: data.tokens || 0,
+                        dailyTokens: data.daily_tokens || 0,
+                        packs: data.packs || [],
+                        booms: data.booms || {},
+                        isOwner: data.is_owner || false,
+                        isBanned: data.is_banned || false,
+                        isMuted: data.is_muted || false,
+                        status: data.status || "approved",
+                        reason: data.reason || "",
+                        role: data.role || "player",
+                        joinDate: data.join_date || new Date().toISOString(),
+                        boomScore: data.boom_score || 0,
+                        totalValue: data.total_value || 0,
+                        profilePicture: data.profile_picture || "",
+                        isPlusUser: data.is_plus_user || false,
+                        nameColor: data.name_color || "",
+                        bannerColor: data.banner_color || "from-purple-600 to-pink-600",
+                        lastDailySpin: data.last_daily_spin || null,
+                        badges: data.badges || [],
+                        muteExpiry: data.mute_expiry || null,
+                        banExpiry: data.ban_expiry || null,
+                        banReason: data.ban_reason || "",
+                        lastSeen: data.last_seen || Date.now(),
+                        packsOpened: data.packs_opened || 0,
+                      }
+                      setCurrentUser(mappedUser)
+                      localStorage.setItem("boomkit_current_user", JSON.stringify(mappedUser))
+                    }
+                  }
+                  fetchUser()
+                }}
               />
             )}
 

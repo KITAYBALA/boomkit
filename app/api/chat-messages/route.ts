@@ -140,18 +140,16 @@ export async function POST(request: Request) {
     // SLOWMODE CHECK (15 seconds)
     const { data: lastMessage } = await supabase
       .from("chat_messages")
-      .select("timestamp")
+      .select("inserted_at")
       .eq("username", username)
-      .order("timestamp", { ascending: false })
+      .order("inserted_at", { ascending: false })
       .limit(1)
       .single()
 
     if (lastMessage) {
-      const lastTime = new Date(lastMessage.timestamp).getTime() // Assuming stored as number or convertable
-      // Actually chat_messages timestamp is defined as number in types (see view_file types/supabase.ts)
-      // Wait, let's verify storage format. The type says `timestamp: number`.
-      // If it is stored as Date.now(), then:
-      const timeDiff = Date.now() - lastMessage.timestamp
+      // Supabase returns inserted_at as an ISO string (e.g., "2023-01-01T12:00:00.000Z")
+      const lastTime = new Date(lastMessage.inserted_at).getTime()
+      const timeDiff = Date.now() - lastTime
       if (timeDiff < 15000) {
         const waitTime = Math.ceil((15000 - timeDiff) / 1000)
         return NextResponse.json({
