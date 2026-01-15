@@ -281,158 +281,164 @@ export default function RealtimeAuctions({
 
       } else if (isSeller) {
         // If nobody bid, seller reclaims item
-        if (!item.top_bidder) {
-          const newBooms = { ...currentUser.booms }
-          newBooms[item.boom_name] = (newBooms[item.boom_name] || 0) + 1
+        // Winner exists but hasn't claimed? Logic gap. 
+        // For now, let's assume Winner must claim. Seller just waits.
+        alert("Winner must claim the item to finalize the transaction.")
+      } else {
+        // Seller reclaims item (no bids)
+        const { error: rpcError } = await supabase.rpc('reclaim_auction_item', {
+          p_auction_id: item.id
+        })
 
-          await supabase.from('users').update({ booms: newBooms }).eq('id', currentUser.id)
-          await supabase.from('auction_items').update({ status: 'processed' }).eq('id', item.id) // Or delete it
-          alert("Item reclaimed!")
-        } else {
-          // Winner exists but hasn't claimed? Logic gap. 
-          // For now, let's assume Winner must claim. Seller just waits.
-          alert("Winner must claim the item to finalize the transaction.")
+        if (rpcError) {
+          console.error("RPC Error:", rpcError)
+          throw rpcError
         }
+
+        alert("Item reclaimed successfully!")
+        // Refresh list
+        refresh()
       }
+    }
 
     } catch (e: any) {
-      alert('Error claiming: ' + e.message)
-    }
-    setLoading(false)
+    alert('Error claiming: ' + e.message)
   }
+  setLoading(false)
+}
 
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-4xl font-bold text-white">Auction House</h1>
-        <Button onClick={() => setShowCreateModal(true)} className="bg-purple-600 hover:bg-purple-700">
-          + Create Auction
-        </Button>
-      </div>
+return (
+  <div className="space-y-6">
+    <div className="flex justify-between items-center">
+      <h1 className="text-4xl font-bold text-white">Auction House</h1>
+      <Button onClick={() => setShowCreateModal(true)} className="bg-purple-600 hover:bg-purple-700">
+        + Create Auction
+      </Button>
+    </div>
 
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-slate-700 p-6 rounded-lg w-full max-w-md">
-            <h2 className="text-2xl font-bold text-white mb-4">Create Auction</h2>
+    {showCreateModal && (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div className="bg-slate-900 border border-slate-700 p-6 rounded-lg w-full max-w-md">
+          <h2 className="text-2xl font-bold text-white mb-4">Create Auction</h2>
 
-            <div className="space-y-4">
+          <div className="space-y-4">
+            <div>
+              <label className="text-white block mb-2">Select Boom</label>
+              <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto p-2 bg-black/20 rounded">
+                {currentUser?.booms && Object.keys(currentUser.booms).length > 0 ? (
+                  Object.entries(currentUser.booms).map(([boom, qty]) => (
+                    <Badge
+                      key={boom}
+                      onClick={() => setSelectedBoom(boom)}
+                      className={`cursor-pointer ${selectedBoom === boom ? 'bg-green-600' : 'bg-slate-700'} hover:bg-green-500`}
+                    >
+                      {boom} (x{qty})
+                    </Badge>
+                  ))
+                ) : <span className="text-gray-400">No Booms to sell</span>}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-white block mb-2">Select Boom</label>
-                <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto p-2 bg-black/20 rounded">
-                  {currentUser?.booms && Object.keys(currentUser.booms).length > 0 ? (
-                    Object.entries(currentUser.booms).map(([boom, qty]) => (
-                      <Badge
-                        key={boom}
-                        onClick={() => setSelectedBoom(boom)}
-                        className={`cursor-pointer ${selectedBoom === boom ? 'bg-green-600' : 'bg-slate-700'} hover:bg-green-500`}
-                      >
-                        {boom} (x{qty})
-                      </Badge>
-                    ))
-                  ) : <span className="text-gray-400">No Booms to sell</span>}
-                </div>
+                <label className="text-white block mb-2">Start Price</label>
+                <input
+                  type="number"
+                  value={startingBid}
+                  onChange={e => setStartingBid(Number(e.target.value))}
+                  className="w-full bg-slate-800 text-white p-2 rounded"
+                  min={10}
+                />
               </div>
+              <div>
+                <label className="text-white block mb-2">Duration (Hrs)</label>
+                <input
+                  type="number"
+                  value={duration}
+                  onChange={e => setDuration(Number(e.target.value))}
+                  className="w-full bg-slate-800 text-white p-2 rounded"
+                  min={1}
+                  max={24}
+                />
+              </div>
+            </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-white block mb-2">Start Price</label>
-                  <input
-                    type="number"
-                    value={startingBid}
-                    onChange={e => setStartingBid(Number(e.target.value))}
-                    className="w-full bg-slate-800 text-white p-2 rounded"
-                    min={10}
-                  />
-                </div>
-                <div>
-                  <label className="text-white block mb-2">Duration (Hrs)</label>
-                  <input
-                    type="number"
-                    value={duration}
-                    onChange={e => setDuration(Number(e.target.value))}
-                    className="w-full bg-slate-800 text-white p-2 rounded"
-                    min={1}
-                    max={24}
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-2 mt-4">
-                <Button variant="outline" onClick={() => setShowCreateModal(false)}>Cancel</Button>
-                <Button onClick={createAuction} disabled={!selectedBoom || loading} className="bg-green-600">
-                  {loading ? 'Creating...' : 'Create Auction'}
-                </Button>
-              </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => setShowCreateModal(false)}>Cancel</Button>
+              <Button onClick={createAuction} disabled={!selectedBoom || loading} className="bg-green-600">
+                {loading ? 'Creating...' : 'Create Auction'}
+              </Button>
             </div>
           </div>
         </div>
-      )}
-
-      <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
-        <h2 className="text-2xl font-bold text-white mb-4">Active Auctions</h2>
-        {items.length === 0 ? (
-          <p className="text-white/70 text-center">No active auctions</p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {items.map((item) => {
-              const ended = new Date(item.ends_at).getTime() < Date.now()
-              const isWinner = currentUser?.username === item.top_bidder
-              const isSeller = currentUser?.username === item.seller
-
-              if (item.status === 'processed') return null // Don't show completed ones
-
-              return (
-                <div key={item.id} className={`rounded-lg p-4 ${ended ? 'bg-red-900/40 border border-red-500' : 'bg-white/10'}`}>
-                  <div className="flex items-center space-x-3 mb-3">
-                    <span className="text-3xl">{getBoomAvatar(item.boom_name)}</span>
-                    <div>
-                      <h3 className="text-white font-bold">{item.boom_name}</h3>
-                      <Badge className={`${getRarityColor(getBoomRarity(item.boom_name))} text-white text-xs`}>
-                        {getBoomRarity(item.boom_name)}
-                      </Badge>
-                    </div>
-                  </div>
-                  <p className="text-white/70">Seller: {item.seller}</p>
-                  <p className="text-white">Current Bid: {item.current_bid} tokens</p>
-                  <p className={`${ended ? 'text-red-400 font-bold' : 'text-white/70'}`}>
-                    Time Left: {timeLeftText(item.ends_at)}
-                  </p>
-                  {item.top_bidder && <p className="text-green-400 text-sm">Top Bidder: {item.top_bidder}</p>}
-
-                  {!ended ? (
-                    <Button
-                      className="w-full mt-2 bg-green-600 hover:bg-green-700"
-                      onClick={() => placeBid(item)}
-                      disabled={isSeller}
-                    >
-                      Place Bid
-                    </Button>
-                  ) : (
-                    <div className="mt-2">
-                      {isWinner && (
-                        <Button className="w-full bg-yellow-500 hover:bg-yellow-600 animate-pulse text-black font-bold" onClick={() => claimAuction(item)}>
-                          Claim Prize! 🎁
-                        </Button>
-                      )}
-                      {isSeller && !item.top_bidder && (
-                        <Button className="w-full bg-gray-500 hover:bg-gray-600" onClick={() => claimAuction(item)}>
-                          Reclaim Item ↩️
-                        </Button>
-                      )}
-                      {isSeller && item.top_bidder && !isWinner && (
-                        <p className="text-center text-yellow-200 text-sm">Waiting for winner to claim.</p>
-                      )}
-                      {!isWinner && !isSeller && (
-                        <p className="text-center text-gray-400 text-sm">Auction Ended</p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        )}
       </div>
+    )}
+
+    <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
+      <h2 className="text-2xl font-bold text-white mb-4">Active Auctions</h2>
+      {items.length === 0 ? (
+        <p className="text-white/70 text-center">No active auctions</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {items.map((item) => {
+            const ended = new Date(item.ends_at).getTime() < Date.now()
+            const isWinner = currentUser?.username === item.top_bidder
+            const isSeller = currentUser?.username === item.seller
+
+            if (item.status === 'processed') return null // Don't show completed ones
+
+            return (
+              <div key={item.id} className={`rounded-lg p-4 ${ended ? 'bg-red-900/40 border border-red-500' : 'bg-white/10'}`}>
+                <div className="flex items-center space-x-3 mb-3">
+                  <span className="text-3xl">{getBoomAvatar(item.boom_name)}</span>
+                  <div>
+                    <h3 className="text-white font-bold">{item.boom_name}</h3>
+                    <Badge className={`${getRarityColor(getBoomRarity(item.boom_name))} text-white text-xs`}>
+                      {getBoomRarity(item.boom_name)}
+                    </Badge>
+                  </div>
+                </div>
+                <p className="text-white/70">Seller: {item.seller}</p>
+                <p className="text-white">Current Bid: {item.current_bid} tokens</p>
+                <p className={`${ended ? 'text-red-400 font-bold' : 'text-white/70'}`}>
+                  Time Left: {timeLeftText(item.ends_at)}
+                </p>
+                {item.top_bidder && <p className="text-green-400 text-sm">Top Bidder: {item.top_bidder}</p>}
+
+                {!ended ? (
+                  <Button
+                    className="w-full mt-2 bg-green-600 hover:bg-green-700"
+                    onClick={() => placeBid(item)}
+                    disabled={isSeller}
+                  >
+                    Place Bid
+                  </Button>
+                ) : (
+                  <div className="mt-2">
+                    {isWinner && (
+                      <Button className="w-full bg-yellow-500 hover:bg-yellow-600 animate-pulse text-black font-bold" onClick={() => claimAuction(item)}>
+                        Claim Prize! 🎁
+                      </Button>
+                    )}
+                    {isSeller && !item.top_bidder && (
+                      <Button className="w-full bg-gray-500 hover:bg-gray-600" onClick={() => claimAuction(item)}>
+                        Reclaim Item ↩️
+                      </Button>
+                    )}
+                    {isSeller && item.top_bidder && !isWinner && (
+                      <p className="text-center text-yellow-200 text-sm">Waiting for winner to claim.</p>
+                    )}
+                    {!isWinner && !isSeller && (
+                      <p className="text-center text-gray-400 text-sm">Auction Ended</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
-  )
+  </div>
+)
 }
