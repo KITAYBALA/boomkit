@@ -121,7 +121,6 @@ export async function POST(request: Request) {
       username,
       message,
       role,
-      timestamp: undefined, // Let Supabase handle inserted_at, remove explicit timestamp to fix schema error
     }]).select()
 
     if (error) {
