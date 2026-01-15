@@ -2863,10 +2863,49 @@ export default function BoomkitGame() {
                 onTradeComplete={() => {
                   // Refresh user data after trade
                   const fetchUser = async () => {
-                    if (!supabase) return
-                    const { data } = await supabase.from("users").select("*").eq("id", currentUser!.id).single()
-                    if (data) {
-                      setCurrentUser(data)
+                    if (!supabase || !currentUser) return
+                    const { data: u, error } = await supabase.from("users").select("*").eq("id", currentUser.id).single()
+
+                    if (error) {
+                      console.error("Error refreshing user after trade:", error)
+                      return
+                    }
+
+                    if (u) {
+                      // Correctly map snake_case DB fields to camelCase GameUser fields
+                      const mappedUser: GameUser = {
+                        id: u.id,
+                        username: u.username,
+                        email: u.email,
+                        password: "", // Ensure password is not leaked
+                        age: u.age || 0,
+                        tokens: u.tokens || 0,
+                        dailyTokens: u.daily_tokens || 0,
+                        packs: u.packs || [],
+                        booms: u.booms || {},
+                        isOwner: u.is_owner || false,
+                        isBanned: u.is_banned || false,
+                        isMuted: u.is_muted || false,
+                        status: u.status || "approved",
+                        reason: u.reason || "",
+                        role: u.role || "player",
+                        joinDate: u.join_date || new Date().toISOString(),
+                        boomScore: u.boom_score || 0,
+                        totalValue: u.total_value || 0,
+                        profilePicture: u.profile_picture || "",
+                        isPlusUser: u.is_plus_user || false,
+                        nameColor: u.name_color || "",
+                        bannerColor: u.banner_color || "from-purple-600 to-pink-600",
+                        lastDailySpin: u.last_daily_spin || null,
+                        badges: u.badges || [],
+                        muteExpiry: u.mute_expiry || null,
+                        banExpiry: u.ban_expiry || null,
+                        banReason: u.ban_reason || "",
+                        lastSeen: u.last_seen || Date.now(),
+                        packsOpened: u.packs_opened || 0,
+                      }
+                      setCurrentUser(mappedUser)
+                      localStorage.setItem("boomkit_current_user", JSON.stringify(mappedUser))
                     }
                   }
                   fetchUser()
