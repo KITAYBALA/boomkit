@@ -19,52 +19,7 @@ export async function GET() {
   }
 }
 
-// Profanity word list for filtering - comprehensive list of inappropriate words
-const PROFANITY_LIST = [
-  // Common swear words (lowercase for case-insensitive matching)
-  "fuck", "shit", "ass", "asshole", "bitch", "bastard", "damn", "dick", "cock",
-  "pussy", "cunt", "whore", "slut", "fag", "faggot", "nigger", "nigga", "retard",
-  "rape", "rapist", "kys", "kill yourself", "suicide", "piss", "prick", "wanker",
-  "twat", "bollocks", "bugger", "arse", "motherfucker", "fucker", "fucking",
-  "shitty", "bullshit", "horseshit", "dumbass", "dipshit", "jackass",
-  // Variations and common obfuscations
-  "f*ck", "sh*t", "b*tch", "a$$", "d!ck", "p*ssy", "c*nt",
-]
-
-// Check if message contains profanity
-function containsProfanity(message: string): boolean {
-  const lowerMessage = message.toLowerCase()
-
-  // Check for exact word matches (with word boundaries)
-  for (const word of PROFANITY_LIST) {
-    // Create a regex that matches the word with word boundaries
-    const regex = new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i')
-    if (regex.test(lowerMessage)) {
-      return true
-    }
-  }
-
-  // Also check for letter substitutions (l33t speak)
-  const normalizedMessage = lowerMessage
-    .replace(/0/g, 'o')
-    .replace(/1/g, 'i')
-    .replace(/3/g, 'e')
-    .replace(/4/g, 'a')
-    .replace(/5/g, 's')
-    .replace(/7/g, 't')
-    .replace(/@/g, 'a')
-    .replace(/\$/g, 's')
-    .replace(/!/g, 'i')
-
-  for (const word of PROFANITY_LIST) {
-    const regex = new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i')
-    if (regex.test(normalizedMessage)) {
-      return true
-    }
-  }
-
-  return false
-}
+import { containsProfanity } from "@/lib/profanity"
 
 export async function POST(request: Request) {
   try {
@@ -166,7 +121,7 @@ export async function POST(request: Request) {
       username,
       message,
       role,
-      timestamp: Date.now() // Explicitly set timestamp here to be safe
+      timestamp: undefined, // Let Supabase handle inserted_at, remove explicit timestamp to fix schema error
     }]).select()
 
     if (error) {
