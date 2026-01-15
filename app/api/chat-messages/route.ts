@@ -137,7 +137,39 @@ export async function POST(request: Request) {
       }, { status: 403 })
     }
 
-    const { data, error } = await supabase.from("chat_messages").insert([{ username, message, role }]).select()
+    // SLOWMODE CHECK (15 seconds)
+    const { data: lastMessage } = await supabase
+      .from("chat_messages")
+      .select("timestamp")
+      .eq("username", username)
+      .order("timestamp", { ascending: false })
+      .limit(1)
+      .single()
+
+    if (lastMessage) {
+      const lastTime = new Date(lastMessage.timestamp).getTime() // Assuming stored as number or convertable
+      // Actually chat_messages timestamp is defined as number in types (see view_file types/supabase.ts)
+      // Wait, let's verify storage format. The type says `timestamp: number`.
+      // If it is stored as Date.now(), then:
+      const timeDiff = Date.now() - lastMessage.timestamp
+      if (timeDiff < 15000) {
+        const waitTime = Math.ceil((15000 - timeDiff) / 1000)
+        return NextResponse.json({
+          error: "SLOWMODE",
+          message: `Please wait ${waitTime} seconds before typing again.`
+        }, { status: 429 })
+      }
+    }
+
+    // Use Date.now() for consistency if that is what number implies, or ISO if it was string. 
+    // Type definition said `timestamp: number`. So `Date.now()` is correct.
+
+    const { data, error } = await supabase.from("chat_messages").insert([{
+      username,
+      message,
+      role,
+      timestamp: Date.now() // Explicitly set timestamp here to be safe
+    }]).select()
 
     if (error) {
       console.error("[v0] Error posting chat message:", error)

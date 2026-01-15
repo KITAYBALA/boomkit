@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServerClient } from '@/lib/supabase-server-client'
 import { createHash } from 'crypto'
+import { createSession } from '@/lib/auth-server'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,10 +11,10 @@ export const dynamic = 'force-dynamic'
  */
 export async function POST(request: NextRequest) {
   const DEBUG_AUTH = process.env.DEBUG_AUTH === 'true' || process.env.NODE_ENV !== 'production'
-  
+
   try {
     if (DEBUG_AUTH) console.log('[AUTH DEBUG] ===== LOGIN START =====')
-    
+
     const { username, password } = await request.json()
 
     if (DEBUG_AUTH) console.log('[AUTH DEBUG] Input username:', username)
@@ -24,10 +25,10 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = getSupabaseServerClient()
-    
+
     if (DEBUG_AUTH) console.log('[AUTH DEBUG] Querying table: users')
     if (DEBUG_AUTH) console.log('[AUTH DEBUG] Querying column: password_hash')
-    
+
     // Find user by username or email - try username first, then email
     let userData: any = null
     let userError: any = null
@@ -56,12 +57,12 @@ export async function POST(request: NextRequest) {
         .select('id, username, email, password_hash, password_reset_required, is_banned, is_owner, role, is_muted, status, badges, name_color, banner_color, profile_picture, tokens, boom_score, total_value, packs, booms, daily_tokens, join_date, is_plus_user, last_daily_spin, mute_expiry, ban_expiry, ban_reason, last_seen, packs_opened, age, reason')
         .ilike('email', username)
         .maybeSingle()
-      
+
       if (DEBUG_AUTH) {
         console.log('[AUTH DEBUG] Email query error:', errorByEmail)
         console.log('[AUTH DEBUG] Email query result:', userByEmail ? 'FOUND' : 'NOT FOUND')
       }
-      
+
       userData = userByEmail
       userError = errorByEmail
       if (userByEmail) {
@@ -110,14 +111,14 @@ export async function POST(request: NextRequest) {
     if (DEBUG_AUTH) console.log('[AUTH DEBUG] Hashing algorithm: sha256')
     const providedPasswordHash = createHash('sha256').update(password).digest('hex')
     const storedPasswordHash = userData.password_hash.trim() // Remove any whitespace
-    
+
     if (DEBUG_AUTH) {
       console.log('[AUTH DEBUG] Computed hash length:', providedPasswordHash.length)
       console.log('[AUTH DEBUG] Stored hash length (after trim):', storedPasswordHash.length)
       console.log('[AUTH DEBUG] Computed hash first 16 chars:', providedPasswordHash.substring(0, 16))
       console.log('[AUTH DEBUG] Stored hash first 16 chars:', storedPasswordHash.substring(0, 16))
     }
-    
+
     // Compare hashes (both should be hex strings)
     const hashesMatch = providedPasswordHash === storedPasswordHash
     if (DEBUG_AUTH) {
@@ -128,7 +129,7 @@ export async function POST(request: NextRequest) {
         console.log('[AUTH DEBUG] Full stored hash:', storedPasswordHash)
       }
     }
-    
+
     if (!hashesMatch) {
       if (DEBUG_AUTH) console.log('[AUTH DEBUG] Password verification failed - returning 401')
       return NextResponse.json({ success: false, message: 'Invalid username or password' }, { status: 401 })
@@ -138,7 +139,14 @@ export async function POST(request: NextRequest) {
 
     // Password is valid - return user data (excluding password_hash)
     const { password_hash: _, ...userWithoutPassword } = userData
-    
+
+    // Create secure session
+    await createSession(
+      userData.id,
+      userData.role || 'player',
+      userData.is_owner || false
+    )
+
     return NextResponse.json({
       success: true,
       user: userWithoutPassword

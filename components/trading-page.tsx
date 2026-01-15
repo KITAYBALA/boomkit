@@ -208,86 +208,19 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
   const acceptTrade = async (trade: Trade) => {
     setLoading(true)
 
-    // Get fresh user data
-    const { data: senderData } = await supabase.from("users").select("booms, tokens").eq("id", trade.sender_id).single()
+    try {
+      const { error } = await supabase.rpc('accept_trade', { trade_uuid: trade.id })
 
-    const { data: receiverData } = await supabase
-      .from("users")
-      .select("booms, tokens")
-      .eq("id", trade.receiver_id)
-      .single()
+      if (error) throw error
 
-    if (!senderData || !receiverData) {
-      alert("Error: Could not find users")
       setLoading(false)
-      return
-    }
-
-    // Check if both parties still have the items
-    for (const [boom, qty] of Object.entries(trade.sender_booms)) {
-      if ((senderData.booms[boom] || 0) < qty) {
-        alert(`Trade failed: ${trade.sender_username} no longer has enough ${boom}`)
-        setLoading(false)
-        return
-      }
-    }
-    for (const [boom, qty] of Object.entries(trade.receiver_booms)) {
-      if ((receiverData.booms[boom] || 0) < qty) {
-        alert(`Trade failed: You no longer have enough ${boom}`)
-        setLoading(false)
-        return
-      }
-    }
-    if (senderData.tokens < trade.sender_tokens) {
-      alert(`Trade failed: ${trade.sender_username} no longer has enough tokens`)
+      alert("Trade accepted!")
+      onTradeComplete()
+    } catch (e: any) {
+      console.error("Trade failed:", e)
       setLoading(false)
-      return
+      alert("Trade failed: " + (e.message || "Unknown error"))
     }
-    if (receiverData.tokens < trade.receiver_tokens) {
-      alert(`Trade failed: You no longer have enough tokens`)
-      setLoading(false)
-      return
-    }
-
-    // Calculate new inventories
-    const newSenderBooms = { ...senderData.booms }
-    const newReceiverBooms = { ...receiverData.booms }
-
-    // Remove sender's offered booms, add to receiver
-    for (const [boom, qty] of Object.entries(trade.sender_booms)) {
-      newSenderBooms[boom] = (newSenderBooms[boom] || 0) - qty
-      if (newSenderBooms[boom] <= 0) delete newSenderBooms[boom]
-      newReceiverBooms[boom] = (newReceiverBooms[boom] || 0) + qty
-    }
-
-    // Remove receiver's offered booms, add to sender
-    for (const [boom, qty] of Object.entries(trade.receiver_booms)) {
-      newReceiverBooms[boom] = (newReceiverBooms[boom] || 0) - qty
-      if (newReceiverBooms[boom] <= 0) delete newReceiverBooms[boom]
-      newSenderBooms[boom] = (newSenderBooms[boom] || 0) + qty
-    }
-
-    // Calculate new token amounts
-    const newSenderTokens = senderData.tokens - trade.sender_tokens + trade.receiver_tokens
-    const newReceiverTokens = receiverData.tokens - trade.receiver_tokens + trade.sender_tokens
-
-    // Update both users
-    await supabase.from("users").update({ booms: newSenderBooms, tokens: newSenderTokens }).eq("id", trade.sender_id)
-
-    await supabase
-      .from("users")
-      .update({ booms: newReceiverBooms, tokens: newReceiverTokens })
-      .eq("id", trade.receiver_id)
-
-    // Update trade status
-    await supabase
-      .from("trades")
-      .update({ status: "accepted", updated_at: new Date().toISOString() })
-      .eq("id", trade.id)
-
-    setLoading(false)
-    alert("Trade accepted!")
-    onTradeComplete()
   }
 
   const declineTrade = async (trade: Trade) => {
