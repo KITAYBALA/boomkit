@@ -2771,22 +2771,16 @@ export default function BoomkitGame() {
                           }}
                         ></div>
 
-                        {/* Pack Image with Emoji Overlay */}
-                        <div className="pt-6 pb-4 px-4 relative">
-                          <img
-                            src={pack.image || "/placeholder.svg"}
-                            alt={pack.name}
-                            className="w-full h-32 object-cover rounded-lg mb-3"
-                          />
-                          {/* Emoji Overlay */}
+                        {/* Centered Emoji Pack Design */}
+                        <div className="h-48 flex flex-col items-center justify-center relative p-4">
                           {pack.emoji && (
-                            <div className="absolute top-8 left-1/2 transform -translate-x-1/2 text-6xl drop-shadow-lg filter hover:scale-110 transition-transform cursor-default">
+                            <div className="text-8xl drop-shadow-lg filter transform group-hover:scale-110 transition-transform duration-300 select-none">
                               {pack.emoji}
                             </div>
                           )}
-                          <div className="text-white text-center">
-                            <div className="font-bold text-lg mb-1">{pack.name}</div>
-                            <div className="text-sm opacity-80 capitalize">{pack.rarity}</div>
+                          <div className="text-white text-center mt-4 z-10">
+                            <div className="font-bold text-lg leading-none">{pack.name}</div>
+                            <div className="text-sm opacity-80 capitalize mt-1">{pack.rarity}</div>
                           </div>
                         </div>
 
