@@ -2642,7 +2642,7 @@ export default function BoomkitGame() {
                   {PACKS.map((pack) => (
                     <div key={pack.id} className="bg-gradient-to-r from-purple-600 to-purple-800 rounded-lg p-6">
                       <h2 className="text-2xl font-bold text-white mb-4 flex items-center">
-                        <img src={pack.image || "/placeholder.svg"} alt={pack.name} className="w-8 h-8 mr-3 rounded" />
+                        <span className="text-3xl mr-3">{pack.emoji}</span>
                         {pack.name}
                       </h2>
                       <div className="grid grid-cols-10 gap-2">
