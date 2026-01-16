@@ -3238,8 +3238,12 @@ export default function BoomkitGame() {
 
       {packAnimation.show && (
         <div
-          className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50 overflow-hidden cursor-pointer"
-          onClick={closePackAnimation}
+          className={`fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50 overflow-hidden ${packAnimation.stage === "done" ? "cursor-pointer" : "cursor-default"}`}
+          onClick={() => {
+            if (packAnimation.stage === "done") {
+              closePackAnimation()
+            }
+          }}
         >
           {/* Confetti particles - colored by rarity */}
           {packAnimation.stage !== "shake" &&
