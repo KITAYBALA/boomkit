@@ -3237,7 +3237,10 @@ export default function BoomkitGame() {
       )}
 
       {packAnimation.show && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50 overflow-hidden">
+        <div
+          className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50 overflow-hidden cursor-pointer"
+          onClick={closePackAnimation}
+        >
           {/* Confetti particles - colored by rarity */}
           {packAnimation.stage !== "shake" &&
             packAnimation.boom &&
@@ -3279,15 +3282,10 @@ export default function BoomkitGame() {
                         "polygon(0 0, 10% 100%, 20% 0, 30% 100%, 40% 0, 50% 100%, 60% 0, 70% 100%, 80% 0, 90% 100%, 100% 0, 100% 100%, 0 100%)",
                     }}
                   />
-                  {packAnimation.packImage ? (
-                    <img
-                      src={packAnimation.packImage || "/placeholder.svg"}
-                      alt={packAnimation.packName}
-                      className="w-32 h-32 object-cover rounded-lg"
-                    />
-                  ) : (
-                    <div className="text-6xl">📦</div>
-                  )}
+                  {/* Display Emoji instead of Image */}
+                  <div className="text-8xl drop-shadow-md">
+                    {PACKS.find(p => p.name === packAnimation.packName)?.emoji || "📦"}
+                  </div>
                   <div className="text-white font-bold mt-2">{packAnimation.packName}</div>
                 </div>
               </div>
@@ -3321,7 +3319,11 @@ export default function BoomkitGame() {
                         "animate-reveal-uncommon"
 
             return (
-              <div className="flex items-center justify-center w-full h-full">
+              <div className="flex items-center justify-center w-full h-full" onClick={(e) => {
+                // Optional: Determine if clicking content should close it. 
+                // User said "click anywhere and exit", which usually includes the content.
+                // So we allow propagation to the parent.
+              }}>
                 {/* Centered Card */}
                 <div
                   className={`relative w-[400px] h-[500px] rounded-2xl shadow-2xl overflow-hidden ${packAnimation.stage === "reveal" ? revealAnimationClass : ""
@@ -3401,16 +3403,6 @@ export default function BoomkitGame() {
                     <div className="absolute inset-0 animate-glow-pulse opacity-50" />
                   )}
                 </div>
-
-                {/* Close button */}
-                {packAnimation.stage === "done" && (
-                  <button
-                    onClick={closePackAnimation}
-                    className="absolute bottom-8 left-1/2 transform -translate-x-1/2 px-8 py-3 bg-white/20 hover:bg-white/30 text-white rounded-lg font-bold text-lg transition-all transform hover:scale-105 z-30"
-                  >
-                    Awesome! 🎉
-                  </button>
-                )}
               </div>
             )
           })()}
