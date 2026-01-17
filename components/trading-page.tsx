@@ -25,6 +25,7 @@ interface GameUser {
   username: string
   tokens: number
   booms: Record<string, number>
+  isBanned?: boolean
   [key: string]: any
 }
 
@@ -171,6 +172,11 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
 
   const sendTrade = async () => {
     if (!selectedUser) return
+    if (currentUser.isBanned) {
+      alert("You are banned and cannot trade.")
+      return
+    }
+
     if (
       Object.keys(myOfferedBooms).length === 0 &&
       myOfferedTokens === 0 &&
@@ -209,6 +215,10 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
     setLoading(true)
 
     try {
+      if (currentUser.isBanned) {
+        throw new Error("You are banned and cannot trade.")
+      }
+
       const { error } = await supabase.rpc('accept_trade', { trade_uuid: trade.id })
 
       if (error) throw error
@@ -246,7 +256,7 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
     setTradeMessage("")
   }
 
-  const otherUsers = users.filter((u) => u.id !== currentUser.id)
+  const otherUsers = users.filter((u) => u.id !== currentUser.id && !u.isBanned)
 
   return (
     <div className="space-y-6">
@@ -269,7 +279,12 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
           </h1>
           <p className="text-purple-200 mt-1">Trade Booms with other players</p>
         </div>
-        <Button onClick={() => setShowNewTrade(true)} className="bg-green-500 hover:bg-green-600">
+        <Button
+          onClick={() => setShowNewTrade(true)}
+          className="bg-green-500 hover:bg-green-600"
+          disabled={currentUser.is_banned}
+          title={currentUser.is_banned ? "You are banned" : "Start a new trade"}
+        >
           <PlusIcon className="h-4 w-4 mr-2" />
           New Trade
         </Button>

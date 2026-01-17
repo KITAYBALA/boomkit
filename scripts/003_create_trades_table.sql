@@ -20,6 +20,10 @@ ALTER TABLE trades ENABLE ROW LEVEL SECURITY;
 
 -- Policies for trades table
 CREATE POLICY "Anyone can read trades" ON trades FOR SELECT USING (true);
-CREATE POLICY "Anyone can create trades" ON trades FOR INSERT WITH CHECK (true);
+CREATE POLICY "Users can only create trades if not banned" ON trades FOR INSERT WITH CHECK (
+  auth.uid()::text = sender_id 
+  AND EXISTS (SELECT 1 FROM users WHERE id = auth.uid()::text AND is_banned = false)
+  AND EXISTS (SELECT 1 FROM users WHERE id = receiver_id AND is_banned = false)
+);
 CREATE POLICY "Anyone can update trades" ON trades FOR UPDATE USING (true);
 CREATE POLICY "Anyone can delete trades" ON trades FOR DELETE USING (true);

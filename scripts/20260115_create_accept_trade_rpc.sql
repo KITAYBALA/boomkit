@@ -32,6 +32,11 @@ BEGIN
     RAISE EXCEPTION 'User not found';
   END IF;
 
+  -- 2b. Verify Not Banned
+  IF v_sender.is_banned OR v_receiver.is_banned THEN
+    RAISE EXCEPTION 'Trading is restricted for banned users';
+  END IF;
+
   v_sender_booms := v_sender.booms;
   v_receiver_booms := v_receiver.booms;
 
