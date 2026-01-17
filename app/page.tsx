@@ -652,9 +652,9 @@ export default function BoomkitGame() {
   const [selectedBoom, setSelectedBoom] = useState<string | null>(null)
   const [auctionPrice, setAuctionPrice] = useState("")
   const [auctionDuration, setAuctionDuration] = useState("24")
+  const [auctionDuration, setAuctionDuration] = useState("24")
   // Multi-sell states
-  const [isSelectMode, setIsSelectMode] = useState(false)
-  const [selectedBoomsForSell, setSelectedBoomsForSell] = useState<Set<string>>(new Set())
+  const [sellQuantity, setSellQuantity] = useState(1)
 
   // Moderation states
   const [showMuteDialog, setShowMuteDialog] = useState(false)
@@ -1463,6 +1463,7 @@ export default function BoomkitGame() {
   // Handle boom click
   const handleBoomClick = (boomName: string) => {
     setSelectedBoom(boomName)
+    setSellQuantity(1)
     setShowBoomAction(true)
     setAuctionPrice("")
     setAuctionDuration("24")
@@ -1489,40 +1490,34 @@ export default function BoomkitGame() {
     }
   }
 
-  // Handle direct sell (single or multiple)
-  const handleDirectSell = (boomNames?: string[]) => {
-    if (!currentUser) return
-
-    const boomsToSell = boomNames || (selectedBoom ? [selectedBoom] : [])
-    if (boomsToSell.length === 0) return
+  // Handle selling booms
+  const handleConfirmSell = () => {
+    if (!currentUser || !selectedBoom) return
 
     let totalTokens = 0
     let totalValueLost = 0
     let totalScoreLost = 0
-    const updatedBooms = { ...currentUser.booms }
     const soldBooms: string[] = []
 
-    for (const boomName of boomsToSell) {
-      const sellPrice = getBoomSellPrice(boomName)
-      const currentQuantity = currentUser.booms[boomName] || 0
+    const boomName = selectedBoom
+    const quantityToSell = Math.min(sellQuantity, currentUser.booms[boomName] || 0)
 
-      if (currentQuantity <= 0) continue
-
-      totalTokens += sellPrice
-      totalValueLost += getBoomValue(boomName)
-      totalScoreLost += getBoomScoreValue(boomName)
-      soldBooms.push(boomName)
-
-      if (updatedBooms[boomName] > 1) {
-        updatedBooms[boomName] -= 1
-      } else {
-        delete updatedBooms[boomName]
-      }
+    if (quantityToSell <= 0) {
+      alert("Invalid quantity to sell!")
+      return
     }
 
-    if (soldBooms.length === 0) {
-      alert("No booms selected to sell!")
-      return
+    const sellPrice = getBoomSellPrice(boomName)
+    const totalTokens = sellPrice * quantityToSell
+    const totalValueLost = getBoomValue(boomName) * quantityToSell
+    const totalScoreLost = getBoomScoreValue(boomName) * quantityToSell
+
+    const updatedBooms = { ...currentUser.booms }
+
+    if (updatedBooms[boomName] > quantityToSell) {
+      updatedBooms[boomName] -= quantityToSell
+    } else {
+      delete updatedBooms[boomName]
     }
 
     const updatedUser = {
@@ -1535,48 +1530,10 @@ export default function BoomkitGame() {
 
     updateAndPersistCurrentUser(updatedUser)
 
-    if (boomNames) {
-      // Multi-sell
-      setSelectedBoomsForSell(new Set())
-      setIsSelectMode(false)
-      alert(`Sold ${soldBooms.length} boom(s) for ${totalTokens} tokens!`)
-    } else {
-      // Single sell
-      setShowBoomAction(false)
-      setSelectedBoom(null)
-      alert(`Sold ${selectedBoom} for ${totalTokens} tokens!`)
-    }
-  }
-
-  // Toggle boom selection for multi-sell
-  const toggleBoomSelection = (boomName: string) => {
-    const newSelection = new Set(selectedBoomsForSell)
-    if (newSelection.has(boomName)) {
-      newSelection.delete(boomName)
-    } else {
-      newSelection.add(boomName)
-    }
-    setSelectedBoomsForSell(newSelection)
-  }
-
-  // Select all booms
-  const selectAllBooms = () => {
-    if (!currentUser) return
-    const allBoomNames = Object.keys(currentUser.booms).filter((name) => (currentUser.booms[name] || 0) > 0)
-    setSelectedBoomsForSell(new Set(allBoomNames))
-  }
-
-  // Get total sell value for selected booms
-  const getTotalSellValue = (): number => {
-    if (!currentUser) return 0
-    let total = 0
-    selectedBoomsForSell.forEach((boomName) => {
-      const quantity = currentUser.booms[boomName] || 0
-      if (quantity > 0) {
-        total += getBoomSellPrice(boomName)
-      }
-    })
-    return total
+    setShowBoomAction(false)
+    setSelectedBoom(null)
+    setSellQuantity(1)
+    alert(`Sold ${quantityToSell} ${boomName}(s) for ${totalTokens} tokens!`)
   }
 
   const handleAuctionList = async () => {
@@ -2580,49 +2537,7 @@ export default function BoomkitGame() {
                 <div className="flex justify-between items-center flex-wrap gap-4">
                   <h1 className="text-4xl font-bold text-white">My Booms</h1>
                   <div className="flex gap-2 items-center">
-                    {isSelectMode && (
-                      <>
-                        <Button
-                          onClick={selectAllBooms}
-                          className="bg-blue-600 hover:bg-blue-700 text-white"
-                          size="sm"
-                        >
-                          Select All
-                        </Button>
-                        {selectedBoomsForSell.size > 0 && (
-                          <div className="bg-green-600 rounded-lg px-4 py-2 text-white font-bold">
-                            {selectedBoomsForSell.size} selected • {getTotalSellValue()} tokens
-                          </div>
-                        )}
-                        <Button
-                          onClick={() => handleDirectSell(Array.from(selectedBoomsForSell))}
-                          disabled={selectedBoomsForSell.size === 0}
-                          className="bg-red-600 hover:bg-red-700 text-white"
-                          size="sm"
-                        >
-                          Sell Selected ({selectedBoomsForSell.size})
-                        </Button>
-                        <Button
-                          onClick={() => {
-                            setIsSelectMode(false)
-                            setSelectedBoomsForSell(new Set())
-                          }}
-                          className="bg-gray-600 hover:bg-gray-700 text-white"
-                          size="sm"
-                        >
-                          Cancel
-                        </Button>
-                      </>
-                    )}
-                    {!isSelectMode && (
-                      <Button
-                        onClick={() => setIsSelectMode(true)}
-                        className="bg-purple-600 hover:bg-purple-700 text-white"
-                        size="sm"
-                      >
-                        Select Mode
-                      </Button>
-                    )}
+                    {/* Select Mode buttons removed */}
                   </div>
                   <div className="bg-purple-600 rounded-lg p-4 text-center">
                     <div className="text-4xl mb-2">⭐</div>
@@ -2654,20 +2569,12 @@ export default function BoomkitGame() {
                             <div key={index} className="text-center">
                               <div
                                 className={`w-12 h-12 rounded border-2 mb-1 flex items-center justify-center text-lg transition-transform hover:scale-110 relative ${hasBooom
-                                  ? isSelectMode
-                                    ? isSelected
-                                      ? `${getRarityColor(boom.rarity)} text-white shadow-lg border-yellow-400 border-4`
-                                      : `${getRarityColor(boom.rarity)} text-white shadow-lg cursor-pointer border-white`
-                                    : `${getRarityColor(boom.rarity)} text-white shadow-lg cursor-pointer border-white`
+                                  ? `${getRarityColor(boom.rarity)} text-white shadow-lg cursor-pointer border-white`
                                   : "bg-black text-gray-500 border-white cursor-not-allowed"
                                   }`}
                                 onClick={() => {
                                   if (hasBooom) {
-                                    if (isSelectMode) {
-                                      toggleBoomSelection(boom.name)
-                                    } else {
-                                      handleBoomClick(boom.name)
-                                    }
+                                    handleBoomClick(boom.name)
                                   }
                                 }}
                               >
@@ -2675,11 +2582,6 @@ export default function BoomkitGame() {
                                 {hasBooom && quantity > 1 && (
                                   <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
                                     {quantity}
-                                  </span>
-                                )}
-                                {isSelectMode && isSelected && (
-                                  <span className="absolute top-0 left-0 w-full h-full bg-yellow-400/30 rounded flex items-center justify-center">
-                                    <span className="text-yellow-400 text-lg">✓</span>
                                   </span>
                                 )}
                               </div>
@@ -3892,8 +3794,32 @@ export default function BoomkitGame() {
               <p className="text-white">
                 <span className="text-3xl">{getBoomAvatar(selectedBoom)}</span> {selectedBoom}
               </p>
-              <Button onClick={handleDirectSell} className="w-full bg-blue-600 hover:bg-blue-700">
-                Sell for {getBoomSellPrice(selectedBoom)} tokens
+
+              <div className="space-y-2">
+                <Label className="text-white">Quantity to Sell: {sellQuantity}</Label>
+                <Input
+                  type="range"
+                  min="1"
+                  max={currentUser?.booms[selectedBoom] || 1}
+                  value={sellQuantity}
+                  onChange={(e) => setSellQuantity(parseInt(e.target.value))}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-xs text-white/70">
+                  <span>1</span>
+                  <span>{currentUser?.booms[selectedBoom] || 1}</span>
+                </div>
+              </div>
+
+              <div className="bg-white/10 rounded p-3 text-center">
+                <p className="text-white/70 text-sm">Total Value</p>
+                <p className="text-yellow-400 font-bold text-xl">
+                  {getBoomSellPrice(selectedBoom) * sellQuantity} tokens
+                </p>
+              </div>
+
+              <Button onClick={() => handleConfirmSell()} className="w-full bg-blue-600 hover:bg-blue-700">
+                Sell {sellQuantity} for {getBoomSellPrice(selectedBoom) * sellQuantity} tokens
               </Button>
 
               <Button onClick={() => setShowBoomAction(false)} className="w-full bg-gray-600 hover:bg-gray-700">
