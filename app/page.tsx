@@ -3782,9 +3782,9 @@ export default function BoomkitGame() {
       )}
       {showBoomAction && selectedBoom && (
         <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
-          <Card className="w-full max-w-md p-6">
+          <Card className="w-full max-w-md p-6 bg-slate-900 border-slate-800">
             <CardHeader>
-              <CardTitle className="text-2xl font-bold">Boom Actions</CardTitle>
+              <CardTitle className="text-2xl font-bold text-white">Boom Actions</CardTitle>
               <CardDescription>What do you want to do with {selectedBoom}?</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
