@@ -652,7 +652,7 @@ export default function BoomkitGame() {
   const [selectedBoom, setSelectedBoom] = useState<string | null>(null)
   const [auctionPrice, setAuctionPrice] = useState("")
   const [auctionDuration, setAuctionDuration] = useState("24")
-  const [auctionDuration, setAuctionDuration] = useState("24")
+
   // Multi-sell states
   const [sellQuantity, setSellQuantity] = useState(1)
 
