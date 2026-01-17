@@ -2561,7 +2561,7 @@ export default function BoomkitGame() {
                         {pack.booms.map((boom, index) => {
                           const quantity = currentUser?.booms[boom.name] || 0
                           const hasBooom = quantity > 0
-                          const isSelected = selectedBoomsForSell.has(boom.name)
+
                           return (
                             <div key={index} className="text-center">
                               <div
