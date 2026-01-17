@@ -1494,10 +1494,7 @@ export default function BoomkitGame() {
   const handleConfirmSell = () => {
     if (!currentUser || !selectedBoom) return
 
-    let totalTokens = 0
-    let totalValueLost = 0
-    let totalScoreLost = 0
-    const soldBooms: string[] = []
+
 
     const boomName = selectedBoom
     const quantityToSell = Math.min(sellQuantity, currentUser.booms[boomName] || 0)
