@@ -1021,8 +1021,11 @@ export default function BoomkitGame() {
               setCurrentView("login")
             }
           } else {
-            // Not authorized -> Force Owner Access
-            setCurrentView("owner-access")
+            // Not authorized.
+            // Allow 'login' and 'register' views so valid users can authenticate
+            if (currentView !== "login" && currentView !== "register") {
+              setCurrentView("owner-access")
+            }
           }
         }
       }
