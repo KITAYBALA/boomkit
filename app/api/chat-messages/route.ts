@@ -133,28 +133,22 @@ export async function POST(request: Request) {
 
     // GEMINI CHAT BOT INTEGRATION
     if (message.toLowerCase().includes("@gemini")) {
-      // Run AI response as a side effect (not blocking the initial message response)
-      // Since this is a serverless route, we might want to wait or use a background task if supported
-      // But for simplicity and reliability in this environment, we will process it before returning
-      // or right after inserting the user message.
-
       const query = message.replace(/@gemini/gi, "").trim()
 
       if (query) {
-        // We use a separate async operation to not block the user's message return
-        // but since this is a standard Next.js route, we should probably handle it carefully.
-        // Let's generate and insert the bot response.
-
-        generateGeminiResponse(query).then(async (aiResponse) => {
+        try {
+          const aiResponse = await generateGeminiResponse(query)
           if (aiResponse) {
             await supabase.from("chat_messages").insert([{
               username: "Gemini 🤖",
               message: aiResponse,
               role: "admin", // Bot gets admin role for special color/status
             }])
-            console.log("[GEMINI] Responded to query:", query)
+            console.log("[GEMINI] Successfully responded to query in production mode")
           }
-        }).catch(err => console.error("[GEMINI] Error:", err))
+        } catch (err) {
+          console.error("[GEMINI] Production error responding:", err)
+        }
       }
     }
 
