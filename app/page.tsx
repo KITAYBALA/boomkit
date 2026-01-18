@@ -2679,7 +2679,6 @@ export default function BoomkitGame() {
                           )}
                           <div className="text-white text-center mt-4 z-10">
                             <div className="font-bold text-lg leading-none">{pack.name}</div>
-                            <div className="text-sm opacity-80 capitalize mt-1">{pack.rarity}</div>
                           </div>
                         </div>
 
