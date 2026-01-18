@@ -26,6 +26,10 @@ import {
   MenuIcon,
   CreditCardIcon,
   PencilIcon,
+  UserIcon,
+  LockIcon,
+  TrashIcon,
+  FileTextIcon,
 } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 
@@ -3100,32 +3104,35 @@ export default function BoomkitGame() {
                 <h1 className="text-4xl font-bold text-white">Settings</h1>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Profile Section */}
-                  <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
-                    <div className="flex items-center mb-4">
-                      <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mr-3">
-                        <span className="text-white">👤</span>
+                  <div className="group bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-purple-500/50 hover:bg-white/15 transition-all duration-300 shadow-xl hover:shadow-purple-500/10">
+                    <div className="flex items-center mb-6">
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mr-4 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                        <UserIcon className="text-white w-6 h-6" />
                       </div>
-                      <h2 className="text-xl font-bold text-white">Profile</h2>
+                      <h2 className="text-2xl font-bold text-white tracking-tight">Profile</h2>
                     </div>
-                    <div className="space-y-2 text-white">
-                      <p>
-                        <strong>Username:</strong> {currentUser?.username}
-                      </p>
-                      <p>
-                        <strong>Role:</strong> {currentUser ? getUserRoleName(currentUser) : "Player"}
-                      </p>
-                      <p>
-                        <strong>Joined:</strong> {currentUser?.joinDate}
-                      </p>
+                    <div className="space-y-4">
+                      <div className="flex flex-col space-y-1">
+                        <span className="text-purple-200/50 text-xs font-bold uppercase tracking-wider">Username</span>
+                        <p className="text-white text-lg font-medium">{currentUser?.username}</p>
+                      </div>
+                      <div className="flex flex-col space-y-1">
+                        <span className="text-purple-200/50 text-xs font-bold uppercase tracking-wider">Role</span>
+                        <p className="text-white font-medium">{currentUser ? getUserRoleName(currentUser) : "Player"}</p>
+                      </div>
+                      <div className="flex flex-col space-y-1">
+                        <span className="text-purple-200/50 text-xs font-bold uppercase tracking-wider">Joined</span>
+                        <p className="text-white font-medium">{currentUser?.joinDate}</p>
+                      </div>
                       {/* Display badges */}
                       {currentUser?.badges && currentUser.badges.length > 0 && (
-                        <div>
-                          <strong>Badges:</strong>
-                          <div className="flex flex-wrap gap-1 mt-1">
+                        <div className="pt-2">
+                          <span className="text-purple-200/50 text-xs font-bold uppercase tracking-wider">Badges</span>
+                          <div className="flex flex-wrap gap-2 mt-2">
                             {currentUser.badges.map((badgeId) => {
                               const badge = AVAILABLE_BADGES.find((b) => b.id === badgeId)
                               return badge ? (
-                                <Badge key={badgeId} className={`${badge.color} text-white text-xs`}>
+                                <Badge key={badgeId} className={`${badge.color} text-white px-3 py-1 rounded-lg border-none shadow-md hover:scale-105 transition-transform cursor-default`}>
                                   {badge.emoji} {badge.name}
                                 </Badge>
                               ) : null
@@ -3137,37 +3144,56 @@ export default function BoomkitGame() {
                   </div>
 
                   {/* Edit Info Section */}
-                  <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
-                    <div className="flex items-center mb-4">
-                      <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mr-3">
-                        <span className="text-white">✏️</span>
+                  <div className="group bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-green-500/50 hover:bg-white/15 transition-all duration-300 shadow-xl hover:shadow-green-500/10">
+                    <div className="flex items-center mb-6">
+                      <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center mr-4 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                        <PencilIcon className="text-white w-6 h-6" />
                       </div>
-                      <h2 className="text-xl font-bold text-white">Edit Info</h2>
+                      <h2 className="text-2xl font-bold text-white tracking-tight">Edit Info</h2>
                     </div>
-                    <div className="space-y-2">
-                      {/* Username and Email change removed as per request */}
-                      <Button variant="link" onClick={() => setShowPasswordEdit(true)}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <Button
+                        variant="secondary"
+                        onClick={() => setShowPasswordEdit(true)}
+                        className="bg-white/5 hover:bg-white/10 text-white border-white/10 flex items-center justify-center gap-2 h-12 rounded-xl transition-all"
+                      >
+                        <LockIcon className="w-4 h-4" />
                         Change Password
                       </Button>
-                      <Button variant="link" onClick={() => setShowDeleteConfirm(true)}>
+                      <Button
+                        variant="destructive"
+                        onClick={() => setShowDeleteConfirm(true)}
+                        className="bg-red-500/20 hover:bg-red-500 text-red-100 border-red-500/20 flex items-center justify-center gap-2 h-12 rounded-xl transition-all"
+                      >
+                        <TrashIcon className="w-4 h-4" />
                         Delete Account
                       </Button>
                     </div>
                   </div>
 
                   {/* Legal Section */}
-                  <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
-                    <div className="flex items-center mb-4">
-                      <div className="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center mr-3">
-                        <span className="text-white">📜</span>
+                  <div className="group bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-blue-500/50 hover:bg-white/15 transition-all duration-300 shadow-xl hover:shadow-blue-500/10">
+                    <div className="flex items-center mb-6">
+                      <div className="w-12 h-12 bg-gradient-to-br from-gray-500 to-slate-600 rounded-xl flex items-center justify-center mr-4 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                        <FileTextIcon className="text-white w-6 h-6" />
                       </div>
-                      <h2 className="text-xl font-bold text-white">Legal</h2>
+                      <h2 className="text-2xl font-bold text-white tracking-tight">Legal</h2>
                     </div>
-                    <div className="space-y-2">
-                      <Button variant="link" onClick={() => setShowPrivacyPolicy(true)}>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <Button
+                        variant="secondary"
+                        onClick={() => setShowPrivacyPolicy(true)}
+                        className="bg-white/5 hover:bg-white/10 text-white border-white/10 flex items-center justify-center gap-2 h-12 rounded-xl transition-all"
+                      >
+                        <ShieldIcon className="w-4 h-4" />
                         Privacy Policy
                       </Button>
-                      <Button variant="link" onClick={() => setShowTermsOfService(true)}>
+                      <Button
+                        variant="secondary"
+                        onClick={() => setShowTermsOfService(true)}
+                        className="bg-white/5 hover:bg-white/10 text-white border-white/10 flex items-center justify-center gap-2 h-12 rounded-xl transition-all"
+                      >
+                        <FileTextIcon className="w-4 h-4" />
                         Terms of Service
                       </Button>
                     </div>
