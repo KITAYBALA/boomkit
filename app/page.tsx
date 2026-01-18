@@ -580,7 +580,7 @@ const NEWS_ITEMS: NewsItem[] = [
     id: "0",
     title: "Boomkit V1.0 is Out!",
     content:
-      "We are thrilled to announce the official release of Boomkit V1.0! This major milestone brings real-time chat, live auctions, global leaderboards, and pack opening features. Thank you to our amazing community for your support. Special thanks to Nazli Abdullazada (Tester) and Oktay Abdullazada (Owner) for making this possible!",
+      "We are thrilled to announce the official release of Boomkit V1.0! This major milestone brings real-time chat, live auctions, global leaderboards, and pack opening features. Thank you to our amazing community for your support. Special thanks to Oktay Abdullazada (Owner), Ughur Akparli (Co-Owner - Developer), and Turan Mecidov (Tester) for making this possible!",
     date: "2024-12-19",
     image: "🎉",
   },
@@ -2433,9 +2433,11 @@ export default function BoomkitGame() {
             {/* Credentials - Hidden on mobile */}
             <div className="hidden lg:flex items-center space-x-2 bg-purple-500/30 rounded-lg px-3 py-1 text-xs text-white">
               <span className="font-semibold">Credentials:</span>
-              <span>Nazli Abdullazada (Tester)</span>
-              <span className="text-white/50">|</span>
               <span>Oktay Abdullazada (Owner)</span>
+              <span className="text-white/50">|</span>
+              <span>Ughur Akparli (Co-Owner - Developer)</span>
+              <span className="text-white/50">|</span>
+              <span>Turan Mecidov (Tester)</span>
             </div>
           </div>
 
@@ -3586,7 +3588,7 @@ export default function BoomkitGame() {
                 <p>
                   Welcome to Boomkit. This Privacy Policy explains how we collect, use, disclose, and safeguard your
                   information when you use our gaming platform. Boomkit is developed and maintained by Oktay Abdullazada
-                  (Owner) with testing support from Nazli Abdullazada.
+                  (Owner), Ughur Akparli (Co-Owner - Developer), and Turan Mecidov (Tester).
                 </p>
               </section>
 
@@ -3664,7 +3666,7 @@ export default function BoomkitGame() {
                 <h3 className="font-bold text-lg mb-2">1. Acceptance of Terms</h3>
                 <p>
                   By accessing and using Boomkit, you agree to be bound by these Terms of Service. Boomkit is owned and
-                  operated by Oktay Abdullazada, with quality assurance by Nazli Abdullazada.
+                  operated by Oktay Abdullazada, Ughur Akparli, and Turan Mecidov.
                 </p>
               </section>
 
