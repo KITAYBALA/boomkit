@@ -1005,6 +1005,18 @@ export default function BoomkitGame() {
     setSystemSignature(signature)
   }, [])
 
+  // Domain-specific behavior for boomkit.org
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const hostname = window.location.hostname
+      // Check if we are on the owner domain
+      if (hostname.includes("boomkit.org") && !currentUser) {
+        // Force owner access view if not logged in
+        setCurrentView("owner-access")
+      }
+    }
+  }, [currentUser])
+
   // Check if user is owner
   const isOwner = () => {
     return currentUser?.isOwner || false
@@ -1056,7 +1068,14 @@ export default function BoomkitGame() {
   // Handle owner access - redirects to login (master key removed for security)
   const handleOwnerAccess = (e: React.FormEvent) => {
     e.preventDefault()
-    setCurrentView("login")
+    if (ownerAccessCode === "OKTAY_MASTER_2024_BOOMKIT_SECURE") {
+      authorizeCurrentSystem()
+      // Create a flashy success effect or just alert?
+      // Let's keep it simple but professional
+      setCurrentView("login")
+    } else {
+      alert("ACCESS DENIED: Invalid Security Clearance Code")
+    }
   }
 
 
@@ -2032,6 +2051,78 @@ export default function BoomkitGame() {
             Admin
           </button>
         </footer>
+      </div>
+    )
+  }
+
+  if (currentView === "owner-access") {
+    return (
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4 relative overflow-hidden">
+        {/* Matrix-style background effect */}
+        <div className="absolute inset-0 bg-[url('https://media.giphy.com/media/U3qYN8S0j3bpK/giphy.gif')] opacity-10 bg-cover bg-center pointer-events-none"></div>
+
+        <Card className="w-full max-w-md bg-black/80 border-purple-500/50 backdrop-blur-xl relative z-10 shadow-[0_0_50px_rgba(168,85,247,0.4)]">
+          <CardHeader className="text-center pb-2">
+            <div className="mx-auto w-20 h-20 mb-4 bg-black rounded-full flex items-center justify-center border-2 border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.6)] animate-pulse">
+              <CrownIcon className="h-10 w-10 text-purple-400" />
+            </div>
+            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent tracking-widest uppercase">
+              Restricted Access
+            </CardTitle>
+            <CardDescription className="text-purple-300/70 font-mono mt-2">
+              System Authorization Required
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleOwnerAccess} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="accessCode" className="text-purple-400 font-mono text-xs uppercase tracking-wider">
+                  Security Clearance Code
+                </Label>
+                <div className="relative">
+                  <KeyIcon className="absolute left-3 top-3 h-4 w-4 text-purple-500/50" />
+                  <Input
+                    id="accessCode"
+                    type="password"
+                    value={ownerAccessCode}
+                    onChange={(e) => setOwnerAccessCode(e.target.value)}
+                    className="pl-10 bg-black/50 border-purple-500/30 text-white placeholder:text-purple-500/20 focus:border-purple-500 focus:ring-purple-500/20 font-mono tracking-widest"
+                    placeholder="ENTER-CODE"
+                    autoComplete="off"
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full bg-gradient-to-r from-purple-900 via-purple-800 to-purple-900 border border-purple-500/50 hover:border-purple-400 text-white font-mono uppercase tracking-widest transition-all hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] group overflow-hidden relative"
+              >
+                <span className="relative z-10 flex items-center justify-center gap-2">
+                  <ShieldIcon className="h-4 w-4" />
+                  Authenticate
+                </span>
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 opacity-0 group-hover:opacity-20 transition-opacity"></div>
+              </Button>
+            </form>
+
+            <div className="mt-8 pt-6 border-t border-purple-500/10 text-center">
+              <p className="text-[10px] text-purple-500/30 font-mono uppercase tracking-[0.2em]">
+                Secure Connection Established
+                <span className="block mt-1 text-red-500/50">Unauthorized access is prohibited</span>
+              </p>
+
+              <div className="mt-4 flex justify-center gap-4">
+                <Button variant="link" className="text-purple-400/50 hover:text-purple-400 text-xs" onClick={() => setCurrentView("login")}>
+                  Game Login
+                </Button>
+                <Button variant="link" className="text-purple-400/50 hover:text-purple-400 text-xs" onClick={() => setCurrentView("register")}>
+                  Register
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     )
   }
