@@ -2645,68 +2645,127 @@ export default function BoomkitGame() {
 
             {/* Booms Page */}
             {currentPage === "booms" && (
-              <div className="space-y-6">
-                <div className="flex justify-between items-center flex-wrap gap-4">
-                  <h1 className="text-4xl font-bold text-white">My Booms</h1>
-                  <div className="flex gap-2 items-center">
-                    {/* Select Mode buttons removed */}
+              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="flex justify-between items-end flex-wrap gap-6 border-b border-white/10 pb-6">
+                  <div>
+                    <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/50 mb-2">
+                      My Collection
+                    </h1>
+                    <p className="text-white/60 text-lg">Manage and view your discovered Booms</p>
                   </div>
-                  <div className="bg-purple-600 rounded-lg p-4 text-center">
-                    <div className="text-4xl mb-2">⭐</div>
-                    <div className="text-white text-2xl font-bold">{currentUser?.boomScore || 0}</div>
-                    <div className="text-white/70 text-sm">Boom Score</div>
-                    <div className="mt-4 text-center">
-                      <div className="text-white font-bold">{currentUser?.packs.length || 0}</div>
-                      <div className="text-white/70 text-sm">Packs Owned</div>
-                      <div className="text-yellow-400 font-bold">🪙 {currentUser?.totalValue || 0}</div>
-                      <div className="text-white/70 text-sm">Total Value</div>
+
+                  <div className="flex gap-4">
+                    <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex items-center gap-4 shadow-2xl">
+                      <div className="bg-yellow-500/20 p-3 rounded-xl">
+                        <StarIcon className="h-8 w-8 text-yellow-500 animate-pulse" />
+                      </div>
+                      <div>
+                        <div className="text-white/50 text-xs uppercase tracking-wider font-bold">Boom Score</div>
+                        <div className="text-white text-2xl font-black">{currentUser?.boomScore || 0}</div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex items-center gap-4 shadow-2xl">
+                      <div className="bg-purple-500/20 p-3 rounded-xl">
+                        <PackageIcon className="h-8 w-8 text-purple-500" />
+                      </div>
+                      <div>
+                        <div className="text-white/50 text-xs uppercase tracking-wider font-bold">Packs</div>
+                        <div className="text-white text-2xl font-black">{currentUser?.packs.length || 0}</div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex items-center gap-4 shadow-2xl">
+                      <div className="bg-emerald-500/20 p-3 rounded-xl">
+                        <CoinsIcon className="h-8 w-8 text-emerald-500" />
+                      </div>
+                      <div>
+                        <div className="text-white/50 text-xs uppercase tracking-wider font-bold">Value</div>
+                        <div className="text-emerald-400 text-2xl font-black">🪙 {currentUser?.totalValue || 0}</div>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Pack Sections */}
-                <div className="space-y-6">
+                <div className="grid grid-cols-1 gap-8">
                   {PACKS.map((pack) => (
-                    <div key={pack.id} className="bg-gradient-to-r from-purple-600 to-purple-800 rounded-lg p-6">
-                      <h2 className="text-2xl font-bold text-white mb-4 flex items-center">
-                        <span className="text-3xl mr-3">{pack.emoji}</span>
-                        {pack.name}
-                      </h2>
-                      <div className="grid grid-cols-10 gap-2">
-                        {pack.booms.map((boom, index) => {
-                          const quantity = currentUser?.booms[boom.name] || 0
-                          const hasBooom = quantity > 0
+                    <div
+                      key={pack.id}
+                      className="group bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl overflow-hidden transition-all duration-300 hover:border-white/20 hover:shadow-2xl"
+                    >
+                      <div className={`h-2 w-full bg-gradient-to-r ${pack.color}`} />
+                      <div className="p-6">
+                        <div className="flex justify-between items-center mb-6">
+                          <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                            <span className="text-4xl filter drop-shadow-md group-hover:scale-110 transition-transform duration-300">
+                              {pack.emoji}
+                            </span>
+                            {pack.name}
+                          </h2>
+                          <Badge className="bg-white/10 text-white/70 border-none px-3 py-1">
+                            {pack.booms.filter(b => (currentUser?.booms[b.name] || 0) > 0).length} / {pack.booms.length} Found
+                          </Badge>
+                        </div>
 
-                          return (
-                            <div key={index} className="text-center">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+                          {pack.booms.map((boom, index) => {
+                            const quantity = currentUser?.booms[boom.name] || 0
+                            const hasBoom = quantity > 0
+                            const rarityColor = getRarityColor(boom.rarity)
+
+                            return (
                               <div
-                                className={`w-12 h-12 rounded border-2 mb-1 flex items-center justify-center text-lg transition-transform hover:scale-110 relative ${hasBooom
-                                  ? `${getRarityColor(boom.rarity)} text-white shadow-lg cursor-pointer border-white`
-                                  : "bg-black text-gray-500 border-white cursor-not-allowed"
-                                  }`}
-                                onClick={() => {
-                                  if (hasBooom) {
-                                    handleBoomClick(boom.name)
-                                  }
-                                }}
+                                key={index}
+                                className="group/item flex flex-col items-center gap-2"
                               >
-                                {hasBooom ? boom.avatar : "🔒"}
-                                {hasBooom && quantity > 1 && (
-                                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                                    {quantity}
-                                  </span>
-                                )}
-                              </div>
-                              <div className="text-white/70 text-xs truncate w-12">{boom.name}</div>
-                              {hasBooom && (
-                                <div className="text-white/50 text-xs">
-                                  {quantity}{" "}
-                                  {boom.rarity === "chroma" ? "chroma" : boom.rarity === "mystical" ? "mystical" : ""}
+                                <div
+                                  className={`
+                                    w-full aspect-square rounded-2xl border-2 flex items-center justify-center text-3xl 
+                                    transition-all duration-300 relative overflow-hidden
+                                    ${hasBoom
+                                      ? `${rarityColor} border-white/30 shadow-[0_0_20px_rgba(0,0,0,0.3)] cursor-pointer hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]`
+                                      : "bg-black/40 text-white/10 border-white/5 cursor-not-allowed filter grayscale"
+                                    }
+                                  `}
+                                  onClick={() => hasBoom && handleBoomClick(boom.name)}
+                                >
+                                  {/* Rarity Glow Effect */}
+                                  {hasBoom && (
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none" />
+                                  )}
+
+                                  {hasBoom ? (
+                                    <span className="z-10 relative drop-shadow-lg">{boom.avatar}</span>
+                                  ) : (
+                                    <LockIcon className="h-8 w-8 opacity-20" />
+                                  )}
+
+                                  {/* Quantity Badge */}
+                                  {hasBoom && quantity > 1 && (
+                                    <div className="absolute top-2 right-2 bg-white text-black text-[10px] font-black rounded-full w-5 h-5 flex items-center justify-center shadow-lg border border-black/10 z-20">
+                                      {quantity}x
+                                    </div>
+                                  )}
+
+                                  {/* Highlight for rare items */}
+                                  {hasBoom && (boom.rarity === 'legendary' || boom.rarity === 'chroma' || boom.rarity === 'mystical') && (
+                                    <div className="absolute inset-0 animate-pulse bg-white/5" />
+                                  )}
                                 </div>
-                              )}
-                            </div>
-                          )
-                        })}
+
+                                <div className="w-full text-center">
+                                  <div className={`text-[10px] uppercase tracking-tighter font-bold mb-0.5 ${hasBoom ? 'text-white/60' : 'text-white/20'}`}>
+                                    {boom.rarity}
+                                  </div>
+                                  <div className={`text-xs font-semibold truncate w-full ${hasBoom ? 'text-white' : 'text-white/30'}`}>
+                                    {boom.name}
+                                  </div>
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
                       </div>
                     </div>
                   ))}
