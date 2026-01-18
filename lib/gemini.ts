@@ -4,7 +4,8 @@ import { GoogleGenerativeAI } from "@google/generative-ai"
  * Utility to handle Gemini AI generations
  */
 export async function generateGeminiResponse(prompt: string): Promise<string> {
-    const apiKey = process.env.GOOGLE_GEMINI_API_KEY
+    // Use env var first, fallback to the key provided by user to avoid restart issues
+    const apiKey = process.env.GOOGLE_GEMINI_API_KEY || "AIzaSyBJcKB1BFqEIlcL8VGJ-q6BKFvBLB8jXmc"
 
     if (!apiKey) {
         console.error("GOOGLE_GEMINI_API_KEY is not defined in environment variables.")
