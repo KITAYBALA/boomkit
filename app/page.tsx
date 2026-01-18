@@ -580,7 +580,7 @@ const NEWS_ITEMS: NewsItem[] = [
     id: "0",
     title: "Boomkit V1.0 is Out!",
     content:
-      "We are thrilled to announce the official release of Boomkit V1.0! This major milestone brings real-time chat, live auctions, global leaderboards, and pack opening features. Thank you to our amazing community for your support. Special thanks to Oktay Abdullazada (Owner), Ughur Akparli (Co-Owner - Developer), and Turan Mecidov (Tester) for making this possible!",
+      "We are thrilled to announce the official release of Boomkit V1.0! This major milestone brings real-time chat, live auctions, global leaderboards, and pack opening features. Thank you to our amazing community for your support. Special thanks to Oktay Abdullazada (Owner) | Ughur Akparli (Co-Owner - Developer) | Turan Mecidov (Tester) for making this possible!",
     date: "2024-12-19",
     image: "🎉",
   },
@@ -2431,7 +2431,7 @@ export default function BoomkitGame() {
             {currentUser?.isOwner && <CrownIcon className="h-5 w-5 md:h-6 md:w-6 text-yellow-400" />}
 
             {/* Credentials - Hidden on mobile */}
-            <div className="hidden lg:flex items-center space-x-2 bg-purple-500/30 rounded-lg px-3 py-1 text-xs text-white">
+            <div className="flex items-center space-x-2 bg-purple-500/30 rounded-lg px-3 py-1 text-xs text-white">
               <span className="font-semibold">Credentials:</span>
               <span>Oktay Abdullazada (Owner)</span>
               <span className="text-white/50">|</span>
