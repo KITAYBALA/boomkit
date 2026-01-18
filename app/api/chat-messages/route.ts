@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { getSupabaseServerClient } from "@/lib/supabase-server-client"
+import { generateGeminiResponse } from "@/lib/gemini"
 
 export async function GET() {
   try {
@@ -129,6 +130,34 @@ export async function POST(request: Request) {
     }
 
     console.log("[v0] Successfully posted chat message:", data)
+
+    // GEMINI CHAT BOT INTEGRATION
+    if (message.toLowerCase().includes("@gemini")) {
+      // Run AI response as a side effect (not blocking the initial message response)
+      // Since this is a serverless route, we might want to wait or use a background task if supported
+      // But for simplicity and reliability in this environment, we will process it before returning
+      // or right after inserting the user message.
+
+      const query = message.replace(/@gemini/gi, "").trim()
+
+      if (query) {
+        // We use a separate async operation to not block the user's message return
+        // but since this is a standard Next.js route, we should probably handle it carefully.
+        // Let's generate and insert the bot response.
+
+        generateGeminiResponse(query).then(async (aiResponse) => {
+          if (aiResponse) {
+            await supabase.from("chat_messages").insert([{
+              username: "Gemini 🤖",
+              message: aiResponse,
+              role: "admin", // Bot gets admin role for special color/status
+            }])
+            console.log("[GEMINI] Responded to query:", query)
+          }
+        }).catch(err => console.error("[GEMINI] Error:", err))
+      }
+    }
+
     return NextResponse.json(data, { status: 201 })
   } catch (error) {
     console.error("[v0] Unexpected error posting chat message:", error)
