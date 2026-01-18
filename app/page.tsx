@@ -637,7 +637,16 @@ export default function BoomkitGame() {
   const [showUserStats, setShowUserStats] = useState(false)
   const [selectedUserStats, setSelectedUserStats] = useState<GameUser | null>(null)
   const [systemSignature, setSystemSignature] = useState<string>("")
+  const [isStorageLoaded, setIsStorageLoaded] = useState(false) // Added to prevent hydration race conditions
   // Custom roles feature removed for security reasons
+
+  const supabase = useMemo(() => (typeof window !== "undefined" ? getSupabaseBrowserClient() : null), [])
+  const router = useRouter()
+
+  // ... (keeping lines 645-813 unchanged - skipping for brevity in replacement if possible, but replace_file_content needs contiguous block)
+  // Actually, I should probably do this in multiple edits if the file is large, but removing the previous task showed I can't be too granular effectively.
+  // Let's modify the state declaration block first.
+
 
   const supabase = useMemo(() => (typeof window !== "undefined" ? getSupabaseBrowserClient() : null), [])
   const router = useRouter()
@@ -835,6 +844,7 @@ export default function BoomkitGame() {
       const storedChat = localStorage.getItem("boomkit_chat_messages")
       if (storedChat) setChatMessages(JSON.parse(storedChat))
 
+      setIsStorageLoaded(true) // Signal that storage is loaded
     }
   }, [])
 
@@ -1007,7 +1017,7 @@ export default function BoomkitGame() {
 
   // Domain-specific behavior for boomkit.org
   useEffect(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== "undefined" && isStorageLoaded) {
       const hostname = window.location.hostname
       // Check if we are on the owner domain
       if (hostname.includes("boomkit.org")) {
@@ -1030,7 +1040,7 @@ export default function BoomkitGame() {
         }
       }
     }
-  }, [currentUser, currentView])
+  }, [currentUser, currentView, isStorageLoaded])
 
   // Check if user is owner
   const isOwner = () => {
