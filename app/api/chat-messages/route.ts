@@ -93,24 +93,24 @@ export async function POST(request: Request) {
       }, { status: 403 })
     }
 
-    // SLOWMODE CHECK (15 seconds)
-    const { data: lastMessage } = await supabase
+    // BURST SLOWMODE CHECK (allow 5 messages per 15 seconds)
+    const { data: previousMessages } = await supabase
       .from("chat_messages")
       .select("inserted_at")
       .eq("username", username)
       .order("inserted_at", { ascending: false })
-      .limit(1)
-      .single()
+      .limit(5)
 
-    if (lastMessage) {
-      // Supabase returns inserted_at as an ISO string (e.g., "2023-01-01T12:00:00.000Z")
-      const lastTime = new Date(lastMessage.inserted_at).getTime()
+    if (previousMessages && previousMessages.length === 5) {
+      // Check the 5th message back. If it was less than 15s ago, user is too fast.
+      const fifthLastMessage = previousMessages[4]
+      const lastTime = new Date(fifthLastMessage.inserted_at).getTime()
       const timeDiff = Date.now() - lastTime
       if (timeDiff < 15000) {
         const waitTime = Math.ceil((15000 - timeDiff) / 1000)
         return NextResponse.json({
           error: "SLOWMODE",
-          message: `Please wait ${waitTime} seconds before typing again.`
+          message: `Burst limit reached. Please wait ${waitTime} seconds before typing again.`
         }, { status: 429 })
       }
     }
