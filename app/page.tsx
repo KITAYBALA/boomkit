@@ -30,6 +30,7 @@ import {
   LockIcon,
   TrashIcon,
   FileTextIcon,
+  Star,
 } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 
@@ -2657,7 +2658,7 @@ export default function BoomkitGame() {
                   <div className="flex gap-4">
                     <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex items-center gap-4 shadow-2xl">
                       <div className="bg-yellow-500/20 p-3 rounded-xl">
-                        <StarIcon className="h-8 w-8 text-yellow-500 animate-pulse" />
+                        <Star className="h-8 w-8 text-yellow-500 animate-pulse" />
                       </div>
                       <div>
                         <div className="text-white/50 text-xs uppercase tracking-wider font-bold">Boom Score</div>
