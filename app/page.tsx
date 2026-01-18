@@ -2688,19 +2688,7 @@ export default function BoomkitGame() {
                           🪙 {pack.price}
                         </div>
 
-                        {/* Rarity Badge */}
-                        <div
-                          className={`absolute top-2 right-2 px-2 py-1 rounded text-xs font-bold ${pack.rarity === "uncommon"
-                            ? "bg-green-500"
-                            : pack.rarity === "rare"
-                              ? "bg-blue-500"
-                              : pack.rarity === "epic"
-                                ? "bg-purple-500"
-                                : "bg-orange-500"
-                            } text-white`}
-                        >
-                          {pack.rarity.toUpperCase()}
-                        </div>
+
                       </div>
 
                       <Button
