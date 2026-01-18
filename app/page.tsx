@@ -1010,12 +1010,24 @@ export default function BoomkitGame() {
     if (typeof window !== "undefined") {
       const hostname = window.location.hostname
       // Check if we are on the owner domain
-      if (hostname.includes("boomkit.org") && !currentUser) {
-        // Force owner access view if not logged in
-        setCurrentView("owner-access")
+      if (hostname.includes("boomkit.org")) {
+        // If user is logged in, we let the default flow handle it (it will go to 'game')
+        if (!currentUser) {
+          // If NOT logged in, check if system is authorized
+          if (isAuthorizedSystem()) {
+            // System is authorized, but user not logged in -> Go to Login
+            // We only modify if we are currently defaulting to owner-access
+            if (currentView === "owner-access") {
+              setCurrentView("login")
+            }
+          } else {
+            // Not authorized -> Force Owner Access
+            setCurrentView("owner-access")
+          }
+        }
       }
     }
-  }, [currentUser])
+  }, [currentUser, currentView])
 
   // Check if user is owner
   const isOwner = () => {
