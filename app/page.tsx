@@ -1159,7 +1159,7 @@ export default function BoomkitGame() {
         packsOpened: user.packs_opened || 0,
       }
 
-      setCurrentUser(newUser)
+      updateAndPersistCurrentUser(newUser)
       setCurrentView("game")
     } catch (error) {
       console.error("Registration error:", error)
@@ -1238,7 +1238,7 @@ export default function BoomkitGame() {
         return
       }
 
-      setCurrentUser(foundUser)
+      updateAndPersistCurrentUser(foundUser)
       setCurrentView("game")
     } catch (error) {
       console.error("Login error:", error)
