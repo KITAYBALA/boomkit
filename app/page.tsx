@@ -644,13 +644,6 @@ export default function BoomkitGame() {
   const [isStorageLoaded, setIsStorageLoaded] = useState(false) // Added to prevent hydration race conditions
   // Custom roles feature removed for security reasons
 
-  const supabase = useMemo(() => (typeof window !== "undefined" ? getSupabaseBrowserClient() : null), [])
-  const router = useRouter()
-
-  // ... (keeping lines 645-813 unchanged - skipping for brevity in replacement if possible, but replace_file_content needs contiguous block)
-  // Actually, I should probably do this in multiple edits if the file is large, but removing the previous task showed I can't be too granular effectively.
-  // Let's modify the state declaration block first.
-
 
   const supabase = useMemo(() => (typeof window !== "undefined" ? getSupabaseBrowserClient() : null), [])
   const router = useRouter()
