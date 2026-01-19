@@ -44,13 +44,14 @@ export default function RealtimeLeaderboard() {
 
     fetchLeaderboard()
 
-    const channel = supabase
-      .channel("leaderboard-changes")
+    if (!supabase) return
+    const subscription = supabase
+      .channel("leaderboard-updates")
       .on("postgres_changes", { event: "*", schema: "public", table: "users" }, () => fetchLeaderboard())
       .subscribe()
 
     return () => {
-      supabase.removeChannel(channel)
+      supabase.removeChannel(subscription)
     }
   }, [])
 
@@ -100,8 +101,8 @@ export default function RealtimeLeaderboard() {
   }
 
   return (
-    <div className="space-y-4">
-      <ScrollArea className="h-[600px] pr-4 rounded-xl border border-white/5 bg-black/50 backdrop-blur-md shadow-2xl">
+    <div className="h-full flex flex-col space-y-4">
+      <ScrollArea className="flex-1 min-h-[600px] pr-4 rounded-xl border border-white/5 bg-black/50 backdrop-blur-md shadow-2xl">
         <div className="space-y-3 p-4">
           {users.length === 0 ? (
             <div className="text-center text-muted-foreground p-12 bg-white/5 rounded-2xl border border-dashed border-white/10">

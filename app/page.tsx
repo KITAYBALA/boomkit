@@ -2498,100 +2498,116 @@ export default function BoomkitGame() {
               <div className="space-y-6">
                 {/* User Profile Section */}
                 <div
-                  className={`backdrop-blur-md rounded-lg p-6 ${currentUser?.bannerColor === "rainbow"
-                    ? "bg-gradient-to-r from-red-500/20 via-yellow-500/20 via-green-500/20 via-blue-500/20 to-purple-500/20 animate-pulse"
-                    : "bg-white/10"
+                  className={`backdrop-blur-xl rounded-2xl p-8 border border-white/10 shadow-2xl relative overflow-hidden transition-all duration-500 hover:shadow-orange-500/10 ${currentUser?.bannerColor === "rainbow"
+                    ? "bg-gradient-to-br from-red-500/10 via-yellow-500/10 via-green-500/10 via-blue-500/10 to-purple-500/10 animate-pulse"
+                    : "bg-white/5"
                     }`}
                 >
-                  <div className="flex items-center space-x-4 mb-4">
-                    <div className="relative">
-                      <div className="w-16 h-16 bg-yellow-500 rounded-lg flex items-center justify-center text-2xl">
+                  {/* Decorative background element */}
+                  <div className="absolute -top-24 -right-24 w-48 h-48 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
+
+                  <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6 mb-8 relative z-10">
+                    <div className="relative group">
+                      <div className="w-24 h-24 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center text-4xl shadow-lg transform transition-transform group-hover:scale-105 group-hover:rotate-3">
                         {currentUser?.profilePicture || "🎯"}
                       </div>
                       <Button
                         size="sm"
                         onClick={() => setShowProfilePicker(true)}
-                        className="absolute -bottom-2 -right-2 w-6 h-6 rounded-full bg-blue-500 hover:bg-blue-600 p-0"
+                        className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 p-0 shadow-lg border-2 border-slate-900"
                       >
-                        <CameraIcon className="h-3 w-3" />
+                        <CameraIcon className="h-4 w-4" />
                       </Button>
                     </div>
-                    <div>
+
+                    <div className="text-center md:text-left flex-1">
                       <h2
-                        className={`text-2xl font-bold ${currentUser?.nameColor === "rainbow"
+                        className={`text-4xl font-black tracking-tight mb-2 ${currentUser?.nameColor === "rainbow"
                           ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent animate-pulse"
                           : "text-white"
                           }`}
                       >
                         {currentUser?.username}
                       </h2>
-                      {/* Update Stats page to show role prominently with badge */}
-                      {/* In the Stats section, after the username display, update to show role with colored badge: */}
-                      {/* Around line 2207, replace the role display line: */}
-                      {/* Old: <p className="text-white/70">{currentUser ? getUserRoleName(currentUser) : "Player"}</p> */}
-                      {/* New: Show role with colored badge */}
-                      <div className="flex items-center gap-2">
+
+                      <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
                         <Badge
-                          className={`${currentUser?.role === "owner"
-                            ? "bg-yellow-500"
+                          className={`px-3 py-1 text-xs font-bold uppercase tracking-wider ${currentUser?.role === "owner"
+                            ? "bg-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.4)]"
                             : currentUser?.role === "admin"
-                              ? "bg-red-500"
+                              ? "bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.4)]"
                               : currentUser?.role === "senior_moderator"
-                                ? "bg-purple-500"
+                                ? "bg-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.4)]"
                                 : currentUser?.role === "moderator"
-                                  ? "bg-blue-500"
+                                  ? "bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.4)]"
                                   : currentUser?.role === "tester"
-                                    ? "bg-green-500"
-                                    : // Added test role badge
-                                    "bg-gray-500"
-                            } text-white`}
+                                    ? "bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.4)]"
+                                    : "bg-slate-600"
+                            } text-white border-none`}
                         >
                           {currentUser ? getUserRoleName(currentUser) : "Player"}
                         </Badge>
+
                         {(currentUser?.role === "moderator" ||
                           currentUser?.role === "senior_moderator" ||
                           currentUser?.role === "admin" ||
-                          currentUser?.role === "tester" || // Added check for tester role
-                          currentUser?.isOwner) && <Badge className="bg-emerald-500 text-white">Staff</Badge>}
-                      </div>
-                      {/* Display badges */}
-                      <div className="flex space-x-1 mt-1">
-                        {(currentUser?.badges ?? []).slice(0, 3).map((badgeId) => {
-                          const badge = AVAILABLE_BADGES.find((b) => b.id === badgeId)
-                          return badge ? (
-                            <Badge key={badgeId} className={`${badge.color} text-white text-xs`}>
-                              {badge.emoji} {badge.name}
+                          currentUser?.role === "tester" ||
+                          currentUser?.isOwner) && (
+                            <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1 text-xs font-bold uppercase tracking-wider">
+                              Staff Member
                             </Badge>
-                          ) : null
-                        })}
+                          )}
+
+                        <div className="flex space-x-2">
+                          {(currentUser?.badges ?? []).slice(0, 3).map((badgeId) => {
+                            const badge = AVAILABLE_BADGES.find((b) => b.id === badgeId)
+                            return badge ? (
+                              <div key={badgeId} className="group relative">
+                                <Badge className={`${badge.color} text-white text-[10px] px-2 py-0.5 shadow-sm hover:scale-110 transition-transform cursor-help`}>
+                                  {badge.emoji}
+                                </Badge>
+                                <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-black text-white text-[10px] rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity">
+                                  {badge.name}
+                                </div>
+                              </div>
+                            ) : null
+                          })}
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <div className="w-full bg-white/20 rounded-full h-3 mb-2">
-                    <div className="bg-orange-500 h-3 rounded-full" style={{ width: "100%" }}></div>
+
+                  <div className="space-y-3 relative z-10">
+                    <div className="flex justify-between items-end">
+                      <span className="text-white/50 text-xs font-bold uppercase tracking-widest">Level Progress</span>
+                      <span className="text-orange-500 font-black text-sm">MAX LEVEL</span>
+                    </div>
+                    <div className="w-full bg-white/5 rounded-full h-4 p-1 border border-white/5 overflow-hidden">
+                      <div className="bg-gradient-to-r from-orange-600 to-yellow-500 h-full rounded-full shadow-[0_0_10px_rgba(249,115,22,0.5)]" style={{ width: "100%" }}></div>
+                    </div>
                   </div>
-                  <div className="text-white text-sm">100</div>
-                  <div className="flex space-x-2 mt-4">
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 relative z-10">
                     <Button
                       onClick={() => setCurrentPage("market")}
-                      className="bg-orange-600 hover:bg-orange-700 text-white"
+                      className="group bg-orange-600 hover:bg-orange-500 text-white font-bold h-12 rounded-xl border border-orange-400/20 shadow-lg shadow-orange-900/20 transition-all hover:scale-[1.02] hover:-translate-y-0.5"
                     >
-                      Unlock Booms
+                      <span className="mr-2 group-hover:animate-bounce">🔓</span> Unlock Booms
                     </Button>
                     <Button
                       onClick={() => setCurrentPage("booms")}
-                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                      className="group bg-blue-600 hover:bg-blue-500 text-white font-bold h-12 rounded-xl border border-blue-400/20 shadow-lg shadow-blue-900/20 transition-all hover:scale-[1.02] hover:-translate-y-0.5"
                     >
-                      Manage Booms
+                      <span className="mr-2 group-hover:rotate-12 transition-transform">⚙️</span> Manage Booms
                     </Button>
                     <Button
                       onClick={() => {
-                        setSelectedUserStats(currentUser) // Set the selected user to the current user
+                        setSelectedUserStats(currentUser)
                         setShowUserStats(true)
                       }}
-                      className="bg-green-600 hover:bg-green-700 text-white"
+                      className="group bg-white/10 hover:bg-white/15 text-white font-bold h-12 rounded-xl border border-white/10 backdrop-blur-md transition-all hover:scale-[1.02] hover:-translate-y-0.5"
                     >
-                      View Stats
+                      <span className="mr-2 group-hover:scale-125 transition-transform">📊</span> Full Profile
                     </Button>
                   </div>
                 </div>
@@ -3860,31 +3876,159 @@ export default function BoomkitGame() {
         </div>
       )}
       {showUserStats && selectedUserStats && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
-          <Card className="w-full max-w-md p-6">
-            <CardHeader>
-              <CardTitle className="text-2xl font-bold">User Stats</CardTitle>
-              <CardDescription>Statistics for {selectedUserStats.username}</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p>
-                <strong>Username:</strong> {selectedUserStats.username}
-              </p>
-              <p>
-                <strong>Role:</strong> {getUserRoleName(selectedUserStats)}
-              </p>
-              <p>
-                <strong>Tokens:</strong> {selectedUserStats.tokens}
-              </p>
-              <p>
-                <strong>Boom Score:</strong> {selectedUserStats.boomScore}
-              </p>
-              <p>
-                <strong>Unique Booms:</strong> {Object.keys(selectedUserStats.booms).length}
-              </p>
-              <Button onClick={() => setShowUserStats(false)} className="w-full bg-gray-600 hover:bg-gray-700">
-                Close
-              </Button>
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center z-[100] p-4 transition-all duration-300">
+          <Card
+            className={`w-full max-w-2xl overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] relative animate-in zoom-in-95 duration-300 ${selectedUserStats.bannerColor === "rainbow"
+                ? "bg-gradient-to-br from-red-500/5 via-yellow-500/5 via-green-500/5 via-blue-500/5 to-purple-500/5"
+                : "bg-slate-900/90"
+              }`}
+          >
+            {/* Header Banner */}
+            <div className={`h-32 w-full relative ${selectedUserStats.bannerColor === "rainbow"
+                ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 animate-pulse"
+                : selectedUserStats.bannerColor || "bg-gradient-to-r from-purple-600 to-pink-600"
+              }`}>
+              <div className="absolute inset-0 bg-black/20" />
+              <button
+                onClick={() => setShowUserStats(false)}
+                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition-colors z-20"
+              >
+                ✕
+              </button>
+            </div>
+
+            <CardContent className="px-8 pb-8 -mt-12 relative z-10">
+              <div className="flex flex-col md:flex-row gap-6">
+                {/* Left Column: Profile Picture & Primary Info */}
+                <div className="flex flex-col items-center md:items-start space-y-4">
+                  <div className="relative group">
+                    <div className="w-32 h-32 rounded-3xl bg-slate-800 border-4 border-slate-900 flex items-center justify-center text-6xl shadow-2xl relative overflow-hidden">
+                      {selectedUserStats.profilePicture || "🎮"}
+                      {selectedUserStats.role === "owner" && (
+                        <div className="absolute inset-0 border-4 border-yellow-500/30 animate-pulse rounded-2xl" />
+                      )}
+                    </div>
+                    {selectedUserStats.isPlusUser && (
+                      <div className="absolute -top-2 -right-2 bg-gradient-to-r from-cyan-400 to-blue-500 text-white text-[10px] font-black px-2 py-1 rounded-full shadow-lg">
+                        PLUS
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="text-center md:text-left">
+                    <h2 className={`text-3xl font-black mb-1 ${selectedUserStats.nameColor === "rainbow"
+                        ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent animate-pulse"
+                        : "text-white"
+                      }`}>
+                      {selectedUserStats.username}
+                    </h2>
+                    <Badge variant="outline" className="border-white/20 text-white/60 bg-white/5 uppercase tracking-widest text-[10px] font-bold">
+                      ID: {selectedUserStats.id.slice(0, 8)}...
+                    </Badge>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+                    <Badge className={`${getRoleColor(selectedUserStats.role)} text-white px-3 py-1 text-xs font-black uppercase tracking-wider border-none shadow-lg shadow-black/20`}>
+                      {getUserRoleName(selectedUserStats)}
+                    </Badge>
+                    {selectedUserStats.isOwner && (
+                      <Badge className="bg-emerald-500 text-white px-3 py-1 text-xs font-black uppercase tracking-wider border-none shadow-lg shadow-black/20">
+                        Official
+                      </Badge>
+                    )}
+                  </div>
+
+                  <div className="w-full pt-4">
+                    <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                      <p className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-3">Active Badges</p>
+                      <div className="flex flex-wrap gap-2">
+                        {(selectedUserStats.badges ?? []).length > 0 ? (
+                          selectedUserStats.badges.map((badgeId) => {
+                            const badge = AVAILABLE_BADGES.find((b) => b.id === badgeId)
+                            return badge ? (
+                              <div key={badgeId} className="flex items-center gap-1.5 bg-black/40 px-3 py-1.5 rounded-xl border border-white/10">
+                                <span className="text-base">{badge.emoji}</span>
+                                <span className="text-[10px] text-white font-bold opacity-80">{badge.name}</span>
+                              </div>
+                            ) : null
+                          })
+                        ) : (
+                          <p className="text-white/20 text-xs italic">No badges earned yet</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right Column: Key Statistics */}
+                <div className="flex-1 space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 rounded-2xl p-4 transition-all hover:scale-[1.02] cursor-default">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xl">💰</span>
+                        <span className="text-white/40 text-[10px] font-black uppercase tracking-widest">Tokens</span>
+                      </div>
+                      <div className="text-2xl font-black text-yellow-500">
+                        {selectedUserStats.tokens.toLocaleString()}
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-2xl p-4 transition-all hover:scale-[1.02] cursor-default">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xl">⭐</span>
+                        <span className="text-white/40 text-[10px] font-black uppercase tracking-widest">Score</span>
+                      </div>
+                      <div className="text-2xl font-black text-purple-400">
+                        {selectedUserStats.boomScore.toLocaleString()}
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-2xl p-4 transition-all hover:scale-[1.02] cursor-default">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xl">📦</span>
+                        <span className="text-white/40 text-[10px] font-black uppercase tracking-widest">Opened</span>
+                      </div>
+                      <div className="text-2xl font-black text-blue-400">
+                        {selectedUserStats.packsOpened || 0}
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-2xl p-4 transition-all hover:scale-[1.02] cursor-default">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xl">🎆</span>
+                        <span className="text-white/40 text-[10px] font-black uppercase tracking-widest">Unique</span>
+                      </div>
+                      <div className="text-2xl font-black text-emerald-400">
+                        {Object.keys(selectedUserStats.booms).length}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-white/5 rounded-2xl p-5 border border-white/5 space-y-4">
+                    <div className="flex justify-between items-center">
+                      <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">Recent Activity</p>
+                      <Badge className="bg-white/5 text-white/40 border-white/10 text-[9px]">Live Tracking</Badge>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-3 text-xs">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                        <p className="text-white/70">Joined the Booom Arena on <span className="text-emerald-400 font-bold">{new Date(selectedUserStats.joinDate).toLocaleDateString()}</span></p>
+                      </div>
+                      <div className="flex items-center gap-3 text-xs">
+                        <span className="w-2 h-2 rounded-full bg-yellow-500" />
+                        <p className="text-white/70">Highest token balance recorded: <span className="text-yellow-400 font-bold">{selectedUserStats.tokens.toLocaleString()}</span></p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Button
+                    onClick={() => setShowUserStats(false)}
+                    className="w-full h-12 bg-white/10 hover:bg-white/20 text-white font-black uppercase tracking-widest text-xs border border-white/10 rounded-xl transition-all"
+                  >
+                    Close Profile
+                  </Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
