@@ -2,19 +2,17 @@
 
 -- Drop the old permissive policy if it exists
 DROP POLICY IF EXISTS "Anyone can create trades" ON trades;
+DROP POLICY IF EXISTS "Users can only create trades if not banned" ON trades;
 
 -- Create a stricter policy for creating trades
 CREATE POLICY "Users can only create trades if not banned"
   ON trades
   FOR INSERT
   WITH CHECK (
-    -- The user creating the trade must be the sender
-    auth.uid()::text = sender_id
-    AND
     -- The sender must NOT be banned
     EXISTS (
       SELECT 1 FROM users
-      WHERE id = auth.uid()::text
+      WHERE id = sender_id
       AND is_banned = false
     )
     AND

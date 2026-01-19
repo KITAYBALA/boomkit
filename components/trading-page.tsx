@@ -282,8 +282,8 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
         <Button
           onClick={() => setShowNewTrade(true)}
           className="bg-green-500 hover:bg-green-600"
-          disabled={currentUser.is_banned}
-          title={currentUser.is_banned ? "You are banned" : "Start a new trade"}
+          disabled={currentUser.isBanned}
+          title={currentUser.isBanned ? "You are banned" : "Start a new trade"}
         >
           <PlusIcon className="h-4 w-4 mr-2" />
           New Trade
