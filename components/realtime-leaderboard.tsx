@@ -72,6 +72,13 @@ export default function RealtimeLeaderboard() {
     }
   }
 
+  const getMedalEmoji = (index: number) => {
+    if (index === 0) return "🥇"
+    if (index === 1) return "🥈"
+    if (index === 2) return "🥉"
+    return `#${index + 1}`
+  }
+
   const getRankStyle = (index: number) => {
     if (index === 0) return "border-yellow-500/50 bg-gradient-to-r from-yellow-500/20 to-amber-500/10 shadow-[0_0_15px_rgba(234,179,8,0.2)]"
     if (index === 1) return "border-slate-300/50 bg-gradient-to-r from-slate-300/20 to-slate-400/10 shadow-[0_0_15px_rgba(203,213,225,0.2)]"
@@ -160,7 +167,7 @@ export default function RealtimeLeaderboard() {
                   <div className="h-px w-12 bg-gradient-to-l from-transparent to-white/10" />
                 </div>
                 <p className="text-xs text-muted-foreground/60 italic px-8">
-                  Keep opening packs and earning tokens to climb the global ranks! 
+                  Keep opening packs and earning tokens to climb the global ranks!
                   The arena reset happens weekly.
                 </p>
                 <div className="opacity-10 grayscale brightness-200">
