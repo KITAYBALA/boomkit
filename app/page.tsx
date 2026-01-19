@@ -31,6 +31,7 @@ import {
   TrashIcon,
   FileTextIcon,
   Star,
+  BanIcon,
 } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 
@@ -3178,67 +3179,133 @@ export default function BoomkitGame() {
                                 {user.isBanned && <span className="text-red-500 text-sm">🚫 Banned</span>}
                               </div>
                               <div className="flex items-center space-x-2">
-                                {(currentUser?.role === "admin" || currentUser?.role === "tester" || isOwner()) && ( // Added tester role to staff actions
-                                  <>
-                                    {isOwner() && (
-                                      <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => openEditUserDialog(user)}
-                                        className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/20"
-                                        title="Edit User Tokens"
+                                {(currentUser?.role === "admin" ||
+                                  currentUser?.role === "senior_moderator" ||
+                                  currentUser?.role === "moderator" ||
+                                  currentUser?.role === "tester" ||
+                                  isOwner()) && (
+                                    <>
+                                      {isOwner() && (
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          onClick={() => openEditUserDialog(user)}
+                                          className="text-purple-400 hover:text-purple-300 hover:bg-purple-500/20"
+                                          title="Edit User Tokens"
+                                        >
+                                          <PencilIcon className="h-4 w-4" />
+                                        </Button>
+                                      )}
+                                      <select
+                                        value={user.role}
+                                        onChange={(e) => quickAssignRole(user.id, e.target.value)}
+                                        className="bg-white/20 text-white text-sm rounded px-2 py-1 border border-white/30"
+                                        disabled={false} // Staff can now manage roles
                                       >
-                                        <PencilIcon className="h-4 w-4" />
-                                      </Button>
-                                    )}
-                                    <select
-                                      value={user.role}
-                                      onChange={(e) => quickAssignRole(user.id, e.target.value)}
-                                      className="bg-white/20 text-white text-sm rounded px-2 py-1 border border-white/30"
-                                      disabled={!isOwner()} // Only owner can change roles freely
-                                    >
-                                      {DEFAULT_ROLES.filter(
-                                        (role) => role.id !== "owner" || (isOwner() && user.id === currentUser?.id),
-                                      ).map((role) => (
-                                        <option key={role.id} value={role.id} className="bg-gray-800 text-white">
-                                          {role.name}
-                                        </option>
-                                      ))}
-                                    </select>
-                                    {user.isMuted ? (
-                                      <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => handleUnbanUnmute(user.id, "unmute")}
-                                        className="bg-yellow-500/50 hover:bg-yellow-500"
-                                      >
-                                        Unmute
-                                      </Button>
-                                    ) : (
-                                      <Button size="sm" variant="outline" onClick={() => openMuteDialog(user)}>
-                                        Mute
-                                      </Button>
-                                    )}
-                                    {user.isBanned ? (
-                                      <Button
-                                        size="sm"
-                                        variant="destructive"
-                                        onClick={() => handleUnbanUnmute(user.id, "unban")}
-                                        className="bg-green-500/80 hover:bg-green-500"
-                                      >
-                                        Unban
-                                      </Button>
-                                    ) : (
-                                      <Button size="sm" variant="destructive" onClick={() => openBanDialog(user)}>
-                                        Ban
-                                      </Button>
-                                    )}
-                                  </>
-                                )}
+                                        {DEFAULT_ROLES.filter(
+                                          (role) => role.id !== "owner" || (isOwner() && user.id === currentUser?.id),
+                                        ).map((role) => (
+                                          <option key={role.id} value={role.id} className="bg-gray-800 text-white">
+                                            {role.name}
+                                          </option>
+                                        ))}
+                                      </select>
+                                      {user.isMuted ? (
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          onClick={() => handleUnbanUnmute(user.id, "unmute")}
+                                          className="bg-yellow-500/50 hover:bg-yellow-500"
+                                        >
+                                          Unmute
+                                        </Button>
+                                      ) : (
+                                        <Button size="sm" variant="outline" onClick={() => openMuteDialog(user)}>
+                                          Mute
+                                        </Button>
+                                      )}
+                                      {user.isBanned ? (
+                                        <Button
+                                          size="sm"
+                                          variant="destructive"
+                                          onClick={() => handleUnbanUnmute(user.id, "unban")}
+                                          className="bg-green-500/80 hover:bg-green-500"
+                                        >
+                                          Unban
+                                        </Button>
+                                      ) : (
+                                        <Button size="sm" variant="destructive" onClick={() => openBanDialog(user)}>
+                                          Ban
+                                        </Button>
+                                      )}
+                                    </>
+                                  )}
                               </div>
                             </div>
                           )
                         })}
+                    </div>
+                  </div>
+
+                  {/* Banned Users Section */}
+                  <div className="bg-red-500/10 backdrop-blur-md rounded-2xl p-6 border border-red-500/20 shadow-xl mt-6">
+                    <div className="flex justify-between items-center mb-6">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-red-500/20 rounded-xl flex items-center justify-center border border-red-500/30">
+                          <BanIcon className="w-5 h-5 text-red-500" />
+                        </div>
+                        <div>
+                          <h2 className="text-2xl font-black text-white tracking-tight">Banned Users</h2>
+                          <p className="text-red-400/60 text-xs font-bold uppercase tracking-widest">Prison Wardened</p>
+                        </div>
+                      </div>
+                      <Badge className="bg-red-500/20 text-red-400 border border-red-500/30 font-black px-3 py-1">
+                        {users.filter(u => u.isBanned).length} BLOCKED
+                      </Badge>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {users.filter(u => u.isBanned).length > 0 ? (
+                        users.filter(u => u.isBanned).map((user) => (
+                          <div
+                            key={user.id}
+                            className="bg-zinc-900/50 backdrop-blur-sm border border-white/5 rounded-2xl p-4 flex flex-col justify-between hover:border-red-500/30 transition-all duration-300 group"
+                          >
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <span className="text-white font-black text-lg tracking-tight group-hover:text-red-400 transition-colors">
+                                  {user.username}
+                                </span>
+                                <div className="p-1.5 bg-red-500/10 rounded-lg">
+                                  <LockIcon className="w-3.5 h-3.5 text-red-500" />
+                                </div>
+                              </div>
+                              <div className="bg-black/20 rounded-xl p-3 border border-white/5">
+                                <span className="text-[10px] font-black uppercase text-white/30 tracking-widest block mb-1">Reason for Ban</span>
+                                <p className="text-sm text-red-200/80 leading-relaxed italic">
+                                  "{user.banReason || "No reason provided"}"
+                                </p>
+                              </div>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => handleUnbanUnmute(user.id, "unban")}
+                              className="mt-4 w-full bg-red-600/20 hover:bg-red-500 text-red-400 hover:text-white border border-red-500/30 hover:border-red-500 rounded-xl font-bold transition-all shadow-lg shadow-red-900/20"
+                            >
+                              Revoke Ban
+                            </Button>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="col-span-full py-12 flex flex-col items-center justify-center bg-zinc-900/20 rounded-3xl border border-dashed border-white/10">
+                          <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4">
+                            <ShieldIcon className="w-8 h-8 text-white/20" />
+                          </div>
+                          <p className="text-white/40 font-bold">No users currently banned.</p>
+                          <p className="text-white/20 text-xs">The arena is peaceful...</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
