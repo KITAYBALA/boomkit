@@ -1986,6 +1986,25 @@ export default function BoomkitGame() {
     return role?.name || "Player"
   }
 
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case "owner":
+        return "bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.5)]"
+      case "admin":
+        return "bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.5)]"
+      case "senior_moderator":
+        return "bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+      case "moderator":
+        return "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]"
+      case "tester":
+        return "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"
+      case "player":
+        return "bg-slate-500 shadow-[0_0_10px_rgba(100,116,139,0.5)]"
+      default:
+        return "bg-gray-500"
+    }
+  }
+
   // Landing Page (replacing Owner Access default)
   if (currentView === "owner-access") {
     // Generate a list of random booms for the background/grid
@@ -3879,14 +3898,14 @@ export default function BoomkitGame() {
         <div className="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center z-[100] p-4 transition-all duration-300">
           <Card
             className={`w-full max-w-2xl overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] relative animate-in zoom-in-95 duration-300 ${selectedUserStats.bannerColor === "rainbow"
-                ? "bg-gradient-to-br from-red-500/5 via-yellow-500/5 via-green-500/5 via-blue-500/5 to-purple-500/5"
-                : "bg-slate-900/90"
+              ? "bg-gradient-to-br from-red-500/5 via-yellow-500/5 via-green-500/5 via-blue-500/5 to-purple-500/5"
+              : "bg-slate-900/90"
               }`}
           >
             {/* Header Banner */}
             <div className={`h-32 w-full relative ${selectedUserStats.bannerColor === "rainbow"
-                ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 animate-pulse"
-                : selectedUserStats.bannerColor || "bg-gradient-to-r from-purple-600 to-pink-600"
+              ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 animate-pulse"
+              : selectedUserStats.bannerColor || "bg-gradient-to-r from-purple-600 to-pink-600"
               }`}>
               <div className="absolute inset-0 bg-black/20" />
               <button
@@ -3917,8 +3936,8 @@ export default function BoomkitGame() {
 
                   <div className="text-center md:text-left">
                     <h2 className={`text-3xl font-black mb-1 ${selectedUserStats.nameColor === "rainbow"
-                        ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent animate-pulse"
-                        : "text-white"
+                      ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent animate-pulse"
+                      : "text-white"
                       }`}>
                       {selectedUserStats.username}
                     </h2>
