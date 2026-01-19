@@ -26,6 +26,7 @@ export default function RealtimeLeaderboard() {
     const supabase = getSupabaseBrowserClient()
 
     const fetchLeaderboard = async () => {
+      if (!supabase) return
       const { data, error } = await supabase
         .from("users")
         .select("id, username, tokens, boom_score, profile_picture, role, badges, packs_opened")
@@ -100,7 +101,7 @@ export default function RealtimeLeaderboard() {
 
   return (
     <div className="space-y-4">
-      <ScrollArea className="h-[550px] pr-4 rounded-xl border border-white/5 bg-black/20 backdrop-blur-sm">
+      <ScrollArea className="h-[600px] pr-4 rounded-xl border border-white/5 bg-black/50 backdrop-blur-md shadow-2xl">
         <div className="space-y-3 p-4">
           {users.length === 0 ? (
             <div className="text-center text-muted-foreground p-12 bg-white/5 rounded-2xl border border-dashed border-white/10">

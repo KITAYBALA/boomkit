@@ -2021,10 +2021,10 @@ export default function BoomkitGame() {
               Boomkit
             </h1>
             <p className="text-3xl md:text-4xl text-purple-400 font-bold">
-              Blooket, but emojis
+              The Ultimate Emoji Trading Arena
             </p>
             <p className="text-slate-400 text-lg md:text-xl max-w-md mx-auto md:mx-0">
-              Collect unique emojis, trade with friends, and climb the leaderboards in the ultimate emoji marketplace.
+              Collect rare emojis, dominate the market, and climb the ranks in the world's premier emoji-based trading experience.
             </p>
             <div className="pt-4 flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
               <Button
@@ -2623,21 +2623,39 @@ export default function BoomkitGame() {
                   </div>
                 </div>
 
-                {/* Stats */}
-                <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
-                  <div className="bg-orange-500 text-white px-4 py-2 rounded-lg inline-block mb-4 font-bold">Stats</div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-purple-600 rounded-lg p-4 text-center">
-                      <div className="text-yellow-400 text-2xl mb-2">🪙</div>
-                      <div className="text-white text-xl font-bold">{currentUser?.tokens || 0}</div>
-                      <div className="text-white/70 text-sm">Total Tokens</div>
+                {/* Enhanced Quick Stats */}
+                <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/10 shadow-2xl relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500 opacity-50" />
+                  <div className="flex items-center justify-between mb-8">
+                    <div className="bg-orange-500 text-white px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest shadow-lg shadow-orange-900/20">
+                      Live Statistics
                     </div>
-                    <div className="bg-purple-600 rounded-lg p-4 text-center">
-                      <div className="text-yellow-400 text-2xl mb-2">⭐</div>
-                      <div className="text-white text-xl font-bold">
-                        {Object.keys(currentUser?.booms || {}).length || 0}
+                    <span className="text-white/20 text-[10px] font-bold uppercase tracking-widest">Updated Realtime</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="group relative bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/20 rounded-2xl p-6 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 cursor-default pointer-events-auto">
+                      <div className="absolute -top-4 -right-4 text-6xl opacity-10 group-hover:opacity-20 transition-opacity select-none group-hover:scale-110 duration-500">🪙</div>
+                      <div className="flex flex-col">
+                        <span className="text-purple-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Available Tokens</span>
+                        <div className="text-white text-3xl font-black drop-shadow-md flex items-baseline gap-2">
+                          {currentUser?.tokens?.toLocaleString() || 0}
+                          <span className="text-yellow-500 text-lg">🪙</span>
+                        </div>
+                        <div className="mt-4 h-1 w-12 bg-purple-500 rounded-full" />
                       </div>
-                      <div className="text-white/70 text-sm">Unique Booms</div>
+                    </div>
+
+                    <div className="group relative bg-pink-600/20 hover:bg-pink-600/30 border border-pink-500/20 rounded-2xl p-6 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 cursor-default pointer-events-auto">
+                      <div className="absolute -top-4 -right-4 text-6xl opacity-10 group-hover:opacity-20 transition-opacity select-none group-hover:scale-110 duration-500">🌌</div>
+                      <div className="flex flex-col">
+                        <span className="text-pink-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Collection Size</span>
+                        <div className="text-white text-3xl font-black drop-shadow-md flex items-baseline gap-2">
+                          {Object.keys(currentUser?.booms || {}).length || 0}
+                          <span className="text-pink-500 text-lg">✨</span>
+                        </div>
+                        <div className="mt-4 h-1 w-12 bg-pink-500 rounded-full" />
+                      </div>
                     </div>
                   </div>
                 </div>
