@@ -2776,102 +2776,139 @@ export default function BoomkitGame() {
 
             {/* Market Page */}
             {currentPage === "market" && (
-              <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                  <h1 className="text-4xl font-bold text-white">Market</h1>
-                  <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
-                    <div className="text-center">
-                      <div className="text-6xl">🏪</div>
-                      <div className="text-white font-bold">MARKET</div>
-                    </div>
-                  </div>
-                </div>
+              <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
+                {/* Market Hero Header */}
+                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-900/40 to-blue-900/40 border border-white/10 p-8 md:p-12 shadow-2xl">
+                  <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-purple-500/10 rounded-full blur-[100px]" />
+                  <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-blue-500/10 rounded-full blur-[100px]" />
 
-                <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
-                  <div className="text-center">
-                    <h3 className="text-white font-bold text-xl mb-2">Token Balance</h3>
-                    <div className="text-4xl font-bold text-yellow-400 mb-2">🪙 {currentUser?.tokens || 0}</div>
-                    <p className="text-white/70">Use tokens to buy packs!</p>
-                  </div>
-                </div>
+                  <div className="relative flex flex-col md:flex-row justify-between items-center gap-8">
+                    <div className="space-y-4 text-center md:text-left">
+                      <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter">
+                        BOOM <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">MARKET</span>
+                      </h1>
+                      <p className="text-white/60 text-lg md:text-xl max-w-md font-medium">
+                        Unleash the power of the arena. Discover legendary Booms and dominate the collection.
+                      </p>
+                    </div>
 
-                {/* Rarity Information */}
-                <div className="bg-white/10 backdrop-blur-md rounded-lg p-4">
-                  <h3 className="text-white font-bold mb-3">📊 Drop Rates</h3>
-                  <div className="grid grid-cols-3 gap-2 text-sm">
-                    <div className="text-center">
-                      <div className="bg-green-500 text-white px-2 py-1 rounded text-xs mb-1">Uncommon</div>
-                      <div className="text-white">60%</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="bg-blue-500 text-white px-2 py-1 rounded text-xs mb-1">Rare</div>
-                      <div className="text-white">25%</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="bg-purple-500 text-white px-2 py-1 rounded text-xs mb-1">Epic</div>
-                      <div className="text-white">10%</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="bg-orange-500 text-white px-2 py-1 rounded text-xs mb-1">Legendary</div>
-                      <div className="text-white">4%</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="bg-gradient-to-r from-red-500 via-yellow-500 to-purple-500 text-white px-2 py-1 rounded text-xs mb-1">
-                        Chroma
+                    <div className="shrink-0 animate-float">
+                      <div className="bg-white/5 backdrop-blur-2xl border border-white/20 rounded-[2rem] p-8 shadow-[0_0_50px_rgba(234,179,8,0.1)] flex flex-col items-center gap-2">
+                        <div className="text-white/40 text-xs uppercase tracking-[0.3em] font-black">Your Balance</div>
+                        <div className="flex items-center gap-3">
+                          <span className="text-5xl drop-shadow-lg">🪙</span>
+                          <span className="text-5xl font-black text-yellow-400 tabular-nums">
+                            {currentUser?.tokens.toLocaleString() || 0}
+                          </span>
+                        </div>
+                        <div className="mt-2 flex items-center gap-2 px-4 py-1.5 bg-yellow-500/10 rounded-full border border-yellow-500/20">
+                          <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
+                          <span className="text-yellow-400 text-xs font-bold uppercase tracking-wider">Ready to spend</span>
+                        </div>
                       </div>
-                      <div className="text-white">0.9%</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="bg-gradient-to-r from-purple-900 via-pink-500 to-indigo-900 text-white px-2 py-1 rounded text-xs mb-1">
-                        Mystical
-                      </div>
-                      <div className="text-white">0.1%</div>
                     </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4">
+                {/* Premium Rarity Banner */}
+                <div className="bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 p-6 shadow-xl">
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-1.5 h-6 bg-primary rounded-full" />
+                    <h3 className="text-xl font-bold text-white uppercase tracking-wider">Global Drop Rates</h3>
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                    {[
+                      { label: "Uncommon", rate: "60%", color: "bg-green-500", glow: "glow-uncommon" },
+                      { label: "Rare", rate: "25%", color: "bg-blue-500", glow: "glow-rare" },
+                      { label: "Epic", rate: "10%", color: "bg-purple-500", glow: "glow-epic" },
+                      { label: "Legendary", rate: "4%", color: "bg-orange-500", glow: "glow-legendary" },
+                      { label: "Chroma", rate: "0.9%", color: "bg-gradient-to-r from-red-500 via-yellow-500 to-purple-500", glow: "glow-chroma" },
+                      { label: "Mystical", rate: "0.1%", color: "bg-gradient-to-r from-purple-900 via-pink-500 to-indigo-900", glow: "glow-mystical" },
+                    ].map((rarity, i) => (
+                      <div key={i} className={`relative group overflow-hidden rounded-xl border border-white/5 bg-white/5 p-4 transition-all duration-300 hover:bg-white/10 hover:border-white/20 ${rarity.glow}`}>
+                        <div className="relative z-10 flex flex-col items-center gap-2">
+                          <div className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider text-white ${rarity.color}`}>
+                            {rarity.label}
+                          </div>
+                          <div className="text-2xl font-black text-white">{rarity.rate}</div>
+                        </div>
+                        <div className="absolute bottom-0 left-0 w-full h-1 bg-white/10 overflow-hidden">
+                          <div className={`h-full ${rarity.color} group-hover:animate-pulse`} style={{ width: rarity.rate }} />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {PACKS.map((pack) => (
-                    <div key={pack.id} className="relative group cursor-pointer">
+                    <div key={pack.id} className="relative group perspective-1000">
                       <div
-                        className={`bg-gradient-to-b ${pack.color} rounded-lg overflow-hidden relative transform transition-transform group-hover:scale-105`}
+                        className={`
+                          bg-gradient-to-br ${pack.color} rounded-[2rem] overflow-hidden relative shadow-2xl
+                          transition-all duration-500 ease-out transform-gpu
+                          group-hover:scale-105 group-hover:-rotate-1 group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)]
+                          border border-white/20
+                        `}
                       >
-                        {/* Pack design with zigzag top */}
-                        <div
-                          className="absolute top-0 left-0 right-0 h-4 bg-white/30"
-                          style={{
-                            clipPath:
-                              "polygon(0 0, 8% 100%, 16% 0, 24% 100%, 32% 0, 40% 100%, 48% 0, 56% 100%, 64% 0, 72% 100%, 80% 0, 88% 100%, 96% 0, 100% 100%, 0 100%)",
-                          }}
-                        ></div>
+                        {/* Shine Effect */}
+                        <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="absolute h-[200%] w-[100px] bg-white/30 skew-x-[-30deg] animate-shine blur-xl" />
+                        </div>
 
-                        {/* Centered Emoji Pack Design */}
-                        <div className="h-48 flex flex-col items-center justify-center relative p-4">
-                          {pack.emoji && (
-                            <div className="text-8xl drop-shadow-lg filter transform group-hover:scale-110 transition-transform duration-300 select-none">
-                              {pack.emoji}
+                        {/* Zigzag Header */}
+                        <div
+                          className="absolute top-0 left-0 right-0 h-8 bg-black/20 backdrop-blur-sm z-10"
+                          style={{
+                            clipPath: "polygon(0 0, 10% 100%, 20% 0, 30% 100%, 40% 0, 50% 100%, 60% 0, 70% 100%, 80% 0, 90% 100%, 100% 0, 100% 100%, 0 100%)",
+                          }}
+                        />
+
+                        {/* Content */}
+                        <div className="h-64 flex flex-col items-center justify-center relative p-8">
+                          {/* Inner card glow */}
+                          <div className="absolute inset-x-8 inset-y-8 bg-white/10 rounded-2xl blur-2xl" />
+
+                          <div className="text-9xl drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] transform-gpu transition-all duration-500 group-hover:scale-110 group-hover:-translate-y-2 select-none z-10">
+                            {pack.emoji}
+                          </div>
+                          <div className="mt-6 z-10 text-center">
+                            <h2 className="text-3xl font-black text-white tracking-tight drop-shadow-md">
+                              {pack.name}
+                            </h2>
+                            <div className="mt-1 px-3 py-1 bg-black/20 rounded-full text-[10px] font-bold text-white/50 uppercase tracking-widest inline-block backdrop-blur-md">
+                              Series 1
                             </div>
-                          )}
-                          <div className="text-white text-center mt-4 z-10">
-                            <div className="font-bold text-lg leading-none">{pack.name}</div>
                           </div>
                         </div>
 
-                        {/* Price Badge */}
-                        <div className="absolute bottom-2 left-2 bg-yellow-500 text-black px-2 py-1 rounded text-sm font-bold flex items-center">
-                          🪙 {pack.price}
+                        {/* Footer / Price Area */}
+                        <div className="bg-black/40 backdrop-blur-xl p-6 flex items-center justify-between border-t border-white/10">
+                          <div className="flex flex-col">
+                            <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Price tag</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-2xl">🪙</span>
+                              <span className="text-2xl font-black text-yellow-400">{pack.price}</span>
+                            </div>
+                          </div>
+
+                          <Button
+                            onClick={() => handlePackAction(pack.id)}
+                            disabled={(currentUser?.tokens || 0) < pack.price}
+                            className={`
+                              h-12 px-8 rounded-xl font-black uppercase tracking-wider text-sm
+                              transition-all duration-300 transform active:scale-95
+                              ${(currentUser?.tokens || 0) < pack.price
+                                ? "bg-white/10 text-white/30 cursor-not-allowed"
+                                : "bg-white text-black hover:bg-yellow-400 hover:text-black hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] shadow-xl"
+                              }
+                            `}
+                          >
+                            Open Pack
+                          </Button>
                         </div>
-
-
                       </div>
-
-                      <Button
-                        onClick={() => handlePackAction(pack.id)}
-                        disabled={(currentUser?.tokens || 0) < pack.price}
-                        className="w-full mt-2 bg-purple-600 hover:bg-purple-700 hover:shadow-lg transition-all"
-                      >
-                        Open for {pack.price}
-                      </Button>
                     </div>
                   ))}
                 </div>
