@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { SendIcon } from "lucide-react"
+import { SendIcon, MessageCircleIcon } from "lucide-react"
 
 type Props = {
   currentUser: { username: string; isMuted?: boolean; role?: string } | null
@@ -22,19 +22,19 @@ const LS_KEY = "boomkit_chat_messages"
 const getRoleColor = (role: string) => {
   switch (role) {
     case "owner":
-      return "bg-yellow-500 text-black"
+      return "bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.4)] text-white"
     case "admin":
-      return "bg-purple-500 text-white"
+      return "bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.4)] text-white"
     case "senior_moderator":
-      return "bg-blue-500 text-white"
+      return "bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.4)] text-white"
     case "moderator":
-      return "bg-green-500 text-white"
+      return "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)] text-white"
     case "tester":
-      return "bg-orange-500 text-white"
+      return "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)] text-white"
     case "staff":
-      return "bg-cyan-500 text-white"
+      return "bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.4)] text-white"
     default:
-      return "bg-gray-500 text-white"
+      return "bg-slate-600 text-white"
   }
 }
 
@@ -152,7 +152,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
 
   const send = async () => {
     if (!text.trim() || !currentUser) return
-    
+
     // Client-side check (also enforced server-side)
     if (isMuted) {
       return
@@ -197,41 +197,98 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
   }
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-4xl font-bold text-white">Global Chat</h1>
-      <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
-        <ScrollArea className="h-96 w-full border border-white/20 rounded p-4 mb-4">
-          {messages.map((msg) => {
-            const displayRole = userRoles[msg.username] || msg.role
-            return (
-              <div key={msg.id} className="mb-3">
-                <div className="flex items-center space-x-2 mb-1">
-                  <Badge className={`text-xs ${getRoleColor(displayRole)}`}>{displayRole}</Badge>
-                  <span
-                    className="text-white font-semibold cursor-pointer hover:underline"
-                    onClick={() => onUsernameClick(msg.username)}
-                  >
-                    {msg.username}:
-                  </span>
-                </div>
-                <p className="text-white/90 ml-2">{msg.message}</p>
+    <div className="flex-1 flex flex-col space-y-6 animate-in fade-in duration-700 min-h-0">
+      <div className="flex items-center justify-between">
+        <h1 className="text-5xl font-black text-white tracking-tighter">Global Chat</h1>
+        <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold px-3 py-1">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse" />
+          Live
+        </Badge>
+      </div>
+
+      <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-6 border border-white/10 shadow-2xl flex-1 flex flex-col min-h-[500px]">
+        <ScrollArea className="flex-1 pr-4 mb-6">
+          <div className="space-y-4">
+            {messages.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center text-white/20 p-20 border-2 border-dashed border-white/5 rounded-3xl">
+                <MessageCircleIcon className="w-12 h-12 mb-4 opacity-10" />
+                <p className="font-bold uppercase tracking-widest text-sm">No messages yet</p>
+                <p className="text-xs">Be the first to start the conversation!</p>
               </div>
-            )
-          })}
-          <div ref={bottomRef} />
+            ) : (
+              messages.map((msg) => {
+                const displayRole = userRoles[msg.username] || msg.role
+                const isMe = msg.username === currentUser?.username
+
+                return (
+                  <div
+                    key={msg.id}
+                    className={`group flex flex-col ${isMe ? "items-end" : "items-start"} transition-all duration-300`}
+                  >
+                    <div className="flex items-center gap-2 mb-1 px-1">
+                      {!isMe && (
+                        <Badge className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 border-none ${getRoleColor(displayRole)}`}>
+                          {displayRole}
+                        </Badge>
+                      )}
+                      <span
+                        className={`text-xs font-black tracking-tight cursor-pointer hover:underline transition-all ${isMe ? "text-purple-400" : "text-white/60"
+                          }`}
+                        onClick={() => onUsernameClick(msg.username)}
+                      >
+                        {msg.username}
+                      </span>
+                      {isMe && (
+                        <Badge className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 border-none ${getRoleColor(displayRole)}`}>
+                          {displayRole}
+                        </Badge>
+                      )}
+                    </div>
+                    <div className={`
+                      max-w-[85%] px-4 py-2.5 rounded-2xl border transition-all duration-300
+                      ${isMe
+                        ? "bg-purple-600/20 border-purple-500/30 text-white rounded-tr-none shadow-lg shadow-purple-900/10"
+                        : "bg-white/5 border-white/10 text-white/90 rounded-tl-none hover:bg-white/10"
+                      }
+                    `}>
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.message}</p>
+                    </div>
+                    <span className="text-[9px] text-white/20 mt-1 px-1 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                      {new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  </div>
+                )
+              })
+            )}
+            <div ref={bottomRef} />
+          </div>
         </ScrollArea>
-        <div className="flex space-x-2">
-          <Input
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder={isMuted ? "You are muted" : "Type a message..."}
-            disabled={isMuted}
-            className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
-            onKeyDown={(e) => e.key === "Enter" && !isMuted && send()}
-          />
-          <Button onClick={send} disabled={isMuted} className="bg-blue-600 hover:bg-blue-700">
-            <SendIcon className="h-4 w-4" />
-          </Button>
+
+        <div className="relative group">
+          <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-blue-600 rounded-3xl blur opacity-20 group-focus-within:opacity-40 transition duration-500" />
+          <div className="relative flex items-center bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-2 pl-4">
+            <Input
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              placeholder={isMuted ? "You have been silenced" : "Share something with the arena..."}
+              disabled={isMuted}
+              className="flex-1 bg-transparent border-none text-white placeholder:text-white/20 focus-visible:ring-0 focus-visible:ring-offset-0 h-10"
+              onKeyDown={(e) => e.key === "Enter" && !isMuted && send()}
+            />
+            <Button
+              onClick={send}
+              disabled={isMuted || !text.trim()}
+              className={`
+                ml-2 rounded-xl h-10 w-10 p-0 transition-all duration-300
+                ${isMuted || !text.trim()
+                  ? "bg-white/5 text-white/20"
+                  : "bg-gradient-to-br from-purple-600 to-blue-600 text-white shadow-lg shadow-purple-900/40 hover:scale-105 active:scale-95"
+                }
+              `}
+            >
+              <SendIcon className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
       </div>
     </div>

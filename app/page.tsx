@@ -2509,9 +2509,9 @@ export default function BoomkitGame() {
           </div>
         </div>
 
-        <div className="flex-1 flex">
+        <div className="flex-1 flex h-0 overflow-hidden">
           {/* Main Content Area */}
-          <div className="flex-1 p-3 md:p-6 overflow-y-auto">
+          <div className={`flex-1 p-3 md:p-6 flex flex-col ${currentPage === "chat" || currentPage === "leaderboard" ? "overflow-hidden" : "overflow-y-auto"}`}>
             {/* Stats Page */}
             {currentPage === "stats" && (
               <div className="space-y-6">
