@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { SendIcon, MessageCircleIcon, PencilIcon, Trash2Icon, CheckIcon, XIcon } from "lucide-react"
+import { SendIcon, MessageCircleIcon, PencilIcon, Trash2Icon, CheckIcon, XIcon, AlertTriangleIcon } from "lucide-react"
 
 type Props = {
   currentUser: { username: string; isMuted?: boolean; role?: string } | null
@@ -47,6 +47,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
   const [isMuted, setIsMuted] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editText, setEditText] = useState("")
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
 
   // Update mute status from currentUser prop (reuse existing user state)
   useEffect(() => {
@@ -237,7 +238,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
   }
 
   const handleDelete = async (id: string) => {
-    if (!currentUser || !confirm("Are you sure you want to delete this message?")) return
+    if (!currentUser) return
 
     try {
       const response = await fetch(`/api/chat-messages?id=${id}&username=${currentUser.username}`, {
@@ -249,6 +250,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
         alert("Failed to delete message: " + (errorData.error || "Unknown error"))
         return
       }
+      setDeleteConfirmId(null)
     } catch (error) {
       console.error("[v0] Error deleting message:", error)
       alert("Failed to delete message.")
@@ -262,6 +264,44 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
 
   return (
     <div className="space-y-6 animate-in fade-in duration-700">
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmId && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
+            onClick={() => setDeleteConfirmId(null)}
+          />
+          <div className="relative bg-zinc-900/90 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 max-w-sm w-full shadow-2xl animate-in zoom-in-95 duration-300">
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center border border-red-500/30">
+                <AlertTriangleIcon className="w-8 h-8 text-red-500 animate-pulse" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-xl font-black text-white tracking-tight">Delete Message?</h3>
+                <p className="text-white/40 text-sm leading-relaxed">
+                  This action cannot be undone. Are you sure you want to remove this message from the arena?
+                </p>
+              </div>
+              <div className="flex gap-3 w-full pt-2">
+                <Button
+                  variant="ghost"
+                  className="flex-1 rounded-xl border border-white/5 hover:bg-white/5 text-white/60 hover:text-white"
+                  onClick={() => setDeleteConfirmId(null)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  className="flex-1 bg-red-600 hover:bg-red-500 text-white rounded-xl shadow-lg shadow-red-900/40"
+                  onClick={() => handleDelete(deleteConfirmId)}
+                >
+                  Delete
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
         <h1 className="text-5xl font-black text-white tracking-tighter">Global Chat</h1>
         <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold px-3 py-1">
@@ -313,7 +353,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
                               <PencilIcon className="w-3 h-3" />
                             </button>
                             <button
-                              onClick={() => handleDelete(msg.id)}
+                              onClick={() => setDeleteConfirmId(msg.id)}
                               className="p-1 hover:bg-red-500/20 rounded-md text-white/40 hover:text-red-400 transition-colors"
                             >
                               <Trash2Icon className="w-3 h-3" />

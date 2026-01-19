@@ -186,7 +186,7 @@ export async function PATCH(request: Request) {
 
     const { data, error } = await supabase
       .from("chat_messages")
-      .update({ message, edited_at: new Date().toISOString() })
+      .update({ message })
       .eq("id", id)
       .select()
 
