@@ -601,6 +601,7 @@ export default function BoomkitGame() {
     | "upgrade"
     | "leaderboard"
     | "trading"
+    | "shop"
   >("stats")
   const [currentUser, setCurrentUser] = useState<GameUser | null>(null)
   const [users, setUsers] = useState<GameUser[]>([])
@@ -2509,9 +2510,9 @@ export default function BoomkitGame() {
           </div>
         </div>
 
-        <div className="flex-1 flex h-0 overflow-hidden">
+        <div className="flex-1 flex">
           {/* Main Content Area */}
-          <div className={`flex-1 p-3 md:p-6 flex flex-col ${currentPage === "chat" || currentPage === "leaderboard" ? "overflow-hidden" : "overflow-y-auto"}`}>
+          <div className="flex-1 p-3 md:p-6 overflow-y-auto">
             {/* Stats Page */}
             {currentPage === "stats" && (
               <div className="space-y-6">

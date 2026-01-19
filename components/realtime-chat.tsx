@@ -6,7 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { SendIcon, MessageCircleIcon } from "lucide-react"
+import { SendIcon, MessageCircleIcon, PencilIcon, Trash2Icon, CheckIcon, XIcon } from "lucide-react"
 
 type Props = {
   currentUser: { username: string; isMuted?: boolean; role?: string } | null
@@ -45,6 +45,8 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
   const bottomRef = useRef<HTMLDivElement>(null)
   const [userRoles, setUserRoles] = useState<Record<string, string>>({})
   const [isMuted, setIsMuted] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editText, setEditText] = useState("")
 
   // Update mute status from currentUser prop (reuse existing user state)
   useEffect(() => {
@@ -111,14 +113,24 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
           .channel("chat_room")
           .on(
             "postgres_changes",
-            { event: "INSERT", schema: "public", table: "chat_messages" },
-            (payload: { new: DbChatRow }) => {
-              console.log("[v0] New message received via realtime:", payload.new)
-              const d = payload.new
-              setMessages((prev) => [
-                ...prev,
-                { id: d.id, username: d.username, message: d.message, role: d.role, timestamp: d.inserted_at },
-              ])
+            { event: "*", schema: "public", table: "chat_messages" },
+            (payload) => {
+              console.log("[v0] Realtime change received:", payload)
+              if (payload.eventType === "INSERT") {
+                const d = payload.new as DbChatRow
+                setMessages((prev) => [
+                  ...prev,
+                  { id: d.id, username: d.username, message: d.message, role: d.role, timestamp: d.inserted_at },
+                ])
+              } else if (payload.eventType === "UPDATE") {
+                const d = payload.new as DbChatRow
+                setMessages((prev) =>
+                  prev.map(m => m.id === d.id ? { ...m, message: d.message } : m)
+                )
+              } else if (payload.eventType === "DELETE") {
+                const oldId = payload.old.id
+                setMessages((prev) => prev.filter(m => m.id !== oldId))
+              }
             },
           )
           .subscribe((status) => {
@@ -196,8 +208,60 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
     }
   }
 
+  const handleUpdate = async () => {
+    if (!editingId || !editText.trim() || !currentUser) return
+
+    try {
+      const response = await fetch("/api/chat-messages", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editingId,
+          username: currentUser.username,
+          message: editText.trim(),
+        }),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        alert("Failed to update message: " + (errorData.error || "Unknown error"))
+        return
+      }
+
+      setEditingId(null)
+      setEditText("")
+    } catch (error) {
+      console.error("[v0] Error updating message:", error)
+      alert("Failed to update message.")
+    }
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!currentUser || !confirm("Are you sure you want to delete this message?")) return
+
+    try {
+      const response = await fetch(`/api/chat-messages?id=${id}&username=${currentUser.username}`, {
+        method: "DELETE",
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        alert("Failed to delete message: " + (errorData.error || "Unknown error"))
+        return
+      }
+    } catch (error) {
+      console.error("[v0] Error deleting message:", error)
+      alert("Failed to delete message.")
+    }
+  }
+
+  const startEditing = (msg: LocalChatRow) => {
+    setEditingId(msg.id)
+    setEditText(msg.message)
+  }
+
   return (
-    <div className="flex-1 flex flex-col space-y-6 animate-in fade-in duration-700 min-h-0">
+    <div className="space-y-6 animate-in fade-in duration-700">
       <div className="flex items-center justify-between">
         <h1 className="text-5xl font-black text-white tracking-tighter">Global Chat</h1>
         <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold px-3 py-1">
@@ -206,8 +270,8 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
         </Badge>
       </div>
 
-      <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-6 border border-white/10 shadow-2xl flex-1 flex flex-col min-h-[500px]">
-        <ScrollArea className="flex-1 pr-4 mb-6">
+      <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-6 border border-white/10 shadow-2xl">
+        <ScrollArea className="h-[500px] w-full pr-4 mb-6">
           <div className="space-y-4">
             {messages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-white/20 p-20 border-2 border-dashed border-white/5 rounded-3xl">
@@ -219,6 +283,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
               messages.map((msg) => {
                 const displayRole = userRoles[msg.username] || msg.role
                 const isMe = msg.username === currentUser?.username
+                const isEditing = editingId === msg.id
 
                 return (
                   <div
@@ -239,20 +304,71 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
                         {msg.username}
                       </span>
                       {isMe && (
-                        <Badge className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 border-none ${getRoleColor(displayRole)}`}>
-                          {displayRole}
-                        </Badge>
+                        <>
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={() => startEditing(msg)}
+                              className="p-1 hover:bg-white/10 rounded-md text-white/40 hover:text-white transition-colors"
+                            >
+                              <PencilIcon className="w-3 h-3" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(msg.id)}
+                              className="p-1 hover:bg-red-500/20 rounded-md text-white/40 hover:text-red-400 transition-colors"
+                            >
+                              <Trash2Icon className="w-3 h-3" />
+                            </button>
+                          </div>
+                          <Badge className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 border-none ${getRoleColor(displayRole)}`}>
+                            {displayRole}
+                          </Badge>
+                        </>
                       )}
                     </div>
+
                     <div className={`
-                      max-w-[85%] px-4 py-2.5 rounded-2xl border transition-all duration-300
+                      max-w-[85%] px-4 py-2.5 rounded-2xl border transition-all duration-300 relative
                       ${isMe
                         ? "bg-purple-600/20 border-purple-500/30 text-white rounded-tr-none shadow-lg shadow-purple-900/10"
                         : "bg-white/5 border-white/10 text-white/90 rounded-tl-none hover:bg-white/10"
                       }
+                      ${isEditing ? "ring-2 ring-purple-500 border-transparent w-full" : ""}
                     `}>
-                      <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.message}</p>
+                      {isEditing ? (
+                        <div className="flex flex-col gap-2">
+                          <textarea
+                            value={editText}
+                            onChange={(e) => setEditText(e.target.value)}
+                            className="bg-transparent border-none text-white focus:ring-0 text-sm resize-none w-full min-h-[60px]"
+                            autoFocus
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" && !e.shiftKey) {
+                                e.preventDefault()
+                                handleUpdate()
+                              }
+                              if (e.key === "Escape") setEditingId(null)
+                            }}
+                          />
+                          <div className="flex justify-end gap-2">
+                            <button
+                              onClick={() => setEditingId(null)}
+                              className="p-1.5 hover:bg-white/10 rounded-lg text-white/40 hover:text-white transition-colors"
+                            >
+                              <XIcon className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={handleUpdate}
+                              className="p-1.5 bg-purple-500 hover:bg-purple-400 rounded-lg text-white shadow-lg transition-colors"
+                            >
+                              <CheckIcon className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.message}</p>
+                      )}
                     </div>
+
                     <span className="text-[9px] text-white/20 mt-1 px-1 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
                       {new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </span>

@@ -158,3 +158,84 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Failed to post chat message" }, { status: 500 })
   }
 }
+
+export async function PATCH(request: Request) {
+  try {
+    const { id, username, message } = await request.json()
+    const supabase = getSupabaseServerClient()
+
+    // Ensure the message belongs to the user
+    const { data: existingMessage, error: fetchError } = await supabase
+      .from("chat_messages")
+      .select("username")
+      .eq("id", id)
+      .single()
+
+    if (fetchError || !existingMessage) {
+      return NextResponse.json({ error: "Message not found" }, { status: 404 })
+    }
+
+    if (existingMessage.username !== username) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+    }
+
+    // Profanity check for edits too
+    if (containsProfanity(message)) {
+      return NextResponse.json({ error: "PROFANITY_DETECTED" }, { status: 403 })
+    }
+
+    const { data, error } = await supabase
+      .from("chat_messages")
+      .update({ message, edited_at: new Date().toISOString() })
+      .eq("id", id)
+      .select()
+
+    if (error) throw error
+
+    return NextResponse.json(data[0], { status: 200 })
+  } catch (error) {
+    console.error("[v0] Error updating message:", error)
+    return NextResponse.json({ error: "Failed to update message" }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get("id")
+    const username = searchParams.get("username")
+
+    if (!id || !username) {
+      return NextResponse.json({ error: "Missing parameters" }, { status: 400 })
+    }
+
+    const supabase = getSupabaseServerClient()
+
+    // Ensure the message belongs to the user
+    const { data: existingMessage, error: fetchError } = await supabase
+      .from("chat_messages")
+      .select("username")
+      .eq("id", id)
+      .single()
+
+    if (fetchError || !existingMessage) {
+      return NextResponse.json({ error: "Message not found" }, { status: 404 })
+    }
+
+    if (existingMessage.username !== username) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+    }
+
+    const { error } = await supabase
+      .from("chat_messages")
+      .delete()
+      .eq("id", id)
+
+    if (error) throw error
+
+    return NextResponse.json({ success: true }, { status: 200 })
+  } catch (error) {
+    console.error("[v0] Error deleting message:", error)
+    return NextResponse.json({ error: "Failed to delete message" }, { status: 500 })
+  }
+}
