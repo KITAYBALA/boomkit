@@ -15,7 +15,7 @@ export async function generateGeminiResponse(prompt: string): Promise<string> {
 
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({
-        model: "gemini-pro"
+        model: "gemini-1.5-flash-latest"
     })
 
     try {
