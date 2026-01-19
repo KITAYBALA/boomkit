@@ -633,7 +633,7 @@ export default function BoomkitGame() {
   const [showPasswordEdit, setShowPasswordEdit] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [staffSearchQuery, setStaffSearchQuery] = useState("") // Added for Staff search
-  const [staffTab, setStaffTab] = useState<"all" | "muted" | "banned">("all")
+  const [staffTab, setStaffTab] = useState<"all" | "active" | "muted" | "banned">("all")
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false) // Fixed typo from setShowShowPrivacyPolicy
   const [showTermsOfService, setShowTermsOfService] = useState(false)
   const [newName, setNewName] = useState("")
@@ -3146,6 +3146,17 @@ export default function BoomkitGame() {
                       All Users
                     </button>
                     <button
+                      onClick={() => setStaffTab("active")}
+                      className={`px-6 py-2 rounded-xl text-sm font-black transition-all duration-300 flex items-center gap-2 ${staffTab === "active" ? "bg-blue-600 text-white shadow-lg shadow-blue-900/40" : "text-white/40 hover:text-white hover:bg-white/5"
+                        }`}
+                    >
+                      <ShieldIcon className="w-4 h-4" />
+                      Active
+                      <Badge className="ml-1 bg-white/10 text-white border-none px-1.5 py-0 min-w-[20px] justify-center">
+                        {users.filter(u => !u.isBanned).length}
+                      </Badge>
+                    </button>
+                    <button
                       onClick={() => setStaffTab("muted")}
                       className={`px-6 py-2 rounded-xl text-sm font-black transition-all duration-300 flex items-center gap-2 ${staffTab === "muted" ? "bg-yellow-500 text-white shadow-lg shadow-yellow-900/40" : "text-white/40 hover:text-white hover:bg-white/5"
                         }`}
@@ -3185,7 +3196,11 @@ export default function BoomkitGame() {
                     {users
                       .filter((u) => {
                         const matchesSearch = u.username.toLowerCase().includes(staffSearchQuery.toLowerCase())
-                        const matchesTab = staffTab === "all" || (staffTab === "muted" && u.isMuted) || (staffTab === "banned" && u.isBanned)
+                        const matchesTab =
+                          staffTab === "all" ||
+                          (staffTab === "active" && !u.isBanned) ||
+                          (staffTab === "muted" && u.isMuted) ||
+                          (staffTab === "banned" && u.isBanned)
                         return matchesSearch && matchesTab
                       })
                       .map((user) => {
@@ -3296,7 +3311,11 @@ export default function BoomkitGame() {
 
                     {users.filter((u) => {
                       const matchesSearch = u.username.toLowerCase().includes(staffSearchQuery.toLowerCase())
-                      const matchesTab = staffTab === "all" || (staffTab === "muted" && u.isMuted) || (staffTab === "banned" && u.isBanned)
+                      const matchesTab =
+                        staffTab === "all" ||
+                        (staffTab === "active" && !u.isBanned) ||
+                        (staffTab === "muted" && u.isMuted) ||
+                        (staffTab === "banned" && u.isBanned)
                       return matchesSearch && matchesTab
                     }).length === 0 && (
                         <div className="py-20 flex flex-col items-center justify-center bg-white/5 rounded-3xl border border-dashed border-white/10">
@@ -3309,7 +3328,7 @@ export default function BoomkitGame() {
                       )}
                   </div>
                 </div>
-              ) : null}
+              )) : null}
 
             {/* Settings Page */}
             {currentPage === "settings" && (
