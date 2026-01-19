@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai"
+import { BOOMKIT_SYSTEM_INSTRUCTION } from "./boomkit-knowledge"
 
 /**
  * Utility to handle Gemini AI generations
@@ -13,7 +14,10 @@ export async function generateGeminiResponse(prompt: string): Promise<string> {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" })
+    const model = genAI.getGenerativeModel({
+        model: "gemini-1.5-flash",
+        systemInstruction: BOOMKIT_SYSTEM_INSTRUCTION
+    })
 
     try {
         const result = await model.generateContent(prompt)
