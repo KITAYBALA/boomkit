@@ -3107,11 +3107,7 @@ export default function BoomkitGame() {
             )}
 
             {/* Staff Page */}
-            {(currentUser?.role === "moderator" ||
-              currentUser?.role === "senior_moderator" ||
-              currentUser?.role === "admin" ||
-              currentUser?.role === "tester" || // Added check for tester role
-              isOwner()) &&
+            {isOwner() || currentUser?.role === "moderator" || currentUser?.role === "senior_moderator" || currentUser?.role === "admin" || currentUser?.role === "tester" ? (
               currentPage === "staff" && (
                 <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
                   <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -3313,1024 +3309,1023 @@ export default function BoomkitGame() {
                       )}
                   </div>
                 </div>
-                </div>
-              )}
+              ) : null}
 
-          {/* Settings Page */}
-          {currentPage === "settings" && (
-            <div className="space-y-6">
-              <h1 className="text-4xl font-bold text-white">Settings</h1>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Profile Section */}
-                <div className="group bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-purple-500/50 hover:bg-white/15 transition-all duration-300 shadow-xl hover:shadow-purple-500/10">
-                  <div className="flex items-center mb-6">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mr-4 shadow-lg group-hover:scale-110 transition-transform duration-300">
-                      <UserIcon className="text-white w-6 h-6" />
-                    </div>
-                    <h2 className="text-2xl font-bold text-white tracking-tight">Profile</h2>
-                  </div>
-                  <div className="space-y-4">
-                    <div className="flex flex-col space-y-1">
-                      <span className="text-purple-200/50 text-xs font-bold uppercase tracking-wider">Username</span>
-                      <p className="text-white text-lg font-medium">{currentUser?.username}</p>
-                    </div>
-                    <div className="flex flex-col space-y-1">
-                      <span className="text-purple-200/50 text-xs font-bold uppercase tracking-wider">Role</span>
-                      <p className="text-white font-medium">{currentUser ? getUserRoleName(currentUser) : "Player"}</p>
-                    </div>
-                    <div className="flex flex-col space-y-1">
-                      <span className="text-purple-200/50 text-xs font-bold uppercase tracking-wider">Joined</span>
-                      <p className="text-white font-medium">{currentUser?.joinDate}</p>
-                    </div>
-                    {/* Display badges */}
-                    {currentUser?.badges && currentUser.badges.length > 0 && (
-                      <div className="pt-2">
-                        <span className="text-purple-200/50 text-xs font-bold uppercase tracking-wider">Badges</span>
-                        <div className="flex flex-wrap gap-2 mt-2">
-                          {currentUser.badges.map((badgeId) => {
-                            const badge = AVAILABLE_BADGES.find((b) => b.id === badgeId)
-                            return badge ? (
-                              <Badge key={badgeId} className={`${badge.color} text-white px-3 py-1 rounded-lg border-none shadow-md hover:scale-105 transition-transform cursor-default`}>
-                                {badge.emoji} {badge.name}
-                              </Badge>
-                            ) : null
-                          })}
-                        </div>
+            {/* Settings Page */}
+            {currentPage === "settings" && (
+              <div className="space-y-6">
+                <h1 className="text-4xl font-bold text-white">Settings</h1>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Profile Section */}
+                  <div className="group bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-purple-500/50 hover:bg-white/15 transition-all duration-300 shadow-xl hover:shadow-purple-500/10">
+                    <div className="flex items-center mb-6">
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mr-4 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                        <UserIcon className="text-white w-6 h-6" />
                       </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Edit Info Section */}
-                <div className="group bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-green-500/50 hover:bg-white/15 transition-all duration-300 shadow-xl hover:shadow-green-500/10">
-                  <div className="flex items-center mb-6">
-                    <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center mr-4 shadow-lg group-hover:scale-110 transition-transform duration-300">
-                      <PencilIcon className="text-white w-6 h-6" />
+                      <h2 className="text-2xl font-bold text-white tracking-tight">Profile</h2>
                     </div>
-                    <h2 className="text-2xl font-bold text-white tracking-tight">Edit Info</h2>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Button
-                      variant="secondary"
-                      onClick={() => setShowPasswordEdit(true)}
-                      className="bg-white/5 hover:bg-white/10 text-white border-white/10 flex items-center justify-center gap-2 h-12 rounded-xl transition-all"
-                    >
-                      <LockIcon className="w-4 h-4" />
-                      Change Password
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      onClick={() => setShowDeleteConfirm(true)}
-                      className="bg-red-500/20 hover:bg-red-500 text-red-100 border-red-500/20 flex items-center justify-center gap-2 h-12 rounded-xl transition-all"
-                    >
-                      <TrashIcon className="w-4 h-4" />
-                      Delete Account
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Legal Section */}
-                <div className="group bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-blue-500/50 hover:bg-white/15 transition-all duration-300 shadow-xl hover:shadow-blue-500/10">
-                  <div className="flex items-center mb-6">
-                    <div className="w-12 h-12 bg-gradient-to-br from-gray-500 to-slate-600 rounded-xl flex items-center justify-center mr-4 shadow-lg group-hover:scale-110 transition-transform duration-300">
-                      <FileTextIcon className="text-white w-6 h-6" />
+                    <div className="space-y-4">
+                      <div className="flex flex-col space-y-1">
+                        <span className="text-purple-200/50 text-xs font-bold uppercase tracking-wider">Username</span>
+                        <p className="text-white text-lg font-medium">{currentUser?.username}</p>
+                      </div>
+                      <div className="flex flex-col space-y-1">
+                        <span className="text-purple-200/50 text-xs font-bold uppercase tracking-wider">Role</span>
+                        <p className="text-white font-medium">{currentUser ? getUserRoleName(currentUser) : "Player"}</p>
+                      </div>
+                      <div className="flex flex-col space-y-1">
+                        <span className="text-purple-200/50 text-xs font-bold uppercase tracking-wider">Joined</span>
+                        <p className="text-white font-medium">{currentUser?.joinDate}</p>
+                      </div>
+                      {/* Display badges */}
+                      {currentUser?.badges && currentUser.badges.length > 0 && (
+                        <div className="pt-2">
+                          <span className="text-purple-200/50 text-xs font-bold uppercase tracking-wider">Badges</span>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {currentUser.badges.map((badgeId) => {
+                              const badge = AVAILABLE_BADGES.find((b) => b.id === badgeId)
+                              return badge ? (
+                                <Badge key={badgeId} className={`${badge.color} text-white px-3 py-1 rounded-lg border-none shadow-md hover:scale-105 transition-transform cursor-default`}>
+                                  {badge.emoji} {badge.name}
+                                </Badge>
+                              ) : null
+                            })}
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    <h2 className="text-2xl font-bold text-white tracking-tight">Legal</h2>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Button
-                      variant="secondary"
-                      onClick={() => setShowPrivacyPolicy(true)}
-                      className="bg-white/5 hover:bg-white/10 text-white border-white/10 flex items-center justify-center gap-2 h-12 rounded-xl transition-all"
-                    >
-                      <ShieldIcon className="w-4 h-4" />
-                      Privacy Policy
-                    </Button>
-                    <Button
-                      variant="secondary"
-                      onClick={() => setShowTermsOfService(true)}
-                      className="bg-white/5 hover:bg-white/10 text-white border-white/10 flex items-center justify-center gap-2 h-12 rounded-xl transition-all"
-                    >
-                      <FileTextIcon className="w-4 h-4" />
-                      Terms of Service
-                    </Button>
+
+                  {/* Edit Info Section */}
+                  <div className="group bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-green-500/50 hover:bg-white/15 transition-all duration-300 shadow-xl hover:shadow-green-500/10">
+                    <div className="flex items-center mb-6">
+                      <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center mr-4 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                        <PencilIcon className="text-white w-6 h-6" />
+                      </div>
+                      <h2 className="text-2xl font-bold text-white tracking-tight">Edit Info</h2>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <Button
+                        variant="secondary"
+                        onClick={() => setShowPasswordEdit(true)}
+                        className="bg-white/5 hover:bg-white/10 text-white border-white/10 flex items-center justify-center gap-2 h-12 rounded-xl transition-all"
+                      >
+                        <LockIcon className="w-4 h-4" />
+                        Change Password
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={() => setShowDeleteConfirm(true)}
+                        className="bg-red-500/20 hover:bg-red-500 text-red-100 border-red-500/20 flex items-center justify-center gap-2 h-12 rounded-xl transition-all"
+                      >
+                        <TrashIcon className="w-4 h-4" />
+                        Delete Account
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Legal Section */}
+                  <div className="group bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-blue-500/50 hover:bg-white/15 transition-all duration-300 shadow-xl hover:shadow-blue-500/10">
+                    <div className="flex items-center mb-6">
+                      <div className="w-12 h-12 bg-gradient-to-br from-gray-500 to-slate-600 rounded-xl flex items-center justify-center mr-4 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                        <FileTextIcon className="text-white w-6 h-6" />
+                      </div>
+                      <h2 className="text-2xl font-bold text-white tracking-tight">Legal</h2>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <Button
+                        variant="secondary"
+                        onClick={() => setShowPrivacyPolicy(true)}
+                        className="bg-white/5 hover:bg-white/10 text-white border-white/10 flex items-center justify-center gap-2 h-12 rounded-xl transition-all"
+                      >
+                        <ShieldIcon className="w-4 h-4" />
+                        Privacy Policy
+                      </Button>
+                      <Button
+                        variant="secondary"
+                        onClick={() => setShowTermsOfService(true)}
+                        className="bg-white/5 hover:bg-white/10 text-white border-white/10 flex items-center justify-center gap-2 h-12 rounded-xl transition-all"
+                      >
+                        <FileTextIcon className="w-4 h-4" />
+                        Terms of Service
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Shop Page */}
-          {currentPage === "shop" && (
-            <div className="space-y-6">
-              <h1 className="text-4xl font-bold text-white">Shop</h1>
-              <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
-                <h3 className="text-white font-bold text-xl mb-4 flex items-center gap-2">
-                  💳 Buy Tokens with Real Money
-                </h3>
-                <p className="text-purple-200 text-sm mb-4">
-                  Purchase tokens instantly with secure Stripe payment. Tokens will be added to your account
-                  immediately.
-                </p>
-                {currentUser && (
-                  <StripeCheckout
-                    userId={currentUser.id}
-                    onSuccess={(tokens) => {
-                      if (currentUser) {
-                        const updatedUser = { ...currentUser, tokens: currentUser.tokens + tokens }
-                        setCurrentUser(updatedUser)
-                      }
-                    }}
-                  />
-                )}
+            {/* Shop Page */}
+            {currentPage === "shop" && (
+              <div className="space-y-6">
+                <h1 className="text-4xl font-bold text-white">Shop</h1>
+                <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
+                  <h3 className="text-white font-bold text-xl mb-4 flex items-center gap-2">
+                    💳 Buy Tokens with Real Money
+                  </h3>
+                  <p className="text-purple-200 text-sm mb-4">
+                    Purchase tokens instantly with secure Stripe payment. Tokens will be added to your account
+                    immediately.
+                  </p>
+                  {currentUser && (
+                    <StripeCheckout
+                      userId={currentUser.id}
+                      onSuccess={(tokens) => {
+                        if (currentUser) {
+                          const updatedUser = { ...currentUser, tokens: currentUser.tokens + tokens }
+                          setCurrentUser(updatedUser)
+                        }
+                      }}
+                    />
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
-    </div >
 
-      {/* MODALS */ }
-  {
-    showNews && (
-      <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
-        <Card className="w-full max-w-2xl bg-purple-900 border-purple-700">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold text-white">Boomkit News</CardTitle>
-            <CardDescription className="text-purple-300">Stay up to date with the latest updates</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4 max-h-96 overflow-y-auto">
-            {NEWS_ITEMS.map((news) => (
-              <div key={news.id} className="bg-purple-800/50 rounded-lg p-4 border border-purple-600">
-                <div className="flex items-center gap-2 mb-2">
-                  {news.image && <span className="text-2xl">{news.image}</span>}
-                  <h3 className="text-xl font-bold text-white">{news.title}</h3>
-                </div>
-                <p className="text-purple-200">{news.content}</p>
-                <p className="text-purple-400 text-sm mt-2">{news.date}</p>
+      {/* MODALS */}
+      {
+        showNews && (
+          <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
+            <Card className="w-full max-w-2xl bg-purple-900 border-purple-700">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-white">Boomkit News</CardTitle>
+                <CardDescription className="text-purple-300">Stay up to date with the latest updates</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4 max-h-96 overflow-y-auto">
+                {NEWS_ITEMS.map((news) => (
+                  <div key={news.id} className="bg-purple-800/50 rounded-lg p-4 border border-purple-600">
+                    <div className="flex items-center gap-2 mb-2">
+                      {news.image && <span className="text-2xl">{news.image}</span>}
+                      <h3 className="text-xl font-bold text-white">{news.title}</h3>
+                    </div>
+                    <p className="text-purple-200">{news.content}</p>
+                    <p className="text-purple-400 text-sm mt-2">{news.date}</p>
+                  </div>
+                ))}
+              </CardContent>
+              <div className="p-4 pt-0">
+                <Button
+                  onClick={() => setShowNews(false)}
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                >
+                  Close
+                </Button>
               </div>
-            ))}
-          </CardContent>
-          <div className="p-4 pt-0">
-            <Button
-              onClick={() => setShowNews(false)}
-              className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-            >
-              Close
-            </Button>
+            </Card>
           </div>
-        </Card>
-      </div>
-    )
-  }
+        )
+      }
 
-  {
-    packAnimation.show && (
-      <div
-        className={`fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50 overflow-hidden ${packAnimation.stage === "done" ? "cursor-pointer" : "cursor-default"}`}
-        onClick={() => {
-          if (packAnimation.stage === "done") {
-            closePackAnimation()
-          }
-        }}
-      >
-        {/* Confetti particles - colored by rarity */}
-        {packAnimation.stage !== "shake" &&
-          packAnimation.boom &&
-          Array.from({ length: packAnimation.particles.length }).map((_, i) => {
-            const colors = getConfettiColors(packAnimation.boom!.rarity)
-            const color = colors[Math.floor(Math.random() * colors.length)]
-            const angle = (Math.PI * 2 * i) / packAnimation.particles.length
-            const distance = 200 + Math.random() * 150
-            const tx = Math.cos(angle) * distance
-            const ty = Math.sin(angle) * distance
-            return (
-              <div
-                key={i}
-                className="absolute pointer-events-none rounded-full"
-                style={{
-                  left: "50%",
-                  top: "50%",
-                  width: "12px",
-                  height: "12px",
-                  backgroundColor: color,
-                  animation: "particle-explode 1.5s ease-out forwards",
-                  ["--tx" as string]: `${tx}px`,
-                  ["--ty" as string]: `${ty}px`,
-                }}
-              />
-            )
-          })}
+      {
+        packAnimation.show && (
+          <div
+            className={`fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50 overflow-hidden ${packAnimation.stage === "done" ? "cursor-pointer" : "cursor-default"}`}
+            onClick={() => {
+              if (packAnimation.stage === "done") {
+                closePackAnimation()
+              }
+            }}
+          >
+            {/* Confetti particles - colored by rarity */}
+            {packAnimation.stage !== "shake" &&
+              packAnimation.boom &&
+              Array.from({ length: packAnimation.particles.length }).map((_, i) => {
+                const colors = getConfettiColors(packAnimation.boom!.rarity)
+                const color = colors[Math.floor(Math.random() * colors.length)]
+                const angle = (Math.PI * 2 * i) / packAnimation.particles.length
+                const distance = 200 + Math.random() * 150
+                const tx = Math.cos(angle) * distance
+                const ty = Math.sin(angle) * distance
+                return (
+                  <div
+                    key={i}
+                    className="absolute pointer-events-none rounded-full"
+                    style={{
+                      left: "50%",
+                      top: "50%",
+                      width: "12px",
+                      height: "12px",
+                      backgroundColor: color,
+                      animation: "particle-explode 1.5s ease-out forwards",
+                      ["--tx" as string]: `${tx}px`,
+                      ["--ty" as string]: `${ty}px`,
+                    }}
+                  />
+                )
+              })}
 
-        {/* Pack shaking stage */}
-        {packAnimation.stage === "shake" && (
-          <div className="text-center">
-            <div className="animate-pack-shake">
-              <div className="w-48 h-64 bg-gradient-to-b from-purple-600 to-purple-900 rounded-lg shadow-2xl flex flex-col items-center justify-center relative overflow-hidden">
-                {/* Zigzag top */}
-                <div
-                  className="absolute top-0 left-0 right-0 h-6 bg-white/30"
-                  style={{
-                    clipPath:
-                      "polygon(0 0, 10% 100%, 20% 0, 30% 100%, 40% 0, 50% 100%, 60% 0, 70% 100%, 80% 0, 90% 100%, 100% 0, 100% 100%, 0 100%)",
-                  }}
-                />
-                {/* Display Emoji instead of Image */}
-                <div className="text-8xl drop-shadow-md">
-                  {PACKS.find(p => p.name === packAnimation.packName)?.emoji || "📦"}
-                </div>
-                <div className="text-white font-bold mt-2">{packAnimation.packName}</div>
-              </div>
-            </div>
-            <p className="text-white/80 mt-6 text-xl animate-pulse">Opening pack...</p>
-          </div>
-        )}
-
-        {/* Pack burst stage */}
-        {packAnimation.stage === "burst" && (
-          <div className="text-center">
-            <div className="animate-pack-burst">
-              <div className="w-48 h-64 bg-gradient-to-b from-yellow-400 to-orange-600 rounded-lg shadow-2xl flex items-center justify-center">
-                <div className="text-6xl">💥</div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Boom reveal stage - Blooket-style card */}
-        {(packAnimation.stage === "reveal" || packAnimation.stage === "done") && packAnimation.boom && (() => {
-          // Find the pack that contains this boom
-          const pack = PACKS.find((p) => p.booms.some((b) => b.name === packAnimation.boom!.name))
-          const dropRate = pack ? getBoomDropRate(packAnimation.boom.name, pack) : 0
-          const isNew = isBoomNew(packAnimation.boom.name)
-          const revealAnimationClass =
-            packAnimation.boom.rarity === "mystical" ? "animate-reveal-mystical" :
-              packAnimation.boom.rarity === "chroma" ? "animate-reveal-chroma" :
-                packAnimation.boom.rarity === "legendary" ? "animate-reveal-legendary" :
-                  packAnimation.boom.rarity === "epic" ? "animate-reveal-epic" :
-                    packAnimation.boom.rarity === "rare" ? "animate-reveal-rare" :
-                      "animate-reveal-uncommon"
-
-          return (
-            <div className="flex items-center justify-center w-full h-full" onClick={(e) => {
-              // Optional: Determine if clicking content should close it. 
-              // User said "click anywhere and exit", which usually includes the content.
-              // So we allow propagation to the parent.
-            }}>
-              {/* Centered Card */}
-              <div
-                className={`relative w-[400px] h-[500px] rounded-2xl shadow-2xl overflow-hidden ${packAnimation.stage === "reveal" ? revealAnimationClass : ""
-                  }`}
-                style={{
-                  background:
-                    packAnimation.boom.rarity === "mystical"
-                      ? "linear-gradient(135deg, #1e1b4b 0%, #581c87 50%, #831843 100%)" :
-                      packAnimation.boom.rarity === "chroma"
-                        ? "linear-gradient(135deg, #0e7490 0%, #0891b2 50%, #ec4899 100%)" :
-                        packAnimation.boom.rarity === "legendary"
-                          ? "linear-gradient(135deg, #ea580c 0%, #f59e0b 50%, #fbbf24 100%)" :
-                          packAnimation.boom.rarity === "epic"
-                            ? "linear-gradient(135deg, #6b21a8 0%, #9333ea 50%, #a855f7 100%)" :
-                            packAnimation.boom.rarity === "rare"
-                              ? "linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%)" :
-                              "linear-gradient(135deg, #166534 0%, #22c55e 50%, #4ade80 100%)"
-                }}
-              >
-                {/* Card Background Pattern (snowy scene for example) */}
-                <div className="absolute inset-0 opacity-20">
-                  <div className="absolute bottom-0 left-0 right-0 h-32 bg-white/30 rounded-t-full"></div>
-                  <div className="absolute bottom-8 left-4 w-16 h-16 bg-white/20 rounded-full"></div>
-                  <div className="absolute bottom-12 right-8 w-12 h-12 bg-white/20 rounded-full"></div>
-                </div>
-
-                {/* Boom Art - Centered */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-8xl relative z-10">
-                    {packAnimation.boom.avatar}
+            {/* Pack shaking stage */}
+            {packAnimation.stage === "shake" && (
+              <div className="text-center">
+                <div className="animate-pack-shake">
+                  <div className="w-48 h-64 bg-gradient-to-b from-purple-600 to-purple-900 rounded-lg shadow-2xl flex flex-col items-center justify-center relative overflow-hidden">
+                    {/* Zigzag top */}
+                    <div
+                      className="absolute top-0 left-0 right-0 h-6 bg-white/30"
+                      style={{
+                        clipPath:
+                          "polygon(0 0, 10% 100%, 20% 0, 30% 100%, 40% 0, 50% 100%, 60% 0, 70% 100%, 80% 0, 90% 100%, 100% 0, 100% 100%, 0 100%)",
+                      }}
+                    />
+                    {/* Display Emoji instead of Image */}
+                    <div className="text-8xl drop-shadow-md">
+                      {PACKS.find(p => p.name === packAnimation.packName)?.emoji || "📦"}
+                    </div>
+                    <div className="text-white font-bold mt-2">{packAnimation.packName}</div>
                   </div>
                 </div>
+                <p className="text-white/80 mt-6 text-xl animate-pulse">Opening pack...</p>
+              </div>
+            )}
 
-                {/* Boom Name - Top */}
-                <div className="absolute top-6 left-0 right-0 text-center z-20">
-                  <h2 className="text-3xl font-bold text-white drop-shadow-lg">
-                    {packAnimation.boom.name}
-                  </h2>
+            {/* Pack burst stage */}
+            {packAnimation.stage === "burst" && (
+              <div className="text-center">
+                <div className="animate-pack-burst">
+                  <div className="w-48 h-64 bg-gradient-to-b from-yellow-400 to-orange-600 rounded-lg shadow-2xl flex items-center justify-center">
+                    <div className="text-6xl">💥</div>
+                  </div>
                 </div>
+              </div>
+            )}
 
-                {/* Rarity Label - Under Name */}
-                <div className="absolute top-20 left-0 right-0 text-center z-20">
+            {/* Boom reveal stage - Blooket-style card */}
+            {(packAnimation.stage === "reveal" || packAnimation.stage === "done") && packAnimation.boom && (() => {
+              // Find the pack that contains this boom
+              const pack = PACKS.find((p) => p.booms.some((b) => b.name === packAnimation.boom!.name))
+              const dropRate = pack ? getBoomDropRate(packAnimation.boom.name, pack) : 0
+              const isNew = isBoomNew(packAnimation.boom.name)
+              const revealAnimationClass =
+                packAnimation.boom.rarity === "mystical" ? "animate-reveal-mystical" :
+                  packAnimation.boom.rarity === "chroma" ? "animate-reveal-chroma" :
+                    packAnimation.boom.rarity === "legendary" ? "animate-reveal-legendary" :
+                      packAnimation.boom.rarity === "epic" ? "animate-reveal-epic" :
+                        packAnimation.boom.rarity === "rare" ? "animate-reveal-rare" :
+                          "animate-reveal-uncommon"
+
+              return (
+                <div className="flex items-center justify-center w-full h-full" onClick={(e) => {
+                  // Optional: Determine if clicking content should close it. 
+                  // User said "click anywhere and exit", which usually includes the content.
+                  // So we allow propagation to the parent.
+                }}>
+                  {/* Centered Card */}
                   <div
-                    className={`inline-block px-4 py-1 rounded-full text-sm font-bold uppercase ${packAnimation.boom.rarity === "mystical" || packAnimation.boom.rarity === "chroma"
-                      ? "animate-pulse"
-                      : ""
+                    className={`relative w-[400px] h-[500px] rounded-2xl shadow-2xl overflow-hidden ${packAnimation.stage === "reveal" ? revealAnimationClass : ""
                       }`}
                     style={{
                       background:
                         packAnimation.boom.rarity === "mystical"
-                          ? "linear-gradient(135deg, #a855f7, #ec4899)"
-                          : packAnimation.boom.rarity === "chroma"
-                            ? "linear-gradient(135deg, #06b6d4, #ec4899, #f59e0b)"
-                            : packAnimation.boom.rarity === "legendary"
-                              ? "#f59e0b"
-                              : packAnimation.boom.rarity === "epic"
-                                ? "#9333ea"
-                                : packAnimation.boom.rarity === "rare"
-                                  ? "#3b82f6"
-                                  : "#22c55e",
-                      color: "white",
+                          ? "linear-gradient(135deg, #1e1b4b 0%, #581c87 50%, #831843 100%)" :
+                          packAnimation.boom.rarity === "chroma"
+                            ? "linear-gradient(135deg, #0e7490 0%, #0891b2 50%, #ec4899 100%)" :
+                            packAnimation.boom.rarity === "legendary"
+                              ? "linear-gradient(135deg, #ea580c 0%, #f59e0b 50%, #fbbf24 100%)" :
+                              packAnimation.boom.rarity === "epic"
+                                ? "linear-gradient(135deg, #6b21a8 0%, #9333ea 50%, #a855f7 100%)" :
+                                packAnimation.boom.rarity === "rare"
+                                  ? "linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%)" :
+                                  "linear-gradient(135deg, #166534 0%, #22c55e 50%, #4ade80 100%)"
                     }}
                   >
-                    {getRarityText(packAnimation.boom.rarity).replace(/[💚💙💜🔥🌈✨]/g, "").trim()}
+                    {/* Card Background Pattern (snowy scene for example) */}
+                    <div className="absolute inset-0 opacity-20">
+                      <div className="absolute bottom-0 left-0 right-0 h-32 bg-white/30 rounded-t-full"></div>
+                      <div className="absolute bottom-8 left-4 w-16 h-16 bg-white/20 rounded-full"></div>
+                      <div className="absolute bottom-12 right-8 w-12 h-12 bg-white/20 rounded-full"></div>
+                    </div>
+
+                    {/* Boom Art - Centered */}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="text-8xl relative z-10">
+                        {packAnimation.boom.avatar}
+                      </div>
+                    </div>
+
+                    {/* Boom Name - Top */}
+                    <div className="absolute top-6 left-0 right-0 text-center z-20">
+                      <h2 className="text-3xl font-bold text-white drop-shadow-lg">
+                        {packAnimation.boom.name}
+                      </h2>
+                    </div>
+
+                    {/* Rarity Label - Under Name */}
+                    <div className="absolute top-20 left-0 right-0 text-center z-20">
+                      <div
+                        className={`inline-block px-4 py-1 rounded-full text-sm font-bold uppercase ${packAnimation.boom.rarity === "mystical" || packAnimation.boom.rarity === "chroma"
+                          ? "animate-pulse"
+                          : ""
+                          }`}
+                        style={{
+                          background:
+                            packAnimation.boom.rarity === "mystical"
+                              ? "linear-gradient(135deg, #a855f7, #ec4899)"
+                              : packAnimation.boom.rarity === "chroma"
+                                ? "linear-gradient(135deg, #06b6d4, #ec4899, #f59e0b)"
+                                : packAnimation.boom.rarity === "legendary"
+                                  ? "#f59e0b"
+                                  : packAnimation.boom.rarity === "epic"
+                                    ? "#9333ea"
+                                    : packAnimation.boom.rarity === "rare"
+                                      ? "#3b82f6"
+                                      : "#22c55e",
+                          color: "white",
+                        }}
+                      >
+                        {getRarityText(packAnimation.boom.rarity).replace(/[💚💙💜🔥🌈✨]/g, "").trim()}
+                      </div>
+                    </div>
+
+                    {/* Drop Rate + NEW - Bottom */}
+                    <div className="absolute bottom-6 left-0 right-0 text-center z-20">
+                      <p className="text-white text-lg font-semibold drop-shadow-lg">
+                        {dropRate}%{isNew && " – NEW!"}
+                      </p>
+                    </div>
+
+                    {/* Glow effect for legendary+ */}
+                    {["legendary", "chroma", "mystical"].includes(packAnimation.boom.rarity) && (
+                      <div className="absolute inset-0 animate-glow-pulse opacity-50" />
+                    )}
+                  </div>
+                </div>
+              )
+            })()}
+          </div>
+        )
+      }
+      {
+        showProfilePicker && (
+          <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
+            <Card className="w-full max-w-md p-6">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold">Choose Profile Picture</CardTitle>
+                <CardDescription>Select your new avatar</CardDescription>
+              </CardHeader>
+              <CardContent className="grid grid-cols-6 gap-4">
+                {PROFILE_PICTURES.map((picture) => (
+                  <button
+                    key={picture}
+                    onClick={() => {
+                      updateProfilePicture(picture)
+                      setShowProfilePicker(false)
+                    }}
+                    className="w-12 h-12 rounded-full bg-yellow-500 text-white text-3xl flex items-center justify-center hover:scale-110 transition-transform"
+                  >
+                    {picture}
+                  </button>
+                ))}
+              </CardContent>
+              <CardContent>
+                <Button onClick={() => setShowProfilePicker(false)} className="w-full bg-gray-600 hover:bg-gray-700">
+                  Cancel
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        )
+      }
+      {
+        showNameEdit && (
+          <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
+            <Card className="w-full max-w-md p-6">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold">Change Username</CardTitle>
+                <CardDescription>Enter your new username</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Input placeholder="New Username" value={newName} onChange={(e) => setNewName(e.target.value)} />
+                <Button
+                  onClick={() => {
+                    updateUserInfo("username", newName)
+                    setShowNameEdit(false)
+                  }}
+                  className="w-full bg-green-600 hover:bg-green-700"
+                >
+                  Save
+                </Button>
+                <Button onClick={() => setShowNameEdit(false)} className="w-full bg-gray-600 hover:bg-gray-700">
+                  Cancel
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        )
+      }
+      {
+        showEmailEdit && (
+          <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
+            <Card className="w-full max-w-md p-6">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold">Change Email</CardTitle>
+                <CardDescription>Enter your new email address</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Input
+                  type="email"
+                  placeholder="New Email"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                />
+                <Button
+                  onClick={() => {
+                    updateUserInfo("email", newEmail)
+                    setShowEmailEdit(false)
+                  }}
+                  className="w-full bg-green-600 hover:bg-green-700"
+                >
+                  Save
+                </Button>
+                <Button onClick={() => setShowEmailEdit(false)} className="w-full bg-gray-600 hover:bg-gray-700">
+                  Cancel
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        )
+      }
+      {
+        showPasswordEdit && (
+          <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
+            <Card className="w-full max-w-md p-6">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold">Change Password</CardTitle>
+                <CardDescription>Enter your new password</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Input
+                  type="password"
+                  placeholder="New Password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+                <Button
+                  onClick={() => {
+                    alert("Password change functionality not implemented in this demo.")
+                    setShowPasswordEdit(false)
+                  }}
+                  className="w-full bg-green-600 hover:bg-green-700"
+                >
+                  Save
+                </Button>
+                <Button onClick={() => setShowPasswordEdit(false)} className="w-full bg-gray-600 hover:bg-gray-700">
+                  Cancel
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        )
+      }
+      {
+        showDeleteConfirm && (
+          <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
+            <Card className="w-full max-w-md p-6">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-red-500">Delete Account</CardTitle>
+                <CardDescription>
+                  Are you sure you want to delete your account? This action cannot be undone.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button
+                  onClick={() => {
+                    alert("Account deletion functionality not implemented in this demo.")
+                    setShowDeleteConfirm(false)
+                  }}
+                  className="w-full bg-red-600 hover:bg-red-700"
+                >
+                  Confirm Delete
+                </Button>
+                <Button onClick={() => setShowDeleteConfirm(false)} className="w-full bg-gray-600 hover:bg-gray-700">
+                  Cancel
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        )
+      }
+      {
+        showPrivacyPolicy && (
+          <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-4">
+            <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold">Privacy Policy</CardTitle>
+                <CardDescription>Last updated: December 19, 2024</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4 text-sm">
+                <section>
+                  <h3 className="font-bold text-lg mb-2">1. Introduction</h3>
+                  <p>
+                    Welcome to Boomkit. This Privacy Policy explains how we collect, use, disclose, and safeguard your
+                    information when you use our gaming platform. Boomkit is developed and maintained by Oktay Abdullazada
+                    (Owner), Ughur Akparli (Co-Owner - Developer), and Turan Mecidov (Tester).
+                  </p>
+                </section>
+
+                <section>
+                  <h3 className="font-bold text-lg mb-2">2. Information We Collect</h3>
+                  <p className="mb-2">We collect information you provide directly to us, including:</p>
+                  <ul className="list-disc pl-6 space-y-1">
+                    <li>Account information (username, email address, age)</li>
+                    <li>Game data (tokens, packs opened, booms collected, leaderboard rankings)</li>
+                    <li>Chat messages sent through our platform</li>
+                    <li>Auction and trading activity</li>
+                  </ul>
+                </section>
+
+                <section>
+                  <h3 className="font-bold text-lg mb-2">3. How We Use Your Information</h3>
+                  <p className="mb-2">We use the information we collect to:</p>
+                  <ul className="list-disc pl-6 space-y-1">
+                    <li>Provide, maintain, and improve our services</li>
+                    <li>Process transactions and send related information</li>
+                    <li>Display leaderboards and game statistics</li>
+                    <li>Monitor and analyze usage patterns</li>
+                    <li>Detect and prevent fraud or abuse</li>
+                  </ul>
+                </section>
+
+                <section>
+                  <h3 className="font-bold text-lg mb-2">4. Data Storage</h3>
+                  <p>
+                    Your data is securely stored using Supabase, a trusted database provider. We implement appropriate
+                    security measures to protect your personal information against unauthorized access, alteration, or
+                    destruction.
+                  </p>
+                </section>
+
+                <section>
+                  <h3 className="font-bold text-lg mb-2">5. Data Sharing</h3>
+                  <p>
+                    We do not sell your personal information. Game-related data such as usernames, scores, and rankings
+                    may be publicly visible on leaderboards and in chat.
+                  </p>
+                </section>
+
+                <section>
+                  <h3 className="font-bold text-lg mb-2">6. Your Rights</h3>
+                  <p>
+                    You have the right to access, update, or delete your account information at any time through your
+                    account settings.
+                  </p>
+                </section>
+
+                <section>
+                  <h3 className="font-bold text-lg mb-2">7. Contact Us</h3>
+                  <p>
+                    If you have questions about this Privacy Policy, please contact the Boomkit team through our platform.
+                  </p>
+                </section>
+
+                <Button onClick={() => setShowPrivacyPolicy(false)} className="w-full bg-gray-600 hover:bg-gray-700 mt-4">
+                  Close
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        )
+      }
+      {
+        showTermsOfService && (
+          <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-4">
+            <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold">Terms of Service</CardTitle>
+                <CardDescription>Last updated: December 19, 2024</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4 text-sm">
+                <section>
+                  <h3 className="font-bold text-lg mb-2">1. Acceptance of Terms</h3>
+                  <p>
+                    By accessing and using Boomkit, you agree to be bound by these Terms of Service. Boomkit is owned and
+                    operated by Oktay Abdullazada, Ughur Akparli, and Turan Mecidov.
+                  </p>
+                </section>
+
+                <section>
+                  <h3 className="font-bold text-lg mb-2">2. Description of Service</h3>
+                  <p>
+                    Boomkit is an online gaming platform that allows users to collect virtual items called "Booms,"
+                    participate in auctions, engage in real-time chat, and compete on leaderboards. All in-game items and
+                    currencies have no real-world monetary value.
+                  </p>
+                </section>
+
+                <section>
+                  <h3 className="font-bold text-lg mb-2">3. User Accounts</h3>
+                  <p className="mb-2">To use Boomkit, you must:</p>
+                  <ul className="list-disc pl-6 space-y-1">
+                    <li>Provide accurate and complete registration information</li>
+                    <li>Be responsible for maintaining the security of your account</li>
+                    <li>Notify us immediately of any unauthorized use</li>
+                    <li>Be at least 13 years of age to create an account</li>
+                  </ul>
+                </section>
+
+                <section>
+                  <h3 className="font-bold text-lg mb-2">4. User Conduct</h3>
+                  <p className="mb-2">You agree NOT to:</p>
+                  <ul className="list-disc pl-6 space-y-1">
+                    <li>Use the service for any illegal purpose</li>
+                    <li>Harass, abuse, or harm other users</li>
+                    <li>Use cheats, exploits, or automation software</li>
+                    <li>Impersonate other users or staff members</li>
+                    <li>Use inappropriate content in chat</li>
+                  </ul>
+                </section>
+
+                <section>
+                  <h3 className="font-bold text-lg mb-2">5. Virtual Items</h3>
+                  <p>
+                    All virtual items, including Booms, tokens, and packs, are licensed to you and remain the property of
+                    Boomkit. Virtual items have no real-world value and cannot be exchanged for real currency.
+                  </p>
+                </section>
+
+                <section>
+                  <h3 className="font-bold text-lg mb-2">6. Moderation</h3>
+                  <p>
+                    Our staff team reserves the right to moderate content, mute or ban users who violate these terms, and
+                    take any action necessary to maintain a safe gaming environment.
+                  </p>
+                </section>
+
+                <section>
+                  <h3 className="font-bold text-lg mb-2">7. Disclaimer</h3>
+                  <p>
+                    Boomkit is provided "as is" without warranties of any kind. We are not responsible for any loss of
+                    virtual items or account data.
+                  </p>
+                </section>
+
+                <section>
+                  <h3 className="font-bold text-lg mb-2">8. Changes to Terms</h3>
+                  <p>
+                    We reserve the right to modify these terms at any time. Continued use of Boomkit after changes
+                    constitutes acceptance of the new terms.
+                  </p>
+                </section>
+
+                <Button
+                  onClick={() => setShowTermsOfService(false)}
+                  className="w-full bg-gray-600 hover:bg-gray-700 mt-4"
+                >
+                  Close
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        )
+      }
+      {
+        showUserStats && selectedUserStats && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center z-[100] p-4 transition-all duration-300">
+            <Card
+              className={`w-full max-w-2xl overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] relative animate-in zoom-in-95 duration-300 ${selectedUserStats.bannerColor === "rainbow"
+                ? "bg-gradient-to-br from-red-500/5 via-yellow-500/5 via-green-500/5 via-blue-500/5 to-purple-500/5"
+                : "bg-slate-900/90"
+                }`}
+            >
+              {/* Header Banner */}
+              <div className={`h-32 w-full relative ${selectedUserStats.bannerColor === "rainbow"
+                ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 animate-pulse"
+                : selectedUserStats.bannerColor || "bg-gradient-to-r from-purple-600 to-pink-600"
+                }`}>
+                <div className="absolute inset-0 bg-black/20" />
+                <button
+                  onClick={() => setShowUserStats(false)}
+                  className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition-colors z-20"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <CardContent className="px-8 pb-8 -mt-12 relative z-10">
+                <div className="flex flex-col md:flex-row gap-6">
+                  {/* Left Column: Profile Picture & Primary Info */}
+                  <div className="flex flex-col items-center md:items-start space-y-4">
+                    <div className="relative group">
+                      <div className="w-32 h-32 rounded-3xl bg-slate-800 border-4 border-slate-900 flex items-center justify-center text-6xl shadow-2xl relative overflow-hidden">
+                        {selectedUserStats.profilePicture || "🎮"}
+                        {selectedUserStats.role === "owner" && (
+                          <div className="absolute inset-0 border-4 border-yellow-500/30 animate-pulse rounded-2xl" />
+                        )}
+                      </div>
+                      {selectedUserStats.isPlusUser && (
+                        <div className="absolute -top-2 -right-2 bg-gradient-to-r from-cyan-400 to-blue-500 text-white text-[10px] font-black px-2 py-1 rounded-full shadow-lg">
+                          PLUS
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="text-center md:text-left">
+                      <h2 className={`text-3xl font-black mb-1 ${selectedUserStats.nameColor === "rainbow"
+                        ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent animate-pulse"
+                        : "text-white"
+                        }`}>
+                        {selectedUserStats.username}
+                      </h2>
+                      <Badge variant="outline" className="border-white/20 text-white/60 bg-white/5 uppercase tracking-widest text-[10px] font-bold">
+                        ID: {selectedUserStats.id.slice(0, 8)}...
+                      </Badge>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 justify-center md:justify-start">
+                      <Badge className={`${getRoleColor(selectedUserStats.role)} text-white px-3 py-1 text-xs font-black uppercase tracking-wider border-none shadow-lg shadow-black/20`}>
+                        {getUserRoleName(selectedUserStats)}
+                      </Badge>
+                      {selectedUserStats.isOwner && (
+                        <Badge className="bg-emerald-500 text-white px-3 py-1 text-xs font-black uppercase tracking-wider border-none shadow-lg shadow-black/20">
+                          Official
+                        </Badge>
+                      )}
+                    </div>
+
+                    <div className="w-full pt-4">
+                      <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
+                        <p className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-3">Active Badges</p>
+                        <div className="flex flex-wrap gap-2">
+                          {(selectedUserStats.badges ?? []).length > 0 ? (
+                            selectedUserStats.badges.map((badgeId) => {
+                              const badge = AVAILABLE_BADGES.find((b) => b.id === badgeId)
+                              return badge ? (
+                                <div key={badgeId} className="flex items-center gap-1.5 bg-black/40 px-3 py-1.5 rounded-xl border border-white/10">
+                                  <span className="text-base">{badge.emoji}</span>
+                                  <span className="text-[10px] text-white font-bold opacity-80">{badge.name}</span>
+                                </div>
+                              ) : null
+                            })
+                          ) : (
+                            <p className="text-white/20 text-xs italic">No badges earned yet</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Key Statistics */}
+                  <div className="flex-1 space-y-4">
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 rounded-2xl p-4 transition-all hover:scale-[1.02] cursor-default">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xl">💰</span>
+                          <span className="text-white/40 text-[10px] font-black uppercase tracking-widest">Tokens</span>
+                        </div>
+                        <div className="text-2xl font-black text-yellow-500">
+                          {selectedUserStats.tokens.toLocaleString()}
+                        </div>
+                      </div>
+
+                      <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-2xl p-4 transition-all hover:scale-[1.02] cursor-default">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xl">⭐</span>
+                          <span className="text-white/40 text-[10px] font-black uppercase tracking-widest">Score</span>
+                        </div>
+                        <div className="text-2xl font-black text-purple-400">
+                          {selectedUserStats.boomScore.toLocaleString()}
+                        </div>
+                      </div>
+
+                      <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-2xl p-4 transition-all hover:scale-[1.02] cursor-default">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xl">📦</span>
+                          <span className="text-white/40 text-[10px] font-black uppercase tracking-widest">Opened</span>
+                        </div>
+                        <div className="text-2xl font-black text-blue-400">
+                          {selectedUserStats.packsOpened || 0}
+                        </div>
+                      </div>
+
+                      <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-2xl p-4 transition-all hover:scale-[1.02] cursor-default">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-xl">🎆</span>
+                          <span className="text-white/40 text-[10px] font-black uppercase tracking-widest">Unique</span>
+                        </div>
+                        <div className="text-2xl font-black text-emerald-400">
+                          {Object.keys(selectedUserStats.booms).length}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-white/5 rounded-2xl p-5 border border-white/5 space-y-4">
+                      <div className="flex justify-between items-center">
+                        <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">Recent Activity</p>
+                        <Badge className="bg-white/5 text-white/40 border-white/10 text-[9px]">Live Tracking</Badge>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-3 text-xs">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                          <p className="text-white/70">Joined the Booom Arena on <span className="text-emerald-400 font-bold">{new Date(selectedUserStats.joinDate).toLocaleDateString()}</span></p>
+                        </div>
+                        <div className="flex items-center gap-3 text-xs">
+                          <span className="w-2 h-2 rounded-full bg-yellow-500" />
+                          <p className="text-white/70">Highest token balance recorded: <span className="text-yellow-400 font-bold">{selectedUserStats.tokens.toLocaleString()}</span></p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <Button
+                      onClick={() => setShowUserStats(false)}
+                      className="w-full h-12 bg-white/10 hover:bg-white/20 text-white font-black uppercase tracking-widest text-xs border border-white/10 rounded-xl transition-all"
+                    >
+                      Close Profile
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )
+      }
+      {
+        showEditUserDialog && userToEdit && (
+          <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
+            <Card className="w-full max-w-md p-6 bg-slate-900 border-purple-500/50">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-purple-400">Edit User: {userToEdit.username}</CardTitle>
+                <CardDescription className="text-slate-400">Manage user tokens and details.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4 pt-4">
+                <div className="space-y-2">
+                  <Label htmlFor="editTokens" className="text-white">User Tokens</Label>
+                  <Input
+                    id="editTokens"
+                    type="number"
+                    value={editTokenValue}
+                    onChange={(e) => setEditTokenValue(e.target.value)}
+                    className="bg-black/50 border-purple-500/30 text-white"
+                  />
+                </div>
+                <div className="flex justify-end space-x-2 mt-4">
+                  <Button variant="ghost" onClick={() => setShowEditUserDialog(false)} className="text-slate-400 hover:text-white">
+                    Cancel
+                  </Button>
+                  <Button onClick={handleSaveUserTokens} className="bg-purple-600 hover:bg-purple-700">
+                    Save Changes
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )
+      }
+      {
+        showMuteDialog && userToModerate && (
+          <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
+            <Card className="w-full max-w-md p-6">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-yellow-400">Mute {userToModerate.username}</CardTitle>
+                <CardDescription>Set a duration for the mute.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Label htmlFor="muteDuration">Mute Duration (hours)</Label>
+                <Input
+                  id="muteDuration"
+                  type="number"
+                  value={muteDuration}
+                  onChange={(e) => setMuteDuration(e.target.value)}
+                  placeholder="e.g., 24 for 1 day"
+                />
+                <Button onClick={handleConfirmMute} className="w-full bg-yellow-600 hover:bg-yellow-700">
+                  Apply Mute
+                </Button>
+                <Button onClick={() => setShowMuteDialog(false)} className="w-full bg-gray-600 hover:bg-gray-700">
+                  Cancel
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        )
+      }
+      {
+        showBanDialog && userToModerate && (
+          <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
+            <Card className="w-full max-w-md p-6">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-red-500">Ban {userToModerate.username}</CardTitle>
+                <CardDescription>This action is permanent.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Label htmlFor="banReason">Ban Reason</Label>
+                <Textarea
+                  id="banReason"
+                  value={banReason}
+                  onChange={(e) => setBanReason(e.target.value)}
+                  placeholder="Reason for permanent ban..."
+                />
+                <Button onClick={handleConfirmBan} className="w-full bg-red-600 hover:bg-red-700">
+                  Confirm Permanent Ban
+                </Button>
+                <Button onClick={() => setShowBanDialog(false)} className="w-full bg-gray-600 hover:bg-gray-700">
+                  Cancel
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        )
+      }
+      {/* Custom role manager removed for security */}
+      {
+        showBadgeManager && (
+          <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
+            <Card className="w-full max-w-md p-6">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold">Manage Badges</CardTitle>
+                <CardDescription>Assign or remove badges from users</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Label htmlFor="userForBadge">Select User</Label>
+                <select
+                  id="userForBadge"
+                  value={selectedUserForBadge}
+                  onChange={(e) => setSelectedUserForBadge(e.target.value)}
+                  className="w-full bg-white/20 text-white text-sm rounded px-2 py-1 border border-white/30"
+                >
+                  <option value="">Select User</option>
+                  {users.map((user) => (
+                    <option key={user.id} value={user.username} className="bg-gray-800 text-white">
+                      {user.username}
+                    </option>
+                  ))}
+                </select>
+
+                <Label htmlFor="badge">Select Badge</Label>
+                <select
+                  id="badge"
+                  value={selectedBadge}
+                  onChange={(e) => setSelectedBadge(e.target.value)}
+                  className="w-full bg-white/20 text-white text-sm rounded px-2 py-1 border border-white/30"
+                >
+                  <option value="">Select Badge</option>
+                  {AVAILABLE_BADGES.map((badge) => (
+                    <option key={badge.id} value={badge.id} className="bg-gray-800 text-white">
+                      {badge.emoji} {badge.name}
+                    </option>
+                  ))}
+                </select>
+
+                <Button onClick={assignBadge} className="w-full bg-green-600 hover:bg-green-700">
+                  Assign Badge
+                </Button>
+                <Button onClick={() => setShowBadgeManager(false)} className="w-full bg-gray-600 hover:bg-gray-700">
+                  Cancel
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        )
+      }
+      {
+        showBoomAction && selectedBoom && (
+          <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
+            <Card className="w-full max-w-md p-6 bg-slate-900 border-slate-800">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-white">Boom Actions</CardTitle>
+                <CardDescription>What do you want to do with {selectedBoom}?</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-white">
+                  <span className="text-3xl">{getBoomAvatar(selectedBoom)}</span> {selectedBoom}
+                </p>
+
+                <div className="space-y-2">
+                  <Label className="text-white">Quantity to Sell: {sellQuantity}</Label>
+                  <Input
+                    type="range"
+                    min="1"
+                    max={currentUser?.booms[selectedBoom] || 1}
+                    value={sellQuantity}
+                    onChange={(e) => setSellQuantity(parseInt(e.target.value))}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-white/70">
+                    <span>1</span>
+                    <span>{currentUser?.booms[selectedBoom] || 1}</span>
                   </div>
                 </div>
 
-                {/* Drop Rate + NEW - Bottom */}
-                <div className="absolute bottom-6 left-0 right-0 text-center z-20">
-                  <p className="text-white text-lg font-semibold drop-shadow-lg">
-                    {dropRate}%{isNew && " – NEW!"}
+                <div className="bg-white/10 rounded p-3 text-center">
+                  <p className="text-white/70 text-sm">Total Value</p>
+                  <p className="text-yellow-400 font-bold text-xl">
+                    {getBoomSellPrice(selectedBoom) * sellQuantity} tokens
                   </p>
                 </div>
 
-                {/* Glow effect for legendary+ */}
-                {["legendary", "chroma", "mystical"].includes(packAnimation.boom.rarity) && (
-                  <div className="absolute inset-0 animate-glow-pulse opacity-50" />
-                )}
-              </div>
-            </div>
-          )
-        })()}
-      </div>
-    )
-  }
-  {
-    showProfilePicker && (
-      <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
-        <Card className="w-full max-w-md p-6">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold">Choose Profile Picture</CardTitle>
-            <CardDescription>Select your new avatar</CardDescription>
-          </CardHeader>
-          <CardContent className="grid grid-cols-6 gap-4">
-            {PROFILE_PICTURES.map((picture) => (
-              <button
-                key={picture}
-                onClick={() => {
-                  updateProfilePicture(picture)
-                  setShowProfilePicker(false)
-                }}
-                className="w-12 h-12 rounded-full bg-yellow-500 text-white text-3xl flex items-center justify-center hover:scale-110 transition-transform"
-              >
-                {picture}
-              </button>
-            ))}
-          </CardContent>
-          <CardContent>
-            <Button onClick={() => setShowProfilePicker(false)} className="w-full bg-gray-600 hover:bg-gray-700">
-              Cancel
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-  {
-    showNameEdit && (
-      <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
-        <Card className="w-full max-w-md p-6">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold">Change Username</CardTitle>
-            <CardDescription>Enter your new username</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Input placeholder="New Username" value={newName} onChange={(e) => setNewName(e.target.value)} />
-            <Button
-              onClick={() => {
-                updateUserInfo("username", newName)
-                setShowNameEdit(false)
-              }}
-              className="w-full bg-green-600 hover:bg-green-700"
-            >
-              Save
-            </Button>
-            <Button onClick={() => setShowNameEdit(false)} className="w-full bg-gray-600 hover:bg-gray-700">
-              Cancel
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-  {
-    showEmailEdit && (
-      <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
-        <Card className="w-full max-w-md p-6">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold">Change Email</CardTitle>
-            <CardDescription>Enter your new email address</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Input
-              type="email"
-              placeholder="New Email"
-              value={newEmail}
-              onChange={(e) => setNewEmail(e.target.value)}
-            />
-            <Button
-              onClick={() => {
-                updateUserInfo("email", newEmail)
-                setShowEmailEdit(false)
-              }}
-              className="w-full bg-green-600 hover:bg-green-700"
-            >
-              Save
-            </Button>
-            <Button onClick={() => setShowEmailEdit(false)} className="w-full bg-gray-600 hover:bg-gray-700">
-              Cancel
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-  {
-    showPasswordEdit && (
-      <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
-        <Card className="w-full max-w-md p-6">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold">Change Password</CardTitle>
-            <CardDescription>Enter your new password</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Input
-              type="password"
-              placeholder="New Password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-            />
-            <Button
-              onClick={() => {
-                alert("Password change functionality not implemented in this demo.")
-                setShowPasswordEdit(false)
-              }}
-              className="w-full bg-green-600 hover:bg-green-700"
-            >
-              Save
-            </Button>
-            <Button onClick={() => setShowPasswordEdit(false)} className="w-full bg-gray-600 hover:bg-gray-700">
-              Cancel
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-  {
-    showDeleteConfirm && (
-      <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
-        <Card className="w-full max-w-md p-6">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold text-red-500">Delete Account</CardTitle>
-            <CardDescription>
-              Are you sure you want to delete your account? This action cannot be undone.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Button
-              onClick={() => {
-                alert("Account deletion functionality not implemented in this demo.")
-                setShowDeleteConfirm(false)
-              }}
-              className="w-full bg-red-600 hover:bg-red-700"
-            >
-              Confirm Delete
-            </Button>
-            <Button onClick={() => setShowDeleteConfirm(false)} className="w-full bg-gray-600 hover:bg-gray-700">
-              Cancel
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-  {
-    showPrivacyPolicy && (
-      <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-4">
-        <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold">Privacy Policy</CardTitle>
-            <CardDescription>Last updated: December 19, 2024</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4 text-sm">
-            <section>
-              <h3 className="font-bold text-lg mb-2">1. Introduction</h3>
-              <p>
-                Welcome to Boomkit. This Privacy Policy explains how we collect, use, disclose, and safeguard your
-                information when you use our gaming platform. Boomkit is developed and maintained by Oktay Abdullazada
-                (Owner), Ughur Akparli (Co-Owner - Developer), and Turan Mecidov (Tester).
-              </p>
-            </section>
-
-            <section>
-              <h3 className="font-bold text-lg mb-2">2. Information We Collect</h3>
-              <p className="mb-2">We collect information you provide directly to us, including:</p>
-              <ul className="list-disc pl-6 space-y-1">
-                <li>Account information (username, email address, age)</li>
-                <li>Game data (tokens, packs opened, booms collected, leaderboard rankings)</li>
-                <li>Chat messages sent through our platform</li>
-                <li>Auction and trading activity</li>
-              </ul>
-            </section>
-
-            <section>
-              <h3 className="font-bold text-lg mb-2">3. How We Use Your Information</h3>
-              <p className="mb-2">We use the information we collect to:</p>
-              <ul className="list-disc pl-6 space-y-1">
-                <li>Provide, maintain, and improve our services</li>
-                <li>Process transactions and send related information</li>
-                <li>Display leaderboards and game statistics</li>
-                <li>Monitor and analyze usage patterns</li>
-                <li>Detect and prevent fraud or abuse</li>
-              </ul>
-            </section>
-
-            <section>
-              <h3 className="font-bold text-lg mb-2">4. Data Storage</h3>
-              <p>
-                Your data is securely stored using Supabase, a trusted database provider. We implement appropriate
-                security measures to protect your personal information against unauthorized access, alteration, or
-                destruction.
-              </p>
-            </section>
-
-            <section>
-              <h3 className="font-bold text-lg mb-2">5. Data Sharing</h3>
-              <p>
-                We do not sell your personal information. Game-related data such as usernames, scores, and rankings
-                may be publicly visible on leaderboards and in chat.
-              </p>
-            </section>
-
-            <section>
-              <h3 className="font-bold text-lg mb-2">6. Your Rights</h3>
-              <p>
-                You have the right to access, update, or delete your account information at any time through your
-                account settings.
-              </p>
-            </section>
-
-            <section>
-              <h3 className="font-bold text-lg mb-2">7. Contact Us</h3>
-              <p>
-                If you have questions about this Privacy Policy, please contact the Boomkit team through our platform.
-              </p>
-            </section>
-
-            <Button onClick={() => setShowPrivacyPolicy(false)} className="w-full bg-gray-600 hover:bg-gray-700 mt-4">
-              Close
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-  {
-    showTermsOfService && (
-      <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-4">
-        <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold">Terms of Service</CardTitle>
-            <CardDescription>Last updated: December 19, 2024</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4 text-sm">
-            <section>
-              <h3 className="font-bold text-lg mb-2">1. Acceptance of Terms</h3>
-              <p>
-                By accessing and using Boomkit, you agree to be bound by these Terms of Service. Boomkit is owned and
-                operated by Oktay Abdullazada, Ughur Akparli, and Turan Mecidov.
-              </p>
-            </section>
-
-            <section>
-              <h3 className="font-bold text-lg mb-2">2. Description of Service</h3>
-              <p>
-                Boomkit is an online gaming platform that allows users to collect virtual items called "Booms,"
-                participate in auctions, engage in real-time chat, and compete on leaderboards. All in-game items and
-                currencies have no real-world monetary value.
-              </p>
-            </section>
-
-            <section>
-              <h3 className="font-bold text-lg mb-2">3. User Accounts</h3>
-              <p className="mb-2">To use Boomkit, you must:</p>
-              <ul className="list-disc pl-6 space-y-1">
-                <li>Provide accurate and complete registration information</li>
-                <li>Be responsible for maintaining the security of your account</li>
-                <li>Notify us immediately of any unauthorized use</li>
-                <li>Be at least 13 years of age to create an account</li>
-              </ul>
-            </section>
-
-            <section>
-              <h3 className="font-bold text-lg mb-2">4. User Conduct</h3>
-              <p className="mb-2">You agree NOT to:</p>
-              <ul className="list-disc pl-6 space-y-1">
-                <li>Use the service for any illegal purpose</li>
-                <li>Harass, abuse, or harm other users</li>
-                <li>Use cheats, exploits, or automation software</li>
-                <li>Impersonate other users or staff members</li>
-                <li>Use inappropriate content in chat</li>
-              </ul>
-            </section>
-
-            <section>
-              <h3 className="font-bold text-lg mb-2">5. Virtual Items</h3>
-              <p>
-                All virtual items, including Booms, tokens, and packs, are licensed to you and remain the property of
-                Boomkit. Virtual items have no real-world value and cannot be exchanged for real currency.
-              </p>
-            </section>
-
-            <section>
-              <h3 className="font-bold text-lg mb-2">6. Moderation</h3>
-              <p>
-                Our staff team reserves the right to moderate content, mute or ban users who violate these terms, and
-                take any action necessary to maintain a safe gaming environment.
-              </p>
-            </section>
-
-            <section>
-              <h3 className="font-bold text-lg mb-2">7. Disclaimer</h3>
-              <p>
-                Boomkit is provided "as is" without warranties of any kind. We are not responsible for any loss of
-                virtual items or account data.
-              </p>
-            </section>
-
-            <section>
-              <h3 className="font-bold text-lg mb-2">8. Changes to Terms</h3>
-              <p>
-                We reserve the right to modify these terms at any time. Continued use of Boomkit after changes
-                constitutes acceptance of the new terms.
-              </p>
-            </section>
-
-            <Button
-              onClick={() => setShowTermsOfService(false)}
-              className="w-full bg-gray-600 hover:bg-gray-700 mt-4"
-            >
-              Close
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-  {
-    showUserStats && selectedUserStats && (
-      <div className="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center z-[100] p-4 transition-all duration-300">
-        <Card
-          className={`w-full max-w-2xl overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] relative animate-in zoom-in-95 duration-300 ${selectedUserStats.bannerColor === "rainbow"
-            ? "bg-gradient-to-br from-red-500/5 via-yellow-500/5 via-green-500/5 via-blue-500/5 to-purple-500/5"
-            : "bg-slate-900/90"
-            }`}
-        >
-          {/* Header Banner */}
-          <div className={`h-32 w-full relative ${selectedUserStats.bannerColor === "rainbow"
-            ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 animate-pulse"
-            : selectedUserStats.bannerColor || "bg-gradient-to-r from-purple-600 to-pink-600"
-            }`}>
-            <div className="absolute inset-0 bg-black/20" />
-            <button
-              onClick={() => setShowUserStats(false)}
-              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition-colors z-20"
-            >
-              ✕
-            </button>
-          </div>
-
-          <CardContent className="px-8 pb-8 -mt-12 relative z-10">
-            <div className="flex flex-col md:flex-row gap-6">
-              {/* Left Column: Profile Picture & Primary Info */}
-              <div className="flex flex-col items-center md:items-start space-y-4">
-                <div className="relative group">
-                  <div className="w-32 h-32 rounded-3xl bg-slate-800 border-4 border-slate-900 flex items-center justify-center text-6xl shadow-2xl relative overflow-hidden">
-                    {selectedUserStats.profilePicture || "🎮"}
-                    {selectedUserStats.role === "owner" && (
-                      <div className="absolute inset-0 border-4 border-yellow-500/30 animate-pulse rounded-2xl" />
-                    )}
-                  </div>
-                  {selectedUserStats.isPlusUser && (
-                    <div className="absolute -top-2 -right-2 bg-gradient-to-r from-cyan-400 to-blue-500 text-white text-[10px] font-black px-2 py-1 rounded-full shadow-lg">
-                      PLUS
-                    </div>
-                  )}
-                </div>
-
-                <div className="text-center md:text-left">
-                  <h2 className={`text-3xl font-black mb-1 ${selectedUserStats.nameColor === "rainbow"
-                    ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent animate-pulse"
-                    : "text-white"
-                    }`}>
-                    {selectedUserStats.username}
-                  </h2>
-                  <Badge variant="outline" className="border-white/20 text-white/60 bg-white/5 uppercase tracking-widest text-[10px] font-bold">
-                    ID: {selectedUserStats.id.slice(0, 8)}...
-                  </Badge>
-                </div>
-
-                <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-                  <Badge className={`${getRoleColor(selectedUserStats.role)} text-white px-3 py-1 text-xs font-black uppercase tracking-wider border-none shadow-lg shadow-black/20`}>
-                    {getUserRoleName(selectedUserStats)}
-                  </Badge>
-                  {selectedUserStats.isOwner && (
-                    <Badge className="bg-emerald-500 text-white px-3 py-1 text-xs font-black uppercase tracking-wider border-none shadow-lg shadow-black/20">
-                      Official
-                    </Badge>
-                  )}
-                </div>
-
-                <div className="w-full pt-4">
-                  <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
-                    <p className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-3">Active Badges</p>
-                    <div className="flex flex-wrap gap-2">
-                      {(selectedUserStats.badges ?? []).length > 0 ? (
-                        selectedUserStats.badges.map((badgeId) => {
-                          const badge = AVAILABLE_BADGES.find((b) => b.id === badgeId)
-                          return badge ? (
-                            <div key={badgeId} className="flex items-center gap-1.5 bg-black/40 px-3 py-1.5 rounded-xl border border-white/10">
-                              <span className="text-base">{badge.emoji}</span>
-                              <span className="text-[10px] text-white font-bold opacity-80">{badge.name}</span>
-                            </div>
-                          ) : null
-                        })
-                      ) : (
-                        <p className="text-white/20 text-xs italic">No badges earned yet</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Column: Key Statistics */}
-              <div className="flex-1 space-y-4">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 rounded-2xl p-4 transition-all hover:scale-[1.02] cursor-default">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xl">💰</span>
-                      <span className="text-white/40 text-[10px] font-black uppercase tracking-widest">Tokens</span>
-                    </div>
-                    <div className="text-2xl font-black text-yellow-500">
-                      {selectedUserStats.tokens.toLocaleString()}
-                    </div>
-                  </div>
-
-                  <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-2xl p-4 transition-all hover:scale-[1.02] cursor-default">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xl">⭐</span>
-                      <span className="text-white/40 text-[10px] font-black uppercase tracking-widest">Score</span>
-                    </div>
-                    <div className="text-2xl font-black text-purple-400">
-                      {selectedUserStats.boomScore.toLocaleString()}
-                    </div>
-                  </div>
-
-                  <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-2xl p-4 transition-all hover:scale-[1.02] cursor-default">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xl">📦</span>
-                      <span className="text-white/40 text-[10px] font-black uppercase tracking-widest">Opened</span>
-                    </div>
-                    <div className="text-2xl font-black text-blue-400">
-                      {selectedUserStats.packsOpened || 0}
-                    </div>
-                  </div>
-
-                  <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-2xl p-4 transition-all hover:scale-[1.02] cursor-default">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xl">🎆</span>
-                      <span className="text-white/40 text-[10px] font-black uppercase tracking-widest">Unique</span>
-                    </div>
-                    <div className="text-2xl font-black text-emerald-400">
-                      {Object.keys(selectedUserStats.booms).length}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white/5 rounded-2xl p-5 border border-white/5 space-y-4">
-                  <div className="flex justify-between items-center">
-                    <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">Recent Activity</p>
-                    <Badge className="bg-white/5 text-white/40 border-white/10 text-[9px]">Live Tracking</Badge>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3 text-xs">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                      <p className="text-white/70">Joined the Booom Arena on <span className="text-emerald-400 font-bold">{new Date(selectedUserStats.joinDate).toLocaleDateString()}</span></p>
-                    </div>
-                    <div className="flex items-center gap-3 text-xs">
-                      <span className="w-2 h-2 rounded-full bg-yellow-500" />
-                      <p className="text-white/70">Highest token balance recorded: <span className="text-yellow-400 font-bold">{selectedUserStats.tokens.toLocaleString()}</span></p>
-                    </div>
-                  </div>
-                </div>
-
-                <Button
-                  onClick={() => setShowUserStats(false)}
-                  className="w-full h-12 bg-white/10 hover:bg-white/20 text-white font-black uppercase tracking-widest text-xs border border-white/10 rounded-xl transition-all"
-                >
-                  Close Profile
+                <Button onClick={() => handleConfirmSell()} className="w-full bg-blue-600 hover:bg-blue-700">
+                  Sell {sellQuantity} for {getBoomSellPrice(selectedBoom) * sellQuantity} tokens
                 </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-  {
-    showEditUserDialog && userToEdit && (
-      <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
-        <Card className="w-full max-w-md p-6 bg-slate-900 border-purple-500/50">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold text-purple-400">Edit User: {userToEdit.username}</CardTitle>
-            <CardDescription className="text-slate-400">Manage user tokens and details.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-4">
-            <div className="space-y-2">
-              <Label htmlFor="editTokens" className="text-white">User Tokens</Label>
-              <Input
-                id="editTokens"
-                type="number"
-                value={editTokenValue}
-                onChange={(e) => setEditTokenValue(e.target.value)}
-                className="bg-black/50 border-purple-500/30 text-white"
-              />
-            </div>
-            <div className="flex justify-end space-x-2 mt-4">
-              <Button variant="ghost" onClick={() => setShowEditUserDialog(false)} className="text-slate-400 hover:text-white">
-                Cancel
-              </Button>
-              <Button onClick={handleSaveUserTokens} className="bg-purple-600 hover:bg-purple-700">
-                Save Changes
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-  {
-    showMuteDialog && userToModerate && (
-      <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
-        <Card className="w-full max-w-md p-6">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold text-yellow-400">Mute {userToModerate.username}</CardTitle>
-            <CardDescription>Set a duration for the mute.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Label htmlFor="muteDuration">Mute Duration (hours)</Label>
-            <Input
-              id="muteDuration"
-              type="number"
-              value={muteDuration}
-              onChange={(e) => setMuteDuration(e.target.value)}
-              placeholder="e.g., 24 for 1 day"
-            />
-            <Button onClick={handleConfirmMute} className="w-full bg-yellow-600 hover:bg-yellow-700">
-              Apply Mute
-            </Button>
-            <Button onClick={() => setShowMuteDialog(false)} className="w-full bg-gray-600 hover:bg-gray-700">
-              Cancel
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-  {
-    showBanDialog && userToModerate && (
-      <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
-        <Card className="w-full max-w-md p-6">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold text-red-500">Ban {userToModerate.username}</CardTitle>
-            <CardDescription>This action is permanent.</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Label htmlFor="banReason">Ban Reason</Label>
-            <Textarea
-              id="banReason"
-              value={banReason}
-              onChange={(e) => setBanReason(e.target.value)}
-              placeholder="Reason for permanent ban..."
-            />
-            <Button onClick={handleConfirmBan} className="w-full bg-red-600 hover:bg-red-700">
-              Confirm Permanent Ban
-            </Button>
-            <Button onClick={() => setShowBanDialog(false)} className="w-full bg-gray-600 hover:bg-gray-700">
-              Cancel
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-  {/* Custom role manager removed for security */ }
-  {
-    showBadgeManager && (
-      <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
-        <Card className="w-full max-w-md p-6">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold">Manage Badges</CardTitle>
-            <CardDescription>Assign or remove badges from users</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Label htmlFor="userForBadge">Select User</Label>
-            <select
-              id="userForBadge"
-              value={selectedUserForBadge}
-              onChange={(e) => setSelectedUserForBadge(e.target.value)}
-              className="w-full bg-white/20 text-white text-sm rounded px-2 py-1 border border-white/30"
-            >
-              <option value="">Select User</option>
-              {users.map((user) => (
-                <option key={user.id} value={user.username} className="bg-gray-800 text-white">
-                  {user.username}
-                </option>
-              ))}
-            </select>
 
-            <Label htmlFor="badge">Select Badge</Label>
-            <select
-              id="badge"
-              value={selectedBadge}
-              onChange={(e) => setSelectedBadge(e.target.value)}
-              className="w-full bg-white/20 text-white text-sm rounded px-2 py-1 border border-white/30"
-            >
-              <option value="">Select Badge</option>
-              {AVAILABLE_BADGES.map((badge) => (
-                <option key={badge.id} value={badge.id} className="bg-gray-800 text-white">
-                  {badge.emoji} {badge.name}
-                </option>
-              ))}
-            </select>
-
-            <Button onClick={assignBadge} className="w-full bg-green-600 hover:bg-green-700">
-              Assign Badge
-            </Button>
-            <Button onClick={() => setShowBadgeManager(false)} className="w-full bg-gray-600 hover:bg-gray-700">
-              Cancel
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-  {
-    showBoomAction && selectedBoom && (
-      <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
-        <Card className="w-full max-w-md p-6 bg-slate-900 border-slate-800">
-          <CardHeader>
-            <CardTitle className="text-2xl font-bold text-white">Boom Actions</CardTitle>
-            <CardDescription>What do you want to do with {selectedBoom}?</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-white">
-              <span className="text-3xl">{getBoomAvatar(selectedBoom)}</span> {selectedBoom}
-            </p>
-
-            <div className="space-y-2">
-              <Label className="text-white">Quantity to Sell: {sellQuantity}</Label>
-              <Input
-                type="range"
-                min="1"
-                max={currentUser?.booms[selectedBoom] || 1}
-                value={sellQuantity}
-                onChange={(e) => setSellQuantity(parseInt(e.target.value))}
-                className="w-full"
-              />
-              <div className="flex justify-between text-xs text-white/70">
-                <span>1</span>
-                <span>{currentUser?.booms[selectedBoom] || 1}</span>
-              </div>
-            </div>
-
-            <div className="bg-white/10 rounded p-3 text-center">
-              <p className="text-white/70 text-sm">Total Value</p>
-              <p className="text-yellow-400 font-bold text-xl">
-                {getBoomSellPrice(selectedBoom) * sellQuantity} tokens
-              </p>
-            </div>
-
-            <Button onClick={() => handleConfirmSell()} className="w-full bg-blue-600 hover:bg-blue-700">
-              Sell {sellQuantity} for {getBoomSellPrice(selectedBoom) * sellQuantity} tokens
-            </Button>
-
-            <Button onClick={() => setShowBoomAction(false)} className="w-full bg-gray-600 hover:bg-gray-700">
-              Cancel
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-    </div >
+                <Button onClick={() => setShowBoomAction(false)} className="w-full bg-gray-600 hover:bg-gray-700">
+                  Cancel
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        )
+      }
+    </div>
   )
 }
