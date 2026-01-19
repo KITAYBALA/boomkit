@@ -15,12 +15,12 @@ export async function generateGeminiResponse(prompt: string): Promise<string> {
 
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({
-        model: "gemini-1.5-flash",
-        systemInstruction: BOOMKIT_SYSTEM_INSTRUCTION
+        model: "gemini-pro"
     })
 
     try {
-        const result = await model.generateContent(prompt)
+        const fullPrompt = `${BOOMKIT_SYSTEM_INSTRUCTION}\n\nUser Question: ${prompt}`
+        const result = await model.generateContent(fullPrompt)
         const response = await result.response
         return response.text()
     } catch (error) {
