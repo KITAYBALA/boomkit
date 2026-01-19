@@ -324,6 +324,8 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
                 const displayRole = userRoles[msg.username] || msg.role
                 const isMe = msg.username === currentUser?.username
                 const isEditing = editingId === msg.id
+                const isStaff = ["owner", "admin", "senior_moderator", "moderator", "tester"].includes(currentUser?.role || "")
+                const canDelete = isMe || isStaff
 
                 return (
                   <div
@@ -332,9 +334,20 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
                   >
                     <div className="flex items-center gap-2 mb-1 px-1">
                       {!isMe && (
-                        <Badge className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 border-none ${getRoleColor(displayRole)}`}>
-                          {displayRole}
-                        </Badge>
+                        <>
+                          <Badge className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 border-none ${getRoleColor(displayRole)}`}>
+                            {displayRole}
+                          </Badge>
+                          {isStaff && (
+                            <button
+                              onClick={() => setDeleteConfirmId(msg.id)}
+                              className="p-1 opacity-0 group-hover:opacity-100 hover:bg-red-500/20 rounded-md text-white/40 hover:text-red-400 transition-all"
+                              title="Staff Delete"
+                            >
+                              <Trash2Icon className="w-3 h-3" />
+                            </button>
+                          )}
+                        </>
                       )}
                       <span
                         className={`text-xs font-black tracking-tight cursor-pointer hover:underline transition-all ${isMe ? "text-purple-400" : "text-white/60"

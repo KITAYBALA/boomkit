@@ -211,7 +211,20 @@ export async function DELETE(request: Request) {
 
     const supabase = getSupabaseServerClient()
 
-    // Ensure the message belongs to the user
+    // Get the requester's role
+    const { data: requesterData, error: requesterError } = await supabase
+      .from("users")
+      .select("role")
+      .ilike("username", username)
+      .single()
+
+    if (requesterError || !requesterData) {
+      return NextResponse.json({ error: "Requester not found" }, { status: 403 })
+    }
+
+    const isStaff = ["owner", "admin", "senior_moderator", "moderator", "tester"].includes(requesterData.role)
+
+    // Ensure the message belongs to the user or requester is staff
     const { data: existingMessage, error: fetchError } = await supabase
       .from("chat_messages")
       .select("username")
@@ -222,7 +235,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Message not found" }, { status: 404 })
     }
 
-    if (existingMessage.username !== username) {
+    if (existingMessage.username !== username && !isStaff) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
     }
 
