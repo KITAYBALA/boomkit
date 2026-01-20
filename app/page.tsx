@@ -3628,8 +3628,8 @@ export default function BoomkitGame() {
                       })
 
                       if (error) {
-                        console.error("Failed to create session in Supabase:", error)
-                        alert("Error starting game lobby. Please try again.")
+                        console.error("Host Session Error:", error)
+                        alert(`CRITICAL: Failed to create lobby. Error: ${error.message}. Check if you've run the emergency SQL script!`)
                         return
                       }
 
@@ -3658,9 +3658,14 @@ export default function BoomkitGame() {
                       .eq("pin", cleanPin)
                       .single()
 
-                    if (error || !session) {
-                      console.error("Join error:", error)
-                      alert("Invalid PIN or session not found. Make sure the host has created the game.")
+                    if (error) {
+                      console.error("Join Error:", error)
+                      alert(`Join Error: ${error.message || "Session not found"}. Ensure the host has already created the game and you have a stable connection.`)
+                      return
+                    }
+
+                    if (!session) {
+                      alert("Room not found. Please double check the 6-digit PIN.")
                       return
                     }
 

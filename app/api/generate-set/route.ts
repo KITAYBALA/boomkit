@@ -40,18 +40,30 @@ export async function POST(req: Request) {
       Only return the JSON, no other text.
     `
 
+    console.log(`[AI API] Generating set for Grade ${grade}, Subject: ${subject}`)
     const result = await model.generateContent(systemPrompt)
     const response = await result.response
     const text = response.text()
 
-    // Attempt to extract JSON if there's markdown formatting
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
-    const jsonStr = jsonMatch ? jsonMatch[0] : text
-    const data = JSON.parse(jsonStr)
+    console.log("[AI API] Raw response length:", text.length)
 
-    return NextResponse.json(data)
-  } catch (error) {
+    // Attempt to extract JSON if there's markdown formatting
+    let jsonStr = text
+    const jsonMatch = text.match(/\{[\s\S]*\}/)
+    if (jsonMatch) {
+      jsonStr = jsonMatch[0]
+    }
+
+    try {
+      const data = JSON.parse(jsonStr)
+      console.log("[AI API] Successfully parsed JSON")
+      return NextResponse.json(data)
+    } catch (parseError) {
+      console.error("[AI API] JSON parsing failed. Text:", text, "Error:", parseError)
+      return NextResponse.json({ error: "The AI returned an invalid response format. Please try again." }, { status: 500 })
+    }
+  } catch (error: any) {
     console.error("Error generating set:", error)
-    return NextResponse.json({ error: "Failed to generate set" }, { status: 500 })
+    return NextResponse.json({ error: `AI Generation Error: ${error.message || "Unknown error"}` }, { status: 500 })
   }
 }
