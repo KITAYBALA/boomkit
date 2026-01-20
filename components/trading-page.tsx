@@ -203,11 +203,13 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
 
     setLoading(false)
     if (error) {
+      console.error("Trade submission error:", error)
       alert("Error sending trade: " + error.message)
     } else {
-      alert("Trade sent!")
+      alert("Trade sent successfully!")
       resetTradeForm()
       setShowNewTrade(false)
+      fetchTrades() // Refresh the list
     }
   }
 
@@ -220,11 +222,11 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
       }
 
       const { error } = await supabase.rpc('accept_trade', { trade_uuid: trade.id })
-
       if (error) throw error
 
       setLoading(false)
       alert("Trade accepted!")
+      fetchTrades() // Refresh local trades list
       onTradeComplete()
     } catch (e: any) {
       console.error("Trade failed:", e)
@@ -428,12 +430,12 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
                             key={user.id}
                             variant="outline"
                             onClick={() => setSelectedUser(user)}
-                            className="justify-start h-14 bg-white/5 border-white/5 hover:bg-purple-500/10 hover:border-purple-500/30 rounded-xl transition-all"
+                            className="justify-start h-14 bg-white/5 border-white/5 hover:bg-purple-500/10 hover:border-purple-500/30 rounded-xl transition-all text-white"
                           >
                             <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center mr-3">
                               <UserIcon className="h-4 w-4 text-white/60" />
                             </div>
-                            <span className="font-medium">{user.username}</span>
+                            <span className="font-medium text-white">{user.username}</span>
                           </Button>
                         ))}
                     </div>
@@ -471,7 +473,7 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
 
                         <div className="space-y-4">
                           <div className="bg-black/20 rounded-2xl p-4 min-h-[120px]">
-                            <p className="text-xs text-white/30 mb-3 font-bold uppercase">Booms to give</p>
+                            <p className="text-xs text-white/60 mb-3 font-bold uppercase">Booms to give</p>
                             <div className="flex flex-wrap gap-2">
                               {Object.entries(myOfferedBooms).map(([boom, qty]) => (
                                 <Badge
@@ -483,7 +485,7 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
                                 </Badge>
                               ))}
                               {Object.keys(myOfferedBooms).length === 0 && (
-                                <p className="text-sm text-white/10 italic">No Booms selected</p>
+                                <p className="text-sm text-white/20 italic">No Booms selected</p>
                               )}
                             </div>
                           </div>
@@ -530,7 +532,7 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
 
                         <div className="space-y-4">
                           <div className="bg-black/20 rounded-2xl p-4 min-h-[120px]">
-                            <p className="text-xs text-white/30 mb-3 font-bold uppercase md:text-right">Booms you receive</p>
+                            <p className="text-xs text-white/60 mb-3 font-bold uppercase md:text-right">Booms you receive</p>
                             <div className="flex flex-wrap md:justify-end gap-2">
                               {Object.entries(theirRequestedBooms).map(([boom, qty]) => (
                                 <Badge
@@ -542,7 +544,7 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
                                 </Badge>
                               ))}
                               {Object.keys(theirRequestedBooms).length === 0 && (
-                                <p className="text-sm text-white/10 italic">No Booms requested</p>
+                                <p className="text-sm text-white/20 italic">No Booms requested</p>
                               )}
                             </div>
                           </div>
@@ -727,13 +729,13 @@ function TradeCard({
                   <span className={`font-bold ${isIncoming ? "text-purple-400" : "text-white"}`}>
                     {trade.sender_username}
                   </span>
-                  <span className="text-xs text-purple-300/50 ml-auto">GIVES</span>
+                  <span className="text-xs text-purple-200 ml-auto font-bold tracking-tighter">GIVES</span>
                 </div>
 
                 <div className="flex flex-wrap gap-1.5 min-h-[2rem]">
                   {Object.entries(trade.sender_booms).map(([boom, qty]) => (
                     <Badge key={boom} variant="secondary" className="bg-white/10 hover:bg-white/20 text-purple-100 border-none px-2.5 py-1 text-xs transition-colors">
-                      {boom} <span className="ml-1 opacity-60 text-[10px]">x{qty}</span>
+                      {boom} <span className="ml-1 text-purple-300 text-[10px]">x{qty}</span>
                     </Badge>
                   ))}
                   {trade.sender_tokens > 0 && (
@@ -764,13 +766,12 @@ function TradeCard({
                   <span className={`font-bold ${!isIncoming ? "text-purple-400" : "text-white"}`}>
                     {trade.receiver_username}
                   </span>
-                  <span className="text-xs text-blue-300/50 mr-auto md:ml-auto md:mr-0">RECEIVES</span>
+                  <span className="text-xs text-blue-200 mr-auto md:ml-auto md:mr-0 font-bold tracking-tighter">RECEIVES</span>
                 </div>
-
                 <div className="flex flex-wrap md:justify-end gap-1.5 min-h-[2rem]">
                   {Object.entries(trade.receiver_booms).map(([boom, qty]) => (
                     <Badge key={boom} variant="secondary" className="bg-white/10 hover:bg-white/20 text-purple-100 border-none px-2.5 py-1 text-xs transition-colors">
-                      {boom} <span className="ml-1 opacity-60 text-[10px]">x{qty}</span>
+                      {boom} <span className="ml-1 text-blue-300 text-[10px]">x{qty}</span>
                     </Badge>
                   ))}
                   {trade.receiver_tokens > 0 && (
