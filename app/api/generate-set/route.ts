@@ -2,20 +2,20 @@ import { NextResponse } from "next/server"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 
 export async function POST(req: Request) {
-    try {
-        const { prompt, grade, subject } = await req.json()
-        const apiKey = process.env.GOOGLE_GEMINI_API_KEY || "AIzaSyBJcKB1BFqEIlcL8VGJ-q6BKFvBLB8jXmc"
+  try {
+    const { prompt, grade, subject, count = 25 } = await req.json()
+    const apiKey = process.env.GOOGLE_GEMINI_API_KEY || "AIzaSyBJcKB1BFqEIlcL8VGJ-q6BKFvBLB8jXmc"
 
-        if (!apiKey) {
-            return NextResponse.json({ error: "Gemini API key missing" }, { status: 500 })
-        }
+    if (!apiKey) {
+      return NextResponse.json({ error: "Gemini API key missing" }, { status: 500 })
+    }
 
-        const genAI = new GoogleGenerativeAI(apiKey)
-        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" })
+    const genAI = new GoogleGenerativeAI(apiKey)
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" })
 
-        const systemPrompt = `
+    const systemPrompt = `
       You are an educational content creator for a game called Boomkit.
-      Generate a set of 15 multiple-choice questions for the following:
+      Generate a set of EXACTLY ${count} multiple-choice questions for the following:
       Grade: ${grade}
       Subject: ${subject}
       Topic/Instructions: ${prompt}
@@ -40,18 +40,18 @@ export async function POST(req: Request) {
       Only return the JSON, no other text.
     `
 
-        const result = await model.generateContent(systemPrompt)
-        const response = await result.response
-        const text = response.text()
+    const result = await model.generateContent(systemPrompt)
+    const response = await result.response
+    const text = response.text()
 
-        // Attempt to extract JSON if there's markdown formatting
-        const jsonMatch = text.match(/\{[\s\S]*\}/)
-        const jsonStr = jsonMatch ? jsonMatch[0] : text
-        const data = JSON.parse(jsonStr)
+    // Attempt to extract JSON if there's markdown formatting
+    const jsonMatch = text.match(/\{[\s\S]*\}/)
+    const jsonStr = jsonMatch ? jsonMatch[0] : text
+    const data = JSON.parse(jsonStr)
 
-        return NextResponse.json(data)
-    } catch (error) {
-        console.error("Error generating set:", error)
-        return NextResponse.json({ error: "Failed to generate set" }, { status: 500 })
-    }
+    return NextResponse.json(data)
+  } catch (error) {
+    console.error("Error generating set:", error)
+    return NextResponse.json({ error: "Failed to generate set" }, { status: 500 })
+  }
 }

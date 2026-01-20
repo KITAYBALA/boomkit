@@ -34,6 +34,10 @@ import {
   BanIcon,
   CheckIcon,
   CompassIcon,
+  SparklesIcon,
+  Settings2Icon,
+  Users2Icon,
+  InfoIcon,
 } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 
@@ -45,6 +49,7 @@ import StripeCheckout from "@/components/stripe-checkout"
 import TradingPage from "@/components/trading-page" // Import TradingPage
 import DiscoverPage from "@/components/discover-page"
 import MergingGame from "@/components/merging-game"
+import GameLobby from "@/components/game-lobby"
 import { createBrowserClient } from "@supabase/ssr"
 
 // Advanced computer identification system
@@ -616,10 +621,14 @@ export default function BoomkitGame() {
     questions: any[]
   } | null>(null)
   const [isMergingGameActive, setIsMergingGameActive] = useState(false)
+  const [lobbyActive, setLobbyActive] = useState(false)
+  const [activeGamePin, setActiveGamePin] = useState("")
+  const [selectedDuration, setSelectedDuration] = useState(120)
   const [discoveredSets, setDiscoveredSets] = useState<any[]>([])
   const [isGeneratingSet, setIsGeneratingSet] = useState(false)
   const [showAiSetCreator, setShowAiSetCreator] = useState(false)
   const [aiSetPrompt, setAiSetPrompt] = useState("")
+  const [aiQuestionCount, setAiQuestionCount] = useState(25)
   const [currentUser, setCurrentUser] = useState<GameUser | null>(null)
   const [users, setUsers] = useState<GameUser[]>([])
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
@@ -1797,7 +1806,8 @@ export default function BoomkitGame() {
         body: JSON.stringify({
           prompt: aiSetPrompt,
           grade: 1, // Default or selected
-          subject: "AI Generated"
+          subject: "AI Generated",
+          count: aiQuestionCount
         })
       })
       const data = await response.json()
@@ -3529,7 +3539,7 @@ export default function BoomkitGame() {
             )}
 
             {/* Discover Page */}
-            {currentPage === "discover" && !isMergingGameActive && (
+            {currentPage === "discover" && !isMergingGameActive && !lobbyActive && (
               <DiscoverPage
                 currentUser={currentUser}
                 onStartGame={(grade, subject, mode) => {
@@ -3554,18 +3564,27 @@ export default function BoomkitGame() {
                     }
                   ]
 
-                  let pin = ""
                   if (mode === "host") {
-                    pin = Math.floor(100000 + Math.random() * 900000).toString()
-                    // Register session in local storage for demo joining
+                    const pin = Math.floor(100000 + Math.random() * 900000).toString()
                     const sessions = JSON.parse(localStorage.getItem("boomkit_game_sessions") || "{}")
-                    sessions[pin] = { grade, subject, questions: defaultQuestions, host: currentUser?.username }
+                    sessions[pin] = {
+                      grade,
+                      subject,
+                      questions: defaultQuestions,
+                      host: currentUser?.username,
+                      players: [],
+                      status: "waiting",
+                      duration: 120
+                    }
                     localStorage.setItem("boomkit_game_sessions", JSON.stringify(sessions))
-                    alert(`GAME HOSTED! PIN: ${pin}. Share this with players!`)
+                    window.dispatchEvent(new Event('storage'))
+                    setActiveGamePin(pin)
+                    setActiveDiscoverGame({ grade, subject, mode: "host", questions: defaultQuestions })
+                    setLobbyActive(true)
+                  } else {
+                    setActiveDiscoverGame({ grade, subject, mode: "solo", questions: defaultQuestions })
+                    setIsMergingGameActive(true)
                   }
-
-                  setActiveDiscoverGame({ grade, subject, mode, questions: defaultQuestions })
-                  setIsMergingGameActive(true)
                 }}
                 onJoinGame={() => {
                   const pinInput = prompt("Enter 6-digit Game PIN:")
@@ -3575,19 +3594,38 @@ export default function BoomkitGame() {
                   const session = sessions[pinInput]
 
                   if (session) {
+                    setActiveGamePin(pinInput)
                     setActiveDiscoverGame({
                       grade: session.grade,
                       subject: session.subject,
                       mode: "join",
                       questions: session.questions
                     })
-                    setIsMergingGameActive(true)
-                    alert(`Joined ${session.host}'s game!`)
+                    setLobbyActive(true)
                   } else {
                     alert("Invalid PIN. No active game session found.")
                   }
                 }}
                 onCreateWithAI={() => setShowAiSetCreator(true)}
+              />
+            )}
+
+            {currentPage === "discover" && lobbyActive && activeDiscoverGame && (
+              <GameLobby
+                pin={activeGamePin}
+                mode={activeDiscoverGame.mode as "host" | "join"}
+                subject={activeDiscoverGame.subject}
+                grade={activeDiscoverGame.grade}
+                currentUser={currentUser}
+                onStart={(duration) => {
+                  setSelectedDuration(duration)
+                  setIsMergingGameActive(true)
+                  setLobbyActive(false)
+                }}
+                onCancel={() => {
+                  setLobbyActive(false)
+                  setActiveGamePin("")
+                }}
               />
             )}
 
@@ -3597,10 +3635,11 @@ export default function BoomkitGame() {
                 subject={activeDiscoverGame.subject}
                 mode={activeDiscoverGame.mode}
                 questions={activeDiscoverGame.questions}
-                durationSeconds={120}
+                durationSeconds={selectedDuration}
                 onEnd={(score) => {
                   console.log("Game ended with score:", score)
                   setIsMergingGameActive(false)
+                  setLobbyActive(false)
                   // Reward tokens for educational play
                   if (currentUser) {
                     const bonus = Math.floor(score / 5)
@@ -4513,11 +4552,26 @@ export default function BoomkitGame() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <Textarea
-                  placeholder="e.g., Solar system facts for 5th grade, or basic multiplication..."
+                  placeholder="e.g., Solar system facts for 10th grade, or basic multiplication..."
                   value={aiSetPrompt}
                   onChange={(e) => setAiSetPrompt(e.target.value)}
                   className="bg-black/50 border-purple-500/30 text-white min-h-[100px]"
                 />
+
+                <div className="space-y-2">
+                  <label className="text-white/70 text-sm font-bold block">
+                    Number of Questions
+                  </label>
+                  <Input
+                    type="number"
+                    min={5}
+                    max={50}
+                    value={aiQuestionCount}
+                    onChange={(e) => setAiQuestionCount(parseInt(e.target.value) || 25)}
+                    className="bg-black/50 border-purple-500/30 text-white"
+                  />
+                  <p className="text-[10px] text-white/30 italic">Default is 25 questions.</p>
+                </div>
                 <div className="flex gap-2">
                   <Button
                     onClick={() => setShowAiSetCreator(false)}
