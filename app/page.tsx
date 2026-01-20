@@ -32,6 +32,7 @@ import {
   FileTextIcon,
   Star,
   BanIcon,
+  CheckIcon,
 } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 
