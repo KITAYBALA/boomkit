@@ -156,9 +156,12 @@ export default function PrivateChat({ currentUser }: Props) {
         }
     }, [supabase, currentUser?.id, activeConversation?.id])
 
-    // Scroll to bottom
+    // Scroll to bottom when messages change
     useEffect(() => {
-        scrollRef.current?.scrollIntoView({ behavior: "smooth" })
+        if (scrollRef.current) {
+            // Use block: 'nearest' to prevent scrolling the whole page if already in view
+            scrollRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" })
+        }
     }, [messages])
 
     // Fetch Users for "New Chat"
@@ -247,7 +250,8 @@ export default function PrivateChat({ currentUser }: Props) {
     }
 
     const filteredUsers = allUsers.filter(u =>
-        u.username.toLowerCase().includes(searchQuery.toLowerCase())
+        u.username.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        !(u as any).is_banned
     )
 
     const getChatTitle = (conv: Conversation) => {
@@ -293,8 +297,8 @@ export default function PrivateChat({ currentUser }: Props) {
                                             fetchMessages(conv.id)
                                         }}
                                         className={`w-full p-4 rounded-2xl text-left transition-all duration-300 group relative ${activeConversation?.id === conv.id
-                                                ? 'bg-purple-600/20 border border-purple-500/30'
-                                                : 'hover:bg-white/5 border border-transparent'
+                                            ? 'bg-purple-600/20 border border-purple-500/30'
+                                            : 'hover:bg-white/5 border border-transparent'
                                             }`}
                                     >
                                         <div className="flex items-center gap-3">
@@ -379,8 +383,8 @@ export default function PrivateChat({ currentUser }: Props) {
                                                     </span>
                                                 )}
                                                 <div className={`max-w-[70%] px-5 py-3 rounded-2xl border transition-all ${isMe
-                                                        ? 'bg-purple-600/20 border-purple-500/30 text-white rounded-tr-none shadow-lg shadow-purple-900/10'
-                                                        : 'bg-white/5 border-white/10 text-white/90 rounded-tl-none'
+                                                    ? 'bg-purple-600/20 border-purple-500/30 text-white rounded-tr-none shadow-lg shadow-purple-900/10'
+                                                    : 'bg-white/5 border-white/10 text-white/90 rounded-tl-none'
                                                     }`}>
                                                     <p className="text-sm leading-relaxed whitespace-pre-wrap break-words font-medium">
                                                         {msg.message}
@@ -462,8 +466,8 @@ export default function PrivateChat({ currentUser }: Props) {
                                                     }
                                                 }}
                                                 className={`p-4 rounded-xl text-left border transition-all flex items-center justify-between group ${selectedUsers.includes(user.id)
-                                                        ? 'bg-purple-600/20 border-purple-500/50'
-                                                        : 'bg-white/5 border-white/5 hover:bg-white/10'
+                                                    ? 'bg-purple-600/20 border-purple-500/50'
+                                                    : 'bg-white/5 border-white/5 hover:bg-white/10'
                                                     }`}
                                             >
                                                 <div className="flex items-center gap-3">

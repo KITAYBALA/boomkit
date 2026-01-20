@@ -27,18 +27,19 @@ interface MergingGameProps {
     grade: number
     subject: string
     mode: "solo" | "host" | "join"
-    onEnd: (score: number) => void
     questions: Question[]
     durationSeconds: number
+    onEnd: (score: number) => void
+    onAwardTokens?: (amount: number) => void
 }
 
 const RARITY_DATA = {
-    uncommon: { emoji: "📦", points: 0, next: "rare", nextPoints: 1, color: "text-green-400" },
-    rare: { emoji: "💎", points: 1, next: "epic", nextPoints: 2, color: "text-blue-400" },
-    epic: { emoji: "🔥", points: 2, next: "legendary", nextPoints: 3, color: "text-purple-400" },
-    legendary: { emoji: "👑", points: 3, next: "chroma", nextPoints: 5, color: "text-yellow-400" },
-    chroma: { emoji: "🌈", points: 5, next: "mystical", nextPoints: 10, color: "text-pink-400" },
-    mystical: { emoji: "✨", points: 10, next: null, nextPoints: 0, color: "text-cyan-400" },
+    uncommon: { emoji: "📦", points: 0, next: "rare", nextPoints: 1, color: "text-green-400", tokenAward: 0 },
+    rare: { emoji: "💎", points: 1, next: "epic", nextPoints: 2, color: "text-blue-400", tokenAward: 10 },
+    epic: { emoji: "🔥", points: 2, next: "legendary", nextPoints: 3, color: "text-purple-400", tokenAward: 20 },
+    legendary: { emoji: "👑", points: 3, next: "chroma", nextPoints: 5, color: "text-yellow-400", tokenAward: 50 },
+    chroma: { emoji: "🌈", points: 5, next: "mystical", nextPoints: 10, color: "text-pink-400", tokenAward: 100 },
+    mystical: { emoji: "✨", points: 10, next: null, nextPoints: 0, color: "text-cyan-400", tokenAward: 250 },
 }
 
 const DROP_RATES = [
@@ -50,7 +51,15 @@ const DROP_RATES = [
     { rarity: "mystical", chance: 0.1 },
 ]
 
-export default function MergingGame({ grade, subject, mode, onEnd, questions, durationSeconds }: MergingGameProps) {
+export default function MergingGame({
+    grade,
+    subject,
+    mode,
+    onEnd,
+    questions,
+    durationSeconds,
+    onAwardTokens,
+}: MergingGameProps) {
     const [timeLeft, setTimeLeft] = useState(durationSeconds)
     const [score, setScore] = useState(0)
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
@@ -201,7 +210,8 @@ export default function MergingGame({ grade, subject, mode, onEnd, questions, du
                         const b2 = next[j]
 
                         const dist = Math.sqrt(Math.pow(b1.x - b2.x, 2) + Math.pow(b1.y - b2.y, 2))
-                        if (b1.rarity === b2.rarity && dist < 10 && b1.y > 80 && b2.y > 80) {
+                        // Relaxed distance for "corner merging" (from 10 to 15)
+                        if (b1.rarity === b2.rarity && dist < 15 && b1.y > 80 && b2.y > 80) {
                             const data = RARITY_DATA[b1.rarity]
                             if (data.next) {
                                 const nextRarity = data.next as keyof typeof RARITY_DATA
@@ -215,6 +225,11 @@ export default function MergingGame({ grade, subject, mode, onEnd, questions, du
                                 setScore((s) => s + data.nextPoints)
                                 toRemove.add(b1.id)
                                 toRemove.add(b2.id)
+
+                                // Award tokens for merge
+                                if (onAwardTokens && RARITY_DATA[nextRarity].tokenAward > 0) {
+                                    onAwardTokens(RARITY_DATA[nextRarity].tokenAward)
+                                }
 
                                 if (nextRarity === "mystical") {
                                     setTimeout(handleGameOver, 500)

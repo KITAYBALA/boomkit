@@ -3717,14 +3717,29 @@ export default function BoomkitGame() {
                   console.log("Game ended with score:", score)
                   setIsMergingGameActive(false)
                   setLobbyActive(false)
-                  // Reward tokens for educational play
+
+                  // Reward tokens based on Grade and Performance
                   if (currentUser) {
-                    const bonus = Math.floor(score / 5)
-                    if (bonus > 0) {
-                      const updatedUser = { ...currentUser, tokens: currentUser.tokens + bonus }
-                      updateAndPersistCurrentUser(updatedUser)
-                      alert(`Game Over! You earned ${bonus} tokens for your performance.`)
+                    const gradeRewards: Record<number, number> = {
+                      1: 3, 2: 5, 3: 10, 4: 20, 5: 25, 6: 50, 7: 75,
+                      8: 100, 9: 125, 10: 150, 11: 175, 12: 200
                     }
+                    const completionBonus = gradeRewards[activeDiscoverGame.grade] || 3
+                    const performanceBonus = Math.floor(score / 10) // Basic performance incentive
+
+                    const totalReward = completionBonus + performanceBonus
+
+                    if (totalReward > 0) {
+                      const updatedUser = { ...currentUser, tokens: currentUser.tokens + totalReward }
+                      updateAndPersistCurrentUser(updatedUser)
+                      alert(`Game Over! You earned ${totalReward} tokens (${completionBonus} for completion + ${performanceBonus} for score).`)
+                    }
+                  }
+                }}
+                onAwardTokens={(amount) => {
+                  if (currentUser) {
+                    const updatedUser = { ...currentUser, tokens: currentUser.tokens + amount }
+                    updateAndPersistCurrentUser(updatedUser)
                   }
                 }}
               />
