@@ -42,6 +42,7 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 
 import RealtimeChat from "@/components/realtime-chat"
+import PrivateChat from "@/components/private-chat"
 import RealtimeAuctions from "@/components/realtime-auctions"
 import RealtimeLeaderboard from "@/components/realtime-leaderboard"
 import { getSupabaseBrowserClient } from "@/lib/supabase-client"
@@ -3041,11 +3042,20 @@ export default function BoomkitGame() {
 
             {/* Chat Page */}
             {currentPage === "chat" && (
-              <RealtimeChat
-                currentUser={currentUser}
-                roleName={currentUser ? getUserRoleName(currentUser) : "Player"}
-                onUsernameClick={handleUsernameClick}
-              />
+              <div className="space-y-12">
+                <RealtimeChat
+                  currentUser={currentUser}
+                  roleName={currentUser ? getUserRoleName(currentUser) : "Player"}
+                  onUsernameClick={handleUsernameClick}
+                />
+                <div className="pt-8 border-t border-white/10">
+                  <div className="flex items-center gap-3 mb-8 ml-2">
+                    <div className="w-1.5 h-8 bg-purple-500 rounded-full shadow-[0_0_15px_purple]" />
+                    <h2 className="text-4xl font-black text-white tracking-tighter">Private Quarters</h2>
+                  </div>
+                  <PrivateChat currentUser={currentUser} />
+                </div>
+              </div>
             )}
 
             {/* Auction Page */}
