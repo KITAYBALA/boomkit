@@ -59,6 +59,7 @@ export default function MergingGame({ grade, subject, mode, onEnd, questions, du
     const [isAnswering, setIsAnswering] = useState(true)
     const [isGameOver, setIsGameOver] = useState(false)
     const [feedback, setFeedback] = useState<"correct" | "incorrect" | null>(null)
+    const [currentBoomX, setCurrentBoomX] = useState(50) // Horizontal position 0-100
 
     const gameAreaRef = useRef<HTMLDivElement>(null)
 
@@ -108,6 +109,24 @@ export default function MergingGame({ grade, subject, mode, onEnd, questions, du
         }
     }
 
+    // Keyboard controls
+    useEffect(() => {
+        if (isGameOver || isAnswering) return
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "ArrowLeft") {
+                setCurrentBoomX(prev => Math.max(5, prev - 5))
+            } else if (e.key === "ArrowRight") {
+                setCurrentBoomX(prev => Math.min(95, prev + 5))
+            } else if (e.key === "ArrowDown" || e.key === " ") {
+                dropBoom()
+            }
+        }
+
+        window.addEventListener("keydown", handleKeyDown)
+        return () => window.removeEventListener("keydown", handleKeyDown)
+    }, [isGameOver, isAnswering, currentBoomX])
+
     const dropBoom = () => {
         if (isAnswering) return
 
@@ -116,7 +135,7 @@ export default function MergingGame({ grade, subject, mode, onEnd, questions, du
             id: Math.random().toString(36).substr(2, 9),
             rarity: rarity as any,
             emoji: RARITY_DATA[rarity].emoji,
-            x: Math.random() * 80 + 10,
+            x: currentBoomX,
             y: 0,
         }
 
@@ -124,6 +143,7 @@ export default function MergingGame({ grade, subject, mode, onEnd, questions, du
         setNextBooms((prev) => [...prev.slice(1), getRandomRarity()])
         setIsAnswering(true)
         setCurrentQuestionIndex((prev) => (prev + 1) % questions.length)
+        setCurrentBoomX(50) // Reset for next turn
     }
 
     // Simulation
@@ -133,10 +153,40 @@ export default function MergingGame({ grade, subject, mode, onEnd, questions, du
         const simulation = setInterval(() => {
             setMergingBooms((prev) => {
                 const next = prev.map((b) => {
+                    let newY = b.y
+                    let newX = b.x
+
                     if (b.y < 85) {
-                        return { ...b, y: b.y + 2 }
+                        newY += 2
                     }
-                    return b
+
+                    // Collision detection with other booms
+                    for (const other of prev) {
+                        if (other.id === b.id) continue
+
+                        const dx = b.x - other.x
+                        const dy = b.y - other.y
+                        const dist = Math.sqrt(dx * dx + dy * dy)
+
+                        // If overlapping (dist < radius * 2, roughly 8 units)
+                        if (dist < 8) {
+                            // Push away horizontally
+                            const force = (8 - dist) / 2
+                            const angle = Math.atan2(dy, dx)
+                            newX += Math.cos(angle) * force
+
+                            // If sitting on top, slow down fall
+                            if (dy < 0) {
+                                newY -= 1
+                            }
+                        }
+                    }
+
+                    // Keep in bounds
+                    newX = Math.max(5, Math.min(95, newX))
+                    newY = Math.min(85, newY)
+
+                    return { ...b, x: newX, y: newY }
                 })
 
                 const merged: MergeItem[] = []
@@ -176,7 +226,7 @@ export default function MergingGame({ grade, subject, mode, onEnd, questions, du
 
                 return [...next.filter((b) => !toRemove.has(b.id)), ...merged]
             })
-        }, 100)
+        }, 50)
 
         return () => clearInterval(simulation)
     }, [isGameOver])
@@ -270,8 +320,8 @@ export default function MergingGame({ grade, subject, mode, onEnd, questions, du
                                         onClick={() => isAnswering && handleAnswer(i)}
                                         disabled={!isAnswering}
                                         className={`h-24 rounded-2xl text-lg font-black transition-all border-b-4 active:border-b-0 active:translate-y-1 ${feedback === "correct" && i === currentQuestion.correctIndex ? "bg-green-500 border-green-700" :
-                                                feedback === "incorrect" && i !== currentQuestion.correctIndex ? "bg-red-500/20 border-red-900/40 text-white/40" :
-                                                    "bg-white/10 hover:bg-white/20 border-white/5 text-white"
+                                            feedback === "incorrect" && i !== currentQuestion.correctIndex ? "bg-red-500/20 border-red-900/40 text-white/40" :
+                                                "bg-white/10 hover:bg-white/20 border-white/5 text-white"
                                             }`}
                                     >
                                         {option}
@@ -326,6 +376,16 @@ export default function MergingGame({ grade, subject, mode, onEnd, questions, du
                         </div>
 
                         <div className="absolute bottom-0 left-0 w-full h-4 bg-white/5" />
+
+                        {/* Drop Preview */}
+                        {!isAnswering && !isGameOver && (
+                            <div
+                                className="absolute w-12 h-12 rounded-xl flex items-center justify-center text-2xl bg-white/20 border border-white/40 shadow-[0_0_15px_rgba(255,255,255,0.2)] z-30 transition-all duration-100 animate-pulse"
+                                style={{ left: `${currentBoomX}%`, top: "-4px", transform: "translateX(-50%)" }}
+                            >
+                                {RARITY_DATA[nextBooms[0] as keyof typeof RARITY_DATA].emoji}
+                            </div>
+                        )}
 
                         {mergingBooms.map((boom) => (
                             <div

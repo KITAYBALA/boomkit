@@ -1814,6 +1814,9 @@ export default function BoomkitGame() {
       const data = await response.json()
       if (data.questions) {
         setDiscoveredSets(prev => [data, ...prev])
+        // Cache this set in local storage
+        const cachedSets = JSON.parse(localStorage.getItem("boomkit_ai_sets") || "[]")
+        localStorage.setItem("boomkit_ai_sets", JSON.stringify([data, ...cachedSets]))
         setShowAiSetCreator(false)
         setAiSetPrompt("")
         alert(`Set "${data.title}" generated successfully!`)
@@ -1825,6 +1828,26 @@ export default function BoomkitGame() {
       alert("Error generating set.")
     } finally {
       setIsGeneratingSet(false)
+    }
+  }
+
+  const fetchQuestionsWithAi = async (grade: number, subject: string, count: number = 25) => {
+    try {
+      const response = await fetch("/api/generate-set", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: `Educational questions about ${subject}`,
+          grade,
+          subject,
+          count
+        })
+      })
+      const data = await response.json()
+      return data.questions || []
+    } catch (err) {
+      console.error(err)
+      return []
     }
   }
 
@@ -3565,27 +3588,28 @@ export default function BoomkitGame() {
             {currentPage === "discover" && !isMergingGameActive && !lobbyActive && (
               <DiscoverPage
                 currentUser={currentUser}
-                onStartGame={(grade, subject, mode) => {
-                  const defaultQuestions = [
-                    {
-                      id: "1",
-                      question: "What is 5 + 5?",
-                      options: ["10", "15", "20", "5"],
-                      correctIndex: 0
-                    },
-                    {
-                      id: "2",
-                      question: "Count the sides of a triangle.",
-                      options: ["2", "3", "4", "5"],
-                      correctIndex: 1
-                    },
-                    {
-                      id: "3",
-                      question: "Which color is the sky on a clear day?",
-                      options: ["Green", "Red", "Blue", "Black"],
-                      correctIndex: 2
-                    }
-                  ]
+                onStartGame={async (grade, subject, mode) => {
+                  let questionsToUse = []
+
+                  // Try to find if we have an AI set for this
+                  const cachedSets = JSON.parse(localStorage.getItem("boomkit_ai_sets") || "[]")
+                  const matchingSet = cachedSets.find((s: any) => s.grade === grade && s.subject === subject)
+
+                  if (matchingSet) {
+                    questionsToUse = matchingSet.questions
+                  } else {
+                    // Generate new ones if possible, but for first play show "Loading..."
+                    // For now, let's just fetch them if they are the default ones
+                    setIsGeneratingSet(true)
+                    questionsToUse = await fetchQuestionsWithAi(grade, subject, 25)
+                    setIsGeneratingSet(false)
+                  }
+
+                  if (!questionsToUse || questionsToUse.length === 0) {
+                    questionsToUse = [
+                      { id: "1", question: "Default: 5+5?", options: ["10", "15"], correctIndex: 0 }
+                    ]
+                  }
 
                   if (mode === "host") {
                     const pin = Math.floor(100000 + Math.random() * 900000).toString()
@@ -3593,19 +3617,22 @@ export default function BoomkitGame() {
                     sessions[pin] = {
                       grade,
                       subject,
-                      questions: defaultQuestions,
+                      questions: questionsToUse,
                       host: currentUser?.username,
                       players: [],
                       status: "waiting",
                       duration: 120
                     }
                     localStorage.setItem("boomkit_game_sessions", JSON.stringify(sessions))
+                    // Ensure the update is visible across tabs
                     window.dispatchEvent(new Event('storage'))
+                    console.log("Registered host session:", pin, sessions[pin])
+
                     setActiveGamePin(pin)
-                    setActiveDiscoverGame({ grade, subject, mode: "host", questions: defaultQuestions })
+                    setActiveDiscoverGame({ grade, subject, mode: "host", questions: questionsToUse })
                     setLobbyActive(true)
                   } else {
-                    setActiveDiscoverGame({ grade, subject, mode: "solo", questions: defaultQuestions })
+                    setActiveDiscoverGame({ grade, subject, mode: "solo", questions: questionsToUse })
                     setIsMergingGameActive(true)
                   }
                 }}
@@ -3613,11 +3640,15 @@ export default function BoomkitGame() {
                   const pinInput = prompt("Enter 6-digit Game PIN:")
                   if (!pinInput) return
 
+                  // Clean pin and try to find session
+                  const cleanPin = pinInput.trim()
                   const sessions = JSON.parse(localStorage.getItem("boomkit_game_sessions") || "{}")
-                  const session = sessions[pinInput]
+                  const session = sessions[cleanPin]
+
+                  console.log("Player attempting join. PIN:", cleanPin, "Session found:", !!session)
 
                   if (session) {
-                    setActiveGamePin(pinInput)
+                    setActiveGamePin(cleanPin)
                     setActiveDiscoverGame({
                       grade: session.grade,
                       subject: session.subject,
@@ -3626,7 +3657,7 @@ export default function BoomkitGame() {
                     })
                     setLobbyActive(true)
                   } else {
-                    alert("Invalid PIN. No active game session found.")
+                    alert("Invalid PIN. Make sure the host has already created the game lobby.")
                   }
                 }}
                 onCreateWithAI={() => setShowAiSetCreator(true)}

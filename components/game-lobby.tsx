@@ -73,7 +73,7 @@ export default function GameLobby({
 
         syncLobby()
 
-        const interval = setInterval(syncLobby, 1000)
+        const interval = setInterval(syncLobby, 500)
         window.addEventListener('storage', syncLobby)
 
         return () => {
