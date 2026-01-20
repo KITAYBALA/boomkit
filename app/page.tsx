@@ -33,6 +33,7 @@ import {
   Star,
   BanIcon,
   CheckIcon,
+  CompassIcon,
 } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 
@@ -42,6 +43,8 @@ import RealtimeLeaderboard from "@/components/realtime-leaderboard"
 import { getSupabaseBrowserClient } from "@/lib/supabase-client"
 import StripeCheckout from "@/components/stripe-checkout"
 import TradingPage from "@/components/trading-page" // Import TradingPage
+import DiscoverPage from "@/components/discover-page"
+import MergingGame from "@/components/merging-game"
 import { createBrowserClient } from "@supabase/ssr"
 
 // Advanced computer identification system
@@ -604,7 +607,19 @@ export default function BoomkitGame() {
     | "leaderboard"
     | "trading"
     | "shop"
+    | "discover"
   >("stats")
+  const [activeDiscoverGame, setActiveDiscoverGame] = useState<{
+    grade: number
+    subject: string
+    mode: "solo" | "host" | "join"
+    questions: any[]
+  } | null>(null)
+  const [isMergingGameActive, setIsMergingGameActive] = useState(false)
+  const [discoveredSets, setDiscoveredSets] = useState<any[]>([])
+  const [isGeneratingSet, setIsGeneratingSet] = useState(false)
+  const [showAiSetCreator, setShowAiSetCreator] = useState(false)
+  const [aiSetPrompt, setAiSetPrompt] = useState("")
   const [currentUser, setCurrentUser] = useState<GameUser | null>(null)
   const [users, setUsers] = useState<GameUser[]>([])
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
@@ -1772,6 +1787,36 @@ export default function BoomkitGame() {
     setUserToModerate(null)
   }
 
+  const handleGenerateAiSet = async () => {
+    if (!aiSetPrompt || isGeneratingSet) return
+    setIsGeneratingSet(true)
+    try {
+      const response = await fetch("/api/generate-set", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: aiSetPrompt,
+          grade: 1, // Default or selected
+          subject: "AI Generated"
+        })
+      })
+      const data = await response.json()
+      if (data.questions) {
+        setDiscoveredSets(prev => [data, ...prev])
+        setShowAiSetCreator(false)
+        setAiSetPrompt("")
+        alert(`Set "${data.title}" generated successfully!`)
+      } else {
+        alert("Failed to generate set. Please try a different prompt.")
+      }
+    } catch (err) {
+      console.error(err)
+      alert("Error generating set.")
+    } finally {
+      setIsGeneratingSet(false)
+    }
+  }
+
   // Confirm ban action
   const handleConfirmBan = () => {
     if (!userToModerate) return
@@ -2388,6 +2433,18 @@ export default function BoomkitGame() {
           >
             <PackageIcon className="h-5 w-5 mr-3" />
             Trading
+          </button>
+
+          <button
+            onClick={() => {
+              setCurrentPage("discover")
+              setSidebarOpen(false)
+            }}
+            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "discover" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
+              }`}
+          >
+            <CompassIcon className="h-5 w-5 mr-3" />
+            Discover
           </button>
 
           {(currentUser?.role === "moderator" ||
@@ -3463,6 +3520,92 @@ export default function BoomkitGame() {
                 </div>
               </div>
             )}
+
+            {/* Discover Page */}
+            {currentPage === "discover" && !isMergingGameActive && (
+              <DiscoverPage
+                currentUser={currentUser}
+                onStartGame={(grade, subject, mode) => {
+                  const defaultQuestions = [
+                    {
+                      id: "1",
+                      question: "What is 5 + 5?",
+                      options: ["10", "15", "20", "5"],
+                      correctIndex: 0
+                    },
+                    {
+                      id: "2",
+                      question: "Count the sides of a triangle.",
+                      options: ["2", "3", "4", "5"],
+                      correctIndex: 1
+                    },
+                    {
+                      id: "3",
+                      question: "Which color is the sky on a clear day?",
+                      options: ["Green", "Red", "Blue", "Black"],
+                      correctIndex: 2
+                    }
+                  ]
+
+                  let pin = ""
+                  if (mode === "host") {
+                    pin = Math.floor(100000 + Math.random() * 900000).toString()
+                    // Register session in local storage for demo joining
+                    const sessions = JSON.parse(localStorage.getItem("boomkit_game_sessions") || "{}")
+                    sessions[pin] = { grade, subject, questions: defaultQuestions, host: currentUser?.username }
+                    localStorage.setItem("boomkit_game_sessions", JSON.stringify(sessions))
+                    alert(`GAME HOSTED! PIN: ${pin}. Share this with players!`)
+                  }
+
+                  setActiveDiscoverGame({ grade, subject, mode, questions: defaultQuestions })
+                  setIsMergingGameActive(true)
+                }}
+                onJoinGame={() => {
+                  const pinInput = prompt("Enter 6-digit Game PIN:")
+                  if (!pinInput) return
+
+                  const sessions = JSON.parse(localStorage.getItem("boomkit_game_sessions") || "{}")
+                  const session = sessions[pinInput]
+
+                  if (session) {
+                    setActiveDiscoverGame({
+                      grade: session.grade,
+                      subject: session.subject,
+                      mode: "join",
+                      questions: session.questions
+                    })
+                    setIsMergingGameActive(true)
+                    alert(`Joined ${session.host}'s game!`)
+                  } else {
+                    alert("Invalid PIN. No active game session found.")
+                  }
+                }}
+                onCreateWithAI={() => setShowAiSetCreator(true)}
+              />
+            )}
+
+            {currentPage === "discover" && isMergingGameActive && activeDiscoverGame && (
+              <MergingGame
+                grade={activeDiscoverGame.grade}
+                subject={activeDiscoverGame.subject}
+                mode={activeDiscoverGame.mode}
+                questions={activeDiscoverGame.questions}
+                durationSeconds={120}
+                onEnd={(score) => {
+                  console.log("Game ended with score:", score)
+                  setIsMergingGameActive(false)
+                  // Reward tokens for educational play
+                  if (currentUser) {
+                    const bonus = Math.floor(score / 5)
+                    if (bonus > 0) {
+                      const updatedUser = { ...currentUser, tokens: currentUser.tokens + bonus }
+                      updateAndPersistCurrentUser(updatedUser)
+                      alert(`Game Over! You earned ${bonus} tokens for your performance.`)
+                    }
+                  }
+                }}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -4348,6 +4491,47 @@ export default function BoomkitGame() {
           </div>
         )
       }
+      {
+        showAiSetCreator && (
+          <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-4">
+            <Card className="w-full max-w-md bg-slate-900 border-purple-500/50">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-white flex items-center gap-2">
+                  <SparklesIcon className="w-6 h-6 text-purple-400" />
+                  Create Set with AI
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Tell the AI what you want to learn about, and it will create a question set for you!
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Textarea
+                  placeholder="e.g., Solar system facts for 5th grade, or basic multiplication..."
+                  value={aiSetPrompt}
+                  onChange={(e) => setAiSetPrompt(e.target.value)}
+                  className="bg-black/50 border-purple-500/30 text-white min-h-[100px]"
+                />
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => setShowAiSetCreator(false)}
+                    className="flex-1 bg-white/10 hover:bg-white/20 text-white rounded-xl"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleGenerateAiSet}
+                    disabled={!aiSetPrompt || isGeneratingSet}
+                    className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold rounded-xl"
+                  >
+                    {isGeneratingSet ? "Generating..." : "Generate Set"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )
+      }
     </div>
   )
 }
+
