@@ -3153,7 +3153,7 @@ export default function BoomkitGame() {
                       <ShieldIcon className="w-4 h-4" />
                       Active
                       <Badge className="ml-1 bg-white/10 text-white border-none px-1.5 py-0 min-w-[20px] justify-center">
-                        {users.filter(u => !u.isBanned).length}
+                        {(users || []).filter(u => u && !u.isBanned).length}
                       </Badge>
                     </button>
                     <button
@@ -3164,7 +3164,7 @@ export default function BoomkitGame() {
                       <MessageCircleIcon className="w-4 h-4" />
                       Muted
                       <Badge className="ml-1 bg-white/10 text-white border-none px-1.5 py-0 min-w-[20px] justify-center">
-                        {users.filter(u => u.isMuted).length}
+                        {(users || []).filter(u => u && u.isMuted).length}
                       </Badge>
                     </button>
                     <button
@@ -3175,7 +3175,7 @@ export default function BoomkitGame() {
                       <BanIcon className="w-4 h-4" />
                       Banned
                       <Badge className="ml-1 bg-white/10 text-white border-none px-1.5 py-0 min-w-[20px] justify-center">
-                        {users.filter(u => u.isBanned).length}
+                        {(users || []).filter(u => u && u.isBanned).length}
                       </Badge>
                     </button>
                   </div>
@@ -3193,8 +3193,9 @@ export default function BoomkitGame() {
                   </div>
 
                   <div className="space-y-3">
-                    {users
+                    {(users || [])
                       .filter((u) => {
+                        if (!u) return false
                         const matchesSearch = u.username.toLowerCase().includes(staffSearchQuery.toLowerCase())
                         const matchesTab =
                           staffTab === "all" ||
@@ -3309,7 +3310,8 @@ export default function BoomkitGame() {
                         )
                       })}
 
-                    {users.filter((u) => {
+                    {(users || []).filter((u) => {
+                      if (!u) return false
                       const matchesSearch = u.username.toLowerCase().includes(staffSearchQuery.toLowerCase())
                       const matchesTab =
                         staffTab === "all" ||
@@ -4004,7 +4006,7 @@ export default function BoomkitGame() {
           <div className="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center z-[100] p-4 transition-all duration-300">
             <Card
               className={`w-full max-w-2xl overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] relative animate-in zoom-in-95 duration-300 ${selectedUserStats.bannerColor === "rainbow"
-                ? "bg-gradient-to-br from-red-500/5 via-yellow-500/5 via-green-500/5 via-blue-500/5 to-purple-500/5"
+                ? "bg-slate-900/95"
                 : "bg-slate-900/90"
                 }`}
             >
