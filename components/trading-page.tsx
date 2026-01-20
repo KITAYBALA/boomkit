@@ -271,21 +271,23 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
         </div>
       )}
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-white/5 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shadow-2xl">
         <div>
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-            <ArrowRightLeftIcon className="h-8 w-8" />
+          <h1 className="text-4xl font-black text-white flex items-center gap-3 tracking-tight">
+            <div className="p-2 bg-purple-600 rounded-xl shadow-lg shadow-purple-500/20">
+              <ArrowRightLeftIcon className="h-8 w-8 text-white" />
+            </div>
             Trading
           </h1>
-          <p className="text-purple-200 mt-1">Trade Booms with other players</p>
+          <p className="text-purple-200/60 mt-2 font-medium">Exchange Booms and Tokens with the community</p>
         </div>
         <Button
           onClick={() => setShowNewTrade(true)}
-          className="bg-green-500 hover:bg-green-600"
+          className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold px-8 h-12 rounded-2xl shadow-xl shadow-green-500/20 transition-all hover:scale-105 active:scale-95 border-none"
           disabled={currentUser.isBanned}
           title={currentUser.isBanned ? "You are banned" : "Start a new trade"}
         >
-          <PlusIcon className="h-4 w-4 mr-2" />
+          <PlusIcon className="h-5 w-5 mr-2" />
           New Trade
         </Button>
       </div>
@@ -302,28 +304,34 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
       )}
 
       {/* Trade Tabs */}
-      <div className="flex gap-2">
-        <Button
-          variant={activeTab === "incoming" ? "default" : "outline"}
+      <div className="flex p-1 bg-white/5 backdrop-blur-md rounded-xl border border-white/10 w-fit">
+        <button
           onClick={() => setActiveTab("incoming")}
-          className={activeTab === "incoming" ? "bg-purple-600" : ""}
+          className={`px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${activeTab === "incoming"
+            ? "bg-purple-600 text-white shadow-lg shadow-purple-500/30 transform scale-105"
+            : "text-purple-200 hover:text-white hover:bg-white/5"
+            }`}
         >
           Incoming ({incomingTrades.length})
-        </Button>
-        <Button
-          variant={activeTab === "outgoing" ? "default" : "outline"}
+        </button>
+        <button
           onClick={() => setActiveTab("outgoing")}
-          className={activeTab === "outgoing" ? "bg-purple-600" : ""}
+          className={`px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${activeTab === "outgoing"
+            ? "bg-purple-600 text-white shadow-lg shadow-purple-500/30 transform scale-105"
+            : "text-purple-200 hover:text-white hover:bg-white/5"
+            }`}
         >
           Outgoing ({outgoingTrades.length})
-        </Button>
-        <Button
-          variant={activeTab === "history" ? "default" : "outline"}
+        </button>
+        <button
           onClick={() => setActiveTab("history")}
-          className={activeTab === "history" ? "bg-purple-600" : ""}
+          className={`px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${activeTab === "history"
+            ? "bg-purple-600 text-white shadow-lg shadow-purple-500/30 transform scale-105"
+            : "text-purple-200 hover:text-white hover:bg-white/5"
+            }`}
         >
           History ({historyTrades.length})
-        </Button>
+        </button>
       </div>
 
       {/* Trade Lists */}
@@ -379,211 +387,247 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
 
       {/* New Trade Modal */}
       {showNewTrade && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-gray-900 border-purple-500">
-            <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <ArrowRightLeftIcon className="h-6 w-6" />
-                Create New Trade
-              </CardTitle>
-              <CardDescription className="text-purple-200">Select a player and choose items to trade</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {/* User Selection */}
-              {!selectedUser ? (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
+          <Card className="w-full max-w-4xl max-h-[90vh] overflow-hidden bg-[#0a0a0c]/90 backdrop-blur-2xl border-purple-500/30 shadow-[0_0_50px_rgba(139,92,246,0.15)] rounded-[2rem]">
+            <CardHeader className="border-b border-white/5 pb-6">
+              <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-white font-medium mb-3">Select a player to trade with:</h3>
-                  <div className="mb-4">
-                    <Input
-                      placeholder="Search users..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="bg-white/10 border-white/20 text-white"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-48 overflow-y-auto">
-                    {otherUsers
-                      .filter((u) => u.username.toLowerCase().includes(searchQuery.toLowerCase()))
-                      .map((user) => (
-                        <Button
-                          key={user.id}
-                          variant="outline"
-                          onClick={() => setSelectedUser(user)}
-                          className="justify-start"
-                        >
-                          <UserIcon className="h-4 w-4 mr-2" />
-                          {user.username}
-                        </Button>
-                      ))}
-                  </div>
+                  <CardTitle className="text-2xl font-bold text-white flex items-center gap-3">
+                    <div className="p-2 bg-purple-500/20 rounded-lg">
+                      <PlusIcon className="h-6 w-6 text-purple-400" />
+                    </div>
+                    Create New Trade
+                  </CardTitle>
+                  <CardDescription className="text-purple-300/60 mt-1">Select a player and choose items to swap</CardDescription>
                 </div>
-              ) : (
-                <>
-                  <div className="flex items-center justify-between">
-                    <p className="text-white">
-                      Trading with: <span className="font-bold text-purple-400">{selectedUser.username}</span>
-                    </p>
-                    <Button variant="ghost" size="sm" onClick={() => setSelectedUser(null)}>
-                      Change
-                    </Button>
-                  </div>
-
-                  <div className="grid md:grid-cols-2 gap-6">
-                    {/* Your Offer */}
-                    <div className="space-y-4">
-                      <h3 className="text-white font-medium flex items-center gap-2">
-                        <PackageIcon className="h-5 w-5 text-green-400" />
-                        You Give:
-                      </h3>
-
-                      {/* Your Booms */}
-                      <div className="bg-white/5 rounded-lg p-3 max-h-40 overflow-y-auto">
-                        <p className="text-xs text-purple-300 mb-2">Your Booms (click to add):</p>
-                        <div className="flex flex-wrap gap-1">
-                          {Object.entries(currentUser.booms || {}).map(([boom, qty]) => (
-                            <Badge
-                              key={boom}
-                              variant="outline"
-                              className="cursor-pointer hover:bg-green-500/20"
-                              onClick={() => addBoomToOffer(boom)}
-                            >
-                              {boom} ({qty})
-                            </Badge>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Offered Booms */}
-                      {Object.keys(myOfferedBooms).length > 0 && (
-                        <div className="bg-green-500/20 rounded-lg p-3">
-                          <p className="text-xs text-green-300 mb-2">Offering:</p>
-                          <div className="flex flex-wrap gap-1">
-                            {Object.entries(myOfferedBooms).map(([boom, qty]) => (
-                              <Badge
-                                key={boom}
-                                className="bg-green-600 cursor-pointer"
-                                onClick={() => removeBoomFromOffer(boom)}
-                              >
-                                {boom} x{qty} <XIcon className="h-3 w-3 ml-1" />
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Token Offer */}
-                      <div className="flex items-center gap-2">
-                        <CoinsIcon className="h-5 w-5 text-yellow-400" />
-                        <Input
-                          type="number"
-                          min="0"
-                          max={currentUser.tokens}
-                          value={myOfferedTokens}
-                          onChange={(e) => setMyOfferedTokens(Math.min(Number(e.target.value), currentUser.tokens))}
-                          className="w-24 bg-white/10 border-white/20 text-white"
-                        />
-                        <span className="text-purple-300 text-sm">/ {currentUser.tokens} tokens</span>
-                      </div>
-                    </div>
-
-                    {/* You Request */}
-                    <div className="space-y-4">
-                      <h3 className="text-white font-medium flex items-center gap-2">
-                        <PackageIcon className="h-5 w-5 text-blue-400" />
-                        You Receive:
-                      </h3>
-
-                      {/* Their Booms */}
-                      <div className="bg-white/5 rounded-lg p-3 max-h-40 overflow-y-auto">
-                        <p className="text-xs text-purple-300 mb-2">
-                          {selectedUser.username}&apos;s Booms (click to request):
-                        </p>
-                        <div className="flex flex-wrap gap-1">
-                          {Object.entries(selectedUser.booms || {}).map(([boom, qty]) => (
-                            <Badge
-                              key={boom}
-                              variant="outline"
-                              className="cursor-pointer hover:bg-blue-500/20"
-                              onClick={() => addBoomToRequest(boom)}
-                            >
-                              {boom} ({qty})
-                            </Badge>
-                          ))}
-                          {Object.keys(selectedUser.booms || {}).length === 0 && (
-                            <span className="text-purple-400 text-sm">No Booms</span>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Requested Booms */}
-                      {Object.keys(theirRequestedBooms).length > 0 && (
-                        <div className="bg-blue-500/20 rounded-lg p-3">
-                          <p className="text-xs text-blue-300 mb-2">Requesting:</p>
-                          <div className="flex flex-wrap gap-1">
-                            {Object.entries(theirRequestedBooms).map(([boom, qty]) => (
-                              <Badge
-                                key={boom}
-                                className="bg-blue-600 cursor-pointer"
-                                onClick={() => removeBoomFromRequest(boom)}
-                              >
-                                {boom} x{qty} <XIcon className="h-3 w-3 ml-1" />
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Token Request */}
-                      <div className="flex items-center gap-2">
-                        <CoinsIcon className="h-5 w-5 text-yellow-400" />
-                        <Input
-                          type="number"
-                          min="0"
-                          max={selectedUser.tokens}
-                          value={theirRequestedTokens}
-                          onChange={(e) =>
-                            setTheirRequestedTokens(Math.min(Number(e.target.value), selectedUser.tokens))
-                          }
-                          className="w-24 bg-white/10 border-white/20 text-white"
-                        />
-                        <span className="text-purple-300 text-sm">/ {selectedUser.tokens} tokens</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Message */}
-                  <div>
-                    <label className="text-white text-sm mb-2 block">Message (optional):</label>
-                    <Textarea
-                      value={tradeMessage}
-                      onChange={(e) => setTradeMessage(e.target.value)}
-                      placeholder="Add a message to your trade offer..."
-                      className="bg-white/10 border-white/20 text-white"
-                      rows={2}
-                    />
-                  </div>
-                </>
-              )}
-
-              {/* Actions */}
-              <div className="flex justify-end gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    resetTradeForm()
-                    setShowNewTrade(false)
-                  }}
-                >
-                  Cancel
+                <Button variant="ghost" size="icon" onClick={() => setShowNewTrade(false)} className="rounded-full text-white/40 hover:text-white hover:bg-white/5">
+                  <XIcon className="h-6 w-6" />
                 </Button>
-                {selectedUser && (
-                  <Button onClick={sendTrade} disabled={loading} className="bg-green-500 hover:bg-green-600">
-                    <SendIcon className="h-4 w-4 mr-2" />
-                    Send Trade
-                  </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="p-0 overflow-y-auto max-h-[calc(90vh-140px)]">
+              <div className="p-8 space-y-8">
+                {/* User Selection */}
+                {!selectedUser ? (
+                  <div className="animate-in slide-in-from-bottom-4 duration-500">
+                    <h3 className="text-lg font-bold text-white mb-4">Who are you trading with?</h3>
+                    <div className="relative mb-6">
+                      <Input
+                        placeholder="Search by username..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="bg-white/5 border-white/10 text-white h-12 pl-12 rounded-xl focus:ring-purple-500/50"
+                      />
+                      <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/20" />
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {otherUsers
+                        .filter((u) => u.username.toLowerCase().includes(searchQuery.toLowerCase()))
+                        .map((user) => (
+                          <Button
+                            key={user.id}
+                            variant="outline"
+                            onClick={() => setSelectedUser(user)}
+                            className="justify-start h-14 bg-white/5 border-white/5 hover:bg-purple-500/10 hover:border-purple-500/30 rounded-xl transition-all"
+                          >
+                            <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center mr-3">
+                              <UserIcon className="h-4 w-4 text-white/60" />
+                            </div>
+                            <span className="font-medium">{user.username}</span>
+                          </Button>
+                        ))}
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex items-center justify-between bg-purple-500/10 p-4 rounded-2xl border border-purple-500/20">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-purple-500 flex items-center justify-center shadow-lg shadow-purple-500/20">
+                          <UserIcon className="h-6 w-6 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-purple-300/60 uppercase font-bold tracking-widest">Trading Session</p>
+                          <p className="text-lg font-bold text-white">{selectedUser.username}</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm" onClick={() => setSelectedUser(null)} className="rounded-xl bg-transparent border-white/10 text-white/60 hover:text-white">
+                        Change Player
+                      </Button>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-8 relative">
+                      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 hidden md:flex">
+                        <div className="w-12 h-12 rounded-full bg-[#1a1a1e] border border-white/10 flex items-center justify-center shadow-2xl">
+                          <ArrowRightLeftIcon className="h-6 w-6 text-purple-400" />
+                        </div>
+                      </div>
+
+                      {/* Your Offer */}
+                      <div className="space-y-6 bg-white/5 p-6 rounded-3xl border border-white/5">
+                        <h3 className="text-sm font-black text-white/40 uppercase tracking-[0.2em] flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-green-500" />
+                          Your Offer
+                        </h3>
+
+                        <div className="space-y-4">
+                          <div className="bg-black/20 rounded-2xl p-4 min-h-[120px]">
+                            <p className="text-xs text-white/30 mb-3 font-bold uppercase">Booms to give</p>
+                            <div className="flex flex-wrap gap-2">
+                              {Object.entries(myOfferedBooms).map(([boom, qty]) => (
+                                <Badge
+                                  key={boom}
+                                  className="bg-green-500/20 text-green-400 border border-green-500/20 hover:bg-green-500/30 cursor-pointer h-8"
+                                  onClick={() => removeBoomFromOffer(boom)}
+                                >
+                                  {boom} x{qty} <XIcon className="h-3 w-3 ml-2 opacity-50" />
+                                </Badge>
+                              ))}
+                              {Object.keys(myOfferedBooms).length === 0 && (
+                                <p className="text-sm text-white/10 italic">No Booms selected</p>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3">
+                            <div className="p-3 bg-yellow-500/10 rounded-xl border border-yellow-500/20 text-yellow-500">
+                              <CoinsIcon className="h-6 w-6" />
+                            </div>
+                            <div className="flex-1">
+                              <Input
+                                type="number"
+                                min="0"
+                                max={currentUser.tokens}
+                                value={myOfferedTokens}
+                                onChange={(e) => setMyOfferedTokens(Math.min(Number(e.target.value), currentUser.tokens))}
+                                className="bg-white/5 border-white/10 text-white h-12 rounded-xl text-lg font-bold"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="p-4 bg-white/5 rounded-2xl">
+                            <p className="text-[10px] text-white/30 mb-3 font-black uppercase tracking-widest text-center">Tap inventory to add</p>
+                            <div className="flex flex-wrap gap-1.5 justify-center max-h-32 overflow-y-auto pr-2">
+                              {Object.entries(currentUser.booms || {}).map(([boom, qty]) => (
+                                <button
+                                  key={boom}
+                                  onClick={() => addBoomToOffer(boom)}
+                                  className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 text-xs text-white/70 transition-all active:scale-90"
+                                >
+                                  {boom} ({qty})
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Their Request */}
+                      <div className="space-y-6 bg-white/5 p-6 rounded-3xl border border-white/5">
+                        <h3 className="text-sm font-black text-white/40 uppercase tracking-[0.2em] flex items-center md:flex-row-reverse gap-2">
+                          <div className="w-2 h-2 rounded-full bg-blue-500" />
+                          Their Give
+                        </h3>
+
+                        <div className="space-y-4">
+                          <div className="bg-black/20 rounded-2xl p-4 min-h-[120px]">
+                            <p className="text-xs text-white/30 mb-3 font-bold uppercase md:text-right">Booms you receive</p>
+                            <div className="flex flex-wrap md:justify-end gap-2">
+                              {Object.entries(theirRequestedBooms).map(([boom, qty]) => (
+                                <Badge
+                                  key={boom}
+                                  className="bg-blue-500/20 text-blue-400 border border-blue-500/20 hover:bg-blue-500/30 cursor-pointer h-8"
+                                  onClick={() => removeBoomFromRequest(boom)}
+                                >
+                                  {boom} x{qty} <XIcon className="h-3 w-3 ml-2 opacity-50" />
+                                </Badge>
+                              ))}
+                              {Object.keys(theirRequestedBooms).length === 0 && (
+                                <p className="text-sm text-white/10 italic">No Booms requested</p>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-3">
+                            <div className="flex-1">
+                              <Input
+                                type="number"
+                                min="0"
+                                max={selectedUser.tokens}
+                                value={theirRequestedTokens}
+                                onChange={(e) => setTheirRequestedTokens(Math.min(Number(e.target.value), selectedUser.tokens))}
+                                className="bg-white/5 border-white/10 text-white h-12 rounded-xl text-lg font-bold"
+                              />
+                            </div>
+                            <div className="p-3 bg-yellow-500/10 rounded-xl border border-yellow-500/20 text-yellow-500">
+                              <CoinsIcon className="h-6 w-6" />
+                            </div>
+                          </div>
+
+                          <div className="p-4 bg-white/5 rounded-2xl">
+                            <p className="text-[10px] text-white/30 mb-3 font-black uppercase tracking-widest text-center">{selectedUser.username}&apos;s Inventory</p>
+                            <div className="flex flex-wrap gap-1.5 justify-center max-h-32 overflow-y-auto pr-2">
+                              {Object.entries(selectedUser.booms || {}).map(([boom, qty]) => (
+                                <button
+                                  key={boom}
+                                  onClick={() => addBoomToRequest(boom)}
+                                  className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 text-xs text-white/70 transition-all active:scale-90"
+                                >
+                                  {boom} ({qty})
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Message Area */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 text-white/30 text-[10px] font-black uppercase tracking-widest ml-1">
+                        <BellIcon className="h-3 w-3" />
+                        Attach a Proposal Message
+                      </div>
+                      <Textarea
+                        value={tradeMessage}
+                        onChange={(e) => setTradeMessage(e.target.value)}
+                        placeholder="Why should they accept this trade? Be persuasive..."
+                        className="bg-white/5 border-white/10 text-white rounded-[1.5rem] p-5 focus:ring-purple-500/50 resize-none min-h-[100px]"
+                      />
+                    </div>
+                  </>
                 )}
               </div>
             </CardContent>
+            {selectedUser && (
+              <div className="p-8 border-t border-white/5 bg-black/20 flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div className="flex items-center gap-6 text-white/40">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
+                    <span className="text-xs font-bold uppercase tracking-wider">Trading Securely</span>
+                  </div>
+                </div>
+                <div className="flex w-full md:w-auto gap-3">
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      resetTradeForm()
+                      setShowNewTrade(false)
+                    }}
+                    className="flex-1 md:flex-none text-white/60 hover:text-white hover:bg-white/5 rounded-2xl h-14 px-8"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={sendTrade}
+                    disabled={loading}
+                    className="flex-1 md:flex-none bg-purple-600 hover:bg-purple-500 text-white font-black h-14 px-12 rounded-2xl shadow-xl shadow-purple-500/20 transition-all hover:scale-[1.02] active:scale-95 border-none"
+                  >
+                    {loading ? "Sending..." : "Send Trade Offer"}
+                    <SendIcon className="h-5 w-5 ml-3" />
+                  </Button>
+                </div>
+              </div>
+            )}
           </Card>
         </div>
       )}
@@ -617,101 +661,139 @@ function TradeCard({
   }
 
   return (
-    <Card className="bg-white/10 border-white/20">
-      <CardContent className="py-4">
+    <Card className="group bg-white/5 backdrop-blur-md border-white/10 hover:border-purple-500/50 transition-all duration-300 hover:scale-[1.01] hover:shadow-2xl hover:shadow-purple-500/10 overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+      <CardContent className="py-5 relative">
         <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <Badge className={statusColors[trade.status]}>
-                {trade.status.charAt(0).toUpperCase() + trade.status.slice(1)}
-              </Badge>
-              <span className="text-purple-200 text-sm flex items-center gap-1">
-                <ClockIcon className="h-3 w-3" />
-                {new Date(trade.created_at).toLocaleDateString()}
-              </span>
+          <div className="flex-1 w-full">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <Badge className={`${statusColors[trade.status]} shadow-lg shadow-current/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider`}>
+                  {trade.status}
+                </Badge>
+                <div className="flex items-center text-purple-300/60 text-xs font-medium">
+                  <ClockIcon className="h-3.5 w-3.5 mr-1" />
+                  {new Date(trade.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                </div>
+              </div>
+
+              {isPending && (
+                <div className="flex gap-2">
+                  {isIncoming && onAccept && onDecline && (
+                    <>
+                      <Button
+                        size="sm"
+                        onClick={onAccept}
+                        disabled={loading}
+                        className="bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/30 px-4 h-9 rounded-full transition-all active:scale-95"
+                      >
+                        <CheckIcon className="h-4 w-4 mr-1.5" />
+                        Accept
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={onDecline}
+                        disabled={loading}
+                        className="shadow-lg shadow-red-500/30 px-4 h-9 rounded-full transition-all active:scale-95"
+                      >
+                        <XIcon className="h-4 w-4 mr-1.5" />
+                        Decline
+                      </Button>
+                    </>
+                  )}
+                  {!isIncoming && onCancel && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={onCancel}
+                      disabled={loading}
+                      className="border-white/10 text-white hover:bg-white/5 rounded-full px-4"
+                    >
+                      Cancel Trade
+                    </Button>
+                  )}
+                </div>
+              )}
             </div>
 
-            <p className="text-white mb-2">
-              {isIncoming ? (
-                <>
-                  <span className="text-purple-400 font-medium">{trade.sender_username}</span>
-                  {" wants to trade with you"}
-                </>
-              ) : (
-                <>
-                  {"Trade offer to "}
-                  <span className="text-purple-400 font-medium">{trade.receiver_username}</span>
-                </>
-              )}
-            </p>
+            <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 bg-white/5 p-4 rounded-2xl border border-white/5">
+              {/* Party A */}
+              <div className="flex-1 space-y-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center border border-purple-500/30">
+                    <UserIcon className="h-4 w-4 text-purple-400" />
+                  </div>
+                  <span className={`font-bold ${isIncoming ? "text-purple-400" : "text-white"}`}>
+                    {trade.sender_username}
+                  </span>
+                  <span className="text-xs text-purple-300/50 ml-auto">GIVES</span>
+                </div>
 
-            {trade.message && <p className="text-purple-300 text-sm italic mb-2">&quot;{trade.message}&quot;</p>}
-
-            <div className="grid md:grid-cols-2 gap-4 mt-3">
-              {/* Sender gives */}
-              <div className="bg-green-500/10 rounded p-2">
-                <p className="text-green-400 text-xs mb-1">{trade.sender_username} gives:</p>
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-1.5 min-h-[2rem]">
                   {Object.entries(trade.sender_booms).map(([boom, qty]) => (
-                    <Badge key={boom} variant="outline" className="text-xs">
-                      {boom} x{qty}
+                    <Badge key={boom} variant="secondary" className="bg-white/10 hover:bg-white/20 text-purple-100 border-none px-2.5 py-1 text-xs transition-colors">
+                      {boom} <span className="ml-1 opacity-60 text-[10px]">x{qty}</span>
                     </Badge>
                   ))}
                   {trade.sender_tokens > 0 && (
-                    <Badge className="bg-yellow-600 text-xs">
-                      <CoinsIcon className="h-3 w-3 mr-1" />
-                      {trade.sender_tokens}
+                    <Badge className="bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 border border-yellow-500/30 px-2.5 py-1 text-xs transition-colors">
+                      <CoinsIcon className="h-3 w-3 mr-1.5" />
+                      {trade.sender_tokens.toLocaleString()}
                     </Badge>
                   )}
                   {Object.keys(trade.sender_booms).length === 0 && trade.sender_tokens === 0 && (
-                    <span className="text-gray-400 text-xs">Nothing</span>
+                    <span className="text-gray-500 text-xs italic py-1 px-2">Nothing offered</span>
                   )}
                 </div>
               </div>
 
-              {/* Receiver gives */}
-              <div className="bg-blue-500/10 rounded p-2">
-                <p className="text-blue-400 text-xs mb-1">{trade.receiver_username} gives:</p>
-                <div className="flex flex-wrap gap-1">
+              {/* Separator / Direction */}
+              <div className="flex items-center justify-center p-2">
+                <div className="w-10 h-10 rounded-full bg-purple-600/20 flex items-center justify-center border border-purple-600/30 group-hover:bg-purple-600/30 transition-colors">
+                  <ArrowRightLeftIcon className="h-5 w-5 text-purple-400 group-hover:rotate-180 transition-transform duration-500" />
+                </div>
+              </div>
+
+              {/* Party B */}
+              <div className="flex-1 space-y-3 md:text-right">
+                <div className="flex items-center md:flex-row-reverse gap-2">
+                  <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
+                    <UserIcon className="h-4 w-4 text-blue-400" />
+                  </div>
+                  <span className={`font-bold ${!isIncoming ? "text-purple-400" : "text-white"}`}>
+                    {trade.receiver_username}
+                  </span>
+                  <span className="text-xs text-blue-300/50 mr-auto md:ml-auto md:mr-0">RECEIVES</span>
+                </div>
+
+                <div className="flex flex-wrap md:justify-end gap-1.5 min-h-[2rem]">
                   {Object.entries(trade.receiver_booms).map(([boom, qty]) => (
-                    <Badge key={boom} variant="outline" className="text-xs">
-                      {boom} x{qty}
+                    <Badge key={boom} variant="secondary" className="bg-white/10 hover:bg-white/20 text-purple-100 border-none px-2.5 py-1 text-xs transition-colors">
+                      {boom} <span className="ml-1 opacity-60 text-[10px]">x{qty}</span>
                     </Badge>
                   ))}
                   {trade.receiver_tokens > 0 && (
-                    <Badge className="bg-yellow-600 text-xs">
-                      <CoinsIcon className="h-3 w-3 mr-1" />
-                      {trade.receiver_tokens}
+                    <Badge className="bg-yellow-500/20 hover:bg-yellow-500/30 text-yellow-400 border border-yellow-500/30 px-2.5 py-1 text-xs transition-colors">
+                      <CoinsIcon className="h-3 w-3 mr-1.5" />
+                      {trade.receiver_tokens.toLocaleString()}
                     </Badge>
                   )}
                   {Object.keys(trade.receiver_booms).length === 0 && trade.receiver_tokens === 0 && (
-                    <span className="text-gray-400 text-xs">Nothing</span>
+                    <span className="text-gray-500 text-xs italic py-1 px-2">Nothing requested</span>
                   )}
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Actions */}
-          {isPending && (
-            <div className="flex gap-2 ml-4">
-              {isIncoming && onAccept && onDecline && (
-                <>
-                  <Button size="sm" onClick={onAccept} disabled={loading} className="bg-green-500 hover:bg-green-600">
-                    <CheckIcon className="h-4 w-4" />
-                  </Button>
-                  <Button size="sm" variant="destructive" onClick={onDecline} disabled={loading}>
-                    <XIcon className="h-4 w-4" />
-                  </Button>
-                </>
-              )}
-              {!isIncoming && onCancel && (
-                <Button size="sm" variant="outline" onClick={onCancel} disabled={loading}>
-                  Cancel
-                </Button>
-              )}
-            </div>
-          )}
+            {trade.message && (
+              <div className="mt-4 flex items-start gap-2 text-purple-200/80 bg-purple-500/5 p-3 rounded-xl border border-purple-500/10">
+                <span className="text-purple-400 mt-0.5">“</span>
+                <p className="text-sm italic flex-1 leading-relaxed">{trade.message}</p>
+                <span className="text-purple-400 self-end">”</span>
+              </div>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>
