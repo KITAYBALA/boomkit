@@ -6,14 +6,14 @@ SECURITY DEFINER
 AS $$
 DECLARE
   v_trade RECORD;
-  v_sender RECORD;
-  v_receiver RECORD;
-  v_sender_booms jsonb;
-  v_receiver_booms jsonb;
-  v_boom_key text;
-  v_boom_qty int;
+  v_sender_id TEXT;
+  v_receiver_id TEXT;
+  v_sender_booms JSONB;
+  v_receiver_booms JSONB;
+  v_boom_key TEXT;
+  v_boom_qty INT;
 BEGIN
-  -- 1. Get Trade
+  -- 1. Get and Lock Trade
   SELECT * INTO v_trade FROM trades WHERE id = trade_uuid FOR UPDATE;
   
   IF v_trade IS NULL THEN
@@ -21,110 +21,76 @@ BEGIN
   END IF;
 
   IF v_trade.status <> 'pending' THEN
-    RAISE EXCEPTION 'Trade is not pending';
+    RAISE EXCEPTION 'Trade is no longer pending';
   END IF;
 
-  -- 2. Get Users (Lock rows)
-  SELECT * INTO v_sender FROM users WHERE id = v_trade.sender_id FOR UPDATE;
-  SELECT * INTO v_receiver FROM users WHERE id = v_trade.receiver_id FOR UPDATE;
+  v_sender_id := v_trade.sender_id;
+  v_receiver_id := v_trade.receiver_id;
 
-  IF v_sender IS NULL OR v_receiver IS NULL THEN
-    RAISE EXCEPTION 'User not found';
-  END IF;
+  -- 2. Fetch and Lock Users
+  -- Initializing from DB to ensure we have the latest state
+  SELECT booms INTO v_sender_booms FROM users WHERE id = v_sender_id FOR UPDATE;
+  SELECT booms INTO v_receiver_booms FROM users WHERE id = v_receiver_id FOR UPDATE;
 
-  -- 2b. Verify Not Banned
-  IF v_sender.is_banned OR v_receiver.is_banned THEN
-    RAISE EXCEPTION 'Trading is restricted for banned users';
-  END IF;
+  IF v_sender_booms IS NULL THEN v_sender_booms := '{}'::jsonb; END IF;
+  IF v_receiver_booms IS NULL THEN v_receiver_booms := '{}'::jsonb; END IF;
 
-  v_sender_booms := v_sender.booms;
-  v_receiver_booms := v_receiver.booms;
-
-  -- 3. Verify Sender Assets
-  -- Tokens
-  IF v_sender.tokens < v_trade.sender_tokens THEN
-     RAISE EXCEPTION 'Sender insufficient tokens';
-  END IF;
-  
-  -- Booms
-  FOR v_boom_key, v_boom_qty IN SELECT * FROM jsonb_each_text(v_trade.sender_booms)
-  LOOP
-    IF (v_sender_booms->>v_boom_key)::int < v_boom_qty THEN
-        RAISE EXCEPTION 'Sender insufficient boom: %', v_boom_key;
+  -- 3. Verify Sender has everything they offered
+  FOR v_boom_key, v_boom_qty IN SELECT * FROM jsonb_each_text(v_trade.sender_booms) LOOP
+    IF COALESCE((v_sender_booms->>v_boom_key)::int, 0) < v_boom_qty THEN
+      RAISE EXCEPTION 'Sender does not have enough %', v_boom_key;
     END IF;
   END LOOP;
 
-  -- 4. Verify Receiver Assets
-  -- Tokens
-  IF v_receiver.tokens < v_trade.receiver_tokens THEN
-     RAISE EXCEPTION 'Receiver insufficient tokens';
-  END IF;
-
-  -- Booms
-  FOR v_boom_key, v_boom_qty IN SELECT * FROM jsonb_each_text(v_trade.receiver_booms)
-  LOOP
-    IF (v_receiver_booms->>v_boom_key)::int < v_boom_qty THEN
-        RAISE EXCEPTION 'Receiver insufficient boom: %', v_boom_key;
+  -- 4. Verify Receiver has everything they offered
+  FOR v_boom_key, v_boom_qty IN SELECT * FROM jsonb_each_text(v_trade.receiver_booms) LOOP
+    IF COALESCE((v_receiver_booms->>v_boom_key)::int, 0) < v_boom_qty THEN
+      RAISE EXCEPTION 'Receiver does not have enough %', v_boom_key;
     END IF;
   END LOOP;
 
-  -- 5. Execute Transfer
+  -- 5. Calculate New Inventories
   
-  -- SENDER: -Tokens, -Own Booms, +New Tokens, +New Booms
-  -- RECEIVER: -Tokens, -Own Booms, +New Tokens, +New Booms
-  
-  -- Update Booms Logic (Tricky with JSONB, simplify by manipulating in memory logic equiv)
-  -- Since we can't easily mutate JSONB in place with complex logic in pure SQL without verbosity, 
-  -- we perform the semantic updates.
-  
-  -- Remove Sender Offered Booms from Sender
-  FOR v_boom_key, v_boom_qty IN SELECT * FROM jsonb_each_text(v_trade.sender_booms)
-  LOOP
-     v_sender_booms := jsonb_set(v_sender_booms, ARRAY[v_boom_key], to_jsonb((v_sender_booms->>v_boom_key)::int - v_boom_qty));
-     -- Clean up if 0? Optional, but cleaner. PostgreSQL jsonb doesn't auto-delete keys with 0 values usually
-     IF (v_sender_booms->>v_boom_key)::int <= 0 THEN
-        v_sender_booms := v_sender_booms - v_boom_key;
-     END IF;
+  -- SENDER loses their offered booms, gains receiver's offered booms
+  FOR v_boom_key, v_boom_qty IN SELECT * FROM jsonb_each_text(v_trade.sender_booms) LOOP
+    v_sender_booms := jsonb_set(v_sender_booms, ARRAY[v_boom_key], to_jsonb((v_sender_booms->>v_boom_key)::int - v_boom_qty));
+    IF (v_sender_booms->>v_boom_key)::int <= 0 THEN
+      v_sender_booms := v_sender_booms - v_boom_key;
+    END IF;
+  END LOOP;
+  FOR v_boom_key, v_boom_qty IN SELECT * FROM jsonb_each_text(v_trade.receiver_booms) LOOP
+    v_sender_booms := jsonb_set(v_sender_booms, ARRAY[v_boom_key], to_jsonb(COALESCE((v_sender_booms->>v_boom_key)::int, 0) + v_boom_qty));
   END LOOP;
 
-  -- Add Sender Offered Booms to Receiver
-  FOR v_boom_key, v_boom_qty IN SELECT * FROM jsonb_each_text(v_trade.sender_booms)
-  LOOP
-     v_receiver_booms := jsonb_set(v_receiver_booms, ARRAY[v_boom_key], to_jsonb(COALESCE((v_receiver_booms->>v_boom_key)::int, 0) + v_boom_qty));
+  -- RECEIVER loses their offered booms, gains sender's offered booms
+  FOR v_boom_key, v_boom_qty IN SELECT * FROM jsonb_each_text(v_trade.receiver_booms) LOOP
+    v_receiver_booms := jsonb_set(v_receiver_booms, ARRAY[v_boom_key], to_jsonb((v_receiver_booms->>v_boom_key)::int - v_boom_qty));
+    IF (v_receiver_booms->>v_boom_key)::int <= 0 THEN
+      v_receiver_booms := v_receiver_booms - v_boom_key;
+    END IF;
+  END LOOP;
+  FOR v_boom_key, v_boom_qty IN SELECT * FROM jsonb_each_text(v_trade.sender_booms) LOOP
+    v_receiver_booms := jsonb_set(v_receiver_booms, ARRAY[v_boom_key], to_jsonb(COALESCE((v_receiver_booms->>v_boom_key)::int, 0) + v_boom_qty));
   END LOOP;
 
-  -- Remove Receiver Offered Booms from Receiver
-  FOR v_boom_key, v_boom_qty IN SELECT * FROM jsonb_each_text(v_trade.receiver_booms)
-  LOOP
-     v_receiver_booms := jsonb_set(v_receiver_booms, ARRAY[v_boom_key], to_jsonb((v_receiver_booms->>v_boom_key)::int - v_boom_qty));
-     IF (v_receiver_booms->>v_boom_key)::int <= 0 THEN
-        v_receiver_booms := v_receiver_booms - v_boom_key;
-     END IF;
-  END LOOP;
-
-  -- Add Receiver Offered Booms to Sender
-  FOR v_boom_key, v_boom_qty IN SELECT * FROM jsonb_each_text(v_trade.receiver_booms)
-  LOOP
-     v_sender_booms := jsonb_set(v_sender_booms, ARRAY[v_boom_key], to_jsonb(COALESCE((v_sender_booms->>v_boom_key)::int, 0) + v_boom_qty));
-  END LOOP;
-
-
-  -- Commit Updates
+  -- 6. Execute Final Updates
+  -- Update Sender
   UPDATE users 
   SET 
     tokens = tokens - v_trade.sender_tokens + v_trade.receiver_tokens,
-    booms = COALESCE(v_sender_booms, '{}'::jsonb)
-  WHERE id = v_trade.sender_id;
+    booms = v_sender_booms
+  WHERE id = v_sender_id;
 
+  -- Update Receiver
   UPDATE users 
   SET 
     tokens = tokens - v_trade.receiver_tokens + v_trade.sender_tokens,
-    booms = COALESCE(v_receiver_booms, '{}'::jsonb)
-  WHERE id = v_trade.receiver_id;
+    booms = v_receiver_booms
+  WHERE id = v_receiver_id;
 
-  -- Update Trade Status
-  UPDATE trades
-  SET status = 'accepted', updated_at = NOW()
+  -- Mark Trade as Accepted
+  UPDATE trades 
+  SET status = 'accepted', updated_at = NOW() 
   WHERE id = trade_uuid;
 
 END;
