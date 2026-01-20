@@ -129,7 +129,8 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
 
   const addBoomToOffer = (boomName: string) => {
     const currentAmount = myOfferedBooms[boomName] || 0
-    const maxAmount = currentUser.booms[boomName] || 0
+    const maxAmount = (currentUser.booms || {})[boomName] || 0
+    console.log(`[v0] Adding ${boomName} to offer. Owned: ${maxAmount}, Offered: ${currentAmount}`)
     if (currentAmount < maxAmount) {
       setMyOfferedBooms({ ...myOfferedBooms, [boomName]: currentAmount + 1 })
     }
@@ -151,7 +152,8 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
   const addBoomToRequest = (boomName: string) => {
     if (!selectedUser) return
     const currentAmount = theirRequestedBooms[boomName] || 0
-    const maxAmount = selectedUser.booms[boomName] || 0
+    const maxAmount = (selectedUser.booms || {})[boomName] || 0
+    console.log(`[v0] Requesting ${boomName} from ${selectedUser.username}. Owned: ${maxAmount}, Requested: ${currentAmount}`)
     if (currentAmount < maxAmount) {
       setTheirRequestedBooms({ ...theirRequestedBooms, [boomName]: currentAmount + 1 })
     }
@@ -222,10 +224,10 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
       console.error("Trade submission error:", error)
       alert("Error sending trade: " + error.message)
     } else {
-      alert("Trade sent successfully!")
-      resetTradeForm()
       setShowNewTrade(false)
-      fetchTrades() // Refresh the list
+      resetTradeForm()
+      alert("Trade sent successfully!")
+      fetchTrades() // Refresh the list in background
     }
   }
 
@@ -536,7 +538,11 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
                               {Object.entries(currentUser.booms || {}).map(([boom, qty]) => (
                                 <button
                                   key={boom}
-                                  onClick={() => addBoomToOffer(boom)}
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault()
+                                    addBoomToOffer(boom)
+                                  }}
                                   className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 text-xs text-white/70 transition-all active:scale-90"
                                 >
                                   {boom} ({qty})
@@ -595,7 +601,11 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
                               {Object.entries(selectedUser.booms || {}).map(([boom, qty]) => (
                                 <button
                                   key={boom}
-                                  onClick={() => addBoomToRequest(boom)}
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.preventDefault()
+                                    addBoomToRequest(boom)
+                                  }}
                                   className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 text-xs text-white/70 transition-all active:scale-90"
                                 >
                                   {boom} ({qty})
