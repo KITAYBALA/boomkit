@@ -17,6 +17,7 @@ import {
 } from "lucide-react"
 
 interface GameLobbyProps {
+    supabase: any
     pin: string
     mode: "host" | "join"
     subject: string
@@ -27,6 +28,7 @@ interface GameLobbyProps {
 }
 
 export default function GameLobby({
+    supabase,
     pin,
     mode,
     subject,
@@ -39,11 +41,22 @@ export default function GameLobby({
     const [players, setPlayers] = useState<any[]>([])
     const [isGameStarted, setIsGameStarted] = useState(false)
 
-    // Sync players and game state via localStorage for local multi-tab demo
+    // Sync players and game state via Supabase
     useEffect(() => {
-        const syncLobby = () => {
-            const sessions = JSON.parse(localStorage.getItem("boomkit_game_sessions") || "{}")
-            const session = sessions[pin]
+        if (!supabase) return
+
+        const syncLobby = async () => {
+            const { data: session, error } = await supabase
+                .from("game_sessions")
+                .select("*")
+                .eq("pin", pin)
+                .single()
+
+            if (error) {
+                console.error("Lobby sync error:", error)
+                return
+            }
+
             if (session) {
                 setPlayers(session.players || [])
                 if (session.status === "started") {
@@ -53,42 +66,77 @@ export default function GameLobby({
             }
         }
 
-        // Register self if joining
-        if (mode === "join") {
-            const sessions = JSON.parse(localStorage.getItem("boomkit_game_sessions") || "{}")
-            if (sessions[pin]) {
-                const currentPlayers = sessions[pin].players || []
-                if (!currentPlayers.find((p: any) => p.username === currentUser.username)) {
-                    sessions[pin].players = [...currentPlayers, {
-                        username: currentUser.username,
-                        profilePicture: currentUser.profilePicture,
-                        id: currentUser.id
-                    }]
-                    localStorage.setItem("boomkit_game_sessions", JSON.stringify(sessions))
-                    // Trigger storage event for other tabs
-                    window.dispatchEvent(new Event('storage'))
+        const registerSelf = async () => {
+            if (mode === "join") {
+                // Fetch current session
+                const { data: session } = await supabase
+                    .from("game_sessions")
+                    .select("players")
+                    .eq("pin", pin)
+                    .single()
+
+                if (session) {
+                    const currentPlayers = session.players || []
+                    if (!currentPlayers.find((p: any) => p.id === currentUser.id)) {
+                        const updatedPlayers = [...currentPlayers, {
+                            username: currentUser.username,
+                            profilePicture: currentUser.profilePicture,
+                            id: currentUser.id
+                        }]
+
+                        await supabase
+                            .from("game_sessions")
+                            .update({ players: updatedPlayers })
+                            .eq("pin", pin)
+
+                        console.log("Registered self to Supabase lobby")
+                    }
                 }
             }
         }
 
+        registerSelf()
         syncLobby()
 
-        const interval = setInterval(syncLobby, 500)
-        window.addEventListener('storage', syncLobby)
+        const interval = setInterval(syncLobby, 2000)
+
+        // Setup realtime subscription
+        const channel = supabase.channel(`lobby-${pin}`)
+            .on('postgres_changes', {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'game_sessions',
+                filter: `pin=eq.${pin}`
+            }, (payload: any) => {
+                setPlayers(payload.new.players || [])
+                if (payload.new.status === "started") {
+                    setIsGameStarted(true)
+                    onStart(payload.new.duration || duration)
+                }
+            })
+            .subscribe()
 
         return () => {
             clearInterval(interval)
-            window.removeEventListener('storage', syncLobby)
+            supabase.removeChannel(channel)
         }
-    }, [pin, mode, currentUser])
+    }, [pin, mode, currentUser, supabase])
 
-    const handleStartGame = () => {
-        const sessions = JSON.parse(localStorage.getItem("boomkit_game_sessions") || "{}")
-        if (sessions[pin]) {
-            sessions[pin].status = "started"
-            sessions[pin].duration = duration
-            localStorage.setItem("boomkit_game_sessions", JSON.stringify(sessions))
-            window.dispatchEvent(new Event('storage'))
+    const handleStartGame = async () => {
+        if (!supabase) return
+
+        const { error } = await supabase
+            .from("game_sessions")
+            .update({
+                status: "started",
+                duration: duration
+            })
+            .eq("pin", pin)
+
+        if (error) {
+            console.error("Failed to start game:", error)
+            alert("Error starting game. Please try again.")
+        } else {
             onStart(duration)
         }
     }

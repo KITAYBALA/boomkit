@@ -3613,41 +3613,58 @@ export default function BoomkitGame() {
 
                   if (mode === "host") {
                     const pin = Math.floor(100000 + Math.random() * 900000).toString()
-                    const sessions = JSON.parse(localStorage.getItem("boomkit_game_sessions") || "{}")
-                    sessions[pin] = {
-                      grade,
-                      subject,
-                      questions: questionsToUse,
-                      host: currentUser?.username,
-                      players: [],
-                      status: "waiting",
-                      duration: 120
-                    }
-                    localStorage.setItem("boomkit_game_sessions", JSON.stringify(sessions))
-                    // Ensure the update is visible across tabs
-                    window.dispatchEvent(new Event('storage'))
-                    console.log("Registered host session:", pin, sessions[pin])
 
-                    setActiveGamePin(pin)
-                    setActiveDiscoverGame({ grade, subject, mode: "host", questions: questionsToUse })
-                    setLobbyActive(true)
+                    if (supabase) {
+                      const { error } = await supabase.from("game_sessions").insert({
+                        pin,
+                        host_id: currentUser?.id,
+                        host_username: currentUser?.username,
+                        grade,
+                        subject,
+                        questions: questionsToUse,
+                        status: "waiting",
+                        duration: 120,
+                        players: []
+                      })
+
+                      if (error) {
+                        console.error("Failed to create session in Supabase:", error)
+                        alert("Error starting game lobby. Please try again.")
+                        return
+                      }
+
+                      console.log("Registered host session in Supabase:", pin)
+                      setActiveGamePin(pin)
+                      setActiveDiscoverGame({ grade, subject, mode: "host", questions: questionsToUse })
+                      setLobbyActive(true)
+                    } else {
+                      alert("Connecting to server...")
+                    }
                   } else {
                     setActiveDiscoverGame({ grade, subject, mode: "solo", questions: questionsToUse })
                     setIsMergingGameActive(true)
                   }
                 }}
-                onJoinGame={() => {
+                onJoinGame={async () => {
                   const pinInput = prompt("Enter 6-digit Game PIN:")
                   if (!pinInput) return
 
-                  // Clean pin and try to find session
                   const cleanPin = pinInput.trim()
-                  const sessions = JSON.parse(localStorage.getItem("boomkit_game_sessions") || "{}")
-                  const session = sessions[cleanPin]
 
-                  console.log("Player attempting join. PIN:", cleanPin, "Session found:", !!session)
+                  if (supabase) {
+                    const { data: session, error } = await supabase
+                      .from("game_sessions")
+                      .select("*")
+                      .eq("pin", cleanPin)
+                      .single()
 
-                  if (session) {
+                    if (error || !session) {
+                      console.error("Join error:", error)
+                      alert("Invalid PIN or session not found. Make sure the host has created the game.")
+                      return
+                    }
+
+                    console.log("Joined session from Supabase:", cleanPin)
                     setActiveGamePin(cleanPin)
                     setActiveDiscoverGame({
                       grade: session.grade,
@@ -3657,7 +3674,7 @@ export default function BoomkitGame() {
                     })
                     setLobbyActive(true)
                   } else {
-                    alert("Invalid PIN. Make sure the host has already created the game lobby.")
+                    alert("Connecting to server...")
                   }
                 }}
                 onCreateWithAI={() => setShowAiSetCreator(true)}
@@ -3666,6 +3683,7 @@ export default function BoomkitGame() {
 
             {currentPage === "discover" && lobbyActive && activeDiscoverGame && (
               <GameLobby
+                supabase={supabase}
                 pin={activeGamePin}
                 mode={activeDiscoverGame.mode as "host" | "join"}
                 subject={activeDiscoverGame.subject}
