@@ -709,8 +709,8 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
           <Card className="w-full max-w-sm bg-[#0a0a0c]/95 backdrop-blur-2xl border-white/10 shadow-[0_0_80px_rgba(0,0,0,0.5)] rounded-[2.5rem] overflow-hidden text-center">
             <CardContent className="p-10 space-y-6">
               <div className={`mx-auto w-20 h-20 rounded-full flex items-center justify-center ring-4 ring-offset-4 ring-offset-[#0a0a0c] ${statusModal.type === 'success' ? 'bg-green-500/20 ring-green-500/50 text-green-400' :
-                  statusModal.type === 'error' ? 'bg-red-500/20 ring-red-500/50 text-red-400' :
-                    'bg-blue-500/20 ring-blue-500/50 text-blue-400'
+                statusModal.type === 'error' ? 'bg-red-500/20 ring-red-500/50 text-red-400' :
+                  'bg-blue-500/20 ring-blue-500/50 text-blue-400'
                 }`}>
                 {statusModal.type === 'success' ? <CheckIcon className="h-10 w-10" /> :
                   statusModal.type === 'error' ? <XIcon className="h-10 w-10" /> :
@@ -725,8 +725,8 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
               <Button
                 onClick={() => setStatusModal({ ...statusModal, show: false })}
                 className={`w-full h-12 rounded-2xl font-black transition-all active:scale-95 ${statusModal.type === 'success' ? 'bg-green-600 hover:bg-green-500 text-white' :
-                    statusModal.type === 'error' ? 'bg-red-600 hover:bg-red-500 text-white' :
-                      'bg-blue-600 hover:bg-blue-500 text-white'
+                  statusModal.type === 'error' ? 'bg-red-600 hover:bg-red-500 text-white' :
+                    'bg-blue-600 hover:bg-blue-500 text-white'
                   }`}
               >
                 Dismiss
@@ -809,10 +809,9 @@ function TradeCard({
                   {!isIncoming && onCancel && (
                     <Button
                       size="sm"
-                      variant="outline"
                       onClick={onCancel}
                       disabled={loading}
-                      className="border-white/10 text-white hover:bg-white/5 rounded-full px-4"
+                      className="bg-red-500/20 hover:bg-red-500/30 text-red-400 border border-red-500/30 shadow-lg shadow-red-500/10 rounded-full px-4 h-9 transition-all active:scale-95"
                     >
                       Cancel Trade
                     </Button>
