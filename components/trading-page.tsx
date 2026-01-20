@@ -65,6 +65,12 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
   const [activeTab, setActiveTab] = useState<"incoming" | "outgoing" | "history">("incoming")
   const [newTradeAlert, setNewTradeAlert] = useState(false)
   const [searchQuery, setSearchQuery] = useState("") // Added for user search
+  const [statusModal, setStatusModal] = useState<{
+    show: boolean;
+    title: string;
+    message: string;
+    type: 'success' | 'error' | 'info';
+  }>({ show: false, title: "", message: "", type: "info" })
 
   const fetchTrades = useCallback(async () => {
     const { data, error } = await supabase
@@ -191,7 +197,12 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
   const sendTrade = async () => {
     if (!selectedUser) return
     if (currentUser.isBanned) {
-      alert("You are banned and cannot trade.")
+      setStatusModal({
+        show: true,
+        title: "Trade Blocked",
+        message: "You are banned and cannot participate in trading.",
+        type: "error"
+      })
       return
     }
 
@@ -201,7 +212,12 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
       Object.keys(theirRequestedBooms).length === 0 &&
       theirRequestedTokens === 0
     ) {
-      alert("Please add something to the trade!")
+      setStatusModal({
+        show: true,
+        title: "Empty Offer",
+        message: "You must add tokens or Booms to the trade before sending.",
+        type: "info"
+      })
       return
     }
 
@@ -222,11 +238,21 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
     setLoading(false)
     if (error) {
       console.error("Trade submission error:", error)
-      alert("Error sending trade: " + error.message)
+      setStatusModal({
+        show: true,
+        title: "Submission Error",
+        message: "Something went wrong while sending your trade: " + error.message,
+        type: "error"
+      })
     } else {
       setShowNewTrade(false)
       resetTradeForm()
-      alert("Trade sent successfully!")
+      setStatusModal({
+        show: true,
+        title: "Trade Dispatched",
+        message: "Your trade offer has been successfully sent to " + selectedUser.username + "!",
+        type: "success"
+      })
       fetchTrades() // Refresh the list in background
     }
   }
@@ -236,20 +262,30 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
 
     try {
       if (currentUser.isBanned) {
-        throw new Error("You are banned and cannot trade.")
+        throw new Error("You are banned and cannot participate in trading.")
       }
 
       const { error } = await supabase.rpc('accept_trade', { trade_uuid: trade.id })
       if (error) throw error
 
       setLoading(false)
-      alert("Trade accepted!")
+      setStatusModal({
+        show: true,
+        title: "Trade Finalized",
+        message: "The trade has been accepted. Your items have been exchanged!",
+        type: "success"
+      })
       fetchTrades() // Refresh local trades list
       onTradeComplete()
     } catch (e: any) {
       console.error("Trade failed:", e)
       setLoading(false)
-      alert("Trade failed: " + (e.message || "Unknown error"))
+      setStatusModal({
+        show: true,
+        title: "Trade Failed",
+        message: e.message || "An unexpected error occurred while accepting the trade.",
+        type: "error"
+      })
     }
   }
 
@@ -664,6 +700,38 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
                 </div>
               </div>
             )}
+          </Card>
+        </div>
+      )}
+      {/* Status Modal */}
+      {statusModal.show && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-in fade-in zoom-in-95 duration-300">
+          <Card className="w-full max-w-sm bg-[#0a0a0c]/95 backdrop-blur-2xl border-white/10 shadow-[0_0_80px_rgba(0,0,0,0.5)] rounded-[2.5rem] overflow-hidden text-center">
+            <CardContent className="p-10 space-y-6">
+              <div className={`mx-auto w-20 h-20 rounded-full flex items-center justify-center ring-4 ring-offset-4 ring-offset-[#0a0a0c] ${statusModal.type === 'success' ? 'bg-green-500/20 ring-green-500/50 text-green-400' :
+                  statusModal.type === 'error' ? 'bg-red-500/20 ring-red-500/50 text-red-400' :
+                    'bg-blue-500/20 ring-blue-500/50 text-blue-400'
+                }`}>
+                {statusModal.type === 'success' ? <CheckIcon className="h-10 w-10" /> :
+                  statusModal.type === 'error' ? <XIcon className="h-10 w-10" /> :
+                    <BellIcon className="h-10 w-10" />}
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="text-2xl font-black text-white tracking-tight">{statusModal.title}</h3>
+                <p className="text-white/40 text-sm font-medium leading-relaxed">{statusModal.message}</p>
+              </div>
+
+              <Button
+                onClick={() => setStatusModal({ ...statusModal, show: false })}
+                className={`w-full h-12 rounded-2xl font-black transition-all active:scale-95 ${statusModal.type === 'success' ? 'bg-green-600 hover:bg-green-500 text-white' :
+                    statusModal.type === 'error' ? 'bg-red-600 hover:bg-red-500 text-white' :
+                      'bg-blue-600 hover:bg-blue-500 text-white'
+                  }`}
+              >
+                Dismiss
+              </Button>
+            </CardContent>
           </Card>
         </div>
       )}

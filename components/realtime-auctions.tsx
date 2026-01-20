@@ -17,7 +17,9 @@ import {
   XIcon,
   TimerIcon,
   ArrowRightIcon,
-  SparklesIcon
+  SparklesIcon,
+  CheckIcon,
+  BellIcon
 } from 'lucide-react'
 
 // Define GameUser interface locally or import if available
@@ -76,6 +78,13 @@ export default function RealtimeAuctions({
   // Bidding State
   const [biddingItem, setBiddingItem] = useState<DbAuction | null>(null)
   const [bidAmount, setBidAmount] = useState<number>(0)
+  // Status Modal State
+  const [statusModal, setStatusModal] = useState<{
+    show: boolean;
+    title: string;
+    message: string;
+    type: 'success' | 'error' | 'info';
+  }>({ show: false, title: "", message: "", type: "info" })
 
   // Convert local auctions to Db-like shape
   const convertLocal = (rows: LocalAuction[]): DbAuction[] => {
@@ -142,7 +151,12 @@ export default function RealtimeAuctions({
 
   const handlePlaceBid = async () => {
     if (!biddingItem || bidAmount <= biddingItem.current_bid) {
-      alert('Bid must be greater than current bid.')
+      setStatusModal({
+        show: true,
+        title: "Invalid Bid",
+        message: "Your bid must be higher than the current top bid.",
+        type: "info"
+      })
       return
     }
 
@@ -153,9 +167,20 @@ export default function RealtimeAuctions({
         .update({ current_bid: bidAmount, top_bidder: currentUser?.username ?? null })
         .eq('id', biddingItem.id)
       if (error) {
-        alert('Failed to place bid: ' + error.message)
+        setStatusModal({
+          show: true,
+          title: "Bidding Error",
+          message: "We couldn't process your bid: " + error.message,
+          type: "error"
+        })
       } else {
         setBiddingItem(null)
+        setStatusModal({
+          show: true,
+          title: "Bid Confirmed",
+          message: "You are now the highest bidder for " + biddingItem.boom_name + "!",
+          type: "success"
+        })
       }
     } else {
       // Local fallback
@@ -187,7 +212,12 @@ export default function RealtimeAuctions({
   const createAuction = async () => {
     if (!currentUser || !selectedBoom) return
     if ((currentUser.booms[selectedBoom] || 0) < 1) {
-      alert("You don't have this Boom!")
+      setStatusModal({
+        show: true,
+        title: "Missing Item",
+        message: "You don't have enough " + selectedBoom + " to auction.",
+        type: "error"
+      })
       return
     }
 
@@ -210,7 +240,12 @@ export default function RealtimeAuctions({
         .eq('id', currentUser.id)
 
       if (userError) {
-        alert('Failed to update inventory: ' + userError.message)
+        setStatusModal({
+          show: true,
+          title: "Vault Error",
+          message: "Couldn't update your inventory: " + userError.message,
+          type: "error"
+        })
         setLoading(false)
         return
       }
@@ -227,12 +262,22 @@ export default function RealtimeAuctions({
         })
 
       if (auctionError) {
-        alert('Failed to create auction: ' + auctionError.message)
+        setStatusModal({
+          show: true,
+          title: "Auction Failed",
+          message: "System error while creating auction: " + auctionError.message,
+          type: "error"
+        })
         // Ideally revert boom deduction here, keeping it simple for now
       } else {
-        alert('Auction created!')
         setShowCreateModal(false)
         setSelectedBoom("")
+        setStatusModal({
+          show: true,
+          title: "Market Listing Live",
+          message: "Your " + selectedBoom + " is now up for auction!",
+          type: "success"
+        })
         if (onAuctionCreated) onAuctionCreated()
       }
     } else {
@@ -267,7 +312,12 @@ export default function RealtimeAuctions({
       // Double check auction status
       const { data: auctionData } = await supabase.from('auction_items').select('*').eq('id', item.id).single()
       if (!auctionData || auctionData.status === 'processed') {
-        alert("Auction already processed.")
+        setStatusModal({
+          show: true,
+          title: "Item Unavailable",
+          message: "This auction has already been processed or closed.",
+          type: "info"
+        })
         setLoading(false)
         return
       }
@@ -278,7 +328,12 @@ export default function RealtimeAuctions({
       if (isWinner) {
         // Winner pays tokens, gets boom
         if (currentUser.tokens < item.current_bid) {
-          alert("You don't have enough tokens to claim this prize!")
+          setStatusModal({
+            show: true,
+            title: "Insufficient Funds",
+            message: "You need more tokens to claim this " + item.boom_name + ".",
+            type: "error"
+          })
           setLoading(false)
           return
         }
@@ -305,7 +360,12 @@ export default function RealtimeAuctions({
 
         // 3. Mark processed
         await supabase.from('auction_items').update({ status: 'processed' }).eq('id', item.id)
-        alert("Claimed successfully! You received " + item.boom_name)
+        setStatusModal({
+          show: true,
+          title: "Prize Claimed",
+          message: "You received your " + item.boom_name + ". Check your vault!",
+          type: "success"
+        })
 
       } else if (isSeller) {
         if (!item.top_bidder) {
@@ -319,16 +379,31 @@ export default function RealtimeAuctions({
             throw rpcError
           }
 
-          alert("Item reclaimed successfully!")
+          setStatusModal({
+            show: true,
+            title: "Item Returned",
+            message: "Your " + item.boom_name + " has been returned to your inventory.",
+            type: "success"
+          })
           // Subscription will auto-refresh
         } else {
           // Winner exists but hasn't claimed? Logic gap. 
           // For now, let's assume Winner must claim. Seller just waits.
-          alert("Winner must claim the item to finalize the transaction.")
+          setStatusModal({
+            show: true,
+            title: "Waiting for Winner",
+            message: "The winner must claim the item to finalize the sale.",
+            type: "info"
+          })
         }
       }
     } catch (e: any) {
-      alert('Error claiming: ' + e.message)
+      setStatusModal({
+        show: true,
+        title: "Transaction Failed",
+        message: e.message || "An unexpected error occurred while claiming.",
+        type: "error"
+      })
     }
     setLoading(false)
   }
@@ -696,6 +771,38 @@ export default function RealtimeAuctions({
                   Maybe later
                 </Button>
               </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+      {/* Status Modal */}
+      {statusModal.show && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-in fade-in zoom-in-95 duration-300">
+          <Card className="w-full max-w-sm bg-[#0a0a0c]/95 backdrop-blur-2xl border-white/10 shadow-[0_0_80px_rgba(0,0,0,0.5)] rounded-[2.5rem] overflow-hidden text-center">
+            <CardContent className="p-10 space-y-6">
+              <div className={`mx-auto w-20 h-20 rounded-full flex items-center justify-center ring-4 ring-offset-4 ring-offset-[#0a0a0c] ${statusModal.type === 'success' ? 'bg-green-500/20 ring-green-500/50 text-green-400' :
+                statusModal.type === 'error' ? 'bg-red-500/20 ring-red-500/50 text-red-400' :
+                  'bg-blue-500/20 ring-blue-500/50 text-blue-400'
+                }`}>
+                {statusModal.type === 'success' ? <CheckIcon className="h-10 w-10" /> :
+                  statusModal.type === 'error' ? <XIcon className="h-10 w-10" /> :
+                    <BellIcon className="h-10 w-10" />}
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="text-2xl font-black text-white tracking-tight">{statusModal.title}</h3>
+                <p className="text-white/40 text-sm font-medium leading-relaxed">{statusModal.message}</p>
+              </div>
+
+              <Button
+                onClick={() => setStatusModal({ ...statusModal, show: false })}
+                className={`w-full h-12 rounded-2xl font-black transition-all active:scale-95 ${statusModal.type === 'success' ? 'bg-green-600 hover:bg-green-500 text-white' :
+                  statusModal.type === 'error' ? 'bg-red-600 hover:bg-red-500 text-white' :
+                    'bg-blue-600 hover:bg-blue-500 text-white'
+                  }`}
+              >
+                Dismiss
+              </Button>
             </CardContent>
           </Card>
         </div>
