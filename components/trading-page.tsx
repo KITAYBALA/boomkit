@@ -170,6 +170,22 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
     }
   }
 
+  const swapTrade = () => {
+    if (!selectedUser) return
+
+    // Store current state
+    const oldMyBooms = { ...myOfferedBooms }
+    const oldMyTokens = myOfferedTokens
+    const oldTheirBooms = { ...theirRequestedBooms }
+    const oldTheirTokens = theirRequestedTokens
+
+    // Simple swap with validation for tokens
+    setMyOfferedBooms(oldTheirBooms)
+    setTheirRequestedBooms(oldMyBooms)
+    setMyOfferedTokens(Math.min(oldTheirTokens, currentUser.tokens))
+    setTheirRequestedTokens(Math.min(oldMyTokens, selectedUser.tokens))
+  }
+
   const sendTrade = async () => {
     if (!selectedUser) return
     if (currentUser.isBanned) {
@@ -459,9 +475,17 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
 
                     <div className="grid md:grid-cols-2 gap-8 relative">
                       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 hidden md:flex">
-                        <div className="w-12 h-12 rounded-full bg-[#1a1a1e] border border-white/10 flex items-center justify-center shadow-2xl">
-                          <ArrowRightLeftIcon className="h-6 w-6 text-purple-400" />
-                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            console.log("[v0] Swap triggered")
+                            swapTrade()
+                          }}
+                          className="w-12 h-12 rounded-full bg-[#1a1a1e] border border-white/10 flex items-center justify-center shadow-2xl hover:bg-white/10 hover:border-purple-500/50 active:scale-90 transition-all group/swap"
+                          title="Swap Offer and Request"
+                        >
+                          <ArrowRightLeftIcon className="h-6 w-6 text-purple-400 group-hover/swap:rotate-180 transition-transform duration-500" />
+                        </button>
                       </div>
 
                       {/* Your Offer */}
