@@ -3056,48 +3056,61 @@ export default function BoomkitGame() {
                 getBoomRarity={getBoomRarity}
                 getRarityColor={getRarityColor}
                 onAuctionCreated={() => {
-                  // Re-fetch user to update inventory
-                  const fetchUser = async () => {
-                    if (!supabase || !currentUser) return
-                    const { data } = await supabase.from("users").select("*").eq("id", currentUser.id).single()
-                    if (data) {
-                      // Correctly map snake_case DB fields to camelCase GameUser fields
-                      const mappedUser: GameUser = {
-                        id: data.id,
-                        username: data.username,
-                        email: data.email,
-                        password: "",
-                        age: data.age || 0,
-                        tokens: data.tokens || 0,
-                        dailyTokens: data.daily_tokens || 0,
-                        packs: data.packs || [],
-                        booms: data.booms || {},
-                        isOwner: data.is_owner || false,
-                        isBanned: data.is_banned || false,
-                        isMuted: data.is_muted || false,
-                        status: data.status || "approved",
-                        reason: data.reason || "",
-                        role: data.role || "player",
-                        joinDate: data.join_date || new Date().toISOString(),
-                        boomScore: data.boom_score || 0,
-                        totalValue: data.total_value || 0,
-                        profilePicture: data.profile_picture || "",
-                        isPlusUser: data.is_plus_user || false,
-                        nameColor: data.name_color || "",
-                        bannerColor: data.banner_color || "from-purple-600 to-pink-600",
-                        lastDailySpin: data.last_daily_spin || null,
-                        badges: data.badges || [],
-                        muteExpiry: data.mute_expiry || null,
-                        banExpiry: data.ban_expiry || null,
-                        banReason: data.ban_reason || "",
-                        lastSeen: data.last_seen || Date.now(),
-                        packsOpened: data.packs_opened || 0,
+                  // Refresh all users data after auction creation to ensure everyone's inventory is in sync
+                  const fetchAllUsers = async () => {
+                    if (!supabase) return
+                    try {
+                      const { data, error } = await supabase.from("users").select("*")
+                      if (error) throw error
+
+                      if (data) {
+                        const mappedUsers: GameUser[] = data.map((u: any) => ({
+                          id: u.id,
+                          username: u.username,
+                          email: u.email,
+                          password: "",
+                          age: u.age || 0,
+                          tokens: u.tokens || 0,
+                          dailyTokens: u.daily_tokens || 0,
+                          packs: u.packs || [],
+                          booms: u.booms || {},
+                          isOwner: u.is_owner || false,
+                          isBanned: u.is_banned || false,
+                          isMuted: u.is_muted || false,
+                          status: u.status || "approved",
+                          reason: u.reason || "",
+                          role: u.role || "player",
+                          joinDate: u.join_date || new Date().toISOString(),
+                          boomScore: u.boom_score || 0,
+                          totalValue: u.total_value || 0,
+                          profilePicture: u.profile_picture || "",
+                          isPlusUser: u.is_plus_user || false,
+                          nameColor: u.name_color || "",
+                          bannerColor: u.banner_color || "from-purple-600 to-pink-600",
+                          lastDailySpin: u.last_daily_spin || null,
+                          badges: u.badges || [],
+                          muteExpiry: u.mute_expiry || null,
+                          banExpiry: u.ban_expiry || null,
+                          banReason: u.ban_reason || "",
+                          lastSeen: u.last_seen || Date.now(),
+                          packsOpened: u.packs_opened || 0,
+                        }))
+
+                        setUsers(mappedUsers)
+                        localStorage.setItem("boomkit_approved_users", JSON.stringify(mappedUsers))
+
+                        // Also update current user if their data changed
+                        const self = mappedUsers.find(u => u.id === currentUser?.id)
+                        if (self) {
+                          setCurrentUser(self)
+                          localStorage.setItem("boomkit_current_user", JSON.stringify(self))
+                        }
                       }
-                      setCurrentUser(mappedUser)
-                      localStorage.setItem("boomkit_current_user", JSON.stringify(mappedUser))
+                    } catch (err) {
+                      console.error("Error refreshing users after auction:", err)
                     }
                   }
-                  fetchUser()
+                  fetchAllUsers()
                 }}
               />
             )}

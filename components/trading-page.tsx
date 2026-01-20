@@ -480,13 +480,13 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
                         <button
                           type="button"
                           onClick={() => {
-                            console.log("[v0] Swap triggered")
-                            swapTrade()
+                            console.log("[v0] Send triggered from central button")
+                            sendTrade()
                           }}
-                          className="w-12 h-12 rounded-full bg-[#1a1a1e] border border-white/10 flex items-center justify-center shadow-2xl hover:bg-white/10 hover:border-purple-500/50 active:scale-90 transition-all group/swap"
-                          title="Swap Offer and Request"
+                          className="w-14 h-14 rounded-full bg-purple-600 border border-purple-400 flex items-center justify-center shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:bg-purple-500 active:scale-90 transition-all group/send"
+                          title="Send Trade Offer"
                         >
-                          <ArrowRightLeftIcon className="h-6 w-6 text-purple-400 group-hover/swap:rotate-180 transition-transform duration-500" />
+                          <SendIcon className="h-6 w-6 text-white group-hover/send:translate-x-1 group-hover/send:-translate-y-1 transition-transform" />
                         </button>
                       </div>
 
