@@ -717,8 +717,6 @@ export default function BoomkitGame() {
   const [registerForm, setRegisterForm] = useState({
     username: "",
     email: "",
-    username: "",
-    email: "",
     password: "",
     age: "",
     reason: "",
@@ -1227,7 +1225,6 @@ export default function BoomkitGame() {
         id: user.id,
         username: user.username,
         email: user.email,
-        password: "", // Never store password in client state
         age: user.age || 0,
         tokens: user.tokens || 0,
         dailyTokens: user.daily_tokens || 0,
@@ -1305,7 +1302,6 @@ export default function BoomkitGame() {
         id: user.id,
         username: user.username,
         email: user.email,
-        password: "", // Never store password in client state
         age: user.age || 0,
         tokens: user.tokens || 0,
         dailyTokens: user.daily_tokens || 0,
@@ -2463,41 +2459,55 @@ export default function BoomkitGame() {
   if (currentView === "login") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <CardTitle className="text-3xl font-bold text-blue-600">Login to Boomkit</CardTitle>
-            <CardDescription>Continue your quiz journey</CardDescription>
+        <Card className="w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl overflow-hidden">
+          <CardHeader className="text-center relative overflow-hidden pb-8">
+            <div className="absolute inset-0 bg-gradient-to-b from-blue-600/30 to-transparent" />
+            <CardTitle className="text-4xl font-black text-white relative z-10 drop-shadow-md">
+              Welcome Back!
+            </CardTitle>
+            <CardDescription className="text-white/80 font-medium relative z-10">Continue your quiz journey</CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <Label htmlFor="loginUsername">Username</Label>
-                <Input
-                  id="loginUsername"
-                  value={loginForm.username}
-                  onChange={(e) => setLoginForm((prev) => ({ ...prev, username: e.target.value }))}
-                  required
-                />
+          <CardContent className="space-y-6 pt-0 relative z-10">
+            <form onSubmit={handleLogin} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="loginUsername" className="text-white font-bold tracking-wide ml-1">Username</Label>
+                <div className="relative group">
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl blur opacity-30 group-focus-within:opacity-100 transition duration-500" />
+                  <Input
+                    id="loginUsername"
+                    value={loginForm.username}
+                    onChange={(e) => setLoginForm((prev) => ({ ...prev, username: e.target.value }))}
+                    required
+                    className="bg-black/40 border-white/10 text-white placeholder:text-white/30 rounded-xl relative h-12"
+                    placeholder="Your username..."
+                  />
+                </div>
               </div>
-              <div>
-                <Label htmlFor="loginPassword">Password</Label>
-                <Input
-                  id="loginPassword"
-                  type="password"
-                  value={loginForm.password}
-                  onChange={(e) => setLoginForm((prev) => ({ ...prev, password: e.target.value }))}
-                  required
-                />
+              <div className="space-y-2">
+                <Label htmlFor="loginPassword" className="text-white font-bold tracking-wide ml-1">Password</Label>
+                <div className="relative group">
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl blur opacity-30 group-focus-within:opacity-100 transition duration-500" />
+                  <Input
+                    id="loginPassword"
+                    type="password"
+                    value={loginForm.password}
+                    onChange={(e) => setLoginForm((prev) => ({ ...prev, password: e.target.value }))}
+                    required
+                    className="bg-black/40 border-white/10 text-white placeholder:text-white/30 rounded-xl relative h-12"
+                    placeholder="Your password..."
+                  />
+                </div>
               </div>
-              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700">
+              <Button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white h-12 rounded-xl text-lg font-bold shadow-lg shadow-blue-900/40 transition-all transform active:scale-95">
                 Login
               </Button>
             </form>
-            <div className="mt-4 text-center space-y-2">
-              <Button variant="link" onClick={() => setCurrentView("register")}>
+            <div className="mt-6 text-center space-y-3">
+              <Button variant="link" className="text-white/60 hover:text-white" onClick={() => setCurrentView("register")}>
                 Need an account? Register
               </Button>
-              <Button variant="link" onClick={() => setCurrentView("owner-access")}>
+              <div className="w-full h-px bg-white/10" />
+              <Button variant="link" className="text-white/40 hover:text-white/80 text-xs" onClick={() => setCurrentView("owner-access")}>
                 Owner Access
               </Button>
             </div>
