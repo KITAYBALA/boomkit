@@ -726,12 +726,18 @@ export default function BoomkitGame() {
   // --- DATA PERSISTENCE AND SYNC HOOKS ---
 
   const updateAndPersistUsers = useCallback(
-    async (newUsers: GameUser[]) => {
+    async (newUsers: GameUser[], targetUserId?: string) => {
       setUsers(newUsers)
       localStorage.setItem("boomkit_approved_users", JSON.stringify(newUsers))
 
-      for (const user of newUsers) {
-        if (!supabase) continue
+      if (!supabase) return
+
+      // If a specific ID is provided, only sync that user. Otherwise sync all (original behavior).
+      const usersToSync = targetUserId ? newUsers.filter((u) => u.id === targetUserId) : newUsers
+
+      // For single user updates, this is much faster. 
+      // For multiple users, we still loop but only over the subset.
+      for (const user of usersToSync) {
         try {
           console.log("[v0] Syncing user to Supabase:", user.username, "role:", user.role)
           const { error } = await supabase.from("users").upsert(
@@ -1796,7 +1802,7 @@ export default function BoomkitGame() {
     const updatedUsers = users.map((u) =>
       u.id === userToModerate.id ? { ...u, isMuted: true, muteExpiry: expiry } : u,
     )
-    updateAndPersistUsers(updatedUsers)
+    updateAndPersistUsers(updatedUsers, userToModerate.id)
     setShowMuteDialog(false)
     setUserToModerate(null)
   }
@@ -1879,7 +1885,7 @@ export default function BoomkitGame() {
     const updatedUsers = users.map((u) =>
       u.id === userToModerate.id ? { ...u, isBanned: true, banReason: banReason, banExpiry: null } : u,
     )
-    updateAndPersistUsers(updatedUsers)
+    updateAndPersistUsers(updatedUsers, userToModerate.id)
     setShowBanDialog(false)
     setUserToModerate(null)
   }
@@ -1897,7 +1903,7 @@ export default function BoomkitGame() {
       }
       return u
     })
-    updateAndPersistUsers(updatedUsers)
+    updateAndPersistUsers(updatedUsers, userId)
   }
 
   // Edit User Functions
@@ -1917,7 +1923,7 @@ export default function BoomkitGame() {
     }
 
     const updatedUsers = users.map((u) => (u.id === userToEdit.id ? { ...u, tokens: newTokens } : u))
-    updateAndPersistUsers(updatedUsers)
+    updateAndPersistUsers(updatedUsers, userToEdit.id)
 
     // Update Supabase
     if (supabase) {
@@ -2002,7 +2008,7 @@ export default function BoomkitGame() {
     }
 
     const updatedUsers = users.map((u) => (u.id === targetUser.id ? { ...u, badges: [...u.badges, selectedBadge] } : u))
-    updateAndPersistUsers(updatedUsers)
+    updateAndPersistUsers(updatedUsers, targetUser.id)
 
     if (currentUser?.id === targetUser.id) {
       updateAndPersistCurrentUser({ ...currentUser, badges: [...currentUser.badges, selectedBadge] })
@@ -2018,7 +2024,7 @@ export default function BoomkitGame() {
     const updatedUsers = users.map((u) =>
       u.id === userId ? { ...u, badges: (u.badges ?? []).filter((b) => b !== badgeId) } : u,
     )
-    updateAndPersistUsers(updatedUsers)
+    updateAndPersistUsers(updatedUsers, userId)
 
     if (currentUser?.id === userId) {
       updateAndPersistCurrentUser({ ...currentUser, badges: (currentUser.badges ?? []).filter((b) => b !== badgeId) })

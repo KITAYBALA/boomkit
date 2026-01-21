@@ -8,8 +8,8 @@ export async function POST(request: NextRequest) {
     try {
         const session = await verifySession()
 
-        if (!session || !['owner', 'admin', 'senior_moderator'].includes(session.role)) {
-            return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
+        if (!session || !['owner', 'admin', 'senior_moderator', 'moderator'].includes(session.role)) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
         }
 
         const { ip, reason, banned_by } = await request.json()
