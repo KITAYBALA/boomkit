@@ -1140,6 +1140,30 @@ export default function BoomkitGame() {
       return
     }
 
+    // Check if this system is banned
+    if (supabase) {
+      try {
+        const currentSystemSignature = generateSystemSignature()
+        const { data: bannedSystem, error } = await supabase
+          .from("banned_systems")
+          .select("*")
+          .eq("system_signature", currentSystemSignature)
+          .single()
+
+        if (bannedSystem && !error) {
+          alert(
+            "This system has been banned from Boomkit. You cannot create a new account.\n\n" +
+            `Reason: ${bannedSystem.reason || "Violation of terms"}\n` +
+            `Banned on: ${new Date(bannedSystem.banned_at).toLocaleDateString()}`
+          )
+          return
+        }
+      } catch (err) {
+        // If error is "no rows", it means not banned - continue with registration
+        console.log("System not banned, allowing registration")
+      }
+    }
+
     try {
       const response = await fetch("/api/auth/register", {
         method: "POST",
@@ -1829,14 +1853,56 @@ export default function BoomkitGame() {
   }
 
   // Confirm ban action
-  const handleConfirmBan = () => {
-    if (!userToModerate) return
-    const updatedUsers = users.map((u) =>
-      u.id === userToModerate.id ? { ...u, isBanned: true, banReason: banReason, banExpiry: null } : u,
-    )
-    updateAndPersistUsers(updatedUsers)
-    setShowBanDialog(false)
-    setUserToModerate(null)
+  const handleConfirmBan = async () => {
+    if (!userToModerate || !supabase) return
+
+    try {
+      // Get the current system signature (will be used if banning current user from different device)
+      const currentSystemSignature = generateSystemSignature()
+
+      // 1. Add system signature to banned_systems table
+      const { error: banSystemError } = await supabase.from("banned_systems").insert({
+        system_signature: currentSystemSignature,
+        banned_by: currentUser?.username || "System",
+        reason: banReason || "Banned by staff",
+        user_id: userToModerate.id,
+        username: userToModerate.username,
+      })
+
+      if (banSystemError) {
+        console.error("Error adding to banned_systems:", banSystemError)
+        // Continue with ban even if system signature tracking fails
+      }
+
+      // 2. Delete the user from Supabase
+      const { error: deleteError } = await supabase.from("users").delete().eq("id", userToModerate.id)
+
+      if (deleteError) {
+        console.error("Error deleting user:", deleteError)
+        alert(`Failed to delete user account: ${deleteError.message}`)
+        return
+      }
+
+      // 3. Remove user from local state
+      const updatedUsers = users.filter((u) => u.id !== userToModerate.id)
+      setUsers(updatedUsers)
+      localStorage.setItem("boomkit_approved_users", JSON.stringify(updatedUsers))
+
+      // 4. If the banned user is the current user, log them out
+      if (currentUser?.id === userToModerate.id) {
+        handleLogout()
+        return
+      }
+
+      // 5. Close dialog and show success
+      setShowBanDialog(false)
+      setUserToModerate(null)
+      setBanReason("")
+      alert(`User ${userToModerate.username} has been banned and their account deleted.`)
+    } catch (err) {
+      console.error("Error banning user:", err)
+      alert("An error occurred while banning the user. Please try again.")
+    }
   }
 
   // Unban/unmute user

@@ -9,6 +9,36 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
+      banned_systems: {
+        Row: {
+          id: string
+          system_signature: string
+          banned_at: string
+          banned_by: string
+          reason: string | null
+          user_id: string | null
+          username: string | null
+        }
+        Insert: {
+          id?: string
+          system_signature: string
+          banned_at?: string
+          banned_by: string
+          reason?: string | null
+          user_id?: string | null
+          username?: string | null
+        }
+        Update: {
+          id?: string
+          system_signature?: string
+          banned_at?: string
+          banned_by?: string
+          reason?: string | null
+          user_id?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
       auction_items: {
         Row: {
           boom_name: string
