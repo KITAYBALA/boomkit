@@ -18,8 +18,6 @@ import {
     CheckIcon,
     MoreVerticalIcon,
     Trash2Icon,
-    MoreVerticalIcon,
-    Trash2Icon,
     ShieldCheckIcon,
     BanIcon
 } from "lucide-react"
@@ -68,8 +66,6 @@ export default function PrivateChat({ currentUser }: Props) {
     const [groupName, setGroupName] = useState("")
     const [searchQuery, setSearchQuery] = useState("")
 
-    const [groupName, setGroupName] = useState("")
-    const [searchQuery, setSearchQuery] = useState("")
 
     // Block System
     const [blockedUsers, setBlockedUsers] = useState<string[]>([])
