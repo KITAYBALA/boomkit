@@ -717,10 +717,16 @@ export default function BoomkitGame() {
   const [registerForm, setRegisterForm] = useState({
     username: "",
     email: "",
+    username: "",
+    email: "",
     password: "",
     age: "",
     reason: "",
   })
+
+  // ToS State
+  const [tosAccepted, setTosAccepted] = useState(false)
+  const [showTosModal, setShowTosModal] = useState(false)
 
   // Login form state
   const [loginForm, setLoginForm] = useState({
@@ -2317,58 +2323,139 @@ export default function BoomkitGame() {
   if (currentView === "register") {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <CardTitle className="text-3xl font-bold text-purple-600">Welcome to Boomkit!</CardTitle>
-            <CardDescription>Join the ultimate quiz adventure</CardDescription>
+        <Card className="w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl overflow-hidden">
+          <CardHeader className="text-center relative overflow-hidden pb-8">
+            <div className="absolute inset-0 bg-gradient-to-b from-purple-600/30 to-transparent" />
+            <CardTitle className="text-4xl font-black text-white relative z-10 drop-shadow-md">
+              Join Boomkit!
+            </CardTitle>
+            <CardDescription className="text-white/80 font-medium relative z-10">Start your adventure today</CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleRegister} className="space-y-4">
-              <div>
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  value={registerForm.username}
-                  onChange={(e) => setRegisterForm((prev) => ({ ...prev, username: e.target.value }))}
-                  required
-                />
+          <CardContent className="space-y-6 pt-0 relative z-10">
+            <form onSubmit={handleRegister} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="username" className="text-white font-bold tracking-wide ml-1">Username</Label>
+                <div className="relative group">
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl blur opacity-30 group-focus-within:opacity-100 transition duration-500" />
+                  <Input
+                    id="username"
+                    value={registerForm.username}
+                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, username: e.target.value }))}
+                    required
+                    className="bg-black/40 border-white/10 text-white placeholder:text-white/30 rounded-xl relative h-12"
+                    placeholder="Choose a cool name..."
+                  />
+                </div>
               </div>
-              <div>
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={registerForm.password}
-                  onChange={(e) => setRegisterForm((prev) => ({ ...prev, password: e.target.value }))}
-                  required
-                />
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-white font-bold tracking-wide ml-1">Password</Label>
+                <div className="relative group">
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl blur opacity-30 group-focus-within:opacity-100 transition duration-500" />
+                  <Input
+                    id="password"
+                    type="password"
+                    value={registerForm.password}
+                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, password: e.target.value }))}
+                    required
+                    className="bg-black/40 border-white/10 text-white placeholder:text-white/30 rounded-xl relative h-12"
+                    placeholder="Keep it secret..."
+                  />
+                </div>
               </div>
-              <div>
-                <Label htmlFor="age">Age (minimum 10)</Label>
-                <Input
-                  id="age"
-                  type="number"
-                  min="10"
-                  value={registerForm.age}
-                  onChange={(e) => setRegisterForm((prev) => ({ ...prev, age: e.target.value }))}
-                  required
-                />
+              <div className="space-y-2">
+                <Label htmlFor="age" className="text-white font-bold tracking-wide ml-1">Age (Minimum 6)</Label>
+                <div className="relative group">
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl blur opacity-30 group-focus-within:opacity-100 transition duration-500" />
+                  <Input
+                    id="age"
+                    type="number"
+                    min="6"
+                    value={registerForm.age}
+                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, age: e.target.value }))}
+                    required
+                    className="bg-black/40 border-white/10 text-white placeholder:text-white/30 rounded-xl relative h-12"
+                    placeholder="Enter your age"
+                  />
+                </div>
               </div>
-              <Button type="submit" className="w-full bg-purple-600 hover:bg-purple-700">
-                Register & Play
+
+              {/* ToS Checkbox */}
+              <div className="flex items-center space-x-3 pt-2">
+                <div className="relative flex items-center">
+                  <input
+                    type="checkbox"
+                    id="tos"
+                    checked={tosAccepted}
+                    onChange={(e) => setTosAccepted(e.target.checked)}
+                    className="peer h-5 w-5 cursor-pointer appearance-none rounded-md border border-white/20 bg-black/40 checked:bg-green-500 checked:border-green-500 transition-all"
+                  />
+                  <CheckIcon className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
+                </div>
+                <label htmlFor="tos" className="text-sm font-medium text-white/90 cursor-pointer select-none">
+                  I accept the{' '}
+                  <button
+                    type="button"
+                    onClick={() => setShowTosModal(true)}
+                    className="text-cyan-300 hover:text-cyan-200 underline underline-offset-2 font-bold transition-colors"
+                  >
+                    Terms of Service
+                  </button>
+                </label>
+              </div>
+
+              <Button
+                type="submit"
+                disabled={!tosAccepted}
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white h-12 rounded-xl text-lg font-bold shadow-lg shadow-purple-900/40 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform active:scale-95"
+              >
+                Let's Go! 🚀
               </Button>
             </form>
 
-            <div className="mt-4 text-center space-y-2">
-              <Button variant="link" onClick={() => setCurrentView("login")}>
+            <div className="mt-6 text-center space-y-3">
+              <Button variant="link" className="text-white/60 hover:text-white" onClick={() => setCurrentView("login")}>
                 Already have an account? Login
               </Button>
-              <Button variant="link" onClick={() => setCurrentView("owner-access")}>
+              <div className="w-full h-px bg-white/10" />
+              <Button variant="link" className="text-white/40 hover:text-white/80 text-xs" onClick={() => setCurrentView("owner-access")}>
                 Owner Access
               </Button>
             </div>
           </CardContent>
         </Card>
+
+        {/* ToS Modal */}
+        {showTosModal && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+            <Card className="w-full max-w-2xl bg-[#0a0a0c] border-white/10 shadow-2xl max-h-[80vh] flex flex-col">
+              <CardHeader className="border-b border-white/10 bg-white/5">
+                <CardTitle className="text-2xl font-bold text-white flex items-center gap-2">
+                  <FileTextIcon className="w-6 h-6 text-purple-400" />
+                  Terms of Service
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex-1 overflow-y-auto p-6 space-y-4 text-white/80 leading-relaxed text-sm">
+                <p><strong className="text-white">1. Respect Required:</strong> Treat all players with kindness. No bullying, hate speech, or harassment.</p>
+                <p><strong className="text-white">2. No Cheating:</strong> Using bots, scripts, or unfair advantages will result in an immediate ban.</p>
+                <p><strong className="text-white">3. Safety First:</strong> Do not share personal information (real name, address, phone number) in public chats.</p>
+                <p><strong className="text-white">4. Appropriate Content:</strong> No inappropriate language or themes. This is a game for everyone.</p>
+                <p><strong className="text-white">5. Account Responsibility:</strong> You are responsible for your account security. Do not share your password.</p>
+                <p className="pt-4 text-xs text-white/40 italic">Last updated: January 2026</p>
+              </CardContent>
+              <div className="p-6 border-t border-white/10 bg-white/5 flex justify-end">
+                <Button
+                  onClick={() => {
+                    setShowTosModal(false)
+                    setTosAccepted(true)
+                  }}
+                  className="bg-green-600 hover:bg-green-500 text-white px-8 font-bold"
+                >
+                  I Understand & Accept
+                </Button>
+              </div>
+            </Card>
+          </div>
+        )}
       </div>
     )
   }
@@ -2423,10 +2510,10 @@ export default function BoomkitGame() {
   return (
     <div
       className={`min-h-screen flex transition-colors duration-500 ${themeMode === "dark"
-          ? "bg-gradient-to-br from-cyan-400 via-purple-500 to-pink-500" // Original dark theme
-          : themeMode === "light"
-            ? "bg-gradient-to-br from-blue-100 via-white to-purple-100" // Light theme
-            : "" // Custom theme handled via style prop
+        ? "bg-gradient-to-br from-cyan-400 via-purple-500 to-pink-500" // Original dark theme
+        : themeMode === "light"
+          ? "bg-gradient-to-br from-sky-400 via-indigo-400 to-purple-400" // Mid-tone light theme
+          : "" // Custom theme handled via style prop
         }`}
       style={themeMode === "custom" ? { background: customThemeColor } : {}}
     >
@@ -2439,10 +2526,13 @@ export default function BoomkitGame() {
       <div
         className={`
         fixed md:relative inset-y-0 left-0 z-50
-        w-48 bg-gradient-to-b from-purple-600 to-purple-800 text-white flex flex-col
+        w-48 text-white flex flex-col
         transform transition-transform duration-300 ease-in-out
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+        ${themeMode === "dark" ? "bg-gradient-to-b from-purple-600 to-purple-800" : ""}
+        ${themeMode === "light" ? "bg-gradient-to-b from-indigo-500 to-indigo-700" : ""}
       `}
+        style={themeMode === "custom" ? { background: customThemeColor, filter: "brightness(0.8)" } : {}}
       >
         {/* Logo */}
         <div className="p-4 text-center flex items-center justify-between">
@@ -3626,8 +3716,8 @@ export default function BoomkitGame() {
                           variant={themeMode === "dark" ? "default" : "secondary"}
                           onClick={() => setThemeMode("dark")}
                           className={`flex items-center justify-center gap-2 h-12 rounded-xl transition-all ${themeMode === "dark"
-                              ? "bg-purple-600 hover:bg-purple-700 text-white"
-                              : "bg-white/5 hover:bg-white/10 text-white border-white/10"
+                            ? "bg-purple-600 hover:bg-purple-700 text-white"
+                            : "bg-white/5 hover:bg-white/10 text-white border-white/10"
                             }`}
                         >
                           <span className="text-lg">🌑</span>
@@ -3637,8 +3727,8 @@ export default function BoomkitGame() {
                           variant={themeMode === "light" ? "default" : "secondary"}
                           onClick={() => setThemeMode("light")}
                           className={`flex items-center justify-center gap-2 h-12 rounded-xl transition-all ${themeMode === "light"
-                              ? "bg-white text-purple-900 hover:bg-white/90"
-                              : "bg-white/5 hover:bg-white/10 text-white border-white/10"
+                            ? "bg-white text-purple-900 hover:bg-white/90"
+                            : "bg-white/5 hover:bg-white/10 text-white border-white/10"
                             }`}
                         >
                           <span className="text-lg">☀️</span>
@@ -3665,8 +3755,8 @@ export default function BoomkitGame() {
                           <Button
                             onClick={() => setThemeMode("custom")}
                             className={`h-12 px-6 rounded-xl transition-all ${themeMode === "custom"
-                                ? "bg-white/20 border-white/20"
-                                : "bg-white/5 border-white/10"
+                              ? "bg-white/20 border-white/20"
+                              : "bg-white/5 border-white/10"
                               }`}
                             style={{ backgroundColor: customThemeColor }}
                           >
