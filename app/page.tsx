@@ -2511,7 +2511,7 @@ export default function BoomkitGame() {
             className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "auction" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
               }`}
           >
-            <GavelIcon className="h-5 w-5" mr-3" />
+            <GavelIcon className="h-5 w-5 mr-3" />
             Auction
           </button>
 
@@ -3147,11 +3147,11 @@ export default function BoomkitGame() {
             {/* Private Chat Page */}
             {currentPage === "private-chat" && (
               <div className="space-y-12">
-                 <div className="flex items-center gap-3 mb-8">
-                    <div className="w-1.5 h-8 bg-purple-500 rounded-full shadow-[0_0_15px_purple]" />
-                    <h2 className="text-4xl font-black text-white tracking-tighter">Private Quarters</h2>
-                  </div>
-                  <PrivateChat currentUser={currentUser} />
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="w-1.5 h-8 bg-purple-500 rounded-full shadow-[0_0_15px_purple]" />
+                  <h2 className="text-4xl font-black text-white tracking-tighter">Private Quarters</h2>
+                </div>
+                <PrivateChat currentUser={currentUser} />
               </div>
             )}
 
