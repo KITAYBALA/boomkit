@@ -607,6 +607,7 @@ export default function BoomkitGame() {
     | "market"
     | "settings"
     | "chat"
+    | "private-chat"
     | "auction"
     | "staff"
     | "news"
@@ -1028,8 +1029,8 @@ export default function BoomkitGame() {
     // Sync immediately on mount
     syncCurrentUserRole()
 
-    // Then sync every 10 seconds
-    const interval = setInterval(syncCurrentUserRole, 10000)
+    // Then sync every 1 second for instant ban detection
+    const interval = setInterval(syncCurrentUserRole, 1000)
 
     return () => clearInterval(interval)
   }, [currentUser, updateAndPersistCurrentUser, supabase])
@@ -1903,7 +1904,6 @@ export default function BoomkitGame() {
 
   // Confirm ban action
   const handleConfirmBan = async () => {
-<<<<<<< HEAD
     if (!userToModerate || !supabase) return
 
     try {
@@ -1953,33 +1953,6 @@ export default function BoomkitGame() {
       console.error("Error banning user:", err)
       alert("An error occurred while banning the user. Please try again.")
     }
-=======
-    if (!userToModerate) return
-
-    // Blacklist the user's IP if it exists
-    if (userToModerate.lastIp) {
-      try {
-        await fetch("/api/admin/blacklist-ip", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ip: userToModerate.lastIp,
-            reason: banReason || "Banned by staff",
-            banned_by: currentUser?.username || "Staff"
-          })
-        })
-      } catch (err) {
-        console.error("Failed to blacklist IP:", err)
-      }
-    }
-
-    const updatedUsers = users.map((u) =>
-      u.id === userToModerate.id ? { ...u, isBanned: true, banReason: banReason, banExpiry: null } : u,
-    )
-    updateAndPersistUsers(updatedUsers, userToModerate.id)
-    setShowBanDialog(false)
-    setUserToModerate(null)
->>>>>>> 880921df248dc0f25232f243ec208f305ddff819
   }
 
   // Unban/unmute user
@@ -2520,13 +2493,25 @@ export default function BoomkitGame() {
 
           <button
             onClick={() => {
+              setCurrentPage("private-chat")
+              setSidebarOpen(false)
+            }}
+            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "private-chat" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
+              }`}
+          >
+            <Users2Icon className="h-5 w-5 mr-3" />
+            Private Chat
+          </button>
+
+          <button
+            onClick={() => {
               setCurrentPage("auction")
               setSidebarOpen(false)
             }}
             className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "auction" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
               }`}
           >
-            <GavelIcon className="h-5 w-5 mr-3" />
+            <GavelIcon className="h-5 w-5" mr-3" />
             Auction
           </button>
 
@@ -3156,13 +3141,17 @@ export default function BoomkitGame() {
                   roleName={currentUser ? getUserRoleName(currentUser) : "Player"}
                   onUsernameClick={handleUsernameClick}
                 />
-                <div className="pt-8 border-t border-white/10">
-                  <div className="flex items-center gap-3 mb-8 ml-2">
+              </div>
+            )}
+
+            {/* Private Chat Page */}
+            {currentPage === "private-chat" && (
+              <div className="space-y-12">
+                 <div className="flex items-center gap-3 mb-8">
                     <div className="w-1.5 h-8 bg-purple-500 rounded-full shadow-[0_0_15px_purple]" />
                     <h2 className="text-4xl font-black text-white tracking-tighter">Private Quarters</h2>
                   </div>
                   <PrivateChat currentUser={currentUser} />
-                </div>
               </div>
             )}
 
