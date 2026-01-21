@@ -212,6 +212,7 @@ interface GameUser {
   banReason?: string
   lastSeen: number // Timestamp of last activity
   packsOpened?: number // Added for Supabase sync
+  lastIp?: string // Added for IP blacklisting
   // password?: string; // Removed password from interface to avoid unintended exposure
 }
 
@@ -762,6 +763,7 @@ export default function BoomkitGame() {
               name_color: user.nameColor || "text-white",
               last_seen: user.lastSeen || Date.now(),
               reason: user.reason || "",
+              last_ip: user.lastIp || "",
             },
             { onConflict: "id" },
           )
@@ -835,6 +837,7 @@ export default function BoomkitGame() {
             ban_reason: userWithActivity.banReason || "",
             last_seen: userWithActivity.lastSeen,
             packs_opened: userWithActivity.packsOpened || 0,
+            last_ip: userWithActivity.lastIp || "",
           })
         } catch (error) {
           console.error("[v0] Error syncing user to Supabase:", error)
@@ -858,7 +861,7 @@ export default function BoomkitGame() {
         const parsedUser = JSON.parse(storedCurrentUser)
         // Check if user is banned - redirect immediately
         if (parsedUser.isBanned) {
-          router.push("/banned")
+          router.push(`/banned?reason=${encodeURIComponent(parsedUser.banReason || "")}`)
           return
         }
         setCurrentUser(parsedUser)
@@ -917,6 +920,7 @@ export default function BoomkitGame() {
             banReason: u.ban_reason || "",
             lastSeen: u.last_seen || Date.now(),
             packsOpened: u.packs_opened || 0,
+            lastIp: u.last_ip || "",
           }))
 
           setUsers(mappedUsers)
@@ -944,7 +948,7 @@ export default function BoomkitGame() {
       try {
         const { data, error } = await supabase
           .from("users")
-          .select("role, badges, is_muted, is_banned, is_owner, mute_expiry, ban_expiry, status")
+          .select("role, badges, is_muted, is_banned, is_owner, mute_expiry, ban_expiry, status, ban_reason")
           .eq("id", currentUser.id)
           .single()
 
@@ -989,7 +993,7 @@ export default function BoomkitGame() {
           }
           // If user got banned, redirect immediately
           if (data.is_banned) {
-            router.push("/banned")
+            router.push(`/banned?reason=${encodeURIComponent(data.ban_reason || "")}`)
             return
           }
           updateAndPersistCurrentUser(updatedUser)
@@ -1274,7 +1278,7 @@ export default function BoomkitGame() {
 
       // Check if user is banned (double-check from server response)
       if (foundUser.isBanned) {
-        router.push("/banned")
+        router.push(`/banned?reason=${encodeURIComponent(foundUser.banReason || "")}`)
         return
       }
 
@@ -1852,8 +1856,26 @@ export default function BoomkitGame() {
   }
 
   // Confirm ban action
-  const handleConfirmBan = () => {
+  const handleConfirmBan = async () => {
     if (!userToModerate) return
+
+    // Blacklist the user's IP if it exists
+    if (userToModerate.lastIp) {
+      try {
+        await fetch("/api/admin/blacklist-ip", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ip: userToModerate.lastIp,
+            reason: banReason || "Banned by staff",
+            banned_by: currentUser?.username || "Staff"
+          })
+        })
+      } catch (err) {
+        console.error("Failed to blacklist IP:", err)
+      }
+    }
+
     const updatedUsers = users.map((u) =>
       u.id === userToModerate.id ? { ...u, isBanned: true, banReason: banReason, banExpiry: null } : u,
     )

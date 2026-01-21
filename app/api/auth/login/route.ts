@@ -17,6 +17,27 @@ export async function POST(request: NextRequest) {
 
     const { username, password } = await request.json()
 
+    // Get client IP
+    const forwarded = request.headers.get("x-forwarded-for")
+    const ip = forwarded ? forwarded.split(",")[0] : request.headers.get("x-real-ip") || "127.0.0.1"
+
+    const supabase = getSupabaseServerClient()
+
+    // CHECK IP BLACKLIST
+    const { data: blacklisted } = await supabase
+      .from('blacklisted_ips')
+      .select('ip')
+      .eq('ip', ip)
+      .maybeSingle()
+
+    if (blacklisted) {
+      if (DEBUG_AUTH) console.log('[AUTH DEBUG] IP is blacklisted:', ip)
+      return NextResponse.json({
+        success: false,
+        message: 'Your IP address is blacklisted. Access denied.'
+      }, { status: 403 })
+    }
+
     if (DEBUG_AUTH) console.log('[AUTH DEBUG] Input username:', username)
     if (DEBUG_AUTH) console.log('[AUTH DEBUG] Input password length:', password?.length ?? 0)
 
@@ -24,7 +45,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Username and password are required' }, { status: 400 })
     }
 
-    const supabase = getSupabaseServerClient()
 
     if (DEBUG_AUTH) console.log('[AUTH DEBUG] Querying table: users')
     if (DEBUG_AUTH) console.log('[AUTH DEBUG] Querying column: password_hash')
@@ -37,7 +57,7 @@ export async function POST(request: NextRequest) {
     if (DEBUG_AUTH) console.log('[AUTH DEBUG] Attempting username lookup:', username)
     const { data: userByUsername, error: errorByUsername } = await supabase
       .from('users')
-      .select('id, username, email, password_hash, password_reset_required, is_banned, is_owner, role, is_muted, status, badges, name_color, banner_color, profile_picture, tokens, boom_score, total_value, packs, booms, daily_tokens, join_date, is_plus_user, last_daily_spin, mute_expiry, ban_expiry, ban_reason, last_seen, packs_opened, age, reason')
+      .select('id, username, email, password_hash, password_reset_required, is_banned, is_owner, role, is_muted, status, badges, name_color, banner_color, profile_picture, tokens, boom_score, total_value, packs, booms, daily_tokens, join_date, is_plus_user, last_daily_spin, mute_expiry, ban_expiry, ban_reason, last_seen, packs_opened, age, reason, last_ip')
       .ilike('username', username)
       .maybeSingle()
 
@@ -54,7 +74,7 @@ export async function POST(request: NextRequest) {
       if (DEBUG_AUTH) console.log('[AUTH DEBUG] Username not found, trying email lookup:', username)
       const { data: userByEmail, error: errorByEmail } = await supabase
         .from('users')
-        .select('id, username, email, password_hash, password_reset_required, is_banned, is_owner, role, is_muted, status, badges, name_color, banner_color, profile_picture, tokens, boom_score, total_value, packs, booms, daily_tokens, join_date, is_plus_user, last_daily_spin, mute_expiry, ban_expiry, ban_reason, last_seen, packs_opened, age, reason')
+        .select('id, username, email, password_hash, password_reset_required, is_banned, is_owner, role, is_muted, status, badges, name_color, banner_color, profile_picture, tokens, boom_score, total_value, packs, booms, daily_tokens, join_date, is_plus_user, last_daily_spin, mute_expiry, ban_expiry, ban_reason, last_seen, packs_opened, age, reason, last_ip')
         .ilike('email', username)
         .maybeSingle()
 
@@ -142,6 +162,9 @@ export async function POST(request: NextRequest) {
     }
 
     if (DEBUG_AUTH) console.log('[AUTH DEBUG] ===== LOGIN SUCCESS =====')
+
+    // Update last_ip in background
+    await supabase.from('users').update({ last_ip: ip }).eq('id', userData.id)
 
     // Password is valid - return user data (excluding password_hash)
     const { password_hash: _, ...userWithoutPassword } = userData

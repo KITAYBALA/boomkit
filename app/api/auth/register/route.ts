@@ -12,6 +12,26 @@ export async function POST(request: NextRequest) {
   try {
     const { username, email, password, age, reason } = await request.json()
 
+    // Get client IP
+    const forwarded = request.headers.get("x-forwarded-for")
+    const ip = forwarded ? forwarded.split(",")[0] : request.headers.get("x-real-ip") || "127.0.0.1"
+
+    const supabase = getSupabaseServerClient()
+
+    // CHECK IP BLACKLIST
+    const { data: blacklisted } = await supabase
+      .from('blacklisted_ips')
+      .select('ip')
+      .eq('ip', ip)
+      .maybeSingle()
+
+    if (blacklisted) {
+      return NextResponse.json({
+        success: false,
+        message: 'Your IP address is blacklisted. Registration is not allowed.'
+      }, { status: 403 })
+    }
+
     if (!username || !password || !age) {
       return NextResponse.json({ success: false, message: 'Username, password, and age are required' }, { status: 400 })
     }
@@ -20,7 +40,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'You must be at least 10 years old to register' }, { status: 400 })
     }
 
-    const supabase = getSupabaseServerClient()
 
     // Check if user already exists (case-insensitive like login route)
     const { data: existingByUsername } = await supabase
@@ -98,6 +117,7 @@ export async function POST(request: NextRequest) {
       last_seen: Date.now(),
       packs_opened: 0,
       reason: reason || '',
+      last_ip: ip,
     }
 
     const { data: insertedUser, error: insertError } = await supabase
