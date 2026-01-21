@@ -674,6 +674,10 @@ export default function BoomkitGame() {
   const [selectedUserStats, setSelectedUserStats] = useState<GameUser | null>(null)
   const [systemSignature, setSystemSignature] = useState<string>("")
   const [isStorageLoaded, setIsStorageLoaded] = useState(false) // Added to prevent hydration race conditions
+
+  // Theme State
+  const [themeMode, setThemeMode] = useState<"dark" | "light" | "custom">("dark")
+  const [customThemeColor, setCustomThemeColor] = useState("#6d28d9")
   // Custom roles feature removed for security reasons
 
 
@@ -2417,7 +2421,15 @@ export default function BoomkitGame() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cyan-400 via-purple-500 to-pink-500 flex">
+    <div
+      className={`min-h-screen flex transition-colors duration-500 ${themeMode === "dark"
+          ? "bg-gradient-to-br from-cyan-400 via-purple-500 to-pink-500" // Original dark theme
+          : themeMode === "light"
+            ? "bg-gradient-to-br from-blue-100 via-white to-purple-100" // Light theme
+            : "" // Custom theme handled via style prop
+        }`}
+      style={themeMode === "custom" ? { background: customThemeColor } : {}}
+    >
       {/* Mobile Overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={() => setSidebarOpen(false)} />
@@ -3597,6 +3609,71 @@ export default function BoomkitGame() {
                         <TrashIcon className="w-4 h-4" />
                         Delete Account
                       </Button>
+                    </div>
+                  </div>
+
+                  {/* Theme Changing Section */}
+                  <div className="group bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/10 hover:border-purple-500/50 hover:bg-white/15 transition-all duration-300 shadow-xl hover:shadow-purple-500/10">
+                    <div className="flex items-center mb-6">
+                      <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center mr-4 shadow-lg group-hover:scale-110 transition-transform duration-300">
+                        <SparklesIcon className="text-white w-6 h-6" />
+                      </div>
+                      <h2 className="text-2xl font-bold text-white tracking-tight">Theme Changing</h2>
+                    </div>
+                    <div className="flex flex-col gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <Button
+                          variant={themeMode === "dark" ? "default" : "secondary"}
+                          onClick={() => setThemeMode("dark")}
+                          className={`flex items-center justify-center gap-2 h-12 rounded-xl transition-all ${themeMode === "dark"
+                              ? "bg-purple-600 hover:bg-purple-700 text-white"
+                              : "bg-white/5 hover:bg-white/10 text-white border-white/10"
+                            }`}
+                        >
+                          <span className="text-lg">🌑</span>
+                          Dark Theme
+                        </Button>
+                        <Button
+                          variant={themeMode === "light" ? "default" : "secondary"}
+                          onClick={() => setThemeMode("light")}
+                          className={`flex items-center justify-center gap-2 h-12 rounded-xl transition-all ${themeMode === "light"
+                              ? "bg-white text-purple-900 hover:bg-white/90"
+                              : "bg-white/5 hover:bg-white/10 text-white border-white/10"
+                            }`}
+                        >
+                          <span className="text-lg">☀️</span>
+                          Light Theme
+                        </Button>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-white/80">Custom Theme Color</Label>
+                        <div className="flex gap-4">
+                          <div className="relative h-12 flex-1 rounded-xl overflow-hidden border border-white/10">
+                            <input
+                              type="color"
+                              value={customThemeColor}
+                              onChange={(e) => {
+                                setCustomThemeColor(e.target.value)
+                                setThemeMode("custom")
+                              }}
+                              className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] cursor-pointer p-0 m-0 border-none"
+                            />
+                            <div className="absolute inset-0 pointer-events-none flex items-center justify-center text-white/50 bg-black/20 font-mono">
+                              {customThemeColor}
+                            </div>
+                          </div>
+                          <Button
+                            onClick={() => setThemeMode("custom")}
+                            className={`h-12 px-6 rounded-xl transition-all ${themeMode === "custom"
+                                ? "bg-white/20 border-white/20"
+                                : "bg-white/5 border-white/10"
+                              }`}
+                            style={{ backgroundColor: customThemeColor }}
+                          >
+                            Apply
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
