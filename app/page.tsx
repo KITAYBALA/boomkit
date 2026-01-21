@@ -967,6 +967,14 @@ export default function BoomkitGame() {
           .single()
 
         if (error) {
+          // If user not found (account deleted), log them out immediately
+          if (error.code === 'PGRST116' || error.message.includes('0 rows') || error.message.includes('No rows')) {
+            console.log("[v0] User account deleted (banned), logging out immediately")
+            localStorage.removeItem("boomkit_current_user")
+            setCurrentUser(null)
+            router.push("/banned?reason=Your account has been removed")
+            return
+          }
           console.log("[v0] Error syncing user role:", error.message)
           return
         }
