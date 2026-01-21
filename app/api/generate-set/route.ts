@@ -11,14 +11,23 @@ export async function POST(req: Request) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" })
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
 
     const systemPrompt = `
-      You are an educational content creator for a game called Boomkit.
+      You are a world-class educational content creator for a game called Boomkit.
       Generate a set of EXACTLY ${count} multiple-choice questions for the following:
       Grade: ${grade}
       Subject: ${subject}
       Topic/Instructions: ${prompt}
+
+      CRITICAL DIFFICULTY RULES:
+      - For Grade 1-2: Use simple arithmetic, basic vocabulary, and primary concepts.
+      - For Grade 3-5: Use intermediate arithmetic (multiplication/division), basic science, and descriptive grammar.
+      - For Grade 6-8: Use pre-algebra, world history, complex biology, and literary analysis.
+      - For Grade 9-12: Use advanced subjects (Calculus, Physics, Philosophy, Economics) depending on the subject.
+      - AVOID REPETITIVE QUESTIONS. Every question must be distinct.
+      - AVOID extremely simple math like "5+5" unless it's Grade 1.
+      - Questions MUST get progressively slightly harder within the set.
 
       Return the response ONLY as a valid JSON object in this format:
       {
@@ -28,7 +37,7 @@ export async function POST(req: Request) {
         "subject": "${subject}",
         "questions": [
           {
-            "id": "1",
+            "id": "unique_id_1",
             "question": "The question text",
             "options": ["Option A", "Option B", "Option C", "Option D"],
             "correctIndex": 0
@@ -36,22 +45,36 @@ export async function POST(req: Request) {
         ]
       }
       
-      Ensure the questions are age-appropriate for the specified grade.
       Only return the JSON, no other text.
     `
 
+    console.log(`[AI API] Generating ${count} questions for Grade ${grade}, Subject: ${subject}`)
     const result = await model.generateContent(systemPrompt)
     const response = await result.response
     const text = response.text()
 
-    // Attempt to extract JSON if there's markdown formatting
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
-    const jsonStr = jsonMatch ? jsonMatch[0] : text
-    const data = JSON.parse(jsonStr)
+    console.log("[AI API] Raw response length:", text.length)
 
-    return NextResponse.json(data)
-  } catch (error) {
+    // Attempt to extract JSON if there's markdown formatting
+    let jsonStr = text
+    const jsonMatch = text.match(/\{[\s\S]*\}/)
+    if (jsonMatch) {
+      jsonStr = jsonMatch[0]
+    }
+
+    try {
+      const data = JSON.parse(jsonStr)
+      if (!data.questions || data.questions.length === 0) {
+        throw new Error("AI returned empty question set");
+      }
+      console.log("[AI API] Successfully generated", data.questions.length, "questions");
+      return NextResponse.json(data)
+    } catch (parseError) {
+      console.error("[AI API] Logic/Parsing failed:", parseError, "Response:", text)
+      return NextResponse.json({ error: "The AI failed to generate a valid question set. Please try a more specific prompt." }, { status: 500 })
+    }
+  } catch (error: any) {
     console.error("Error generating set:", error)
-    return NextResponse.json({ error: "Failed to generate set" }, { status: 500 })
+    return NextResponse.json({ error: `AI Error: ${error.message || "Unknown error"}` }, { status: 500 })
   }
 }

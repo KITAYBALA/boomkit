@@ -212,6 +212,7 @@ interface GameUser {
   banReason?: string
   lastSeen: number // Timestamp of last activity
   packsOpened?: number // Added for Supabase sync
+  lastIp?: string // Added for IP blacklisting
   // password?: string; // Removed password from interface to avoid unintended exposure
 }
 
@@ -725,57 +726,62 @@ export default function BoomkitGame() {
   // --- DATA PERSISTENCE AND SYNC HOOKS ---
 
   const updateAndPersistUsers = useCallback(
-    async (newUsers: GameUser[]) => {
+    async (newUsers: GameUser[], targetUserId?: string) => {
       setUsers(newUsers)
       localStorage.setItem("boomkit_approved_users", JSON.stringify(newUsers))
 
-      for (const user of newUsers) {
-        if (!supabase) continue
-        try {
-          console.log("[v0] Syncing user to Supabase:", user.username, "role:", user.role)
-          const { error } = await supabase.from("users").upsert(
-            {
-              id: user.id,
-              username: user.username,
-              email: user.email || "",
-              tokens: user.tokens || 0,
-              boom_score: user.boomScore || 0,
-              role: user.role,
-              status: user.status || "approved",
-              is_banned: user.isBanned || false,
-              is_muted: user.isMuted || false,
-              mute_expiry: user.muteExpiry || null,
-              ban_expiry: user.banExpiry || null,
-              ban_reason: user.banReason || null,
-              banner_color: user.bannerColor || "from-purple-600 to-pink-600",
-              packs_opened: user.packsOpened || 0,
-              badges: user.badges || [],
-              packs: user.packs || [],
-              booms: user.booms || {},
-              daily_tokens: user.dailyTokens || 0,
-              total_value: user.totalValue || 0,
-              join_date: user.joinDate || new Date().toISOString().split("T")[0],
-              profile_picture: user.profilePicture || "🎮",
-              is_owner: user.isOwner || false,
-              is_plus_user: user.isPlusUser || false,
-              last_daily_spin: user.lastDailySpin || "",
-              name_color: user.nameColor || "text-white",
-              last_seen: user.lastSeen || Date.now(),
-              reason: user.reason || "",
-            },
-            { onConflict: "id" },
-          )
-          if (error) {
-            console.error("[v0] Error syncing user:", user.username, error)
-          } else {
-            console.log("[v0] Successfully synced user:", user.username)
-          }
-        } catch (err) {
-          console.error("[v0] Failed to sync user to Supabase:", err)
+      if (!targetUserId) return
+
+      const user = newUsers.find((u) => u.id === targetUserId)
+      if (!user) return
+
+      try {
+        const updates = {
+          username: user.username,
+          email: user.email || "",
+          tokens: user.tokens || 0,
+          boom_score: user.boomScore || 0,
+          role: user.role,
+          status: user.status || "approved",
+          is_banned: user.isBanned || false,
+          is_muted: user.isMuted || false,
+          mute_expiry: user.muteExpiry || null,
+          ban_expiry: user.banExpiry || null,
+          ban_reason: user.banReason || null,
+          banner_color: user.bannerColor || "from-purple-600 to-pink-600",
+          packs_opened: user.packsOpened || 0,
+          badges: user.badges || [],
+          packs: user.packs || [],
+          booms: user.booms || {},
+          daily_tokens: user.dailyTokens || 0,
+          total_value: user.totalValue || 0,
+          profile_picture: user.profilePicture || "🎮",
+          is_owner: user.isOwner || false,
+          is_plus_user: user.isPlusUser || false,
+          last_daily_spin: user.lastDailySpin || "",
+          name_color: user.nameColor || "text-white",
+          last_seen: user.lastSeen || Date.now(),
+          reason: user.reason || "",
+          last_ip: user.lastIp || "",
         }
+
+        const response = await fetch("/api/users/update", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ targetUserId, updates }),
+        })
+
+        const data = await response.json()
+        if (!data.success) {
+          console.error("[v0] API Update Error:", data.message)
+        } else {
+          console.log("[v0] Successfully synced user via API:", user.username)
+        }
+      } catch (err) {
+        console.error("[v0] Failed to sync user to API:", err)
       }
     },
-    [supabase],
+    [],
   )
 
   // Declaring updateAndPersistAuctions and updateAndPersistChat
@@ -805,9 +811,8 @@ export default function BoomkitGame() {
         })
 
         try {
-          const supabase = getSupabaseBrowserClient()
-          await supabase.from("users").upsert({
-            id: userWithActivity.id,
+          // Use the secure API
+          const updates = {
             username: userWithActivity.username,
             email: userWithActivity.email || "",
             age: userWithActivity.age || 18,
@@ -835,9 +840,21 @@ export default function BoomkitGame() {
             ban_reason: userWithActivity.banReason || "",
             last_seen: userWithActivity.lastSeen,
             packs_opened: userWithActivity.packsOpened || 0,
+            last_ip: userWithActivity.lastIp || "",
+          }
+
+          const response = await fetch("/api/users/update", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ targetUserId: userWithActivity.id, updates }),
           })
+
+          const data = await response.json()
+          if (!data.success) {
+            console.error("[v0] Error syncing via API:", data.message)
+          }
         } catch (error) {
-          console.error("[v0] Error syncing user to Supabase:", error)
+          console.error("[v0] Error calling update API:", error)
         }
       } else {
         setCurrentUser(null)
@@ -858,7 +875,7 @@ export default function BoomkitGame() {
         const parsedUser = JSON.parse(storedCurrentUser)
         // Check if user is banned - redirect immediately
         if (parsedUser.isBanned) {
-          router.push("/banned")
+          router.push(`/banned?reason=${encodeURIComponent(parsedUser.banReason || "")}`)
           return
         }
         setCurrentUser(parsedUser)
@@ -917,6 +934,7 @@ export default function BoomkitGame() {
             banReason: u.ban_reason || "",
             lastSeen: u.last_seen || Date.now(),
             packsOpened: u.packs_opened || 0,
+            lastIp: u.last_ip || "",
           }))
 
           setUsers(mappedUsers)
@@ -944,7 +962,7 @@ export default function BoomkitGame() {
       try {
         const { data, error } = await supabase
           .from("users")
-          .select("role, badges, is_muted, is_banned, is_owner, mute_expiry, ban_expiry, status")
+          .select("role, badges, is_muted, is_banned, is_owner, mute_expiry, ban_expiry, status, ban_reason")
           .eq("id", currentUser.id)
           .single()
 
@@ -989,7 +1007,7 @@ export default function BoomkitGame() {
           }
           // If user got banned, redirect immediately
           if (data.is_banned) {
-            router.push("/banned")
+            router.push(`/banned?reason=${encodeURIComponent(data.ban_reason || "")}`)
             return
           }
           updateAndPersistCurrentUser(updatedUser)
@@ -1298,7 +1316,7 @@ export default function BoomkitGame() {
 
       // Check if user is banned (double-check from server response)
       if (foundUser.isBanned) {
-        router.push("/banned")
+        router.push(`/banned?reason=${encodeURIComponent(foundUser.banReason || "")}`)
         return
       }
 
@@ -1816,7 +1834,7 @@ export default function BoomkitGame() {
     const updatedUsers = users.map((u) =>
       u.id === userToModerate.id ? { ...u, isMuted: true, muteExpiry: expiry } : u,
     )
-    updateAndPersistUsers(updatedUsers)
+    updateAndPersistUsers(updatedUsers, userToModerate.id)
     setShowMuteDialog(false)
     setUserToModerate(null)
   }
@@ -1838,6 +1856,9 @@ export default function BoomkitGame() {
       const data = await response.json()
       if (data.questions) {
         setDiscoveredSets(prev => [data, ...prev])
+        // Cache this set in local storage
+        const cachedSets = JSON.parse(localStorage.getItem("boomkit_ai_sets") || "[]")
+        localStorage.setItem("boomkit_ai_sets", JSON.stringify([data, ...cachedSets]))
         setShowAiSetCreator(false)
         setAiSetPrompt("")
         alert(`Set "${data.title}" generated successfully!`)
@@ -1852,8 +1873,29 @@ export default function BoomkitGame() {
     }
   }
 
+  const fetchQuestionsWithAi = async (grade: number, subject: string, count: number = 25) => {
+    try {
+      const response = await fetch("/api/generate-set", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: `Educational questions about ${subject}`,
+          grade,
+          subject,
+          count
+        })
+      })
+      const data = await response.json()
+      return data.questions || []
+    } catch (err) {
+      console.error(err)
+      return []
+    }
+  }
+
   // Confirm ban action
   const handleConfirmBan = async () => {
+<<<<<<< HEAD
     if (!userToModerate || !supabase) return
 
     try {
@@ -1903,6 +1945,33 @@ export default function BoomkitGame() {
       console.error("Error banning user:", err)
       alert("An error occurred while banning the user. Please try again.")
     }
+=======
+    if (!userToModerate) return
+
+    // Blacklist the user's IP if it exists
+    if (userToModerate.lastIp) {
+      try {
+        await fetch("/api/admin/blacklist-ip", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ip: userToModerate.lastIp,
+            reason: banReason || "Banned by staff",
+            banned_by: currentUser?.username || "Staff"
+          })
+        })
+      } catch (err) {
+        console.error("Failed to blacklist IP:", err)
+      }
+    }
+
+    const updatedUsers = users.map((u) =>
+      u.id === userToModerate.id ? { ...u, isBanned: true, banReason: banReason, banExpiry: null } : u,
+    )
+    updateAndPersistUsers(updatedUsers, userToModerate.id)
+    setShowBanDialog(false)
+    setUserToModerate(null)
+>>>>>>> 880921df248dc0f25232f243ec208f305ddff819
   }
 
   // Unban/unmute user
@@ -1918,7 +1987,7 @@ export default function BoomkitGame() {
       }
       return u
     })
-    updateAndPersistUsers(updatedUsers)
+    updateAndPersistUsers(updatedUsers, userId)
   }
 
   // Edit User Functions
@@ -1938,17 +2007,7 @@ export default function BoomkitGame() {
     }
 
     const updatedUsers = users.map((u) => (u.id === userToEdit.id ? { ...u, tokens: newTokens } : u))
-    updateAndPersistUsers(updatedUsers)
-
-    // Update Supabase
-    if (supabase) {
-      const { error } = await supabase.from("users").update({ tokens: newTokens }).eq("id", userToEdit.id)
-      if (error) {
-        console.error("Error updating tokens:", error)
-        alert("Failed to update tokens in database")
-        return
-      }
-    }
+    updateAndPersistUsers(updatedUsers, userToEdit.id)
 
     setShowEditUserDialog(false)
     setUserToEdit(null)
@@ -1974,34 +2033,9 @@ export default function BoomkitGame() {
       return u
     })
 
-    setUsers(updatedUsers)
-    localStorage.setItem("boomkit_approved_users", JSON.stringify(updatedUsers))
-
-    const userToUpdate = updatedUsers.find((u) => u.id === userId)
-    if (userToUpdate) {
-      console.log("[v0] Syncing user role to Supabase:", userToUpdate.username, "role:", userToUpdate.role)
-      try {
-        // ONLY update the role and badges fields to avoid overwriting other data (tokens, pfp, etc.)
-        const { error } = await supabase
-          .from("users")
-          .update({
-            role: userToUpdate.role,
-            badges: userToUpdate.badges,
-          })
-          .eq("id", userId)
-
-        if (error) {
-          console.error("[v0] Error syncing role to Supabase:", error)
-          alert(`Error saving role: ${error.message}`)
-        } else {
-          console.log("[v0] Successfully saved role to Supabase")
-          alert(`Role updated successfully!`)
-        }
-      } catch (err) {
-        console.error("[v0] Failed to sync role:", err)
-        alert(`Failed to save role: ${err}`)
-      }
-    }
+    // Call secure sync flow
+    updateAndPersistUsers(updatedUsers, userId)
+    alert(`Role updated successfully!`)
   }
 
   // Assign badge to user
@@ -2023,7 +2057,7 @@ export default function BoomkitGame() {
     }
 
     const updatedUsers = users.map((u) => (u.id === targetUser.id ? { ...u, badges: [...u.badges, selectedBadge] } : u))
-    updateAndPersistUsers(updatedUsers)
+    updateAndPersistUsers(updatedUsers, targetUser.id)
 
     if (currentUser?.id === targetUser.id) {
       updateAndPersistCurrentUser({ ...currentUser, badges: [...currentUser.badges, selectedBadge] })
@@ -2039,7 +2073,7 @@ export default function BoomkitGame() {
     const updatedUsers = users.map((u) =>
       u.id === userId ? { ...u, badges: (u.badges ?? []).filter((b) => b !== badgeId) } : u,
     )
-    updateAndPersistUsers(updatedUsers)
+    updateAndPersistUsers(updatedUsers, userId)
 
     if (currentUser?.id === userId) {
       updateAndPersistCurrentUser({ ...currentUser, badges: (currentUser.badges ?? []).filter((b) => b !== badgeId) })
@@ -3631,59 +3665,89 @@ export default function BoomkitGame() {
             {currentPage === "discover" && !isMergingGameActive && !lobbyActive && (
               <DiscoverPage
                 currentUser={currentUser}
-                onStartGame={(grade, subject, mode) => {
-                  const defaultQuestions = [
-                    {
-                      id: "1",
-                      question: "What is 5 + 5?",
-                      options: ["10", "15", "20", "5"],
-                      correctIndex: 0
-                    },
-                    {
-                      id: "2",
-                      question: "Count the sides of a triangle.",
-                      options: ["2", "3", "4", "5"],
-                      correctIndex: 1
-                    },
-                    {
-                      id: "3",
-                      question: "Which color is the sky on a clear day?",
-                      options: ["Green", "Red", "Blue", "Black"],
-                      correctIndex: 2
-                    }
-                  ]
+                onStartGame={async (grade, subject, mode) => {
+                  let questionsToUse = []
+
+                  // Try to find if we have an AI set for this
+                  const cachedSets = JSON.parse(localStorage.getItem("boomkit_ai_sets") || "[]")
+                  const matchingSet = cachedSets.find((s: any) => s.grade === grade && s.subject === subject)
+
+                  if (matchingSet) {
+                    questionsToUse = matchingSet.questions
+                  } else {
+                    // Generate new ones if possible, but for first play show "Loading..."
+                    // For now, let's just fetch them if they are the default ones
+                    setIsGeneratingSet(true)
+                    questionsToUse = await fetchQuestionsWithAi(grade, subject, 25)
+                    setIsGeneratingSet(false)
+                  }
+
+                  if (!questionsToUse || questionsToUse.length === 0) {
+                    questionsToUse = [
+                      { id: "1", question: "Default: 5+5?", options: ["10", "15"], correctIndex: 0 }
+                    ]
+                  }
 
                   if (mode === "host") {
                     const pin = Math.floor(100000 + Math.random() * 900000).toString()
-                    const sessions = JSON.parse(localStorage.getItem("boomkit_game_sessions") || "{}")
-                    sessions[pin] = {
-                      grade,
-                      subject,
-                      questions: defaultQuestions,
-                      host: currentUser?.username,
-                      players: [],
-                      status: "waiting",
-                      duration: 120
+
+                    if (supabase) {
+                      const { error } = await supabase.from("game_sessions").insert({
+                        pin,
+                        host_id: currentUser?.id,
+                        host_username: currentUser?.username,
+                        grade,
+                        subject,
+                        questions: questionsToUse,
+                        status: "waiting",
+                        duration: 120,
+                        players: []
+                      })
+
+                      if (error) {
+                        console.error("Host Session Error:", error)
+                        alert(`CRITICAL: Failed to create lobby. Error: ${error.message}. Check if you've run the emergency SQL script!`)
+                        return
+                      }
+
+                      console.log("Registered host session in Supabase:", pin)
+                      setActiveGamePin(pin)
+                      setActiveDiscoverGame({ grade, subject, mode: "host", questions: questionsToUse })
+                      setLobbyActive(true)
+                    } else {
+                      alert("Connecting to server...")
                     }
-                    localStorage.setItem("boomkit_game_sessions", JSON.stringify(sessions))
-                    window.dispatchEvent(new Event('storage'))
-                    setActiveGamePin(pin)
-                    setActiveDiscoverGame({ grade, subject, mode: "host", questions: defaultQuestions })
-                    setLobbyActive(true)
                   } else {
-                    setActiveDiscoverGame({ grade, subject, mode: "solo", questions: defaultQuestions })
+                    setActiveDiscoverGame({ grade, subject, mode: "solo", questions: questionsToUse })
                     setIsMergingGameActive(true)
                   }
                 }}
-                onJoinGame={() => {
+                onJoinGame={async () => {
                   const pinInput = prompt("Enter 6-digit Game PIN:")
                   if (!pinInput) return
 
-                  const sessions = JSON.parse(localStorage.getItem("boomkit_game_sessions") || "{}")
-                  const session = sessions[pinInput]
+                  const cleanPin = pinInput.trim()
 
-                  if (session) {
-                    setActiveGamePin(pinInput)
+                  if (supabase) {
+                    const { data: session, error } = await supabase
+                      .from("game_sessions")
+                      .select("*")
+                      .eq("pin", cleanPin)
+                      .single()
+
+                    if (error) {
+                      console.error("Join Error:", error)
+                      alert(`Join Error: ${error.message || "Session not found"}. Ensure the host has already created the game and you have a stable connection.`)
+                      return
+                    }
+
+                    if (!session) {
+                      alert("Room not found. Please double check the 6-digit PIN.")
+                      return
+                    }
+
+                    console.log("Joined session from Supabase:", cleanPin)
+                    setActiveGamePin(cleanPin)
                     setActiveDiscoverGame({
                       grade: session.grade,
                       subject: session.subject,
@@ -3692,7 +3756,7 @@ export default function BoomkitGame() {
                     })
                     setLobbyActive(true)
                   } else {
-                    alert("Invalid PIN. No active game session found.")
+                    alert("Connecting to server...")
                   }
                 }}
                 onCreateWithAI={() => setShowAiSetCreator(true)}
@@ -3701,6 +3765,7 @@ export default function BoomkitGame() {
 
             {currentPage === "discover" && lobbyActive && activeDiscoverGame && (
               <GameLobby
+                supabase={supabase}
                 pin={activeGamePin}
                 mode={activeDiscoverGame.mode as "host" | "join"}
                 subject={activeDiscoverGame.subject}
@@ -3729,14 +3794,29 @@ export default function BoomkitGame() {
                   console.log("Game ended with score:", score)
                   setIsMergingGameActive(false)
                   setLobbyActive(false)
-                  // Reward tokens for educational play
+
+                  // Reward tokens based on Grade and Performance
                   if (currentUser) {
-                    const bonus = Math.floor(score / 5)
-                    if (bonus > 0) {
-                      const updatedUser = { ...currentUser, tokens: currentUser.tokens + bonus }
-                      updateAndPersistCurrentUser(updatedUser)
-                      alert(`Game Over! You earned ${bonus} tokens for your performance.`)
+                    const gradeRewards: Record<number, number> = {
+                      1: 3, 2: 5, 3: 10, 4: 20, 5: 25, 6: 50, 7: 75,
+                      8: 100, 9: 125, 10: 150, 11: 175, 12: 200
                     }
+                    const completionBonus = gradeRewards[activeDiscoverGame.grade] || 3
+                    const performanceBonus = Math.floor(score / 10) // Basic performance incentive
+
+                    const totalReward = completionBonus + performanceBonus
+
+                    if (totalReward > 0) {
+                      const updatedUser = { ...currentUser, tokens: currentUser.tokens + totalReward }
+                      updateAndPersistCurrentUser(updatedUser)
+                      alert(`Game Over! You earned ${totalReward} tokens (${completionBonus} for completion + ${performanceBonus} for score).`)
+                    }
+                  }
+                }}
+                onAwardTokens={(amount) => {
+                  if (currentUser) {
+                    const updatedUser = { ...currentUser, tokens: currentUser.tokens + amount }
+                    updateAndPersistCurrentUser(updatedUser)
                   }
                 }}
               />

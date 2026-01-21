@@ -56,7 +56,10 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
 
   // Scroll to bottom when messages change
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" })
+    if (bottomRef.current) {
+      // Use block: 'nearest' to prevent scrolling the whole page if already in view
+      bottomRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" })
+    }
   }, [messages])
 
   useEffect(() => {
