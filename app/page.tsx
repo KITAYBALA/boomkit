@@ -730,60 +730,58 @@ export default function BoomkitGame() {
       setUsers(newUsers)
       localStorage.setItem("boomkit_approved_users", JSON.stringify(newUsers))
 
-      if (!supabase) return
+      if (!targetUserId) return
 
-      // If a specific ID is provided, only sync that user. Otherwise sync all (original behavior).
-      const usersToSync = targetUserId ? newUsers.filter((u) => u.id === targetUserId) : newUsers
+      const user = newUsers.find((u) => u.id === targetUserId)
+      if (!user) return
 
-      // For single user updates, this is much faster. 
-      // For multiple users, we still loop but only over the subset.
-      for (const user of usersToSync) {
-        try {
-          console.log("[v0] Syncing user to Supabase:", user.username, "role:", user.role)
-          const { error } = await supabase.from("users").upsert(
-            {
-              id: user.id,
-              username: user.username,
-              email: user.email || "",
-              tokens: user.tokens || 0,
-              boom_score: user.boomScore || 0,
-              role: user.role,
-              status: user.status || "approved",
-              is_banned: user.isBanned || false,
-              is_muted: user.isMuted || false,
-              mute_expiry: user.muteExpiry || null,
-              ban_expiry: user.banExpiry || null,
-              ban_reason: user.banReason || null,
-              banner_color: user.bannerColor || "from-purple-600 to-pink-600",
-              packs_opened: user.packsOpened || 0,
-              badges: user.badges || [],
-              packs: user.packs || [],
-              booms: user.booms || {},
-              daily_tokens: user.dailyTokens || 0,
-              total_value: user.totalValue || 0,
-              join_date: user.joinDate || new Date().toISOString().split("T")[0],
-              profile_picture: user.profilePicture || "🎮",
-              is_owner: user.isOwner || false,
-              is_plus_user: user.isPlusUser || false,
-              last_daily_spin: user.lastDailySpin || "",
-              name_color: user.nameColor || "text-white",
-              last_seen: user.lastSeen || Date.now(),
-              reason: user.reason || "",
-              last_ip: user.lastIp || "",
-            },
-            { onConflict: "id" },
-          )
-          if (error) {
-            console.error("[v0] Error syncing user:", user.username, error)
-          } else {
-            console.log("[v0] Successfully synced user:", user.username)
-          }
-        } catch (err) {
-          console.error("[v0] Failed to sync user to Supabase:", err)
+      try {
+        const updates = {
+          username: user.username,
+          email: user.email || "",
+          tokens: user.tokens || 0,
+          boom_score: user.boomScore || 0,
+          role: user.role,
+          status: user.status || "approved",
+          is_banned: user.isBanned || false,
+          is_muted: user.isMuted || false,
+          mute_expiry: user.muteExpiry || null,
+          ban_expiry: user.banExpiry || null,
+          ban_reason: user.banReason || null,
+          banner_color: user.bannerColor || "from-purple-600 to-pink-600",
+          packs_opened: user.packsOpened || 0,
+          badges: user.badges || [],
+          packs: user.packs || [],
+          booms: user.booms || {},
+          daily_tokens: user.dailyTokens || 0,
+          total_value: user.totalValue || 0,
+          profile_picture: user.profilePicture || "🎮",
+          is_owner: user.isOwner || false,
+          is_plus_user: user.isPlusUser || false,
+          last_daily_spin: user.lastDailySpin || "",
+          name_color: user.nameColor || "text-white",
+          last_seen: user.lastSeen || Date.now(),
+          reason: user.reason || "",
+          last_ip: user.lastIp || "",
         }
+
+        const response = await fetch("/api/users/update", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ targetUserId, updates }),
+        })
+
+        const data = await response.json()
+        if (!data.success) {
+          console.error("[v0] API Update Error:", data.message)
+        } else {
+          console.log("[v0] Successfully synced user via API:", user.username)
+        }
+      } catch (err) {
+        console.error("[v0] Failed to sync user to API:", err)
       }
     },
-    [supabase],
+    [],
   )
 
   // Declaring updateAndPersistAuctions and updateAndPersistChat
@@ -813,9 +811,8 @@ export default function BoomkitGame() {
         })
 
         try {
-          const supabase = getSupabaseBrowserClient()
-          await supabase.from("users").upsert({
-            id: userWithActivity.id,
+          // Use the secure API
+          const updates = {
             username: userWithActivity.username,
             email: userWithActivity.email || "",
             age: userWithActivity.age || 18,
@@ -844,9 +841,20 @@ export default function BoomkitGame() {
             last_seen: userWithActivity.lastSeen,
             packs_opened: userWithActivity.packsOpened || 0,
             last_ip: userWithActivity.lastIp || "",
+          }
+
+          const response = await fetch("/api/users/update", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ targetUserId: userWithActivity.id, updates }),
           })
+
+          const data = await response.json()
+          if (!data.success) {
+            console.error("[v0] Error syncing via API:", data.message)
+          }
         } catch (error) {
-          console.error("[v0] Error syncing user to Supabase:", error)
+          console.error("[v0] Error calling update API:", error)
         }
       } else {
         setCurrentUser(null)
@@ -1925,16 +1933,6 @@ export default function BoomkitGame() {
     const updatedUsers = users.map((u) => (u.id === userToEdit.id ? { ...u, tokens: newTokens } : u))
     updateAndPersistUsers(updatedUsers, userToEdit.id)
 
-    // Update Supabase
-    if (supabase) {
-      const { error } = await supabase.from("users").update({ tokens: newTokens }).eq("id", userToEdit.id)
-      if (error) {
-        console.error("Error updating tokens:", error)
-        alert("Failed to update tokens in database")
-        return
-      }
-    }
-
     setShowEditUserDialog(false)
     setUserToEdit(null)
     alert(`Updated tokens for ${userToEdit.username} to ${newTokens}`)
@@ -1959,34 +1957,9 @@ export default function BoomkitGame() {
       return u
     })
 
-    setUsers(updatedUsers)
-    localStorage.setItem("boomkit_approved_users", JSON.stringify(updatedUsers))
-
-    const userToUpdate = updatedUsers.find((u) => u.id === userId)
-    if (userToUpdate) {
-      console.log("[v0] Syncing user role to Supabase:", userToUpdate.username, "role:", userToUpdate.role)
-      try {
-        // ONLY update the role and badges fields to avoid overwriting other data (tokens, pfp, etc.)
-        const { error } = await supabase
-          .from("users")
-          .update({
-            role: userToUpdate.role,
-            badges: userToUpdate.badges,
-          })
-          .eq("id", userId)
-
-        if (error) {
-          console.error("[v0] Error syncing role to Supabase:", error)
-          alert(`Error saving role: ${error.message}`)
-        } else {
-          console.log("[v0] Successfully saved role to Supabase")
-          alert(`Role updated successfully!`)
-        }
-      } catch (err) {
-        console.error("[v0] Failed to sync role:", err)
-        alert(`Failed to save role: ${err}`)
-      }
-    }
+    // Call secure sync flow
+    updateAndPersistUsers(updatedUsers, userId)
+    alert(`Role updated successfully!`)
   }
 
   // Assign badge to user
