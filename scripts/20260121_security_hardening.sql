@@ -23,21 +23,25 @@ EXCEPTION
         END IF;
 END $$;
 
--- 3. Reset unauthorized admins
--- We only keep Oktay, Ughur, and Turan as staff.
--- Note: Using ILIKE for case-insensitive matching if needed, but these are specific usernames.
+-- 3. Reset unauthorized admins (keeping staff)
 UPDATE users 
 SET role = 'player', is_owner = FALSE 
-WHERE username NOT IN ('Oktay Abdullazada', 'Ughur Akparli', 'Turan Mecidov');
+WHERE NOT (
+    username IN ('system', 'HadiGidek', 'TUran1545', 'Oktay Abdullazada', 'Ughur Akparli', 'Turan Mecidov')
+);
 
 -- Ensure the actual owners are set correctly
 UPDATE users
 SET role = 'owner', is_owner = TRUE
-WHERE username IN ('Oktay Abdullazada', 'Ughur Akparli');
+WHERE username IN ('system', 'Oktay Abdullazada');
 
 UPDATE users
-SET role = 'tester'
-WHERE username = 'Turan Mecidov';
+SET role = 'moderator', is_owner = FALSE
+WHERE username IN ('HadiGidek', 'Ughur Akparli');
+
+UPDATE users
+SET role = 'tester', is_owner = FALSE
+WHERE username IN ('TUran1545', 'Turan Mecidov');
 
 -- 4. Harden Users RLS Policies
 DROP POLICY IF EXISTS "Anyone can read users" ON users;
