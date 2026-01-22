@@ -20,13 +20,14 @@ export async function POST(req: Request) {
       Subject: ${subject}
       Topic/Instructions: ${prompt}
 
-      CRITICAL DIFFICULTY RULES:
-      - For Grade 1-2: Use simple arithmetic, basic vocabulary, and primary concepts.
-      - For Grade 3-5: Use intermediate arithmetic (multiplication/division), basic science, and descriptive grammar.
-      - For Grade 6-8: Use pre-algebra, world history, complex biology, and literary analysis.
-      - For Grade 9-12: Use advanced subjects (Calculus, Physics, Philosophy, Economics) depending on the subject.
-      - AVOID REPETITIVE QUESTIONS. Every question must be distinct.
-      - AVOID extremely simple math like "5+5" unless it's Grade 1.
+      CRITICAL DIFFICULTY & DIVERSITY RULES:
+      - EVERY question MUST have EXACTLY 4 options. Never 2 or 3.
+      - AVOID REPETITIVE QUESTIONS. Every single question in the set must be unique and different in structure and content.
+      - For Grade 1 Math: Focus on a wide variety of topics: addition, subtraction, basic shapes, counting objects, telling time, and simple word problems. AVOID repeating simple "X+Y" patterns.
+      - For Grade 1 Reading: Use diverse vocabulary, sentence completion, identifying main ideas, and phonics. Every reading question should look and feel different.
+      - For Grade 2-5: Use intermediate arithmetic (multiplication/division), basic science, descriptive grammar, and reading comprehension.
+      - For Grade 6-12: Increase complexity naturally (Algebra, Biology, Physics, etc.) but MAINTAIN the 4-option requirement and high diversity.
+      - AVOID extremely simple or repetitive math like "5+5" unless it's a very small part of a larger, more complex set for Grade 1.
       - Questions MUST get progressively slightly harder within the set.
 
       Return the response ONLY as a valid JSON object in this format:

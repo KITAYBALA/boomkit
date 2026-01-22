@@ -3858,7 +3858,12 @@ export default function BoomkitGame() {
 
                   if (!questionsToUse || questionsToUse.length === 0) {
                     questionsToUse = [
-                      { id: "1", question: "Default: 5+5?", options: ["10", "15"], correctIndex: 0 }
+                      {
+                        id: "fallback-1",
+                        question: "What is the primary color of the sky on a clear day?",
+                        options: ["Red", "Green", "Blue", "Yellow"],
+                        correctIndex: 2
+                      }
                     ]
                   }
 
