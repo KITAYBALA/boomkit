@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServerClient } from '@/lib/supabase-server-client'
 import { createHash } from 'crypto'
+import { createSession } from '@/lib/auth-server'
 
 export const dynamic = 'force-dynamic'
 
@@ -164,6 +165,13 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`[AUTH] User registered: ${username}`)
+
+    // Create secure session (matching login behavior)
+    await createSession(
+      insertedUser.id,
+      insertedUser.role || 'player',
+      insertedUser.is_owner || false
+    )
 
     // Return user data (excluding password_hash)
     const { password_hash: _, ...userWithoutPassword } = insertedUser

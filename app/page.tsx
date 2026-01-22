@@ -3840,21 +3840,10 @@ export default function BoomkitGame() {
               <DiscoverPage
                 currentUser={currentUser}
                 onStartGame={async (grade, subject, mode) => {
-                  let questionsToUse = []
-
-                  // Try to find if we have an AI set for this
-                  const cachedSets = JSON.parse(localStorage.getItem("boomkit_ai_sets") || "[]")
-                  const matchingSet = cachedSets.find((s: any) => s.grade === grade && s.subject === subject)
-
-                  if (matchingSet) {
-                    questionsToUse = matchingSet.questions
-                  } else {
-                    // Generate new ones if possible, but for first play show "Loading..."
-                    // For now, let's just fetch them if they are the default ones
-                    setIsGeneratingSet(true)
-                    questionsToUse = await fetchQuestionsWithAi(grade, subject, 25)
-                    setIsGeneratingSet(false)
-                  }
+                  // Always generate fresh, unique questions for each game session
+                  setIsGeneratingSet(true)
+                  let questionsToUse = await fetchQuestionsWithAi(grade, subject, 25)
+                  setIsGeneratingSet(false)
 
                   if (!questionsToUse || questionsToUse.length === 0) {
                     questionsToUse = [
