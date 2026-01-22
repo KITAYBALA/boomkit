@@ -897,6 +897,9 @@ export default function BoomkitGame() {
       const storedChat = localStorage.getItem("boomkit_chat_messages")
       if (storedChat) setChatMessages(JSON.parse(storedChat))
 
+      const storedAiSets = localStorage.getItem("boomkit_ai_sets")
+      if (storedAiSets) setDiscoveredSets(JSON.parse(storedAiSets))
+
       setIsStorageLoaded(true) // Signal that storage is loaded
     }
   }, [])
@@ -3839,11 +3842,20 @@ export default function BoomkitGame() {
             {currentPage === "discover" && !isMergingGameActive && !lobbyActive && (
               <DiscoverPage
                 currentUser={currentUser}
+                discoveredSets={discoveredSets}
                 onStartGame={async (grade, subject, mode) => {
-                  // Always generate fresh, unique questions for each game session
-                  setIsGeneratingSet(true)
-                  let questionsToUse = await fetchQuestionsWithAi(grade, subject, 25)
-                  setIsGeneratingSet(false)
+                  // Check if this is a pre-generated AI set
+                  const existingSet = discoveredSets.find(s => s.subject === subject && s.grade === grade);
+
+                  let questionsToUse = [];
+                  if (existingSet && existingSet.questions) {
+                    questionsToUse = existingSet.questions;
+                  } else {
+                    // Always generate fresh, unique questions for each game session
+                    setIsGeneratingSet(true)
+                    questionsToUse = await fetchQuestionsWithAi(grade, subject, 25)
+                    setIsGeneratingSet(false)
+                  }
 
                   if (!questionsToUse || questionsToUse.length === 0) {
                     questionsToUse = [

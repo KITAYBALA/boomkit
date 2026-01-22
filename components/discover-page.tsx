@@ -169,6 +169,7 @@ interface DiscoverPageProps {
     onStartGame: (grade: number, subject: string, mode: "solo" | "host") => void
     onJoinGame: () => void
     onCreateWithAI: () => void
+    discoveredSets?: any[]
 }
 
 export default function DiscoverPage({
@@ -176,6 +177,7 @@ export default function DiscoverPage({
     onStartGame,
     onJoinGame,
     onCreateWithAI,
+    discoveredSets = [],
 }: DiscoverPageProps) {
     const [selectedGrade, setSelectedGrade] = useState<number>(1)
     const [searchQuery, setSearchQuery] = useState("")
@@ -232,8 +234,8 @@ export default function DiscoverPage({
                             key={grade.grade}
                             onClick={() => setSelectedGrade(grade.grade)}
                             className={`px-4 py-2 rounded-xl font-bold text-sm transition-all ${selectedGrade === grade.grade
-                                    ? `${grade.color} text-white shadow-lg scale-105`
-                                    : "bg-white/10 text-white/70 hover:bg-white/20"
+                                ? `${grade.color} text-white shadow-lg scale-105`
+                                : "bg-white/10 text-white/70 hover:bg-white/20"
                                 }`}
                         >
                             {grade.emoji} {grade.label}
@@ -252,6 +254,52 @@ export default function DiscoverPage({
                     className="pl-12 bg-white/10 border-white/20 text-white placeholder:text-white/40 rounded-xl h-12"
                 />
             </div>
+
+            {/* Custom AI Sets Section */}
+            {discoveredSets.length > 0 && (
+                <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                        <SparklesIcon className="w-5 h-5 text-pink-400" />
+                        <h3 className="text-white font-bold text-xl">My AI Sets</h3>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {discoveredSets.map((set, index) => (
+                            <Card
+                                key={`ai-set-${index}`}
+                                className="bg-gradient-to-br from-purple-900/40 to-pink-900/40 backdrop-blur-md border-pink-500/30 hover:border-pink-500/60 transition-all duration-300 group cursor-pointer overflow-hidden shadow-lg shadow-pink-500/10"
+                            >
+                                <CardHeader className="pb-2">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            <span className="text-3xl">🤖</span>
+                                            <div>
+                                                <CardTitle className="text-white text-lg">{set.title}</CardTitle>
+                                                <p className="text-pink-300/60 text-xs mt-1">
+                                                    Grade {set.grade} • {set.questions?.length || 0} Questions
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <Badge className="bg-pink-600 text-white border-none">
+                                            AI
+                                        </Badge>
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="pt-2">
+                                    <div className="flex gap-2">
+                                        <Button
+                                            onClick={() => onStartGame(set.grade, set.subject, "solo")}
+                                            className="flex-1 bg-pink-600 hover:bg-pink-700 text-white font-bold rounded-xl h-10"
+                                        >
+                                            <PlayIcon className="w-4 h-4 mr-2" />
+                                            Play Now
+                                        </Button>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* Subjects Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
