@@ -904,65 +904,106 @@ export default function BoomkitGame() {
     }
   }, [])
 
-  // Load users from Supabase on mount
-  useEffect(() => {
-    const fetchUsersFromSupabase = async () => {
-      try {
-        const { data, error } = await supabase.from("users").select("*")
+  // Reusable function to fetch users from Supabase
+  const fetchUsersFromSupabase = useCallback(async (refreshCurrentUser = false) => {
+    if (!supabase) return
 
-        if (error) {
-          console.error("[v0] Error fetching users from Supabase:", error.message)
-          return
+    try {
+      const { data, error } = await supabase.from("users").select("*")
+
+      if (error) {
+        console.error("[v0] Error fetching users from Supabase:", error.message)
+        return
+      }
+
+      if (data && data.length > 0) {
+        const mappedUsers: GameUser[] = data.map((u: any) => ({
+          id: u.id,
+          username: u.username,
+          email: u.email,
+          password: "", // Ensure password is not leaked
+          age: u.age || 0,
+          tokens: u.tokens || 0,
+          dailyTokens: u.daily_tokens || 0,
+          packs: u.packs || [],
+          booms: u.booms || {}, // Initialize booms as an object
+          isOwner: u.is_owner || false,
+          isBanned: u.is_banned || false,
+          isMuted: u.is_muted || false,
+          status: u.status || "approved",
+          reason: u.reason || "",
+          role: u.role || "player",
+          joinDate: u.join_date || new Date().toISOString(),
+          boomScore: u.boom_score || 0,
+          totalValue: u.total_value || 0,
+          profilePicture: u.profile_picture || "",
+          isPlusUser: u.is_plus_user || false,
+          nameColor: u.name_color || "",
+          bannerColor: u.banner_color || "from-purple-600 to-pink-600",
+          lastDailySpin: u.last_daily_spin || null,
+          badges: u.badges || [],
+          muteExpiry: u.mute_expiry || null,
+          banExpiry: u.ban_expiry || null,
+          banReason: u.ban_reason || "",
+          lastSeen: u.last_seen || Date.now(),
+          packsOpened: u.packs_opened || 0,
+          lastIp: u.last_ip || "",
+        }))
+
+        setUsers(mappedUsers)
+        localStorage.setItem("boomkit_approved_users", JSON.stringify(mappedUsers))
+        console.log("[v0] Loaded", mappedUsers.length, "users from Supabase")
+
+        if (refreshCurrentUser && currentUser) {
+          const self = mappedUsers.find(u => u.id === currentUser.id)
+          if (self) {
+            setCurrentUser(self)
+            localStorage.setItem("boomkit_current_user", JSON.stringify(self))
+          }
         }
+      }
+    } catch (err) {
+      console.error("[v0] Failed to fetch users from Supabase:", err)
+    }
+  }, [supabase, currentUser])
 
-        if (data && data.length > 0) {
-          const mappedUsers: GameUser[] = data.map((u: any) => ({
-            id: u.id,
-            username: u.username,
-            email: u.email,
-            password: "", // Ensure password is not leaked
-            age: u.age || 0,
-            tokens: u.tokens || 0,
-            dailyTokens: u.daily_tokens || 0,
-            packs: u.packs || [],
-            booms: u.booms || {}, // Initialize booms as an object
-            isOwner: u.is_owner || false,
-            isBanned: u.is_banned || false,
-            isMuted: u.is_muted || false,
-            status: u.status || "approved",
-            reason: u.reason || "",
-            role: u.role || "player",
-            joinDate: u.join_date || new Date().toISOString(),
-            boomScore: u.boom_score || 0,
-            totalValue: u.total_value || 0,
-            profilePicture: u.profile_picture || "",
-            isPlusUser: u.is_plus_user || false,
-            nameColor: u.name_color || "",
-            bannerColor: u.banner_color || "from-purple-600 to-pink-600",
-            lastDailySpin: u.last_daily_spin || null,
-            badges: u.badges || [],
-            muteExpiry: u.mute_expiry || null,
-            banExpiry: u.ban_expiry || null,
-            banReason: u.ban_reason || "",
-            lastSeen: u.last_seen || Date.now(),
-            packsOpened: u.packs_opened || 0,
-            lastIp: u.last_ip || "",
-          }))
+  // NEW: Session validation to handle sync issues
+  useEffect(() => {
+    const validateSession = async () => {
+      // Don't validate if we haven't even tried to load storage yet
+      if (!isStorageLoaded) return
 
-          setUsers(mappedUsers)
-          localStorage.setItem("boomkit_approved_users", JSON.stringify(mappedUsers))
-          console.log("[v0] Loaded", mappedUsers.length, "users from Supabase")
+      try {
+        const res = await fetch('/api/auth/verify')
+        const data = await res.json()
+
+        if (!data.authenticated) {
+          // If client thinks they are logged in but server has no session
+          if (currentUser) {
+            console.log("[v0] Session lost or expired, logging out")
+            handleLogout()
+          }
+        } else if (currentUser && data.user.id !== currentUser.id) {
+          // If IDs don't match (should rarely happen unless cookie/storage is manipulated)
+          console.log("[v0] Session ID mismatch, logging out")
+          handleLogout()
         }
       } catch (err) {
-        console.error("[v0] Failed to fetch users from Supabase:", err)
+        console.error("[v0] Failed to validate session:", err)
       }
     }
 
-    // Only fetch if supabase client is available
+    if (isStorageLoaded) {
+      validateSession()
+    }
+  }, [isStorageLoaded, currentUser])
+
+  // Load users from Supabase on mount
+  useEffect(() => {
     if (supabase) {
       fetchUsersFromSupabase()
     }
-  }, [supabase])
+  }, [supabase, fetchUsersFromSupabase])
 
   // Find the
 
@@ -3357,61 +3398,8 @@ export default function BoomkitGame() {
                 currentUser={currentUser!}
                 users={users}
                 onTradeComplete={() => {
-                  // Refresh all users data after trade to ensure everyone's inventory is in sync
-                  const fetchAllUsers = async () => {
-                    if (!supabase) return
-                    try {
-                      const { data, error } = await supabase.from("users").select("*")
-                      if (error) throw error
-
-                      if (data) {
-                        const mappedUsers: GameUser[] = data.map((u: any) => ({
-                          id: u.id,
-                          username: u.username,
-                          email: u.email,
-                          password: "",
-                          age: u.age || 0,
-                          tokens: u.tokens || 0,
-                          dailyTokens: u.daily_tokens || 0,
-                          packs: u.packs || [],
-                          booms: u.booms || {},
-                          isOwner: u.is_owner || false,
-                          isBanned: u.is_banned || false,
-                          isMuted: u.is_muted || false,
-                          status: u.status || "approved",
-                          reason: u.reason || "",
-                          role: u.role || "player",
-                          joinDate: u.join_date || new Date().toISOString(),
-                          boomScore: u.boom_score || 0,
-                          totalValue: u.total_value || 0,
-                          profilePicture: u.profile_picture || "",
-                          isPlusUser: u.is_plus_user || false,
-                          nameColor: u.name_color || "",
-                          bannerColor: u.banner_color || "from-purple-600 to-pink-600",
-                          lastDailySpin: u.last_daily_spin || null,
-                          badges: u.badges || [],
-                          muteExpiry: u.mute_expiry || null,
-                          banExpiry: u.ban_expiry || null,
-                          banReason: u.ban_reason || "",
-                          lastSeen: u.last_seen || Date.now(),
-                          packsOpened: u.packs_opened || 0,
-                        }))
-
-                        setUsers(mappedUsers)
-                        localStorage.setItem("boomkit_approved_users", JSON.stringify(mappedUsers))
-
-                        // Also update current user if their data changed
-                        const self = mappedUsers.find(u => u.id === currentUser?.id)
-                        if (self) {
-                          setCurrentUser(self)
-                          localStorage.setItem("boomkit_current_user", JSON.stringify(self))
-                        }
-                      }
-                    } catch (err) {
-                      console.error("Error refreshing users after trade:", err)
-                    }
-                  }
-                  fetchAllUsers()
+                  // Refresh all users data after trade AND update current user state
+                  fetchUsersFromSupabase(true)
                 }}
               />
             )}
