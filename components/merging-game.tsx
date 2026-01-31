@@ -30,6 +30,7 @@ interface MergingGameProps {
     questions: Question[]
     durationSeconds: number
     onEnd: (score: number) => void
+    onScoreUpdate?: (score: number) => void
     onAwardTokens?: (amount: number) => void
 }
 
@@ -58,6 +59,7 @@ export default function MergingGame({
     onEnd,
     questions,
     durationSeconds,
+    onScoreUpdate,
     onAwardTokens,
 }: MergingGameProps) {
     const [timeLeft, setTimeLeft] = useState(durationSeconds)
@@ -222,7 +224,11 @@ export default function MergingGame({
                                     x: (b1.x + b2.x) / 2,
                                     y: 85,
                                 })
-                                setScore((s) => s + data.nextPoints)
+                                setScore((s) => {
+                                    const newScore = s + data.nextPoints
+                                    if (onScoreUpdate) onScoreUpdate(newScore)
+                                    return newScore
+                                })
                                 toRemove.add(b1.id)
                                 toRemove.add(b2.id)
 
