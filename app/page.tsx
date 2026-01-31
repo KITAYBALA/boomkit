@@ -873,6 +873,17 @@ export default function BoomkitGame() {
     [setUsers],
   )
 
+  // Handle logout
+  const handleLogout = useCallback(() => {
+    updateAndPersistCurrentUser(null)
+    setCurrentView("owner-access")
+    // Clear Supabase session if necessary
+    const supabase = getSupabaseBrowserClient()
+    if (supabase) {
+      supabase.auth.signOut()
+    }
+  }, [updateAndPersistCurrentUser])
+
   // Load initial data from localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -1154,16 +1165,6 @@ export default function BoomkitGame() {
     return currentUser?.isOwner || false
   }
 
-  // Handle logout
-  const handleLogout = () => {
-    updateAndPersistCurrentUser(null)
-    setCurrentView("owner-access")
-    // Clear Supabase session if necessary
-    const supabase = getSupabaseBrowserClient()
-    if (supabase) {
-      supabase.auth.signOut()
-    }
-  }
 
   // Check if user can spin today
   useEffect(() => {
