@@ -1,132 +1,337 @@
 export const TOPICS_BY_GRADE_SUBJECT: Record<number, Record<string, string[]>> = {
     1: {
-        "Math": ["Counting & Number Patterns", "Addition & Subtraction", "Place Value", "Geometry (Shapes)", "Measurement", "Time & Money"],
-        "Reading": ["Phonics & Decoding", "Sight Words", "Reading Comprehension", "Story Elements", "Vocabulary"],
-        "Writing": ["Sentence Structure", "Punctuation & Capitalization", "Spelling", "Narrative Writing", "Opinion Writing"],
-        "English Language Arts": ["Grammar Basics", "Parts of Speech (Nouns/Verbs)", "Listening & Speaking"],
-        "Science": ["Plants & Animals (Living Things)", "Weather & Seasons", "Matter (Solids, Liquids)", "Forces & Motion", "Day & Night"],
-        "Social Studies": ["Family & Community", "Maps & Globes", "Rules & Laws", "Holidays & Traditions", "Needs vs. Wants"],
-        "Art": ["Colors (Primary/Secondary)", "Shapes in Art", "Lines & Patterns", "Drawing Basics"],
-        "Music": ["Rhythm & Beat", "Melody", "Instruments", "Singing Basics"],
-        "Physical Education": ["Locomotor Skills", "Balance & Coordination", "Personal Health", "Teamwork Games"]
+        "Math": [
+            "General Math (All Topics)",
+            // Numbers & Counting
+            "Counting to 100", "Counting by 2s", "Counting by 5s", "Counting by 10s", "Counting Backward from 20", "Writing Numbers 0-20", "Number Words 1-10", "Number Words 11-20", "Ordinal Numbers (1st-5th)", "Ordinal Numbers (6th-10th)",
+            "Estimating Quantities", "Comparing Numbers (More)", "Comparing Numbers (Less)", "Equal To", "Even Numbers Intro", "Odd Numbers Intro", "Patterns with Shapes", "Patterns with Numbers", "Before and After Numbers", "Missing Numbers in Sequence",
+            // Operations
+            "Addition within 5", "Addition within 10", "Addition within 20", "Subtraction within 5", "Subtraction within 10", "Subtraction within 20",
+            "Missing Addends (Sum to 10)", "Number Bonds to 10", "Number Bonds to 20", "Doubles Facts (1+1 to 5+5)", "Doubles Facts (6+6 to 10+10)", "Doubles Plus One (2+3, 4+5)", "Making 10 to Add", "Commutative Property (2+3=3+2)",
+            "Word Problems: Adding Animals", "Word Problems: Adding Fruit", "Word Problems: Taking Away Toys", "Word Problems: Taking Away Balloons", "Fact Families (Addition/Subtraction)", "Mental Math: Adding 1", "Mental Math: Subtracting 1",
+            // Place Value
+            "Tens and Ones (Intro)", "Counting with Base Ten Blocks", "Comparing Two-Digit Numbers", "Expanded Form Basics", "10 More, 10 Less", "Identifying the Tens Digit", "Identifying the Ones Digit",
+            // Measurement & Data
+            "Measuring with Paper Clips", "Measuring with Cubes", "Longer vs. Shorter", "Taller vs. Shorter", "Heavier vs. Lighter", "Full vs. Empty", "Telling Time to the Hour", "Telling Time to the Half Hour",
+            "Morning, Afternoon, Night", "Yesterday, Today, Tomorrow", "Days of the Week", "Months of the Year", "Season Names", "Reading a Simple Calendar", "Identifying Pennies", "Identifying Nickels", "Identifying Dimes", "Identifying Quarters",
+            "Value of a Penny", "Value of a Nickel", "Value of a Dime", "Value of a Quarter", "Counting Pennies", "Counting Nickels", "Simple Bar Graphs", "Reading Tally Charts", "Making a Picture Graph", "Sorting Objects by Color", "Sorting Objects by Shape",
+            // Geometry
+            "Circles", "Squares", "Triangles", "Rectangles", "Hexagons", "Cubes", "Spheres", "Cones", "Cylinders", "Sides of a Shape", "Corners (Vertices)", "Open vs. Closed Shapes", "Fractions: Halves", "Fractions: Quarters", "Folding Shapes", "Symmetry intro"
+        ],
+        "Reading": [
+            "General Reading (All Topics)",
+            // Phonics & Phonemic Awareness
+            "Recognizing Syllables", "Rhyming Words (Short A)", "Rhyming Words (Short O)", "Rhyming Words (Short I)", "Beginning Sounds (Consonants)", "Ending Sounds (Consonants)", "Short A Vowel Sound", "Short E Vowel Sound", "Short I Vowel Sound", "Short O Vowel Sound", "Short U Vowel Sound",
+            "Long A with Silent E", "Long I with Silent E", "Long O with Silent E", "Long U with Silent E", "Consonant Blends: BL, CL, FL", "Consonant Blends: BR, CR, FR", "Consonant Blends: ST, SP, SK", "Digraphs: CH", "Digraphs: SH", "Digraphs: TH", "Digraphs: WH",
+            "R-Controlled Vowels: AR", "R-Controlled Vowels: OR", "R-Controlled Vowels: ER, IR, UR", "Soft C sounds", "Soft G sounds", "Word Family: -AT", "Word Family: -AN", "Word Family: -IG", "Word Family: -OP", "Word Family: -UG",
+            // Sight Words & Vocabulary
+            "High Frequency Words: Pre-Primer", "High Frequency Words: Primer", "High Frequency Words: First Grade", "Color Words Spellings", "Animal Name Vocabulary", "Family Member Vocabulary", "Opposites (Antonyms)", "Words for Actions (Verbs)", "Compound Words (Butterfly, Basketball)",
+            // Comprehension
+            "Retelling the Story", "Identifying the Main Character", "Describing the Setting", "What happened first?", "What happened last?", "Identifying the Problem", "Finding the Solution", "Making a Prediction", "Connecting the Story to My Life", "Author's Purpose (Tell/Teach/Fun)",
+            "Fiction vs. Real Life", "Picture Clues", "Character Feelings", "Summary of the Story", "Asking Questions while Reading"
+        ],
+        "Writing": [
+            "General Writing (All Topics)",
+            // Mechanics
+            "Holding a Pencil correctly", "Writing Capital Letters", "Writing Lowercase Letters", "Space between Words", "Starting with a Capital Letter", "Using a Period", "Using a Question Mark", "Using an Exclamation Point", "Spelling Short Words", "Proper Finger Spacing",
+            // Grammar
+            "Identifying Nouns", "Identifying Verbs", "Naming People", "Naming Places", "Naming Things", "Singular vs. Plural (Adding -s)", "Action Words in Sentences", "Describing Words (Adjectives)", "Using 'I' in a sentence", "The word 'and'", "Simple Sentences",
+            // Composition
+            "Writing My Name", "Writing a Label", "Writing a List", "Writing a Card", "Journal Entry: My Day", "Story: Once Upon a Time", "How-To: Making Toast", "Opinion: My Favorite Animal", "Informative: All about Dogs", "Writing to a Friend", "Describing a Picture"
+        ],
+        "Science": [
+            "General Science (All Topics)",
+            "Plants: Parts of a Seed", "Plants: Roots and Stems", "Plants: Leaves and Flowers", "What Plants Need: Water", "What Plants Need: Light", "Life Cycle of a Bean", "Types of Living Things", "Non-Living Things", "Animals: Mammals", "Animals: Birds", "Animals: Fish", "Animals: Reptiles",
+            "Animals: Insects", "Animal Life Cycles", "Animal Coverings (Fur, Feathers, Scales)", "Hibernation", "Migration", "Camouflage", "Nocturnal Animals", "Five Senses: Sight", "Five Senses: Hearing", "Five Senses: Smell", "Five Senses: Taste", "Five Senses: Touch", "Eating Healthy Food", "Parts of the Human Body",
+            "Keeping Clean (Germs)", "The Sun", "The Moon", "Day vs. Night", "Stars and Constellations", "Weather: Sunny Days", "Weather: Rainy Days", "Weather: Snowy Days", "Weather: Windy Days", "Clouds in the Sky", "The Four Seasons: Spring", "The Four Seasons: Summer", "The Four Seasons: Fall", "The Four Seasons: Winter",
+            "Recycling Paper and Plastic", "Saving Water", "Rocks and Pebbles", "Soil and Dirt", "Solids (Hard and Soft)", "Liquids (Water and Juice)", "Gases (Air and Bubbles)", "Sinking and Floating", "Magnets: Attraction", "Pushes and Pulls", "Gravity (Falling down)", "Fast vs. Slow Motion", "Light and Shadows", "Sound and Vibrations"
+        ],
+        "Social Studies": [
+            "General Social Studies (All Topics)",
+            "Rules in the Classroom", "Rules at Home", "Being a Kind Friend", "Taking Turns", "Honesty", "Responsibility", "Community Helpers: Doctors", "Community Helpers: Firefighters", "Community Helpers: Police Officers", "Community Helpers: Teachers", "Community Helpers: Farmers",
+            "Map Symbols", "What is a Globe?", "North, South, East, West Basics", "My Neighborhood", "The School Map", "Landforms: Mountains", "Bodies of Water: Oceans", "Past vs. Present: School", "Past vs. Present: Toys", "Past vs. Present: Travel", "Calendars and Time", "Timeline of My Life", "The American Flag",
+            "The Liberty Bell", "The Bald Eagle", "Pledge of Allegiance", "George Washington", "Abraham Lincoln", "MLK Jr. Day", "Thanksgiving History", "Independence Day", "Veteran's Day", "Family Traditions", "Needs: Food and Water", "Wants: Toys and Games", "Money and Buying", "Saving Money in a Bank"
+        ]
     },
     2: {
-        "Math": ["Addition & Subtraction (2-digit)", "Place Value (Hundreds)", "Measurement (Inches/Cm)", "Time (Analog/Digital)", "Money (Counting Coins)", "Data & Graphs"],
-        "Reading": ["Fluency", "Main Idea & Details", "Character & Setting", "Cause & Effect", "Poetry Basics"],
-        "Writing": ["Paragraph Structure", "Descriptive Writing", "Editing & Revising", "Letter Writing"],
-        "English": ["Parts of Speech (Adjectives/Adverbs)", "Contractions (can't, don't)", "Synonyms & Antonyms"],
-        "Science": ["Properties of Matter", "Habitats & Ecosystems", "Earth's Resources", "Simple Machines", "Water Cycle Basics"],
-        "Social Studies": ["Government Basics", "History (Time & Change)", "Geography (Landforms)", "Culture & Diversity", "Economics (Producers/Consumers)"],
-        "Art": ["Texture & Form", "Painting Techniques", "Famous Artists", "Mixed Media"],
-        "Music": ["Pitch (High/Low)", "Tempo (Fast/Slow)", "Musical Families", "Performance"],
-        "PE": ["Throwing & Catching", "Fitness Basics", "Movement Patterns", "Safety in Activity"]
+        "Math": [
+            "General Math (All Topics)",
+            "Counting to 1000", "Skip Counting by 2s to 100", "Skip Counting by 5s to 500", "Skip Counting by 10s to 1000", "Skip Counting by 100s", "Place Value: Hundreds, Tens, Ones", "Identifying Values of Digits", "Comparing 3-Digit Numbers (>, <, =)", "Ordering Numbers to 1000", "Reading & Writing 3-Digit Numbers", "Expanded Form to 1000",
+            "Mental Math: Adding 10", "Mental Math: Subtracting 10", "Mental Math: Adding 100", "Mental Math: Subtracting 100", "Addition within 100 (No Regrouping)", "Addition within 100 (with Regrouping)", "Subtraction within 100 (No Borrowing)", "Subtraction within 100 (with Borrowing)", "Adding Three 2-Digit Numbers", "Adding Four 2-Digit Numbers",
+            "Addition within 1000 (Standard Algorithm)", "Subtraction within 1000 (Standard Algorithm)", "One-Step Word Problems", "Two-Step Word Problems", "Even and Odd Numbers (Grouping)", "Pairs of Objects", "Intro to Arrays (Rows and Columns)", "Rectangular Arrays", "Repeated Addition (Basis for Multiplication)", "Partitioning Rectangles",
+            "Measuring in Inches (Ruler)", "Measuring in Centimeters", "Measuring in Feet and Yards", "Measuring in Meters", "Comparing Lengths (Difference)", "Estimating Length in Inches/CM", "Number Line Addition", "Number Line Subtraction", "Telling Time to 5 Minutes", "Using AM and PM", "Quarter Past and Quarter To", "Counting Pennies, Nickels, Dimes",
+            "Counting Quarters and Dollars", "Money Word Problems: Making Change", "Money Word Problems: Buying Items", "Reading a Line Plot", "Reading a Bar Graph (Scales)", "Creating a Picture Graph", "Interpreting Data from Graphs", "Recognizing Shapes: Triangles and Quadrilaterals", "Recognizing Pentagons and Hexagons", "Count Sides and Angles",
+            "Properties of Cubes", "Partitioning Circles: Halves", "Partitioning Circles: Fourths", "Partitioning Rectangles: Thirds", "Equal Shares", "Number of Thirds in a Whole"
+        ],
+        "Reading": [
+            "General Reading (All Topics)",
+            "Vowel Teams: AI and AY", "Vowel Teams: EE and EA", "Vowel Teams: IE and Y", "Vowel Teams: OA and OW", "Diphthongs: OI and OY", "Diphthongs: OU and OW", "Vowel Digraphs: OO, AU, AW", "Consonant Digraphs: KN, GN", "Silent Letters: WR", "Hard and Soft C", "Hard and Soft G", "Prefix: UN-", "Prefix: RE-", "Prefix: DIS-", "Suffix: -FUL", "Suffix: -LESS", "Suffix: -LY", "Suffix: -ABLE",
+            "Fluency: Reading with Feeling", "Fluency: Self-Correction", "Fluency: Pacing", "Context Clues for New Words", "Compound Word Review", "Multi-Syllable Words", "Identifying the Moral of a Fable", "Folktales from Different Cultures", "Character Traits: Brave, Kind, Sneaky", "Character Motivations (Why they do it)", "Comparing the Start and End of a Story", "Information within Illustrations",
+            "Comparing Two Versions of a Fairy Tale", "Identifying the Main Goal of a Text", "Text Features: Table of Contents", "Text Features: Glossary", "Text Features: Index", "Text Features: Electronic Menus", "Bold and Italic Words purpose", "Fact vs. Opinion basics", "Answering 5W Questions (Who, What, etc.)", "Making Connections: Text-to-Self", "Making Connections: Text-to-Text"
+        ],
+        "Writing": [
+            "General Writing (All Topics)",
+            "Collective Nouns (Group, Flock)", "Irregular Plurals (Children, Feet)", "Singular vs. Plural Nouns review", "Reflexive Pronouns (Myself, Himself)", "Identifying the Subject of a Sentence", "Identifying the Predicate", "Past Tense Irregular Verbs (Came, Saw, Went)", "Future Tense with 'Will'", "Adverbs that end in -LY", "Adjectives for Comparison (-ER, -EST)",
+            "Simple vs. Compound Sentences", "Using a Comma in a Friendly Letter", "Using a Comma in a Series", "Capitalizing Holidays", "Capitalizing Geographic Names", "Apostrophes in Contractions (Don't, Can't)", "Apostrophes in Possessives (User's Book)", "Dictionary Skills: First Letter", "Dictionary Skills: Guide Words", "Personal Narrative: A Memory", "Opinion: My Favorite Book",
+            "Informative: How to Play a Sport", "Descriptive Writing: Using Senses", "Fictional Narrative: Animals that Talk", "Poetry: Rhyme Schemes", "Poetry: Cinquain", "Editing: Checking for Capitals", "Publishing: Final Drafts"
+        ],
+        "Science": [
+            "General Science (All Topics)",
+            "What is Matter?", "Weight vs. Mass basics", "Measuring Liquid Volume", "Solids changing to Liquids", "Liquids changing to Solids", "What is an Ecosystem?", "Desert Habitats", "Rainforest Habitats", "Tundra Habitats", "Grassland Habitats", "Marine (Ocean) Habitats", "Freshwater Habitats", "Forest Habitats", "How Animals depend on Plants", "Pollination: Bees and Butterflies",
+            "How Seeds Travel", "Adaptations for Survival", "Life Cycle: Honeybee", "Life Cycle: Ant", "Diversity of Life", "Fast Changes on Earth", "Earthquakes (Causes)", "Volcanoes (Eruptions)", "Slow Changes on Earth", "Weathering by Water", "Weathering by Wind", "Erosion: Soil moving", "Landforms: Plateaus and Plains", "Landforms: Canyons and Valleys", "Lakes, Streams, and Rivers", "Oceans and Seas",
+            "Mapping Local Landforms", "Protecting the Environment", "Engineering: Building a Bridge", "Engineering: Testing a Model"
+        ],
+        "Social Studies": [
+            "General Social Studies (All Topics)",
+            "Timelines of History", "Native American Tribes: Coastal", "Native American Tribes: Plains", "Christopher Columbus Intro", "Ponce de Leon and Florida", "Jamestown Colony intro", "The Pilgrims and Plymouth", "The First Thanksgiving", "Colonial Life: School and Toys", "George Washington (President #1)", "Thomas Jefferson (President #3)", "Abraham Lincoln (President #16)", "The Statue of Liberty",
+            "Mount Rushmore", "The White House", "Rosa Parks and bravery", "The Continents: North and South America", "The Continents: Europe and Asia", "The Continents: Africa and Oceania", "Antarctica (The Ice Continent)", "The Five Oceans", "Equator and Prime Meridian", "Cardinal vs. Intermediate Directions", "Reading a Map Scale", "Grid Maps", "Rights of a Citizen", "Responsibilities (Chores/Voting)",
+            "Rules for Safety", "The Mayor's Job", "The Governor's Job", "The President's Job", "The Three Branches (Very Basic)", "Producers (Makers)", "Consumers (Buyers)", "Bartering (Trading Items)", "Supply and Demand (Basic)", "Community Businesses", "International Trade Intro"
+        ]
     },
     3: {
-        "Math": ["Multiplication & Division Intro", "Fractions Basics", "Area & Perimeter", "Quadrilaterals", "Rounding & Estimation", "Mass & Volume"],
-        "English (Reading & Writing)": ["Main Idea & Summary", "Point of View", "Inferences", "Grammar (Pronouns/Verbs)", "Cursive Writing"],
-        "Science": ["Forces & Interactions", "Life Cycles", "Inheritance of Traits", "Weather & Climate", "Ecosystems & Interactions"],
-        "Social Studies": ["Communities", "Local History", "Geography (Regions)", "Government Services", "Trade & Currency"],
-        "Computer Basics": ["Typing Skills", "Internet Safety", "Parts of a Computer", "Digital Citizenship"],
-        "Art": ["Color Theory", "Perspective Intro", "Cultural Art", "Sculpture Basics"],
-        "Music": ["Reading Notes", "Musical Notation", "Composers", "Singing in Rounds"],
-        "PE": ["Sports Skills", "Aerobic Capacity", "Muscular Strength", "Fair Play"]
+        "Math": [
+            "General Math (All Topics)",
+            "Multiplication as Groups", "Multiplication on the Number Line", "Arrays for Multiplication", "The Commutative Property (3x4 = 4x3)", "The Associative Property", "The Distributive Property", "Multiplication Facts for 0 and 1", "Multiplication Facts for 2 and 5", "Multiplication Facts for 3 and 4", "Multiplication Facts for 6, 7, 8", "Multiplication Facts for 9 and 10", "Multiplication Facts for 11 and 12",
+            "The Relationship between Mult and Div", "Division as Fair Sharing", "Division as Repeated Subtraction", "Fact Families (Mult and Div)", "Solving for the Missing Factor", "Order of Operations with Mult/Div", "Multi-Step Word Problems", "Estimating Products", "Rounding to the Nearest 10", "Rounding to the Nearest 100", "Fluency with Addition to 1000", "Fluency with Subtraction to 1000",
+            "Multiples of 10 (2 x 40, etc.)", "Identifying Number Patterns", "What is a Fraction?", "Fractions as Parts of a Whole", "Fractions as Parts of a Set", "Unit Fractions (1/2, 1/3, 1/4)", "Fractions on the Number Line", "Equivalent Fractions (Visuals)", "Generating Equivalent Fractions", "Simplest Form", "Comparing Fractions (Same Denominator)", "Comparing Fractions (Same Numerator)",
+            "Fractions equal to 1", "Telling Time to the Minute", "Calculating Elapsed Time", "Word Problems with Time", "Measuring Liquid Volume (Liters)", "Measuring Mass (Grams/Kilograms)", "Word Problems with Mass/Volume", "Interpreting Bar Graphs with Scales", "Creating Bar Graphs with Scales", "Reading Line Plots with Quarter Inches", "The Concept of Area", "Area of Rectangles (Counting Squares)",
+            "Area using Multiplication side lengths", "Area of Composite Shapes", "The Perimeter of Polygons", "Finding a Missing Side length with Perimeter", "Area vs. Perimeter: Same Area, Different Perimeter", "Classifying Quadrilaterals", "Rhombus vs. Square", "Trapezoids and Parallelograms", "Partitioning Shapes into Equal Areas"
+        ],
+        "English (Reading & Writing)": [
+            "General ELA (All Topics)",
+            "Asking Questions (Who, What, etc.)", "Citing Evidence from the Text", "Recounting Fables and Folktales", "Moral of the Story", "Describing Characters (Traits, Feelings)", "Character Perspective vs. Action", "Sequence of Events in Stories", "Cause and Effect in Literature", "Literal vs. Nonliteral Language", "Point of View (1st vs. 3rd Person)", "Illustrations and Meaning", "Comparing Characters in a Series",
+            "Main Idea of Informational Text", "Supporting Details", "Text Structure: Time Order", "Text Structure: Cause and Effect", "Vocabulary: Using Context Clues", "Using a Glossary/Dictionary", "Using Maps and Photos in Reading", "Sentence Fragments and Run-ons", "Abstract Nouns (Kindness, Bravery)", "Regular Verbs (Past, Present, Future)", "Irregular Verbs (Past Tense)", "Subject-Verb Agreement", "Pronoun-Antecedent Agreement",
+            "Comparative Adverbs (Faster)", "Superlative Adverbs (Fastest)", "Coordinating Conjunctions (And, But, Or)", "Simple Sentences", "Compound Sentences", "Complex Sentences", "Capitalizing Titles of Works", "Commas in Direct Address", "Dialogue with Quotation Marks", "Possessive Nouns (Singular/Plural)", "Word Nuances (Shades of Meaning)", "Opinion Essays: Introduction", "Opinion Essays: Giving Reasons", "Informative Writing: Facts and Details",
+            "Narrative Writing: Sensory Details", "Research: Using the Internet Safely", "Taking Notes from a Text"
+        ],
+        "Science": [
+            "General Science (All Topics)",
+            "Forces and Interactions", "Pushing and Pulling Forces", "Balanced vs. Unbalanced Forces", "Friction (Moving objects)", "Static Electricity", "Magnetic Poles", "Magnetic Force", "Life Cycle: Flower", "Life Cycle: Mammal", "Life Cycle: Insect", "Social Animals (Bees, Ants)", "Inheritance: Why children look like parents", "Variation: Why siblings look different", "Environmental Traits",
+            "Survival of the Fittest (Introduction)", "Adaptation to Environment", "Fossils: How they form", "Learning from Fossils", "Extinct Animals", "Changes in Habitats", "Impact of Humans on Ecosystems", "The Water Cycle (Evaporation, Condensation)", "Types of Precipitation", "Severe Weather: Hurricanes", "Severe Weather: Tornadoes", "Severe Weather: Blizzards", "Weather Hazards and Safety", "Defining a Problem for Engineering",
+            "Testing a Prototype", "Improving Designs"
+        ],
+        "Social Studies": [
+            "General Social Studies (All Topics)",
+            "Reading a World Map", "Latitude and Longitude (Intro)", "The Hemispheres", "Physical Regions of the Earth", "Climate Zones (Tropical, Temperate, Polar)", "Natural Resources and the Environment", "Human Impact on the Land", "Native Americans of the Southwest", "Native Americans of the Northeast", "Native Americans of the Plains", "Founding of My Community", "Immigration and Culture", "Customs and Traditions Around the World",
+            "Global Trade: Why we buy from other countries", "Local Government Services (Library, Police)", "How Laws are Made", "Taxes and what they pay for", "Rights of Free Speech", "The Judicial Branch (Courts)", "Conflict and Cooperation", "Standard of Living", "Economic Specialization", "Opportunity Cost", "Financial Literacy: Spending vs. Saving", "The Role of Banks"
+        ],
+        "Computer Basics": [
+            "General Computer Skills",
+            "Hardware (CPU, Monitor, Mouse)", "Input Devices", "Output Devices", "Storage Devices", "Typing: Home Row Position", "Typing Accuracy", "Typing Speed Goals", "Navigating the Desktop", "Opening and Closing Windows", "File Management: Folders", "Browser Basics", "Searching the Web Safely", "URLs and Domains (.com, .gov)", "Identifying Scams", "Cyberbullying Prevention", "Digital Citizenship", "Using Email properly", "Creating a Presentation Slide"
+        ],
     },
     4: {
-        "Math": ["Multi-digit Multiplication", "Long Division", "Fractions (Equivalence/Ordering)", "Decimals Intro", "Angles & Lines", "Unit Conversions"],
-        "English Language Arts": ["Theme & Moral", "Text Structure", "Figurative Language (Similes)", "Research Skills", "Opinion Essays"],
-        "Science": ["Energy & Collisions", "Waves (Light/Sound)", "Earth's Systems (Geology)", "Renewable Energy", "Plant Structures"],
-        "Social Studies": ["State History", "US Regions", "American Revolution Intro", "Government Branches", "Immigration Basics"],
-        "Computer Science": ["Coding Basics (Blocks)", "Algorithms", "Debugging", "Input/Output"],
-        "Art": ["Symmetry & Pattern", "Portraiture", "Landscape Art", "Printmaking"],
-        "Music": ["Harmony", "Musical Genres", "Instrumental Skills", "Rhythm Reading"],
-        "PE": ["Team Sports", "Fitness Goals", "Rhythmic Movement", "Sportsmanship"]
+        "Math": [
+            "General Math (All Topics)",
+            "Place Value up to 1,000,000", "Comparing Large Numbers", "Rounding Large Numbers", "Adding Large Numbers (Standard Algo)", "Subtracting Large Numbers (Standard Algo)", "Multiplication: 2-Digit by 2-Digit", "Multiplication: 3-Digit by 1-Digit", "Multiplication: 4-Digit by 1-Digit", "Area Models for Multiplication", "Partial Products Multiplication", "Long Division with 1-Digit Divisor", "Division with Remainders",
+            "Interpreting Remainders", "Partial Quotients Division", "Factors and Multiples", "Identifying Prime Numbers", "Identifying Composite Numbers", "Generating a Number Pattern", "Generating a Shape Pattern", "Equivalent Fractions (Detailed)", "Comparing Fractions (Different Denom)", "Adding Fractions (Same Denom)", "Subtracting Fractions (Same Denom)", "Decomposing Fractions", "Adding Mixed Numbers",
+            "Subtracting Mixed Numbers", "Multiplying a Fraction by a Whole Number", "Denominator of 10 and 100", "Comparing Fractions with 10/100 Denom", "Decimal Notation for Fractions", "Comparing Decimals to Hundredths", "Line Plots with Fraction Data", "Relative Size of Measurement Units", "Converting Miles to Feet", "Converting Hours to Minutes", "Calculating Area of Rectangles", "Calculating Perimeter of Rectangles",
+            "Solving Area/Perimeter Word Problems", "Angle Concepts", "Measuring Angles with a Protractor", "Drawing Angles", "Additive Angle Problems", "Geometric Building Blocks: Points, Lines, Rays", "Parallel Lines", "Perpendicular Lines", "Right, Acute, and Obtuse Angles", "Classifying Triangles (Right/Acute/Obtuse)", "Classifying Quadrilaterals with Parallel Lines", "Lines of Symmetry"
+        ],
+        "English Language Arts": [
+            "General ELA (All Topics)",
+            "Inferences in Literature", "Finding the Theme", "Summarizing Fiction", "Character Analysis: Interactions", "Setting Analysis: Sensory Details", "Greek and Roman Mythology Allusions", "Poetry: Rhythm and Rhyme", "Poetry: Stanzas and Verses", "Drama: Dialogue and Stage Directions", "Comparing First vs. Third Person Point of View", "Visual Elements in Fiction", "Comparing Traditional Myths",
+            "Main Idea in Nonfiction", "Supporting Evidence", "Summarizing Informational Text", "Historic/Scientific Text: Chronology", "Historic/Scientific Text: Cause/Effect", "Historic/Scientific Text: Compare/Contrast", "General Academic Vocabulary", "Domain-Specific Vocabulary", "Firsthand vs. Secondhand Accounts", "Using Charts and Maps in Reading", "Integrating Information from Multiple Texts", "Drawing Evidence from Reading",
+            "Relative Pronouns (Who, Which, That)", "Relative Adverbs (Where, When, Why)", "Progressive Verb Tenses (Am running)", "Modal Auxiliaries (Can, May, Must)", "Order of Adjectives", "Prepositional Phrases", "Creating Complete Sentences", "Correcting Sentence Fragments", "Correcting Run-on Sentences", "Homophones (Their, There, They're)", "Capitalizing Proper Nouns", "Using Commas and Quotation Marks in Dialogue",
+            "Using Conjunctions to Connect Ideas", "Similes and Metaphors", "Idioms and Adages", "Proverbs", "Synonyms and Antonyms", "Formal vs. Informal Language", "Foundations of Research", "Quoting Secondary Sources", "Using Search Engines effectively"
+        ],
+        "Science": [
+            "General Science (All Topics)",
+            "Forms of Energy", "Sound Energy and Vibration", "Light Energy and Reflection", "Refraction (Bending Light)", "Electrical Energy Circuits", "Heat Transfer (Convection, Conduction, Radiation)", "Energy in Motion (Speed)", "Energy Transfer in Collisions", "Stored Energy", "Wavelength and Amplitude", "How the Human Eye sees Light", "Communication using Patterns (Morse Code)", "Digital Communication Basics",
+            "The Rock Cycle", "Sedimentary Rocks and Fossils", "Metamorphic Rocks", "Igneous Rocks", "Erosion by Glaciers", "Erosion by Water", "Impact of Weathering", "Plate Tectonics Intro", "Causes of Earthquakes", "Measuring Earthquake Strength", "Volcanic Landforms", "Map Analysis of Landforms", "Renewable Resources (Wind, Solar)", "Non-renewable Resources (Coal, Oil)", "Fossil Fuels and the Environment", "Mining and Land Use",
+            "Protecting against Natural Hazards", "Plant Structures: Internal vs. External", "Animal Senses and Survival", "How the Brain processes signals"
+        ],
+        "Social Studies": [
+            "General Social Studies (All Topics)",
+            "The Five Regions of the United States", "State Capitals for all 50 States", "Map Coordinates review", "Landforms of North America", "Indigenous Tribes: Northeast Woodlands", "Indigenous Tribes: Southeast (Cherokee)", "Indigenous Tribes: Southwest (Pueblo)", "Indigenous Tribes: Northwest Coast", "Indigenous Tribes: Great Plains", "European Explorers: Spanish", "European Explorers: French", "European Explorers: English",
+            "The 13 Original Colonies", "Colonial Economies (Tobacco, Ship-building)", "The French and Indian War", "Taxes and Tensions (Boston Tea Party)", "The Declaration of Independence", "The Revolutionary War: Battles", "The Revolutionary War: People", "The Constitution of the USA", "The Three Branches of Government (Checks/Balances)", "Federal vs. State Government", "The Bill of Rights (Amendments 1-10)", "The Oregon Trail and Pioneers",
+            "The Gold Rush", "The Industrial Revolution in America", "Steam Power and Railroads", "History of Immigration in the Late 1800s", "Ellis Island and Angel Island", "Women's Suffrage Movement (Early)", "Abolitionist Movement basics", "Major Inventions (Lightbulb, Telephone)", "Current Events: Domestic Issues", "Global Citizenship"
+        ],
+        "Computer Science": [
+            "General Computer Science",
+            "What is an Algorithm?", "Sequential Instructions", "Looping with Conditions", "Events and Interaction", "Variables: Storing Data", "Logic: If-Then statements", "Debugging: Finding Errors", "Decomposing Problems", "Abstraction in Coding", "Block-based Coding Projects", "Creating Digital Art with code", "Internet Protocols intro", "Public vs. Private Information on the Web", "Copyright and Fair Use laws"
+        ]
     },
     5: {
-        "Math": ["Decimal Operations", "Fraction Operations", "Volume", "Coordinate Plane", "Order of Operations", "Powers of 10"],
-        "English": ["Reading Informational Text", "Multiple Accounts", "Greek & Latin Roots", "Argumentative Writing", "Narrative Arcs"],
-        "Science": ["Matter & Particles", "Photosynthesis", "Ecosystem Dynamics", "Earth's Spheres", "Stars & Solar System"],
-        "Social Studies": ["US History (Colonial - Civil War)", "Geography of the Americas", "Economics (Supply/Demand)", "Civic Responsibilities"],
-        "Computer Science": ["Loops & Conditionals", "Binary Basics", "Presentation Software", "Data Analysis"],
-        "Art": ["3D Art", "Art History", "Abstract Art", "Visual Storytelling"],
-        "Music": ["Ensemble Playing", "Music Theory", "World Music", "Composition Basics"],
-        "PE": ["Game Strategy", "Skill Refinement", "Personal Fitness Plan", "Cooperative Games"]
+        "Math": [
+            "General Math (All Topics)",
+            "Order of Operations (PEMDAS)", "Using Brackets and Parentheses", "Writing Numerical Expressions", "The Value of Decimal Places", "Powers of 10 and Exponents", "Scientific Notation (Intro)", "Multiplying by Powers of 10", "Dividing by Powers of 10", "Multi-Digit Multiplication (Standard Algo)", "Long Division (2-Digit Divisor)", "Addition of Decimals", "Subtraction of Decimals", "Multiplication of Decimals", "Division of Decimals",
+            "Decimal Word Problems", "Comparing Decimals to Thousandths", "Adding Fractions with Unlike Denominators", "Subtracting Fractions with Unlike Denominators", "Generating Equivalent Fractions (Advanced)", "Multiplying Fractions by Whole Numbers", "Multiplying Fractions by Fractions", "Finding the Area of Rectangles with Fractional Sides", "Fractional Scaling (Larger/Smaller)", "Fraction Word Problems", "Dividing Unit Fractions by Whole Numbers",
+            "Dividing Whole Numbers by Unit Fractions", "Conversions within Metric System (Meters, Grams, Liters)", "Conversions within Customary System (Inches, Pounds, Quarts)", "Multi-Step Measurement Word Problems", "Line Plots with Fractional Intervals", "Understanding Volume", "Unit Cubes and Volume", "Volume of Rectangular Prisms (l x w x h)", "Volume of Composite Figures (Additive)", "Coordinate Planes: X and Y Axis", "Plotting Points in the 1st Quadrant",
+            "Geometry: Properties of 2D Figures", "Classifying Triangles (Isosceles, Scalene, Equilateral)", "Classifying Quadrilaterals Hierarchy", "Properties of Regular Polygons"
+        ],
+        "English": [
+            "General ELA (All Topics)",
+            "Quoting accurately from a text", "Theme determination from details", "Summarizing complex stories", "Character comparisons across stories", "Setting comparisons across stories", "Metaphors and Similes in Poetry", "Analyzing Poetry Structures", "Analyzing Drama Structures", "Comparison of Visual vs. Written Texts", "Analyzing Mystery Genre elements", "Historical Fiction Characteristics", "Graphic Novel Analysis",
+            "Determining Main Ideas of Info Text", "Explain relationships in Scientific/Historic text", "Analyzing multiple accounts of same event", "Comparing First vs. Secondhand POV", "Evaluating Evidence in an Argument", "Analyzing how an author uses reasons", "Technical Vocabulary", "Integrating Information from Several Texts", "Fluency and Accuracy in Reading", "Conjunctions and Prepositions", "Interjections!", "Perfect Verb Tenses (Has/Had)",
+            "Shifts in Verb Tense", "Correlative Conjunctions (neither/nor)", "Punctuation in a Series", "Using Commas for Introductory Phrases", "Using Commas for Yes/No", "Titles of Works (Underlining/Italics)", "Greek and Latin Roots (list 1)", "Greek and Latin Roots (list 2)", "Context Clues (Advanced)", "Nuance in Near-Synonyms", "Opinion Writing: Logic and Transitions", "Informational Writing: Clear Formatting", "Narrative Writing: Pacing and Closure",
+            "Conducting Research using Primary/Secondary sources", "Paraphrasing data correctly"
+        ],
+        "Science": [
+            "General Science (All Topics)",
+            "Particles in Matter", "Conservation of Matter in Changes", "Dissolving and Mixtures", "Identifying Mystery Substances", "Chemical Reactions: Signs of Change", "Gravitational Force of Earth", "Brightness of the Sun vs. Other Stars", "The Orbit of Earth", "The Rotation of Earth", "Seasonal Constellation changes", "Daily Shadow patterns", "Photosynthesis: How Plants get Energy", "The Role of Decomposers", "Food Webs and Energy Pyramids",
+            "Transfer of Energy from Sun to Animals", "Cycling of Matter in Ecosystems", "The Geosphere (Land)", "The Biosphere (Life)", "The Hydrosphere (Water)", "The Atmosphere (Air)", "Interactions between Earth's Spheres", "Availability of Salt Water vs. Fresh Water", "Sustainable Agriculture", "Human Impact on the Environment (Positive/Negative)", "Renewable Energy sources deep dive"
+        ],
+        "Social Studies": [
+            "General Social Studies (All Topics)",
+            "The Age of Exploration: Major Routes", "Effects of Exploration on Indigenous Peoples", "Colonial America: Everyday Life", "The French and Indian War impact", "The Stamp Act and Sons of Liberty", "The Boston Massacre", "The Continental Congress", "The Declaration of Independence (Sections)", "The Revolutionary War (Northern Strategy)", "The Revolutionary War (Southern Strategy)", "The Articles of Confederation (Success/Failure)",
+            "The Constitution: Great Compromise", "The Electoral College intro", "The Bill of Rights (Amendment-by-Amendment)", "The War of 1812", "The Industrial Revolution: Cotton Gin and Telegraph", "Westward Expansion and the Trail of Tears", "Causes of the Civil War: Abolitionism", "Causes of the Civil War: Sectionalism", "The Civil War: Major Leaders", "The Civil War: Emancipation Proclamation", "Reconstruction: Amendments 13, 14, 15", "The Jim Crow Era basics",
+            "Turn of the Century Inventions", "Late 19th Century Immigration patterns", "Urbanization: Rise of Cities", "Geography: Major Landforms of the USA", "US Capitals Memorization"
+        ],
+        "Computer Science": [
+            "General Computer Science",
+            "Nested Loops in Programming", "Boolean Logic (And, Or, Not)", "Global vs. Local Variables", "Modular Programming: Functions", "Data Collection and Analysis", "Visualizing Data with Computers", "Binary Code: Bits and Bytes", "Hardware components deep dive", "Operating Systems basics", "Network Routers and Switches", "Internet Protocols: HTTP and DNS", "Safe Online Communities", "Cyber Security: Strong Passwords"
+        ]
     },
     6: {
-        "Math": ["Ratios & Proportions", "Rational Numbers", "Expressions & Equations", "Statistics (Mean/Median)", "Area of Polygons", "Volume of Prisms"],
-        "English": ["Literary Analysis", "Argumentative Essays", "Connotations & Denotations", "Reliable Sources", "Plot vs. Theme"],
-        "Science": ["Cells & Organisms", "Body Systems", "Energy Transfer", "Forces (Gravity/Friction)", "Weather Patterns"],
-        "History": ["Ancient Civilizations (Mesopotamia, Egypt)", "Ancient Greece & Rome", "World Religions", "Geography & Human Impact"],
-        "Geography": ["Maps & Projections", "Physical Geography", "Human Geography", "Resources & Trade"],
-        "Computer Science / ICT": ["Text-Based Coding Intro", "HTML/CSS Basics", "Digital Ethics", "Spreadsheet skills"],
-        "Art": ["Perspective Drawing", "Color Psychology", "Digital Art Intro", "Critique & Analysis"],
-        "Music": ["Music History", "Chords & Scales", "Band/Orchestra", "Appreciation"],
-        "PE": ["Team Strategies", "Health-Related Fitness", "Lifetime Activities", "Conflict Resolution"]
+        "Math": [
+            "General Math (All Topics)",
+            "Ratio Language and Rates", "Equivalent Ratios", "Unit Rate Problems", "Solving Percent Problems", "Converting Fractions to Decimals and Percents", "Dividing Fractions by Fractions", "Long Division Fluency with Multi-Digit numbers", "Adding and Subtracting Decimals Fluency", "Multiplying and Dividing Decimals Fluency", "Greatest Common Factor (GCF)", "Least Common Multiple (LCM)", "The Distributive Property with GCF",
+            "Integers and the Number Line", "Opposite Values and Zero", "Rational Numbers on the Number Line", "Coordinate Plane: Four Quadrants", "Ordering Rational Numbers", "Understanding Absolute Value", "Distance on the Coordinate Plane", "Numerical Expressions with Exponents", "Algebraic Expressions (Variables)", "Writing Expressions from Words", "Evaluating Expressions with Substitution", "Generating Equivalent Expressions", "Identifying Equivalent Expressions",
+            "Solving One-Step Equations (Add/Sub)", "Solving One-Step Equations (Mult/Div)", "Inequalities on a Number Line", "Dependent vs. Independent Variables", "Area of Triangles (Formula)", "Area of Special Quadrilaterals", "Area of Polygons (Decomposition)", "Volume of Rectangular Prisms with Fractions", "Surface Area using Nets", "Statistical Questions and Variability", "The Mean (Average)", "The Median (Middle)", "The Mode (Most Common)",
+            "The Range of Data", "Dot Plots", "Histograms", "Box Plots (Five-Number Summary)", "Mean Absolute Deviation (MAD)"
+        ],
+        "English": [
+            "General ELA (All Topics)",
+            "Citing textual evidence (Middle School level)", "Determining Theme and Summaring Literature", "Plot Development: Introduction to Climax", "Character response to change", "Figurative/Connotative Meanings", "Tone Analysis in Fiction", "Analyze how a chapter fits into a book", "Point of View: Author vs. Character", "Integrating diverse media in literature", "Literature vs. Film comparisons", "Central Ideas in Informational Text", "Summarizing Nonfiction",
+            "Analyzing Key individuals in history/science", "Word choice in technical text", "Analyzing text structure (Info)", "Determining point of view in nonfiction", "Evaluate arguments and claims", "Comparing Two Authors' views", "Objective view and Tone", "Pronoun Case (Subjective/Objective)", "Intensive Pronouns", "Vague Pronouns", "Punctuation for Effect (Commas, Parentheses, Dashes)", "Spelling correctly (Grade 6 level)", "Expanding Vocabulary (Academic)",
+            "Greek and Latin Roots (Latin list)", "Greek and Latin Roots (Greek list)", "Reference Materials (Thesaurus, Online Lexicon)", "Context Clues for academic logic", "Argumentative Essays: Supporting Claims", "Informative Essays: Organizing Ideas", "Narrative Writing: Engaging the Reader", "Short Research Projects", "Evaluating Source Credibility"
+        ],
+        "Science": [
+            "General Science (All Topics)",
+            "Cells: Nucleus and DNA", "Cells: Mitochondria and Energy", "Cells: The Cell Membrane", "Plant vs. Animal Cells (Detailed)", "Tissue, Organs, and Systems", "Digestive System: Organs", "Circulatory System: Heart and Vessels", "Respiratory System: Lungs and Gas Exchange", "Nervous System: Brain and Nerves", "Muscular and Skeletal Systems", "Homeostasis basics", "Types of Asexual Reproduction", "Genetics: Dominant and Recessive Traits (Intro)",
+            "States of Matter: Molecular Motion", "Thermal Energy and Temperature", "Heat Transfer: Conduction", "Heat Transfer: Convection", "Heat Transfer: Radiation", "Density of Substances", "Kinetic Energy formula (Conceptual)", "Potential Energy types", "The Water Cycle and Global Circulation", "Ocean Currents: Surface vs. Deep", "Air Masses and Weather Fronts", "Reading a Weather Map", "Factors affecting Climate (Latitude, Altitude)", "The Greenhouse Effect",
+            "Global Warming evidence", "Human impact on Water quality"
+        ],
+        "History": [
+            "General World History (All Topics)",
+            "Paleolithic vs. Neolithic Era", "The Agricultural Revolution", "Mesopotamia: Fertile Crescent", "Sumerian Inventions (Writing, Wheels)", "The Code of Hammurabi", "Ancient Egypt: Geography of the Nile", "Egypt: Old, Middle, and New Kingdoms", "Ancient India: Harappa and Mohenjo-Daro", "Ancient India: Caste System basics", "Ancient China: Shang and Zhou Dynasties", "Confucianism and Taoism", "Chinese Inventions (Silk, Compass)", "Ancient Israel: Origins",
+            "Ancient Greece: Polis (Athens/Sparta)", "Greek Democracy", "The Persian Wars", "The Golden Age of Athens", "Greek Philosophers (Socrates, Plato)", "Alexander the Great's Empire", "Roman Republic: Origins", "The Punic Wars", "Rise of the Roman Empire", "Pax Romana", "The Fall of Rome (Causes)", "World Religions: Origins of Hinduism/Buddhism", "History skills: Timelines and Maps", "Primary vs. Secondary sources deep dive"
+        ]
     },
     7: {
-        "Math (Pre-Algebra)": ["Proportional Relationships", "Operations with Rational Numbers", "Algebraic Expressions", "Inequalities", "Geometry (Circles/Angles)", "Probability"],
-        "English": ["Analytical Writing", "Tone & Mood", "Poetry Analysis", "Media Literacy", "Complex Sentence Structure"],
-        "Biology": ["Cell Structure & Function", "Genetics & Heredity", "Evolution & Natural Selection", "Ecosystem Organization"],
-        "History": ["Middle Ages", "Renaissance & Reformation", "Age of Exploration", "Feudal Japan", "Aztec/Inca/Maya"],
-        "Geography": ["Cultural Geography", "Global Interdependence", "Population Trends", "Environmental Issues"],
-        "Computer Science": ["Python Basics", "Cybersecurity", "Web Design", "Hardware Components"],
-        "Foreign Language": ["Basic Vocabulary", "Common Phrases", "Grammar Introduction", "Cultural Appreciation"],
-        "PE": ["Personal Training", "Skill Mastery", "Social Interaction", "Rules & Officiating"]
+        "Math (Pre-Algebra)": [
+            "General Math (All Topics)",
+            "Unit Rates with Complex Fractions", "Proportional Relationships and Constancy", "The Constant of Proportionality (k)", "Graphing Proportional Relationships", "Solving Multi-Step Percent Problems", "Simple Interest Formula", "Tax, Tips, and Gratuities", "Markups and Markdowns", "Percent Increase and Decrease", "Adding and Subtracting Integers", "Multiplying and Dividing Integers", "Applying Operations to Rational Numbers", "Converting Rational Numbers to Decimals",
+            "Real-World Problems with Rational Numbers", "Simplifying Linear Expressions", "Factoring Linear Expressions", "Solving Two-Step Equations", "Solving Equations with Distribution", "Applying Equations to Word Problems", "Solving and Graphing Inequalities", "Solving Two-Step Inequalities", "Scale Drawings of Geometric Figures", "Scale Factor and Area", "Constructing Triangles with given conditions", "Cross Sections of 3D Figures", "Area of a Circle formula",
+            "Circumference of a Circle formula", "Angle Relationships (Supplementary/Complementary)", "Vertical and Adjacent Angles", "Solving for Unknown Angles", "Volume of Right Prisms", "Surface Area of Right Prisms", "Volume of Pyramids", "Random Sampling for Inferences", "Comparing Two Data Distributions", "Using the Mean Absolute Deviation (MAD)", "The Concept of Probability", "Predicting Results using Probability", "Theoretical vs. Experimental Probability",
+            "Probability of Compound Events", "Tree Diagrams for Outcomes"
+        ],
+        "English": [
+            "General ELA (All Topics)",
+            "Citing multiple pieces of evidence", "Theme development in Middle School Literature", "Summarizing stories objectively", "In-depth character analysis", "Poetic Form: Sonnets and Ballads", "Analyzing Drama Scenes", "Character Points of View", "Literary Allusions in Modern Writing", "Determining Central Ideas and Summarizing Nonfiction", "Analyzing interactions between individuals/events", "Technical Word Meanings in Nonfiction", "Analyzing Text Structure for Persuasion",
+            "Authors' Points of View in multiple texts", "Evaluating the logic of a claim", "Comparing two authors on the same topic", "Phrases vs. Clauses", "Independent vs. Dependent Clauses", "Simple, Compound, Complex, Compound-Complex Sentences", "Comma usage after clauses", "Misplaced Modifiers", "Dangling Modifiers", "Words with Positive/Negative Connotations", "Figures of Speech: Personification and Hyperbole", "Argumentative Writing: Logic and Transitions",
+            "Informative Writing: Topic Development", "Narrative Writing: Character Motivation", "Research using Paraphrasing/Quoting", "MLA Citation basics"
+        ],
+        "Biology": [
+            "General Biology (All Topics)",
+            "Structure and Function of Organelles", "Cell Wall vs. Cell Membrane", "Passive Transport: Diffusion and Osmosis", "Active Transport Basics", "Photosynthesis: The Equation", "Cellular Respiration: The Equation", "Comparison of Energy Processes", "Mitosis: Stages (Prophase to Telophase)", "Meiosis: Gamete Production", "Mendelian Genetics: Pea Plants", "Punnett Squares: Monohybrid Cross", "Genotype vs. Phenotype", "Dominant vs. Recessive alleles",
+            "Incomplete Dominance", "Sex-Linked Traits intro", "DNA Structure basics", "Genetic Mutations (Types)", "Fossil Record Evidence for Evolution", "Anatomical Homology", "Embryological Evidence for Evolution", "The Process of Natural Selection", "Artificial Selection vs. Natural Selection", "Biodiversity and Ecosystem health", "Interdependent Relationships in Ecosystems", "Food Webs and Energy Flow", "Cycles of Matter: Carbon and Nitrogen", "Resources and Human Populations"
+        ],
+        "History": [
+            "General World History (All Topics)",
+            "Legacy of the Roman Empire", "The Byzantine Empire (Justinian/Theodora)", "The Rise of Islam", "The Golden Age of Islam (Science/Art)", "West African Kingdoms: Ghana", "West African Kingdoms: Mali (Mansa Musa)", "West African Kingdoms: Songhai", "East African Trading States", "Maya Civilization: Achievements", "Aztec Empire: Society/Tenochtitlan", "Inca Empire: Engineering/Machu Picchu", "Reunification of China (Sui/Tang)", "The Song Dynasty (Inventions)",
+            "The Mongol Empire (Genghis Khan)", "Yuan Dynasty in China", "Feudal Japan (Shogunate/Samurai)", "Heian Period Culture", "Medieval Europe: Feudalism/Manorialism", "The Power of the Church in Middle Ages", "The Crusades (Causes and Effects)", "The Black Death (Impact on Europe)", "The Hundred Years War", "The Renaissance in Italy", "Renaissance Art and Humanism", "The Northern Renaissance", "The Protestant Reformation (Luther/Calvin)", "The Counter-Reformation"
+        ]
     },
     8: {
-        "Math (Algebra)": ["Linear Equations", "Functions", "Systems of Equations", "Exponents & Scientific Notation", "Pythagorean Theorem", "Transformations"],
-        "English": ["Literary Classics", "Research Papers", "Rhetorical Analysis", "Listening & Debate", "Narrative Techniques"],
-        "Biology": ["Human Anatomy (Detailed)", "DNA & RNA", "Biotechnology Basics", "Biodiversity"],
-        "Chemistry (Basics)": ["Atomic Structure", "Periodic Table Intro", "Chemical Reactions", "States of Matter"],
-        "History": ["US History (Constitution - Reconstruction)", "Civil War", "Industrial Revolution", "Government Systems"],
-        "Geography": ["Geopolitics", "Global Economics", "Urbanization", "Case Studies"],
-        "Computer Science": ["Programming Logic", "App Development Basics", "Networks", "Artificial Intelligence Intro"],
-        "Foreign Language": ["Verb Conjugations", "Sentence Construction", "Dialogue Practice", "Reading Short Texts"],
-        "PE": ["Fitness Assessment", "Movement Concepts", "Nutrition & Performance", "Leadership"]
+        "Math (Algebra)": [
+            "General Math (All Topics)",
+            "Rational vs. Irrational Numbers", "Finding Approximations of Square Roots", "Properties of Integer Exponents", "Scientific Notation Operations", "Squares and Square Roots", "Cubes and Cube Roots", "Estimating with Scientific Notation", "Linear Equations: Solving Multi-Step", "Solving Equations with Variables on Both Sides", "Equations with One, Zero, or Infinite Solutions", "Defining a Function", "Function Rules and Tables", "Linear vs. Nonlinear functions",
+            "Comparing Functions in different forms", "Slope-Intercept Form (y = mx + b)", "Calculating Slope from Two Points", "Calculating Slope from a Graph", "Graphing Linear Equations", "Applications of Linear Functions", "Systems of Equations Basics", "Systems of Equations: Solving by Graphing", "Systems of Equations: Solving by Substitution", "Systems of Equations: Word Problems", "Geometric Transformations: Translations", "Geometric Transformations: Reflections",
+            "Geometric Transformations: Rotations", "Geometric Transformations: Dilations", "Similarity of Figures", "Congruence of Figures", "Parallel Lines and Transversals (Angles)", "The Pythagorean Theorem Formula", "Pythagorean Theorem: Solving for Hypotenuse", "Pythagorean Theorem: Solving for a Leg", "Converse of the Pythagorean Theorem", "Pythagorean Theorem in 3D", "The Distance Formula", "Volume of Cylinders", "Volume of Cones", "Volume of Spheres",
+            "Scatter Plots and Patterns", "The Line of Best Fit", "Interpreting Linear Models", "Two-Way Frequency Tables"
+        ],
+        "English": [
+            "General ELA (All Topics)",
+            "Citing the strongest textual evidence", "Theme development (8th Grade Level)", "Objectively summarizing literature", "Internal vs. External Conflict in characters", "Tone and Mood Deep Analysis", "Impact of Analogies in Text", "Analyzing how Dialogue reveals character", "Standard Plot Structure vs. Nonlinear plots", "Biblical and Mythological Allusions (Deep dive)", "Literary Archetypes", "Main Idea and Support in Nonfiction",
+            "Connection between ideas/individuals across a text", "Analyzing Author Perspective and Bias", "Conflicting viewpoints in Nonfiction", "Analyzing Persuasive Rhetoric", "Evaluating the Credibility of an Argument", "Verbals: Gerunds", "Verbals: Participles", "Verbals: Infinitives", "Active vs. Passive Voice", "Imperative, Interrogative, and Indicative Moods", "Subjective and Conditional Moods", "Punctuation: Ellipsis and Dashes", "Irony and Satire", "Word Nuances and Connotations",
+            "Argumentative Writing: Counterclaims", "Informative Writing: Structuring complex ideas", "Narrative Writing: Narrative Techniques", "Synthesizing Research from multiple sources"
+        ],
+        "Chemistry (Basics)": [
+            "General Chemistry (All Topics)",
+            "Atomic Structures: Protons and Neutrons", "Electron Shells and Valence Electrons", "Modern Periodic Table", "Groups and Periods of Elements", "Metals, Non-Metals, and Metalloids", "Chemical Bonding Intro", "Ionic Bonds (Transferring Electrons)", "Covalent Bonds (Sharing Electrons)", "Chemical Formulas and Naming", "Chemical Reactions and Balancing Equations", "The Law of Conservation of Mass", "Synthesis and Decomposition Reactions",
+            "Replacement Reactions", "Exothermic and Endothermic Reactions", "Concentration and Rate of Reaction", "Acids and Bases (pH Scale)", "Indicators", "Matter and its Physical Properties", "Matter and its Chemical Properties"
+        ],
+        "History": [
+            "General US History (All Topics)",
+            "Review: The Thirteen Colonies", "Causes of the American Revolution", "The Declaration of Independence", "The Revolutionary War (Detail)", "The Articles of Confederation Limitations", "The US Constitution: Drafting", "The Federalist Papers", "The Bill of Rights", "George Washington's Neutrality", "Alexander Hamilton vs. Thomas Jefferson", "The War of 1812 (Second Independence)", "The Era of Good Feelings", "The Monroe Doctrine",
+            "The Election of Andrew Jackson", "Jacksonian Democracy and the Spoils System", "Indian Removal Policy", "The Industrial Revolution in the USA", "Pioneer Life and Manifest Destiny", "The Texas Revolution (Alamo)", "The Mexican-American War", "The California Gold Rush", "Social Reform: Temperance and Education", "Social Reform: Women's Rights (Seneca Falls)", "Abolitionism: Garrison and Douglass", "Leading to Civil War: Sectionalism",
+            "Leading to Civil War: Compromise of 1850", "The Kansas-Nebraska Act", "Dred Scott Decision", "Election of 1860", "The Civil War: Secession and Ft. Sumter", "Major Civil War Battles (Gettysburg, Vicksburg)", "Abraham Lincoln's Leadership", "The Emancipation Proclamation (Details)", "Assassination of Lincoln", "Reconstruction: Presidential vs. Congressional", "The 13th, 14th, and 15th Amendments", "The Rise of Jim Crow Laws", "The Closing of the Frontier"
+        ]
     },
     9: {
-        "Math (Algebra / Geometry)": ["Polynomials", "Quadratics", "Exponential Functions", "Geometric Proofs", "Coordinate Geometry", "Triangles"],
-        "English Literature": ["World Literature", "Shakespeare", "The Hero's Journey", "Analytic Essays", "Novel Studies"],
-        "Biology": ["Cellular Respiration", "Mitosis & Meiosis", "Ecology", "Microbiology"],
-        "Chemistry": ["Stoichiometry", "Bonding", "Gas Laws", "Solutions", "Acids & Bases"],
-        "Physics (Intro)": ["Motion (Kinematics)", "Newton's Laws", "Work & Power", "Electricity Basics"],
-        "History": ["World History (Modern)", "World Wars", "Cold War", "Globalization"],
-        "Geography": ["Human Migration", "Cultural Landscapes", "Political Geography", "Sustainable Development"],
-        "Computer Science": ["Advanced Python/Java", "Data Structures", "Algorithm Design", "Digital Media"],
-        "Foreign Language": ["Intermediate Grammar", "Cultural Immersion", "Oral Proficiency", "Essay Writing"],
-        "PE": ["Personal Fitness", "Weight Training", "Yoga/Pilates", "Team Sports"]
+        "Math (Algebra / Geometry)": [
+            "General Math (All Topics)",
+            "Real Number System and Properties", "Solving Multi-Step Equations (Algebra I)", "Solving Linear Inequalities", "Compound Inequalities", "Absolute Value Equations", "Function Notation and Evaluation", "Domain and Range (Introduction)", "Parent Functions", "Linear Transformations", "Standard Form to Slope-Intercept Form", "Point-Slope form equations", "Parallel and Perpendicular Slopes", "Solving Systems by Substitution", "Solving Systems by Elimination",
+            "Systems of Equations Applications", "Graphing Linear Inequalities in two variables", "Systems of Linear Inequalities", "Laws of Exponents review", "Radical Expressions (Simplifying)", "Rational Exponents", "Polynomial Operations (Add/Sub/Mult)", "Factoring: GCF and Triomials", "Factoring: Difference of Squares", "Factoring: Grouping", "Solving Quadratics by Factoring", "Solving Quadratics by Square Roots", "Completing the Square", "The Quadratic Formula",
+            "The Discriminant", "Graphing Parabolas (Vertex Form)", "Quadratic Applications (Projectile Motion)", "Exponential Growth and Decay", "Sequences (Arithmetic and Geometric)", "Statistics: Variance and Standard Deviation", "Euclidean Geometry Foundations", "Logical Reasoning: Conditional Statements", "Geometric Proofs (Two-Column)", "Congruent Triangles: SSS, SAS, ASA, AAS, HL", "Properties of Isosceles Triangles", "Triangle Midsegments"
+        ],
+        "English Literature": [
+            "General ELA (All Topics)",
+            "Literary Device: Foreshadowing", "Literary Device: Flashback", "Themes in World Myths", "In-depth Literary Analysis (Grade 9)", "The Hero's Journey Archetype", "Analyzing The Odyssey", "Analyzing Romeo and Juliet", "Analyzing To Kill a Mockingbird", "Poetic Devices: Metonymy and Synecdoche", "Epic Poetry structure", "Shakespearean Sonnets", "Soliloquy vs. Monologue", "Dynamic vs. Static Characters", "Symbolism and Motif", "Imagery and Descriptive Power",
+            "Narrative Perspectives (Deep Dive)", "Tone and Mood shifts", "Irony: Verbal, Situational, Dramatic", "Deductive vs. Inductive reasoning", "Writing a Thesis Statement", "Argumentative Writing Structure", "Persuasive Appeals (Ethos, Pathos, Logos)", "The Writing Process: Pre-writing to Publishing", "Annotation Strategies", "Vocabulary from Word Roots", "MLA Formatting Styles"
+        ],
+        "Biology": [
+            "General Biology (All Topics)",
+            "The Hierarchy of Life", "Scientific Method in Biology", "Water: Polarity and Properties", "Macromolecules: Carbohydrates", "Macromolecules: Lipids", "Macromolecules: Proteins", "Macromolecules: Nucleic Acids", "Enzyme structure and function", "ATP: The Energy Molecule", "Prokaryotic vs. Eukaryotic Cells", "Membrane Transport: Pumps and Channels", "Cellular Respiration Overview", "Glycolysis", "The Krebs Cycle", "The Electron Transport Chain",
+            "Comparison of Aerobic and Anaerobic Resp", "Photosynthesis: Light-Dependent Reactions", "The Calvin Cycle", "Cell Cycle Checkpoints", "Cancer and Cells", "DNA Replication: Semi-conservative model", "Transcription: RNA Polymerase", "Translation: Polypeptide chain formation", "Central Dogma of Biology", "Meiosis and Genetic Variation", "Human Genetics (Karyotypes/Pedigrees)", "Evolution: Evidence and Cladograms", "Modern Ecology basics"
+        ]
     },
     10: {
-        "Math (Geometry / Algebra II)": ["Similarity & Congruence", "Trigonometry Basics", "Circles & Arcs", "Probability & Statistics", "Complex Numbers", "Logarithms"],
-        "English Literature": ["American Literature", "Literary Movements", "Research Methodology", "Public Speaking", "Creative Writing"],
-        "Chemistry": ["Chemical Kinetics", "Thermodynamics", "Electrochemistry", "Nuclear Chemistry", "Organic Chemistry Basics"],
-        "Physics": ["Vectors", "Projectile Motion", "Momentum", "Circular Motion"],
-        "Biology": ["Molecular Biology", "Physiology", "Environmental Science", "Evolutionary Biology"],
-        "History": ["US History (1900s - Present)", "Civil Rights Movement", "Major Conflicts", "Economic Shifts"],
-        "Computer Science": ["Web Development (Full Stack)", "Database Managment", "Software Engineering Principles", "Project Management"],
-        "Foreign Language": ["Literature & Film", "Advanced Conversation", "Idioms & Slang", "Translations"],
-        "PE": ["Conditioning", "Lifetime Sports (Golf, Tennis)", "First Aid/CPR", "Wellness"]
+        "Math (Geometry / Algebra II)": [
+            "General Math (All Topics)",
+            "Similar Polygons and Scale Factors", "Similarity Theorems for Triangles", "Right Triangle Trigonometry (SOH CAH TOA)", "Solving for Missing Sides with Trig", "Solving for Missing Angles with Trig", "Special Right Triangles (45-45-90, 30-60-90)", "Law of Sines", "Law of Cosines", "Geometric Mean", "Circles: Tangents and Secants", "Chord Properties", "Arc Length and Sector Area Formulas", "Equations of Circles in the Plane", "Volume of Prisms and Pyramids",
+            "Volume of Cylinders, Cones, and Spheres", "Density and Geometric Modeling", "Design with Geometry", "Complex Numbers and Imaginary Units", "Operations with Complex Numbers", "Higher-Order Polynomial Operations", "Synthetic and Long Division of Polynomials", "Rational Exponents and Radical Expressions", "Exponential Functions and Graphs", "The number 'e'", "Logarithmic Functions and Graphs", "Properties of Logs (Product, Quotient, Power)",
+            "Solving Exponential and Log Equations", "Rational Functions: Asymptotes and Slants", "Solving Rational Equations", "Transformation of Functions (Parent Functions)", "Composition of Functions", "Inverse Functions", "Parabolas, Circles, Ellipses, and Hyperbolas", "Systems of Non-Linear Equations"
+        ],
+        "English Literature": [
+            "General ELA (All Topics)",
+            "Rhetorical Analysis foundations", "Analyzing Persuasive Text (Speeches)", "Satire and Allegory (Animal Farm)", "Analyzing Lord of the Flies", "Analyzing Fahrenheit 451", "Dystopian Literature themes", "Analyzing Greek Tragedy (Antigone)", "Analyzing Night (Ellie Wiesel)", "Cultural Context in World Literature", "Irony in Mystery Texts", "Authorial Choice in Nonfiction", "Synthesizing themes from multiple texts", "Analyzing the Rhetorical Triangle",
+            "Logical Fallacies (Ad Hominem, Straw Man, etc.)", "Advanced Vocabulary: Tone words", "Research methodology", "Developing a unique authorial voice", "Creative Writing: Show, Don't Tell", "Citing sources via APA/MLA Styles"
+        ],
+        "Chemistry": [
+            "General Chemistry (All Topics)",
+            "Measurement and Uncertainty", "Scientific Notation in Chemistry", "Density and Specific Gravity", "Dalton's Atomic Theory", "Significant Figures (Rules)", "Moles and Molar Mass", "The Bohr Model vs. Quantum Model", "Electron Configuration (s, p, d, f)", "Periodic Trends: Atom Size", "Periodic Trends: Ionization Energy", "Periodic Trends: Electronegativity", "Lewis Structures and VSEPR Theory", "Molecular Geometry Shapes", "Intermolecular Forces (Hydrogen Bonds, etc.)",
+            "Physical and Chemical Changes", "Balancing Redox Reactions (Basic)", "Stoichiometry: Mass-to-Mass", "Stoichiometry: Limiting Reactant", "Stoichiometry: Percent Yield", "Kinetic Molecular Theory of Gases", "Boyle's, Charles's, and Gay-Lussac's Laws", "The Ideal Gas Law (PV=nRT)", "Partial Pressures and Effusion", "Solubility and Precipitates", "Molarity and Concentration", "Acid/Base Titration intro", "Enthalpy and Calorimetry", "Nuclear Decay types"
+        ]
     },
     11: {
-        "Math (Trigonometry / Pre-Calculus)": ["Unit Circle", "Trig Identities", "Vectors & Matrices", "Conic Sections", "Limits Intro", "Sequence & Series"],
-        "English": ["British Literature", "Rhetorical Strategies", "Synthesis Essays", "Modernist Literature", "Journalism"],
-        "Physics": ["Electromagnetism", "Optics", "Modern Physics", "Waves & Quantum Examples"],
-        "Chemistry": ["Advanced Organic Checklist", "Biochemistry Intro", "Material Science", "Lab Techniques"],
-        "Biology": ["Marine Biology", "Anatomy & Physiology", "Genetics (Advanced)", "Zoology"],
-        "History": ["European History", "Government & Politics", "Comparative Government", "Historical Analysis"],
-        "Philosophy / Civics": ["Ethics", "Political Philosophy", "Logic & Reasoning", "Constitutional Law"],
-        "Computer Science / Programming": ["Game Development", "Cybersecurity Advanced", "Machine Learning Concepts", "Capstone Project"],
-        "Foreign Language": ["Fluency Practice", "Current Events", "Cultural History", "Literature Analysis"]
+        "Math (Trigonometry / Pre-Calculus)": [
+            "General Math (All Topics)",
+            "Unit Circle and Radians", "Trig Functions of Any Angle", "Graphing Sin, Cos, Tan", "Amplitude, Period, and Phase Shift", "Fundamental Trig Identities", "Proving Trig Identities", "Sum and Difference Formulas", "Double-Angle and Half-Angle Formulas", "Solving Trig Equations (Complex)", "Polar Coordinates and Equations", "De Moivre's Theorem", "Vector Operations (Dot Product)", "Matrices: Adding and Multiplying", "Calculating Determinants and Inverses",
+            "Conic Sections: Circles and Parabolas", "Conic Sections: Ellipses and Hyperbolas", "Parametric Equations", "Arithmetic and Geometric Sequences", "Summation Notation (Sigma)", "Limits: Definition and Evaluation", "Infinity and Limits", "Continuity of Functions", "The Difference Quotient", "Binomial Theorem and Pascal's Triangle", "Mathematical Induction Intro", "Introduction to Derivatives (Power Rule)"
+        ],
+        "English": [
+            "General ELA (All Topics)",
+            "Analyzing The Great Gatsby", "Analyzing The Crucible", "Analyzing The Scarlet Letter", "Voice and Style in Emily Dickinson", "Themes in Transcendentalism (Emerson/Thoreau)", "Harlem Renaissance Literature", "Modernism in American Poetry", "Beats Generation and Post-Modernism", "Contemporary Voices in America", "Rhetorical Situation: Audience/Purpose", "Persuasive Appeals: Logos and Pathos", "Analyzing Persuasive Strategies", "Synthesis Essay Development",
+            "Argumentative Essay: Nuance and Evidence", "Rhetorical Analysis Essay", "The Power of Persuasion in Speeches", "Vocabulary: Latin and Greek roots deep dive", "Advanced Sentence Structures (Style)", "Research and Bibliography (AP/College Level)"
+        ],
+        "History": [
+            "General US History (All Topics)",
+            "Post-Civil War Gilded Age", "The Progressive Era (Refoms)", "US Imperialism: Spanish-American War", "World War I: Causes and Neutrality", "WWI: The Home Front and Treaty of Versailles", "The Roaring Twenties (Jazz Age)", "The Great Depression (Causes)", "The New Deal (CCC, WPA, Social Security)", "Dust Bowl and the Human Impact", "World War II: The Rise of Fascism", "WWII: Pearl Harbor and Mobilization", "WWII: D-Day and the Pacific Strategy", "The Holocaust and Human Rights",
+            "The Atomic Bomb and the end of WWII", "The Cold War Origins (Containment)", "The Truman Doctrine and Marshall Plan", "The Korean War", "The 1950s: Suburbia and Conformity", "The Civil Rights Movement: Brown v. Board", "The Civil Rights Movement: MLK and Malcolm X", "The Vietnam War: Escalation and Protest", "The 1960s Counterculture", "The Great Society (Johnson)", "The Nixon Era and Watergate", "The 1970s: Inflation and Energy", "The Reagan Revolution (Conservatism)", "The End of the Cold War",
+            "Modern History: 9/11 and the Global War on Terror", "The Digital Revolution impact on Society"
+        ]
     },
     12: {
-        "Math (Calculus / Advanced Math)": ["Derivatives", "Integrals", "Differential Equations", "Applications of Calculus", "Statistics (Inference)"],
-        "English": ["Contemporary Literature", "College Writing", "Literary Theory", "Senior Thesis", "Business Communication"],
-        "Physics": ["Astrophysics", "Quantum Mechanics Intro", "Relativity", "Engineering Physics"],
-        "Chemistry": ["AP Chemistry Topics", "Environmental Chemistry", "Pharmaceutical Chemistry", "Forensics"],
-        "Biology": ["AP Biology Topics", "Neuroscience Intro", "Botany", "Epidemiology"],
-        "History": ["Contemporary Issues", "Economics (Macro/Micro)", "Sociology", "Psychology"],
-        "Philosophy / Civics": ["Human Rights", "Global Politics", "Existentialism", "Senior Project"],
-        "Computer Science": ["Cloud Computing", "Cryptography", "Mobile App Dev", "Systems Architecture"],
-        "Foreign Language": ["Business Language", "Translation & Innovation", "Cultural Immersion Project"],
-        "Electives": ["Psychology", "Sociology", "Creative Writing", "Film Studies", "Financial Literacy", "Entrepreneurship"]
+        "Math (Calculus / Advanced Math)": [
+            "General Math (All Topics)",
+            "Limits at a Point", "Limits at Infinity", "One-Sided Limits", "Continuity and Differentiability", "The Derivative as a Slope", "Power Rule and Constant Multiple Rule", "Product and Quotient Rules", "The Chain Rule", "Implicit Differentiation", "Logarithmic Differentiation", "Related Rates Problems", "Mean Value Theorem", "Extreme Value Theorem", "Optimization Problems", "First and Second Derivative Tests", "Curve Sketching", "Riemann Sums", "Definite Integrals",
+            "Indefinite Integrals", "The Fundamental Theorem of Calculus", "U-Substitution for Integration", "Integration by Parts", "Area Between Curves", "Volumes of Solids of Revolution", "Arc Length", "Differential Equations (Separable)", "Logistic Growth Models", "Population Density Models", "Statistics: Data Collection", "Statistics: Confidence Intervals", "Statistics: Hypothesis Testing", "Statistics: Regression and Correlation"
+        ],
+        "English": [
+            "General ELA (All Topics)",
+            "Analyzing Beowulf (Anglo-Saxon)", "Analyzing The Canterbury Tales (Middle English)", "Shakespearean Tragedy: Macbeth", "Shakespearean Tragedy: Hamlet", "Mary Shelley's Frankenstein", "19th Century British Novel: Jane Eyre", "Dystopian Vision: 1984", "Themes in Brave New World", "Post-Colonial Voices in English Literature", "Satire in British Literature (Swift)", "Modernist British Poetry", "Advanced Literary Theory", "Senior Research Project",
+            "The Transition to College Writing", "Business and Technical Communications", "The Power of a Narrative Portfolio", "Analyzing Global Voices in Translation"
+        ],
+        "Philosophy / Civics": [
+            "General Philosophy & Civics",
+            "Greek Philosophy: Socrates and Plato", "Aristotle's Ethics", "Rationalism vs. Empiricism (Descartes/Hume)", "Existentialism: Sartre and Camus", "Utilitarianism vs. Deontology", "Social Contract Theory (Locke/Hobbes)", "The Rights of the Individual", "Global Citizenship", "International Organizations (UN, EU)", "The US Legal System (Criminal vs. Civil)", "Human Rights and Global Justice", "Political Ideologies (Liberalism, Conservatism)", "Environmental Ethics"
+        ],
+        "Computer Science": [
+            "General Computer Science",
+            "Full Stack Web Development", "API Design and REST", "Database Systems (SQL vs. NoSQL)", "Cloud Infrastructure (AWS/Azure)", "Cybersecurity: Threats and Defense", "Cryptography: Symmetric and Asymmetric", "Artificial Intelligence: Neural Networks", "Machine Learning: Training Models", "Mobile App Development Lifecycle", "Software Engineering: Agile and Scrum", "Ethical Issues in Computing", "Final Capstone Project"
+        ]
     }
 }
