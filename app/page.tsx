@@ -965,7 +965,7 @@ export default function BoomkitGame() {
     } catch (err) {
       console.error("[v0] Failed to fetch users from Supabase:", err)
     }
-  }, [supabase, currentUser])
+  }, [supabase])
 
   // NEW: Session validation to handle sync issues
   useEffect(() => {
@@ -993,10 +993,11 @@ export default function BoomkitGame() {
       }
     }
 
-    if (isStorageLoaded) {
+    if (isStorageLoaded && !(window as any).sessionValidated) {
       validateSession()
+        ; (window as any).sessionValidated = true
     }
-  }, [isStorageLoaded, currentUser])
+  }, [isStorageLoaded, currentUser, handleLogout])
 
   // Load users from Supabase on mount
   useEffect(() => {
@@ -1081,11 +1082,11 @@ export default function BoomkitGame() {
     // Sync immediately on mount
     syncCurrentUserRole()
 
-    // Then sync every 1 second for instant ban detection
-    const interval = setInterval(syncCurrentUserRole, 1000)
+    // Then sync every 15 seconds for ban/role detection (reduced from 1s to prevent 429 errors)
+    const interval = setInterval(syncCurrentUserRole, 15000)
 
     return () => clearInterval(interval)
-  }, [currentUser, updateAndPersistCurrentUser, supabase])
+  }, [currentUser?.id, supabase, syncCurrentUserRole])
 
   // Custom roles feature removed for security - no longer loading from Supabase
 
