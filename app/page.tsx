@@ -1019,77 +1019,76 @@ export default function BoomkitGame() {
 
   // Find the
 
-  useEffect(() => {
-    // Sync current user's role from Supabase every 10 seconds
-    const syncCurrentUserRole = async () => {
-      if (!currentUser?.id || !supabase) return
+  const syncCurrentUserRole = useCallback(async () => {
+    if (!currentUser?.id || !supabase) return
 
-      try {
-        const { data, error } = await supabase
-          .from("users")
-          .select("role, badges, is_muted, is_banned, is_owner, mute_expiry, ban_expiry, status, ban_reason")
-          .eq("id", currentUser.id)
-          .single()
+    try {
+      const { data, error } = await supabase
+        .from("users")
+        .select("role, badges, is_muted, is_banned, is_owner, mute_expiry, ban_expiry, status, ban_reason")
+        .eq("id", currentUser.id)
+        .single()
 
-        if (error) {
-          // If user not found (account deleted), log them out immediately
-          if (error.code === 'PGRST116' || error.message.includes('0 rows') || error.message.includes('No rows')) {
-            console.log("[v0] User account deleted (banned), logging out immediately")
-            localStorage.removeItem("boomkit_current_user")
-            setCurrentUser(null)
-            router.push("/banned?reason=Your account has been removed")
-            return
-          }
-          console.log("[v0] Error syncing user role:", error.message)
+      if (error) {
+        // If user not found (account deleted), log them out immediately
+        if (error.code === 'PGRST116' || error.message.includes('0 rows') || error.message.includes('No rows')) {
+          console.log("[v0] User account deleted (banned), logging out immediately")
+          localStorage.removeItem("boomkit_current_user")
+          setCurrentUser(null)
+          router.push("/banned?reason=Your account has been removed")
           return
         }
-
-        if (
-          data &&
-          (data.role !== currentUser.role ||
-            JSON.stringify(data.badges) !== JSON.stringify(currentUser.badges) ||
-            data.is_muted !== currentUser.isMuted ||
-            data.is_banned !== currentUser.isBanned ||
-            data.is_owner !== currentUser.isOwner ||
-            data.mute_expiry !== currentUser.muteExpiry ||
-            data.ban_expiry !== currentUser.banExpiry ||
-            data.status !== currentUser.status) // Check for status change
-        ) {
-          console.log(
-            "[v0] User data updated from Supabase. Role:",
-            data.role,
-            "Badges:",
-            data.badges,
-            "Muted:",
-            data.is_muted,
-            "Banned:",
-            data.is_banned,
-            "Status:",
-            data.status,
-          )
-          const updatedUser = {
-            ...currentUser,
-            role: data.role || "player",
-            badges: data.badges || [],
-            isMuted: data.is_muted || false,
-            isBanned: data.is_banned || false,
-            isOwner: data.is_owner || false, // Sync owner status from database
-            muteExpiry: data.mute_expiry,
-            banExpiry: data.ban_expiry,
-            status: data.status || "approved", // Update status
-          }
-          // If user got banned, redirect immediately
-          if (data.is_banned) {
-            router.push(`/banned?reason=${encodeURIComponent(data.ban_reason || "")}`)
-            return
-          }
-          updateAndPersistCurrentUser(updatedUser)
-        }
-      } catch (err) {
-        console.log("[v0] Error in role sync:", err)
+        console.log("[v0] Error syncing user role:", error.message)
+        return
       }
-    }
 
+      if (
+        data &&
+        (data.role !== currentUser.role ||
+          JSON.stringify(data.badges) !== JSON.stringify(currentUser.badges) ||
+          data.is_muted !== currentUser.isMuted ||
+          data.is_banned !== currentUser.isBanned ||
+          data.is_owner !== currentUser.isOwner ||
+          data.mute_expiry !== currentUser.muteExpiry ||
+          data.ban_expiry !== currentUser.banExpiry ||
+          data.status !== currentUser.status) // Check for status change
+      ) {
+        console.log(
+          "[v0] User data updated from Supabase. Role:",
+          data.role,
+          "Badges:",
+          data.badges,
+          "Muted:",
+          data.is_muted,
+          "Banned:",
+          data.is_banned,
+          "Status:",
+          data.status,
+        )
+        const updatedUser = {
+          ...currentUser,
+          role: data.role || "player",
+          badges: data.badges || [],
+          isMuted: data.is_muted || false,
+          isBanned: data.is_banned || false,
+          isOwner: data.is_owner || false, // Sync owner status from database
+          muteExpiry: data.mute_expiry,
+          banExpiry: data.ban_expiry,
+          status: data.status || "approved", // Update status
+        }
+        // If user got banned, redirect immediately
+        if (data.is_banned) {
+          router.push(`/banned?reason=${encodeURIComponent(data.ban_reason || "")}`)
+          return
+        }
+        updateAndPersistCurrentUser(updatedUser)
+      }
+    } catch (err) {
+      console.log("[v0] Error in role sync:", err)
+    }
+  }, [currentUser, supabase, router, updateAndPersistCurrentUser])
+
+  useEffect(() => {
     // Sync immediately on mount
     syncCurrentUserRole()
 
@@ -1097,7 +1096,7 @@ export default function BoomkitGame() {
     const interval = setInterval(syncCurrentUserRole, 15000)
 
     return () => clearInterval(interval)
-  }, [currentUser?.id, supabase, syncCurrentUserRole])
+  }, [syncCurrentUserRole])
 
   // Custom roles feature removed for security - no longer loading from Supabase
 
