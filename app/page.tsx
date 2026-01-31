@@ -804,85 +804,96 @@ export default function BoomkitGame() {
     localStorage.setItem("boomkit_chat_messages", JSON.stringify(newMessages))
   }, [])
 
-  const updateAndPersistCurrentUser = useCallback(
-    async (updatedUser: GameUser | null) => {
-      if (updatedUser) {
-        // Add or update the lastSeen timestamp on every action
-        const userWithActivity = { ...updatedUser, lastSeen: Date.now(), packsOpened: updatedUser.packs?.length || 0 }
-        setCurrentUser(userWithActivity)
-        localStorage.setItem("boomkit_current_user", JSON.stringify(userWithActivity))
-
-        // Also update the user in the main list
-        setUsers((prevUsers) => {
-          const newUsers = prevUsers.map((u) => (u.id === userWithActivity.id ? userWithActivity : u))
-          localStorage.setItem("boomkit_approved_users", JSON.stringify(newUsers))
-          return newUsers
-        })
-
-        try {
-          // Use the secure API
-          const updates = {
-            username: userWithActivity.username,
-            email: userWithActivity.email || "",
-            age: userWithActivity.age || 18,
-            tokens: userWithActivity.tokens || 0,
-            daily_tokens: userWithActivity.dailyTokens || 0,
-            packs: userWithActivity.packs || [],
-            booms: userWithActivity.booms || {},
-            is_owner: userWithActivity.isOwner || false,
-            is_banned: userWithActivity.isBanned || false,
-            is_muted: userWithActivity.isMuted || false,
-            status: userWithActivity.status || "approved",
-            reason: userWithActivity.reason || "",
-            role: userWithActivity.role || "player",
-            join_date: userWithActivity.joinDate,
-            boom_score: userWithActivity.boomScore || 0,
-            total_value: userWithActivity.totalValue || 0,
-            profile_picture: userWithActivity.profilePicture || "🎯",
-            is_plus_user: userWithActivity.isPlusUser || false,
-            name_color: userWithActivity.nameColor || "",
-            banner_color: userWithActivity.bannerColor || "",
-            last_daily_spin: userWithActivity.lastDailySpin || "",
-            badges: userWithActivity.badges || [],
-            mute_expiry: userWithActivity.muteExpiry || 0,
-            ban_expiry: userWithActivity.banExpiry || 0,
-            ban_reason: userWithActivity.banReason || "",
-            last_seen: userWithActivity.lastSeen,
-            packs_opened: userWithActivity.packsOpened || 0,
-            last_ip: userWithActivity.lastIp || "",
-          }
-
-          const response = await fetch("/api/users/update", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ targetUserId: userWithActivity.id, updates }),
-          })
-
-          const data = await response.json()
-          if (!data.success) {
-            console.error("[v0] Error syncing via API:", data.message)
-          }
-        } catch (error) {
-          console.error("[v0] Error calling update API:", error)
-        }
-      } else {
-        setCurrentUser(null)
-        localStorage.removeItem("boomkit_current_user")
-      }
-    },
-    [setUsers],
-  )
-
   // Handle logout
   const handleLogout = useCallback(() => {
-    updateAndPersistCurrentUser(null)
+    // 1. Clear State
+    setCurrentUser(null)
+    localStorage.removeItem("boomkit_current_user")
+
+    // 2. Redirect to landing
     setCurrentView("owner-access")
-    // Clear Supabase session if necessary
-    const supabase = getSupabaseBrowserClient()
-    if (supabase) {
-      supabase.auth.signOut()
+
+    // 3. Clear Supabase session
+    const sb = getSupabaseBrowserClient()
+    if (sb) {
+      sb.auth.signOut()
     }
-  }, [updateAndPersistCurrentUser])
+  }, [])
+
+  const updateAndPersistCurrentUser = useCallback(
+    async (updatedUser: GameUser | null) => {
+      if (!updatedUser) {
+        handleLogout()
+        return
+      }
+
+      // Add or update the lastSeen timestamp on every action
+      const userWithActivity = { ...updatedUser, lastSeen: Date.now(), packsOpened: updatedUser.packs?.length || 0 }
+      setCurrentUser(userWithActivity)
+      localStorage.setItem("boomkit_current_user", JSON.stringify(userWithActivity))
+
+      // Also update the user in the main list
+      setUsers((prevUsers) => {
+        const newUsers = prevUsers.map((u) => (u.id === userWithActivity.id ? userWithActivity : u))
+        localStorage.setItem("boomkit_approved_users", JSON.stringify(newUsers))
+        return newUsers
+      })
+
+      try {
+        // Use the secure API
+        const updates = {
+          username: userWithActivity.username,
+          email: userWithActivity.email || "",
+          age: userWithActivity.age || 18,
+          tokens: userWithActivity.tokens || 0,
+          daily_tokens: userWithActivity.dailyTokens || 0,
+          packs: userWithActivity.packs || [],
+          booms: userWithActivity.booms || {},
+          is_owner: userWithActivity.isOwner || false,
+          is_banned: userWithActivity.isBanned || false,
+          is_muted: userWithActivity.isMuted || false,
+          status: userWithActivity.status || "approved",
+          reason: userWithActivity.reason || "",
+          role: userWithActivity.role || "player",
+          join_date: userWithActivity.joinDate,
+          boom_score: userWithActivity.boomScore || 0,
+          total_value: userWithActivity.totalValue || 0,
+          profile_picture: userWithActivity.profilePicture || "🎯",
+          is_plus_user: userWithActivity.isPlusUser || false,
+          name_color: userWithActivity.nameColor || "",
+          banner_color: userWithActivity.bannerColor || "",
+          last_daily_spin: userWithActivity.lastDailySpin || "",
+          badges: userWithActivity.badges || [],
+          mute_expiry: userWithActivity.muteExpiry || 0,
+          ban_expiry: userWithActivity.banExpiry || 0,
+          ban_reason: userWithActivity.banReason || "",
+          last_seen: userWithActivity.lastSeen,
+          packs_opened: userWithActivity.packsOpened || 0,
+          last_ip: userWithActivity.lastIp || "",
+        }
+
+        const response = await fetch("/api/users/update", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ targetUserId: userWithActivity.id, updates }),
+        })
+
+        if (response.status === 401) {
+          console.warn("[v0] Session unauthorized during sync, logging out")
+          handleLogout()
+          return
+        }
+
+        const data = await response.json()
+        if (!data.success) {
+          console.error("[v0] Error syncing via API:", data.message)
+        }
+      } catch (error) {
+        console.error("[v0] Error calling update API:", error)
+      }
+    },
+    [setUsers, handleLogout],
+  )
 
   // Load initial data from localStorage
   useEffect(() => {
