@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   title: "Boomkit",
   description: "Created by: system",
   generator: "system",
+  icons: {
+    icon: "/favicon.png",
+  },
 }
 
 export default function RootLayout({
