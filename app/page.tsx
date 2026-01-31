@@ -872,6 +872,8 @@ export default function BoomkitGame() {
           last_seen: userWithActivity.lastSeen,
           packs_opened: userWithActivity.packsOpened || 0,
           last_ip: userWithActivity.lastIp || "",
+          xp: userWithActivity.xp || 0,
+          level: userWithActivity.level || 1,
         }
 
         const response = await fetch("/api/users/update", {
@@ -972,6 +974,8 @@ export default function BoomkitGame() {
           lastSeen: u.last_seen || Date.now(),
           packsOpened: u.packs_opened || 0,
           lastIp: u.last_ip || "",
+          xp: u.xp || 0,
+          level: u.level || 1,
         }))
 
         setUsers(mappedUsers)
@@ -1137,7 +1141,7 @@ export default function BoomkitGame() {
 
     window.addEventListener("storage", handleStorageChange)
     return () => window.removeEventListener("storage", handleStorageChange)
-  }, [currentUser])
+  }, []) // Removed [currentUser] to avoid re-registering and potential loops
 
   // Initialize system signature on component mount
   useEffect(() => {
@@ -3458,6 +3462,9 @@ export default function BoomkitGame() {
                           banReason: u.ban_reason || "",
                           lastSeen: u.last_seen || Date.now(),
                           packsOpened: u.packs_opened || 0,
+                          lastIp: u.last_ip || "",
+                          xp: u.xp || 0,
+                          level: u.level || 1,
                         }))
 
                         setUsers(mappedUsers)
