@@ -274,6 +274,34 @@ interface NewsItem {
 
 // ... existing code ...
 
+const getBoomRarity = (boomName: string) => {
+  for (const pack of PACKS) {
+    const boom = pack.booms.find((b) => b.name === boomName)
+    if (boom) return boom.rarity
+  }
+  return "uncommon"
+}
+
+const getBoomAvatar = (boomName: string) => {
+  for (const pack of PACKS) {
+    const boom = pack.booms.find((b) => b.name === boomName)
+    if (boom) return boom.avatar
+  }
+  return "❓"
+}
+
+const getRarityColor = (rarity: string) => {
+  switch (rarity) {
+    case "uncommon": return "bg-green-500"
+    case "rare": return "bg-blue-500"
+    case "epic": return "bg-purple-500"
+    case "legendary": return "bg-orange-500"
+    case "chroma": return "bg-pink-500"
+    case "mystical": return "bg-cyan-500"
+    default: return "bg-gray-500"
+  }
+}
+
 // Get boom sell price
 const getBoomSellPrice = (boomName: string) => {
   const rarity = getBoomRarity(boomName)
@@ -341,6 +369,21 @@ const DEFAULT_ROLES: UserRole[] = [
     color: "bg-yellow-500",
     permissions: ["all"],
   },
+]
+
+const gradingGroups = [
+  { grade: 1, label: "1st Grade" },
+  { grade: 2, label: "2nd Grade" },
+  { grade: 3, label: "3rd Grade" },
+  { grade: 4, label: "4th Grade" },
+  { grade: 5, label: "5th Grade" },
+  { grade: 6, label: "6th Grade" },
+  { grade: 7, label: "7th Grade" },
+  { grade: 8, label: "8th Grade" },
+  { grade: 9, label: "9th Grade" },
+  { grade: 10, label: "10th Grade" },
+  { grade: 11, label: "11th Grade" },
+  { grade: 12, label: "12th Grade" },
 ]
 
 // Available badges
@@ -3583,12 +3626,6 @@ export default function BoomkitGame() {
                       {isOwner() && (
                         <div className="flex gap-2">
                           <Button
-                            onClick={() => setShowRoleManager(true)}
-                            className="bg-purple-600/20 hover:bg-purple-600 text-purple-400 hover:text-white border border-purple-500/30 rounded-xl font-bold transition-all"
-                          >
-                            Custom Roles
-                          </Button>
-                          <Button
                             onClick={() => setShowBadgeManager(true)}
                             className="bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-500/30 rounded-xl font-bold transition-all"
                           >
@@ -5178,7 +5215,7 @@ export default function BoomkitGame() {
                 await supabase.from("game_sessions").update({ status: "finished" }).eq("pin", activeGamePin)
               }
               setLobbyActive(false)
-              setActiveGamePin(null)
+              setActiveGamePin("")
               setActiveDiscoverGame(null)
             }}
             players={[]} // This would be populated from a real-time subscription
