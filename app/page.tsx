@@ -1178,46 +1178,6 @@ export default function BoomkitGame() {
   }
 
 
-  // XP and Leveling System
-  const awardXP = (amount: number) => {
-    if (!currentUser) return
-
-    let newXP = (currentUser.xp || 0) + amount
-    let newLevel = currentUser.level || 1
-    let leveledUp = false
-    const XP_PER_LEVEL = 100 // Simple fixed XP per level for now
-
-    // Calculate new level
-    while (newXP >= XP_PER_LEVEL) {
-      newXP -= XP_PER_LEVEL
-      newLevel++
-      leveledUp = true
-    }
-
-    // Cap at level 100
-    if (newLevel >= 100) {
-      newLevel = 100
-      newXP = Math.max(newXP, XP_PER_LEVEL) // Max out XP visual
-    }
-
-    if (leveledUp) {
-      alert(`🎉 LEVEL UP! You are now Level ${newLevel}!`)
-
-      // Check for Milestone Rewards
-      if (newLevel === 100) {
-        alert("🏆 MAX LEVEL REACHED! You unlocked the Admin Boom!")
-      } else if (newLevel % 10 === 0) {
-        alert(`🎁 CONGRATULATIONS! You reached Level ${newLevel} and unlocked a Special Reward! Check your Level Booms!`)
-      }
-    }
-
-    const updatedUser = {
-      ...currentUser,
-      xp: newXP,
-      level: newLevel
-    }
-    updateAndPersistCurrentUser(updatedUser)
-  }
 
   // XP and Leveling System
   const awardXP = (amount: number) => {
