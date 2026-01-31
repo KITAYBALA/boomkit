@@ -5320,7 +5320,8 @@ export default function BoomkitGame() {
             const pin = Math.floor(100000 + Math.random() * 900000).toString()
 
             if (supabase) {
-              const { error } = await supabase.from("game_sessions").insert({
+              // Robust Hosting logic: Try new columns, fall back to old if schema cache is stale
+              const lobbyData: any = {
                 pin,
                 host_id: currentUser?.id,
                 host_username: currentUser?.username,
@@ -5329,10 +5330,26 @@ export default function BoomkitGame() {
                 questions,
                 status: "waiting",
                 duration: settings.duration * 60,
+                players: []
+              }
+
+              // Try with new columns first
+              let { error } = await supabase.from("game_sessions").insert({
+                ...lobbyData,
                 mode: selectedGameMode.id,
                 settings: settings,
-                players: []
               })
+
+              // If missing column error (42703), retry with basic data
+              if (error && error.code === '42703') {
+                console.warn("Schema cache mismatch: Retrying without 'mode' and 'settings' columns.")
+                const retry = await supabase.from("game_sessions").insert(lobbyData)
+                error = retry.error
+
+                if (!error) {
+                  alert("⚠️ Database Schema Alert: Your game started, but 'Game Modes' and 'Custom Settings' were lost because the database columns are missing. Please run the SQL migration in the implementation plan to fix this permamently.")
+                }
+              }
 
               if (error) {
                 console.error("Host Session Error:", error)
