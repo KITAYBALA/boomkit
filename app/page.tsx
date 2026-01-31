@@ -2046,20 +2046,24 @@ export default function BoomkitGame() {
         // Continue with ban even if system signature tracking fails
       }
 
-      // 2. Update the user in Supabase to set is_banned = true
-      const { error: banError } = await supabase
-        .from("users")
-        .update({
-          is_banned: true,
-          ban_reason: banReason || "Banned by staff",
-          ban_expiry: null // Permanent ban
-        })
-        .eq("id", userToModerate.id)
+      // 2. Update the user via Secure API (since RLS prevents direct updates to other users)
+      const response = await fetch("/api/users/update", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          targetUserId: userToModerate.id,
+          updates: {
+            is_banned: true,
+            ban_reason: banReason || "Banned by staff",
+            ban_expiry: null // Permanent ban
+          }
+        }),
+      })
 
-      if (banError) {
-        console.error("Error banning user:", banError)
-        alert(`Failed to ban user: ${banError.message}`)
-        return
+      const data = await response.json()
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.message || "Failed to ban user via API")
       }
 
       // 3. Update local state
