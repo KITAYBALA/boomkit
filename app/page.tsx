@@ -5031,10 +5031,10 @@ export default function BoomkitGame() {
                     min={5}
                     max={50}
                     value={aiQuestionCount}
-                    onChange={(e) => setAiQuestionCount(parseInt(e.target.value) || 25)}
+                    onChange={(e) => setAiQuestionCount(parseInt(e.target.value) || 30)}
                     className="bg-black/50 border-purple-500/30 text-white"
                   />
-                  <p className="text-[10px] text-white/30 italic">Default is 25 questions.</p>
+                  <p className="text-[10px] text-white/30 italic">Default is 30 questions (Recommended for best experience).</p>
                 </div>
                 <div className="flex gap-2">
                   <Button

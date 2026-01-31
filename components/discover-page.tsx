@@ -463,61 +463,73 @@ export default function DiscoverPage({
 
             {/* VIEW: TOPICS */}
             {viewMode === "topics" && selectedSubject && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 animate-in slide-in-from-right-4 duration-500">
-                    <div className="col-span-full flex items-center gap-2 mb-2">
-                        <LayoutGridIcon className="w-5 h-5 text-purple-400" />
-                        <span className="text-white/60 font-medium">Available Topics</span>
+                <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
+                    <div className="flex items-center justify-between gap-4 flex-wrap">
+                        <div className="flex items-center gap-2">
+                            <LayoutGridIcon className="w-5 h-5 text-purple-400" />
+                            <span className="text-white/60 font-medium">Available Topics ({filteredTopics.length})</span>
+                        </div>
+                        <Button
+                            onClick={() => {
+                                const randomTopic = filteredTopics[Math.floor(Math.random() * filteredTopics.length)]
+                                onStartGame(selectedGrade, `${selectedSubject.name}: ${randomTopic}`, "solo")
+                            }}
+                            className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-bold rounded-xl h-10 shadow-lg shadow-orange-500/20 border border-white/10"
+                        >
+                            <SparklesIcon className="w-4 h-4 mr-2" />
+                            Surprise Me!
+                        </Button>
                     </div>
 
-                    {filteredTopics.map((topic, index) => (
-                        <Card
-                            key={index}
-                            className="bg-white/5 backdrop-blur-md border-white/10 hover:border-white/30 transition-all duration-500 group cursor-default overflow-hidden hover:shadow-2xl hover:shadow-purple-500/10 hover:-translate-y-1 relative"
-                        >
-                            {/* Hover Gradient Overlay */}
-                            <div className={`absolute inset-0 bg-gradient-to-br ${gradeInfo?.gradient || "from-gray-700 to-gray-800"} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                        {filteredTopics.map((topic, index) => {
+                            const isGeneral = topic.includes("General")
+                            return (
+                                <Card
+                                    key={index}
+                                    className={`
+                                        ${isGeneral ? "bg-purple-900/40 border-purple-500/50" : "bg-white/5 border-white/10"} 
+                                        backdrop-blur-md hover:border-white/30 transition-all duration-300 group cursor-default overflow-hidden hover:shadow-xl relative
+                                    `}
+                                >
+                                    {/* Hover Gradient Overlay */}
+                                    <div className={`absolute inset-0 bg-gradient-to-br ${gradeInfo?.gradient || "from-gray-700 to-gray-800"} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
 
-                            <CardHeader className="pb-4 relative z-10">
-                                <div className="flex items-start justify-between">
-                                    <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-3xl shadow-lg">
-                                            {selectedSubject.emoji}
-                                        </div>
-                                        <div>
-                                            <CardTitle className="text-white text-lg font-bold leading-tight">{topic}</CardTitle>
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <Badge variant="outline" className="bg-white/5 border-white/10 text-white/50 text-[10px] px-2 py-0 rounded-full">
-                                                    {gradeInfo?.label}
-                                                </Badge>
-                                                <Badge variant="outline" className="bg-white/5 border-white/10 text-white/50 text-[10px] px-2 py-0 rounded-full">
-                                                    {selectedSubject.name}
-                                                </Badge>
+                                    <CardHeader className="p-4 relative z-10">
+                                        <div className="flex items-start justify-between min-h-[4rem]">
+                                            <div className="flex flex-col gap-2">
+                                                <CardTitle className={`text-white text-base font-bold leading-tight ${isGeneral ? "text-purple-200" : ""}`}>
+                                                    {topic}
+                                                </CardTitle>
+                                                {isGeneral && (
+                                                    <Badge className="bg-purple-600/50 text-[10px] w-fit">Full Subject</Badge>
+                                                )}
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                            </CardHeader>
+                                    </CardHeader>
 
-                            <CardContent className="pt-2 relative z-10">
-                                <div className="grid grid-cols-2 gap-3">
-                                    <Button
-                                        onClick={() => onStartGame(selectedGrade, `${selectedSubject.name}: ${topic}`, "solo")}
-                                        className="bg-emerald-600/90 hover:bg-emerald-500 text-white font-bold rounded-xl h-10 border-b-4 border-emerald-800 hover:border-emerald-700 active:border-b-0 active:translate-y-1 transition-all"
-                                    >
-                                        <Gamepad2 className="w-4 h-4 mr-2" />
-                                        Solo
-                                    </Button>
-                                    <Button
-                                        onClick={() => onStartGame(selectedGrade, `${selectedSubject.name}: ${topic}`, "host")}
-                                        className="bg-violet-600/90 hover:bg-violet-500 text-white font-bold rounded-xl h-10 border-b-4 border-violet-800 hover:border-violet-700 active:border-b-0 active:translate-y-1 transition-all"
-                                    >
-                                        <Trophy className="w-4 h-4 mr-2" />
-                                        Host
-                                    </Button>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
+                                    <CardContent className="p-4 pt-0 relative z-10">
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <Button
+                                                onClick={() => onStartGame(selectedGrade, `${selectedSubject.name}: ${topic}`, "solo")}
+                                                className="bg-emerald-600/90 hover:bg-emerald-500 text-white font-bold rounded-lg h-9 text-xs border-b-2 border-emerald-800 active:border-b-0 active:translate-y-0.5 transition-all"
+                                            >
+                                                <Gamepad2 className="w-3 h-3 mr-1" />
+                                                Solo
+                                            </Button>
+                                            <Button
+                                                onClick={() => onStartGame(selectedGrade, `${selectedSubject.name}: ${topic}`, "host")}
+                                                className="bg-violet-600/90 hover:bg-violet-500 text-white font-bold rounded-lg h-9 text-xs border-b-2 border-violet-800 active:border-b-0 active:translate-y-0.5 transition-all"
+                                            >
+                                                <Trophy className="w-3 h-3 mr-1" />
+                                                Host
+                                            </Button>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            )
+                        })}
+                    </div>
 
                     {filteredTopics.length === 0 && (
                         <div className="col-span-full flex flex-col items-center justify-center py-20 bg-white/5 rounded-3xl border border-dashed border-white/20 backdrop-blur-sm">
