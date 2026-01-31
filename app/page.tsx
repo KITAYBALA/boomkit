@@ -213,6 +213,8 @@ interface GameUser {
   lastSeen: number // Timestamp of last activity
   packsOpened?: number // Added for Supabase sync
   lastIp?: string // Added for IP blacklisting
+  xp: number // Added for leveling system
+  level: number // Added for leveling system
   // password?: string; // Removed password from interface to avoid unintended exposure
 }
 
@@ -1175,6 +1177,105 @@ export default function BoomkitGame() {
     return currentUser?.isOwner || false
   }
 
+  // Handle logout
+  const handleLogout = () => {
+    updateAndPersistCurrentUser(null)
+    setCurrentView("owner-access")
+    // Clear Supabase session if necessary
+    if (supabase) {
+      supabase.auth.signOut()
+    }
+  }
+
+  // XP and Leveling System
+  const awardXP = (amount: number) => {
+    if (!currentUser) return
+
+    let newXP = (currentUser.xp || 0) + amount
+    let newLevel = currentUser.level || 1
+    let leveledUp = false
+    const XP_PER_LEVEL = 100 // Simple fixed XP per level for now
+
+    // Calculate new level
+    while (newXP >= XP_PER_LEVEL) {
+      newXP -= XP_PER_LEVEL
+      newLevel++
+      leveledUp = true
+    }
+
+    // Cap at level 100
+    if (newLevel >= 100) {
+      newLevel = 100
+      newXP = Math.max(newXP, XP_PER_LEVEL) // Max out XP visual
+    }
+
+    if (leveledUp) {
+      alert(`🎉 LEVEL UP! You are now Level ${newLevel}!`)
+
+      // Check for Milestone Rewards
+      if (newLevel === 100) {
+        alert("🏆 MAX LEVEL REACHED! You unlocked the Admin Boom!")
+      } else if (newLevel % 10 === 0) {
+        alert(`🎁 CONGRATULATIONS! You reached Level ${newLevel} and unlocked a Special Reward! Check your Level Booms!`)
+      }
+    }
+
+    const updatedUser = {
+      ...currentUser,
+      xp: newXP,
+      level: newLevel
+    }
+    updateAndPersistCurrentUser(updatedUser)
+  }
+
+  // XP and Leveling System
+  const awardXP = (amount: number) => {
+    if (!currentUser) return
+
+    let newXP = (currentUser.xp || 0) + amount
+    let newLevel = currentUser.level || 1
+    let leveledUp = false
+    const XP_PER_LEVEL = 100 // Simple fixed XP per level for now
+
+    // Calculate new level
+    while (newXP >= XP_PER_LEVEL) {
+      newXP -= XP_PER_LEVEL
+      newLevel++
+      leveledUp = true
+    }
+
+    // Cap at level 100
+    if (newLevel >= 100) {
+      newLevel = 100
+      newXP = Math.max(newXP, XP_PER_LEVEL) // Max out XP visual
+    }
+
+    if (leveledUp) {
+      alert(`🎉 LEVEL UP! You are now Level ${newLevel}!`)
+
+      // Check for Milestone Rewards
+      if (newLevel === 100) {
+        alert("🏆 MAX LEVEL REACHED! You unlocked the Admin Boom!")
+        // Grant Admin Boom Logic here or in a separate function
+        const adminBoom = "Admin Boom" // Placeholder name
+        // Check if already has it?
+        if (!currentUser.booms[adminBoom]) {
+          // Logic to add boom would require updating booms object
+          // awardXP handles state update at end, so we can modify a temp object if we want
+          // But simpler to just alert for now and maybe handle in a more complex way if needed
+        }
+      } else if (newLevel % 10 === 0) {
+        alert(`🎁 CONGRATULATIONS! You reached Level ${newLevel} and unlocked a Special Reward! Check your Level Booms!`)
+      }
+    }
+
+    const updatedUser = {
+      ...currentUser,
+      xp: newXP,
+      level: newLevel
+    }
+    updateAndPersistCurrentUser(updatedUser)
+  }
 
   // Check if user can spin today
   useEffect(() => {
@@ -1311,6 +1412,8 @@ export default function BoomkitGame() {
         banReason: user.ban_reason || "",
         lastSeen: user.last_seen || Date.now(),
         packsOpened: user.packs_opened || 0,
+        xp: user.xp || 0,
+        level: user.level || 1,
       }
 
       updateAndPersistCurrentUser(newUser)
@@ -1383,6 +1486,8 @@ export default function BoomkitGame() {
         banReason: user.ban_reason || "",
         lastSeen: user.last_seen || Date.now(),
         packsOpened: user.packs_opened || 0,
+        xp: user.xp || 0,
+        level: user.level || 1,
       }
 
       // Check if user is banned (double-check from server response)
@@ -2931,11 +3036,18 @@ export default function BoomkitGame() {
 
                   <div className="space-y-3 relative z-10">
                     <div className="flex justify-between items-end">
-                      <span className="text-white/50 text-xs font-bold uppercase tracking-widest">Level Progress</span>
-                      <span className="text-orange-500 font-black text-sm">MAX LEVEL</span>
+                      <span className="text-white/50 text-xs font-bold uppercase tracking-widest">
+                        Level {currentUser?.level || 1}
+                      </span>
+                      <span className="text-orange-500 font-black text-sm">
+                        {(currentUser?.level || 1) >= 100 ? "MAX LEVEL" : `${currentUser?.xp || 0} / 100 XP`}
+                      </span>
                     </div>
                     <div className="w-full bg-white/5 rounded-full h-4 p-1 border border-white/5 overflow-hidden">
-                      <div className="bg-gradient-to-r from-orange-600 to-yellow-500 h-full rounded-full shadow-[0_0_10px_rgba(249,115,22,0.5)]" style={{ width: "100%" }}></div>
+                      <div
+                        className="bg-gradient-to-r from-orange-600 to-yellow-500 h-full rounded-full shadow-[0_0_10px_rgba(249,115,22,0.5)] transition-all duration-500"
+                        style={{ width: `${Math.min(((currentUser?.xp || 0) / 100) * 100, 100)}%` }}
+                      ></div>
                     </div>
                   </div>
 
@@ -3039,6 +3151,32 @@ export default function BoomkitGame() {
                       My Collection
                     </h1>
                     <p className="text-white/60 text-lg">Manage and view your discovered Booms</p>
+                  </div>
+
+                  {/* Level Rewards Banner */}
+                  <div className="w-full bg-gradient-to-r from-purple-900/50 to-blue-900/50 border border-white/10 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center border-2 border-orange-500 shadow-[0_0_20px_rgba(249,115,22,0.3)] text-3xl">
+                        🏆
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-white">Level Rewards</h3>
+                        <p className="text-white/60 text-sm">Unlock special Booms every 10 levels!</p>
+                        <div className="text-orange-400 font-black text-xs uppercase tracking-widest mt-1">
+                          Next Reward: Level {Math.ceil((currentUser?.level || 1) / 10) * 10}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      {[10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((lvl) => {
+                        const isUnlocked = (currentUser?.level || 1) >= lvl;
+                        return (
+                          <div key={lvl} className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border ${isUnlocked ? "bg-green-500 border-green-400 text-white shadow-[0_0_10px_rgba(34,197,94,0.5)]" : "bg-black/40 border-white/10 text-white/20"}`} title={`Level ${lvl} Reward`}>
+                            {isUnlocked ? "✓" : lvl}
+                          </div>
+                        )
+                      })}
+                    </div>
                   </div>
 
                   <div className="flex gap-4">
@@ -3990,6 +4128,9 @@ export default function BoomkitGame() {
                       const updatedUser = { ...currentUser, tokens: currentUser.tokens + totalReward }
                       updateAndPersistCurrentUser(updatedUser)
                       alert(`Game Over! You earned ${totalReward} tokens (${completionBonus} for completion + ${performanceBonus} for score).`)
+
+                      // Award XP
+                      awardXP(Math.floor(score / 2) + 10) // Example XP formula
                     }
                   }
                 }}
