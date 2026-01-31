@@ -2004,7 +2004,7 @@ export default function BoomkitGame() {
     }
   }
 
-  const fetchQuestionsWithAi = async (grade: number, subject: string, count: number = 25) => {
+  const fetchQuestionsWithAi = async (grade: number, subject: string, count: number = 30) => {
     try {
       const response = await fetch("/api/generate-set", {
         method: "POST",
@@ -3965,7 +3965,7 @@ export default function BoomkitGame() {
                   } else {
                     // Always generate fresh, unique questions for each game session
                     setIsGeneratingSet(true)
-                    questionsToUse = await fetchQuestionsWithAi(grade, subject, 25)
+                    questionsToUse = await fetchQuestionsWithAi(grade, subject, 30)
                     setIsGeneratingSet(false)
                   }
 

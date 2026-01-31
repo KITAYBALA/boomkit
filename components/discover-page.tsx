@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -14,7 +14,10 @@ import {
     ChevronRightIcon,
     Gamepad2,
     Trophy,
+    ArrowLeftIcon,
+    LayoutGridIcon
 } from "lucide-react"
+import { TOPICS_BY_GRADE_SUBJECT } from "@/lib/curriculum-data"
 
 // Enhanced Grade configuration with premium gradients and shadows
 const GRADES = [
@@ -187,12 +190,48 @@ export default function DiscoverPage({
     const [gamePin, setGamePin] = useState("")
     const [hoveredSubject, setHoveredSubject] = useState<number | null>(null)
 
+    // View state for hierarchical navigation (Subjects -> Topics)
+    const [viewMode, setViewMode] = useState<"subjects" | "topics">("subjects")
+    const [selectedSubject, setSelectedSubject] = useState<{ name: string; emoji: string } | null>(null)
+
     const gradeInfo = GRADES.find((g) => g.grade === selectedGrade)
     const subjects = SUBJECTS_BY_GRADE[selectedGrade] || []
 
     const filteredSubjects = subjects.filter((subject) =>
         subject.name.toLowerCase().includes(searchQuery.toLowerCase())
     )
+
+    // Get topics for the selected subject and grade
+    const getTopics = () => {
+        if (!selectedSubject) return []
+        const gradeTopics = TOPICS_BY_GRADE_SUBJECT[selectedGrade] || {}
+        return gradeTopics[selectedSubject.name] || []
+    }
+
+    const filteredTopics = getTopics().filter((topic) =>
+        topic.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+
+    const handleSubjectClick = (subject: { name: string; emoji: string }) => {
+        // Check if there are topics for this subject
+        const gradeTopics = TOPICS_BY_GRADE_SUBJECT[selectedGrade] || {}
+        const topics = gradeTopics[subject.name] || []
+
+        if (topics.length > 0) {
+            setSelectedSubject(subject)
+            setViewMode("topics")
+            setSearchQuery("") // Clear search when entering topics
+        } else {
+            // Fallback: Start game directly if no sub-topics defined
+            onStartGame(selectedGrade, subject.name, "solo")
+        }
+    }
+
+    const handleBackToSubjects = () => {
+        setViewMode("subjects")
+        setSelectedSubject(null)
+        setSearchQuery("")
+    }
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 p-2">
@@ -204,14 +243,35 @@ export default function DiscoverPage({
 
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 relative z-10">
                     <div>
-                        <div className="flex items-center gap-3 mb-2">
-                            <span className="text-4xl animate-bounce">🧭</span>
-                            <h1 className="text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-purple-200 drop-shadow-lg">
-                                Discover
-                            </h1>
-                        </div>
+                        {viewMode === "topics" && selectedSubject ? (
+                            <div className="flex items-center gap-3 mb-2">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={handleBackToSubjects}
+                                    className="bg-white/10 hover:bg-white/20 text-white rounded-full mr-2"
+                                >
+                                    <ArrowLeftIcon className="w-6 h-6" />
+                                </Button>
+                                <span className="text-4xl animate-bounce">{selectedSubject.emoji}</span>
+                                <h1 className="text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-purple-200 drop-shadow-lg">
+                                    {selectedSubject.name}
+                                </h1>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-3 mb-2">
+                                <span className="text-4xl animate-bounce">🧭</span>
+                                <h1 className="text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-purple-200 drop-shadow-lg">
+                                    Discover
+                                </h1>
+                            </div>
+                        )}
+
                         <p className="text-xl text-purple-200/70 font-medium max-w-lg leading-relaxed">
-                            Embark on an educational journey. Learn, play, and compete with next-gen games!
+                            {viewMode === "topics"
+                                ? "Select a topic to start your adventure!"
+                                : "Embark on an educational journey. Learn, play, and compete with next-gen games!"
+                            }
                         </p>
                     </div>
 
@@ -234,8 +294,8 @@ export default function DiscoverPage({
                 </div>
             </div>
 
-            {/* Grade Selector */}
-            <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 shadow-2xl">
+            {/* Grade Selector - Hide in topics view to focus attention, or keep it? Keeping it for quick switching */}
+            <div className={`bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 shadow-2xl transition-all duration-500 ${viewMode === "topics" ? "opacity-50 hover:opacity-100 scale-95" : ""}`}>
                 <div className="flex items-center gap-3 mb-6">
                     <div className="p-2 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-xl border border-white/10">
                         <BookOpenIcon className="w-6 h-6 text-purple-300" />
@@ -248,7 +308,14 @@ export default function DiscoverPage({
                         return (
                             <button
                                 key={grade.grade}
-                                onClick={() => setSelectedGrade(grade.grade)}
+                                onClick={() => {
+                                    setSelectedGrade(grade.grade)
+                                    // If changing grade in topics view, go back to subjects as topics might change
+                                    if (viewMode === "topics") {
+                                        setViewMode("subjects")
+                                        setSelectedSubject(null)
+                                    }
+                                }}
                                 className={`
                                     relative px-5 py-3 rounded-2xl font-bold text-sm transition-all duration-300 ease-out
                                     flex items-center gap-2 border
@@ -275,7 +342,7 @@ export default function DiscoverPage({
                 <div className="relative">
                     <SearchIcon className="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-white/50 group-focus-within:text-purple-400 transition-colors" />
                     <Input
-                        placeholder={`Search ${gradeInfo?.label} subjects...`}
+                        placeholder={viewMode === "topics" ? `Search topics in ${selectedSubject?.name}...` : `Search ${gradeInfo?.label} subjects...`}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="pl-14 h-14 bg-slate-900/80 backdrop-blur-xl border-white/10 text-white placeholder:text-white/30 rounded-2xl text-lg focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all shadow-xl"
@@ -283,8 +350,8 @@ export default function DiscoverPage({
                 </div>
             </div>
 
-            {/* Custom AI Sets Section */}
-            {discoveredSets.length > 0 && (
+            {/* Custom AI Sets Section - Only show in Subjects View */}
+            {viewMode === "subjects" && discoveredSets.length > 0 && (
                 <div className="space-y-4">
                     <div className="flex items-center gap-2">
                         <SparklesIcon className="w-6 h-6 text-pink-400" />
@@ -330,72 +397,152 @@ export default function DiscoverPage({
                 </div>
             )}
 
-            {/* Subjects Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredSubjects.map((subject, index) => (
-                    <Card
-                        key={index}
-                        onMouseEnter={() => setHoveredSubject(index)}
-                        onMouseLeave={() => setHoveredSubject(null)}
-                        className="bg-white/5 backdrop-blur-md border-white/10 hover:border-white/30 transition-all duration-500 group cursor-pointer overflow-hidden hover:shadow-2xl hover:shadow-purple-500/10 hover:-translate-y-2 relative"
-                    >
-                        {/* Hover Gradient Overlay */}
-                        <div className={`absolute inset-0 bg-gradient-to-br ${gradeInfo?.gradient || "from-gray-700 to-gray-800"} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
+            {/* VIEW: SUBJECTS */}
+            {viewMode === "subjects" && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 animate-in slide-in-from-left-4 duration-500">
+                    {filteredSubjects.map((subject, index) => (
+                        <Card
+                            key={index}
+                            onClick={() => handleSubjectClick(subject)}
+                            onMouseEnter={() => setHoveredSubject(index)}
+                            onMouseLeave={() => setHoveredSubject(null)}
+                            className="bg-white/5 backdrop-blur-md border-white/10 hover:border-white/30 transition-all duration-500 group cursor-pointer overflow-hidden hover:shadow-2xl hover:shadow-purple-500/10 hover:-translate-y-2 relative"
+                        >
+                            {/* Hover Gradient Overlay */}
+                            <div className={`absolute inset-0 bg-gradient-to-br ${gradeInfo?.gradient || "from-gray-700 to-gray-800"} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
 
-                        <CardHeader className="pb-4 relative z-10">
-                            <div className="flex items-start justify-between">
-                                <div className="flex items-center gap-4">
-                                    <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-4xl shadow-lg group-hover:scale-110 transition-transform duration-500">
-                                        {subject.emoji}
+                            <CardHeader className="pb-4 relative z-10">
+                                <div className="flex items-start justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-4xl shadow-lg group-hover:scale-110 transition-transform duration-500">
+                                            {subject.emoji}
+                                        </div>
+                                        <div>
+                                            <CardTitle className="text-white text-xl font-bold">{subject.name}</CardTitle>
+                                            <div className="flex items-center gap-2 mt-2">
+                                                <Badge variant="outline" className="bg-white/5 border-white/10 text-white/50 text-[10px] px-2 py-0.5 rounded-full">
+                                                    {gradeInfo?.label}
+                                                </Badge>
+                                                <Badge variant="secondary" className="bg-purple-500/20 text-purple-200 border-none text-[10px] px-2 py-0.5 rounded-full">
+                                                    {(TOPICS_BY_GRADE_SUBJECT[selectedGrade]?.[subject.name]?.length || 0)} Topics
+                                                </Badge>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <CardTitle className="text-white text-xl font-bold">{subject.name}</CardTitle>
-                                        <div className="flex items-center gap-2 mt-2">
-                                            <Badge variant="outline" className="bg-white/5 border-white/10 text-white/50 text-[10px] px-2 py-0.5 rounded-full">
-                                                {gradeInfo?.label}
-                                            </Badge>
+                                    <ChevronRightIcon className="w-6 h-6 text-white/30 group-hover:text-white group-hover:translate-x-1 transition-all" />
+                                </div>
+                            </CardHeader>
+
+                            <CardContent className="pt-2 relative z-10">
+                                <p className="text-white/40 text-sm line-clamp-2">
+                                    Explore specific topics like
+                                    {TOPICS_BY_GRADE_SUBJECT[selectedGrade]?.[subject.name]?.slice(0, 2).map((t: string) => ` ${t}`).join(", ")} and more.
+                                </p>
+                            </CardContent>
+                        </Card>
+                    ))}
+
+                    {filteredSubjects.length === 0 && (
+                        <div className="col-span-full flex flex-col items-center justify-center py-20 bg-white/5 rounded-3xl border border-dashed border-white/20 backdrop-blur-sm">
+                            <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6 animate-pulse">
+                                <SearchIcon className="w-10 h-10 text-white/30" />
+                            </div>
+                            <h3 className="text-white font-bold text-2xl mb-2">No subjects found</h3>
+                            <p className="text-white/40">We couldn't find any subjects matching "{searchQuery}"</p>
+                            <Button
+                                variant="link"
+                                onClick={() => setSearchQuery("")}
+                                className="mt-4 text-purple-400 hover:text-purple-300"
+                            >
+                                Clear search
+                            </Button>
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* VIEW: TOPICS */}
+            {viewMode === "topics" && selectedSubject && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 animate-in slide-in-from-right-4 duration-500">
+                    <div className="col-span-full flex items-center gap-2 mb-2">
+                        <LayoutGridIcon className="w-5 h-5 text-purple-400" />
+                        <span className="text-white/60 font-medium">Available Topics</span>
+                    </div>
+
+                    {filteredTopics.map((topic, index) => (
+                        <Card
+                            key={index}
+                            className="bg-white/5 backdrop-blur-md border-white/10 hover:border-white/30 transition-all duration-500 group cursor-default overflow-hidden hover:shadow-2xl hover:shadow-purple-500/10 hover:-translate-y-1 relative"
+                        >
+                            {/* Hover Gradient Overlay */}
+                            <div className={`absolute inset-0 bg-gradient-to-br ${gradeInfo?.gradient || "from-gray-700 to-gray-800"} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
+
+                            <CardHeader className="pb-4 relative z-10">
+                                <div className="flex items-start justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-3xl shadow-lg">
+                                            {selectedSubject.emoji}
+                                        </div>
+                                        <div>
+                                            <CardTitle className="text-white text-lg font-bold leading-tight">{topic}</CardTitle>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <Badge variant="outline" className="bg-white/5 border-white/10 text-white/50 text-[10px] px-2 py-0 rounded-full">
+                                                    {gradeInfo?.label}
+                                                </Badge>
+                                                <Badge variant="outline" className="bg-white/5 border-white/10 text-white/50 text-[10px] px-2 py-0 rounded-full">
+                                                    {selectedSubject.name}
+                                                </Badge>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </CardHeader>
+                            </CardHeader>
 
-                        <CardContent className="pt-2 relative z-10">
-                            <div className="grid grid-cols-2 gap-3 opacity-80 group-hover:opacity-100 transition-opacity duration-300">
+                            <CardContent className="pt-2 relative z-10">
+                                <div className="grid grid-cols-2 gap-3">
+                                    <Button
+                                        onClick={() => onStartGame(selectedGrade, `${selectedSubject.name}: ${topic}`, "solo")}
+                                        className="bg-emerald-600/90 hover:bg-emerald-500 text-white font-bold rounded-xl h-10 border-b-4 border-emerald-800 hover:border-emerald-700 active:border-b-0 active:translate-y-1 transition-all"
+                                    >
+                                        <Gamepad2 className="w-4 h-4 mr-2" />
+                                        Solo
+                                    </Button>
+                                    <Button
+                                        onClick={() => onStartGame(selectedGrade, `${selectedSubject.name}: ${topic}`, "host")}
+                                        className="bg-violet-600/90 hover:bg-violet-500 text-white font-bold rounded-xl h-10 border-b-4 border-violet-800 hover:border-violet-700 active:border-b-0 active:translate-y-1 transition-all"
+                                    >
+                                        <Trophy className="w-4 h-4 mr-2" />
+                                        Host
+                                    </Button>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))}
+
+                    {filteredTopics.length === 0 && (
+                        <div className="col-span-full flex flex-col items-center justify-center py-20 bg-white/5 rounded-3xl border border-dashed border-white/20 backdrop-blur-sm">
+                            <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6 animate-pulse">
+                                <SearchIcon className="w-10 h-10 text-white/30" />
+                            </div>
+                            <h3 className="text-white font-bold text-2xl mb-2">No topics found</h3>
+                            <p className="text-white/40">We couldn't find any topics matching "{searchQuery}"</p>
+                            <div className="flex gap-4 mt-6">
                                 <Button
-                                    onClick={() => onStartGame(selectedGrade, subject.name, "solo")}
-                                    className="bg-emerald-600/90 hover:bg-emerald-500 text-white font-bold rounded-xl h-11 border-b-4 border-emerald-800 hover:border-emerald-700 active:border-b-0 active:translate-y-1 transition-all"
+                                    variant="outline"
+                                    onClick={() => setSearchQuery("")}
+                                    className="border-white/20 text-white hover:bg-white/10"
                                 >
-                                    <Gamepad2 className="w-4 h-4 mr-2" />
-                                    Solo
+                                    Clear search
                                 </Button>
                                 <Button
-                                    onClick={() => onStartGame(selectedGrade, subject.name, "host")}
-                                    className="bg-violet-600/90 hover:bg-violet-500 text-white font-bold rounded-xl h-11 border-b-4 border-violet-800 hover:border-violet-700 active:border-b-0 active:translate-y-1 transition-all"
+                                    onClick={() => onStartGame(selectedGrade, selectedSubject.name, "solo")}
+                                    className="bg-gradient-to-r from-purple-600 to-pink-600 border-none text-white hover:opacity-90"
                                 >
-                                    <Trophy className="w-4 h-4 mr-2" />
-                                    Host
+                                    Play General {selectedSubject.name} Game
                                 </Button>
                             </div>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
-
-            {filteredSubjects.length === 0 && (
-                <div className="flex flex-col items-center justify-center py-20 bg-white/5 rounded-3xl border border-dashed border-white/20 backdrop-blur-sm">
-                    <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6 animate-pulse">
-                        <SearchIcon className="w-10 h-10 text-white/30" />
-                    </div>
-                    <h3 className="text-white font-bold text-2xl mb-2">No subjects found</h3>
-                    <p className="text-white/40">We couldn't find any subjects matching "{searchQuery}"</p>
-                    <Button
-                        variant="link"
-                        onClick={() => setSearchQuery("")}
-                        className="mt-4 text-purple-400 hover:text-purple-300"
-                    >
-                        Clear search
-                    </Button>
+                        </div>
+                    )}
                 </div>
             )}
 
