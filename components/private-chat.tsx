@@ -77,16 +77,23 @@ export default function PrivateChat({ currentUser }: Props) {
         if (stored) setBlockedUsers(JSON.parse(stored))
     }, [])
 
-    const blockUser = (userId: string) => {
-        const newBlocked = [...blockedUsers, userId]
+    const blockUser = (username: string) => {
+        if (blockedUsers.includes(username)) return
+        const newBlocked = [...blockedUsers, username]
         setBlockedUsers(newBlocked)
         localStorage.setItem("boomkit_blocked_users", JSON.stringify(newBlocked))
         // Close active if blocked user is in it (optional, but good UX for single chats)
-        if (activeConversation && !activeConversation.is_group && activeConversation.members.find(m => m === userId)) { // Logic simplification for now: reload
-            // For simplicity, just force a re-render or close
+        if (activeConversation && !activeConversation.is_group && activeConversation.members.find(m => m === username)) {
             setActiveConversation(null)
         }
         alert("User blocked.")
+    }
+
+    const unblockUser = (username: string) => {
+        const newBlocked = blockedUsers.filter(u => u !== username)
+        setBlockedUsers(newBlocked)
+        localStorage.setItem("boomkit_blocked_users", JSON.stringify(newBlocked))
+        alert("User unblocked.")
     }
 
     const deleteChat = (convId: string) => {
@@ -382,23 +389,38 @@ export default function PrivateChat({ currentUser }: Props) {
                                             <div className="absolute right-0 top-full mt-2 w-48 bg-[#1a1a1c] border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 origin-top-right">
                                                 <div className="p-1">
                                                     {!conv.is_group && (
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation()
-                                                                // Find ID
-                                                                // This is tricky without user ID in members list derived from usernames
-                                                                // For now, prompt username block
-                                                                const otherUser = conv.members.find(m => m !== currentUser?.username)
-                                                                if (otherUser) blockUser(otherUser) // Blocking essentially by username string for list filter?
-                                                                // Ideally we block by ID. Let's fix this properly.
-                                                                // REVISION: We assume username blocking for filter simplicity in this quick impl?
-                                                                // Or better: prompt to block.
-                                                                setShowChatActions(null)
-                                                            }}
-                                                            className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-white hover:bg-white/10 rounded-lg"
-                                                        >
-                                                            <BanIcon className="h-3.5 w-3.5" /> Block User
-                                                        </button>
+                                                        (() => {
+                                                            const otherUser = conv.members.find(m => m !== currentUser?.username)
+                                                            const isBlocked = otherUser ? blockedUsers.includes(otherUser) : false
+                                                            
+                                                            return (
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation()
+                                                                        if (otherUser) {
+                                                                            if (isBlocked) {
+                                                                                unblockUser(otherUser)
+                                                                            } else {
+                                                                                blockUser(otherUser)
+                                                                            }
+                                                                        }
+                                                                        setShowChatActions(null)
+                                                                    }}
+                                                                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-white hover:bg-white/10 rounded-lg"
+                                                                >
+                                                                    {isBlocked ? (
+                                                                        <>
+                                                                            <ShieldCheckIcon className="h-3.5 w-3.5 text-green-400" /> 
+                                                                            <span className="text-green-400">Unblock User</span>
+                                                                        </>
+                                                                    ) : (
+                                                                        <>
+                                                                            <BanIcon className="h-3.5 w-3.5" /> Block User
+                                                                        </>
+                                                                    )}
+                                                                </button>
+                                                            )
+                                                        })()
                                                     )}
                                                     <button
                                                         onClick={(e) => {

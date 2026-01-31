@@ -295,48 +295,51 @@ const FALLBACK_QUESTIONS: { [key: string]: any[] } = {
 }
 
 function getFallbackQuestions(grade: number, subject: string, count: number) {
-  let questionSet: any[] = []
+  let pool: any[] = []
   const subjectLower = subject.toLowerCase()
 
   // Match subject to question bank
   if (subjectLower.includes("math") || subjectLower.includes("algebra") || subjectLower.includes("geometry") || subjectLower.includes("calculus") || subjectLower.includes("trigonometry")) {
-    if (grade <= 3) questionSet = [...FALLBACK_QUESTIONS["math_elementary"]]
-    else if (grade <= 6) questionSet = [...FALLBACK_QUESTIONS["math_middle"]]
-    else questionSet = [...FALLBACK_QUESTIONS["math_high"]]
+    if (grade <= 3) pool = [...FALLBACK_QUESTIONS["math_elementary"]]
+    else if (grade <= 6) pool = [...FALLBACK_QUESTIONS["math_middle"]]
+    else pool = [...FALLBACK_QUESTIONS["math_high"]]
   } else if (subjectLower.includes("reading") || subjectLower.includes("english") || subjectLower.includes("writing") || subjectLower.includes("literature") || subjectLower.includes("language")) {
-    questionSet = [...FALLBACK_QUESTIONS["reading"]]
+    pool = [...FALLBACK_QUESTIONS["reading"]]
   } else if (subjectLower.includes("science") || subjectLower.includes("biology") || subjectLower.includes("chemistry") || subjectLower.includes("physics")) {
-    questionSet = [...FALLBACK_QUESTIONS["science"]]
+    pool = [...FALLBACK_QUESTIONS["science"]]
   } else if (subjectLower.includes("history") || subjectLower.includes("social") || subjectLower.includes("geography") || subjectLower.includes("civics")) {
-    questionSet = [...FALLBACK_QUESTIONS["history"]]
+    pool = [...FALLBACK_QUESTIONS["history"]]
   } else if (subjectLower.includes("computer") || subjectLower.includes("ict") || subjectLower.includes("programming") || subjectLower.includes("technology")) {
-    questionSet = [...FALLBACK_QUESTIONS["computer"]]
+    pool = [...FALLBACK_QUESTIONS["computer"]]
   } else if (subjectLower.includes("art") || subjectLower.includes("music")) {
-    questionSet = [...FALLBACK_QUESTIONS["art"]]
+    pool = [...FALLBACK_QUESTIONS["art"]]
   } else if (subjectLower.includes("pe") || subjectLower.includes("physical") || subjectLower.includes("sport") || subjectLower.includes("education")) {
-    questionSet = [...FALLBACK_QUESTIONS["pe"]]
+    pool = [...FALLBACK_QUESTIONS["pe"]]
   } else {
-    questionSet = [...FALLBACK_QUESTIONS["general"]]
+    pool = [...FALLBACK_QUESTIONS["general"]]
   }
 
-  // Add more questions from other sets to reach count
-  const additionalSets = ["general", "science", "history"]
-  for (const setName of additionalSets) {
-    if (questionSet.length < count) {
-      questionSet.push(...FALLBACK_QUESTIONS[setName])
-    }
+  // Add more questions from general pool if needed, but shuffle it first
+  const secondaryPool = [...FALLBACK_QUESTIONS["general"], ...FALLBACK_QUESTIONS["science"], ...FALLBACK_QUESTIONS["history"]]
+
+  // Combine and shuffle everything for maximum variety
+  let combined = [...pool]
+
+  // If we don't have enough, pull from secondary
+  if (combined.length < count) {
+    combined = [...combined, ...secondaryPool]
   }
 
-  // Shuffle for variety
-  for (let i = questionSet.length - 1; i > 0; i--) {
+  // Fisher-Yates shuffle
+  for (let i = combined.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [questionSet[i], questionSet[j]] = [questionSet[j], questionSet[i]]
+    [combined[i], combined[j]] = [combined[j], combined[i]]
   }
 
-  // Return with unique IDs
-  return questionSet.slice(0, count).map((q, idx) => ({
+  // Return with unique tokens to prevent client-side key collisions
+  return combined.slice(0, count).map((q, idx) => ({
     ...q,
-    id: `fallback_${Date.now()}_${idx}`
+    id: `fallback_${grade}_${subject}_${Date.now()}_${idx}_${Math.random().toString(36).substr(2, 9)}`
   }))
 }
 
@@ -371,12 +374,19 @@ export async function POST(req: Request) {
       CRITICAL DIFFICULTY & DIVERSITY RULES:
       - EVERY question MUST have EXACTLY 4 options. Never 2 or 3.
       - AVOID REPETITIVE QUESTIONS. Every single question in the set must be unique and different in structure and content.
-      - For Grade 1 Math: Focus on a wide variety of topics: addition, subtraction, basic shapes, counting objects, telling time, and simple word problems. AVOID repeating simple "X+Y" patterns.
-      - For Grade 1 Reading: Use diverse vocabulary, sentence completion, identifying main ideas, and phonics. Every reading question should look and feel different.
-      - For Grade 2-5: Use intermediate arithmetic (multiplication/division), basic science, descriptive grammar, and reading comprehension.
-      - For Grade 6-12: Increase complexity naturally (Algebra, Biology, Physics, etc.) but MAINTAIN the 4-option requirement and high diversity.
-      - AVOID extremely simple or repetitive math like "5+5" unless it's a very small part of a larger, more complex set for Grade 1.
-      - Questions MUST get progressively slightly harder within the set.
+      - GRADED CURRICULUM CONSTRAINTS:
+        * Grade 1: Focus on basic foundations. Math: Addition/subtraction within 20, telling time to the hour, basic shapes (circles, squares), counting by 2s/5s/10s. Reading: Phonics, high-frequency words, basic sentence structure.
+        * Grade 2: Math: Double-digit addition/subtraction, measuring length, money, telling time to 5 mins. Reading: Context clues, main idea, character traits.
+        * Grade 3: Math: Introduction to multiplication/division, fractions, area/perimeter. Reading: Informational text analysis, prefixes/suffixes, complex sentences.
+        * Grade 4: Math: Multi-digit multiplication, long division, adding/subtracting fractions, decimals. Reading: Figurative language (similes, metaphors), summarizing, inference.
+        * Grade 5: Math: Multiplying/dividing fractions, volume, coordinate planes. Reading: Analyzing themes, point of view, advanced vocabulary.
+        * Grade 6-8 (Middle): Focus on pre-algebra, ratios, Earth/Life science, world history, literary analysis, and argumentative writing.
+        * Grade 9-12 (High): Focus on Algebra I/II, Geometry, Calculus, Biology/Chemistry/Physics, American/European History, and advanced literature/poetry analysis.
+      
+      - RANDOMIZATION SEED: ${Date.now()}
+      - TOPIC VARIETY: Do not just stick to one sub-topic. If it's Math, mix arithmetic with word problems, geometry, and measurements.
+      - AVOID "5+5" CLICHÉS: Do not use extremely simple or repetitive math like "5+5" unless it's a very specific context for Grade 1.
+      - PROGRESSION: Questions MUST get progressively harder within the set.
 
       Return the response ONLY as a valid JSON object in this format:
       {

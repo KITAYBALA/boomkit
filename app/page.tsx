@@ -1938,7 +1938,7 @@ export default function BoomkitGame() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          prompt: `Educational questions about ${subject}`,
+          prompt: `High-quality, curriculum-aligned educational questions about ${subject} for Grade ${grade}. Include a mix of sub-topics and conceptual understanding.`,
           grade,
           subject,
           count
