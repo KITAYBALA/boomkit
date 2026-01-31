@@ -1,4 +1,3 @@
--- Add xp and level columns to users table if they don't exist
 DO $$
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'users' AND column_name = 'xp') THEN
