@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
         // 3. Sensitive Field Protection
         const protectedFields = [
             'role', 'is_owner', 'is_banned', 'is_plus_user', 'tokens', 'boom_score',
-            'total_value', 'badges', 'is_muted', 'ban_reason', 'ban_expiry'
+            'total_value', 'badges', 'is_muted', 'ban_reason', 'ban_expiry', 'xp', 'level'
         ]
 
         const updatingProtectedFields = Object.keys(updates).some(key => protectedFields.includes(key))
