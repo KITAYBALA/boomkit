@@ -9,7 +9,7 @@ ADD COLUMN IF NOT EXISTS "settings" JSONB DEFAULT '{}';
 
 -- 2. Force the schema cache to refresh
 -- Toggling a comment is a highly reliable trigger for PostgREST cache reload
-COMMENT ON TABLE public.game_sessions IS 'Game sessions for Boomkit - Refreshed ' || now();
+COMMENT ON TABLE public.game_sessions IS 'Game sessions for Boomkit - Refreshed at migration';
 
 -- 3. Explicitly notify the listen/notify channel if configured
 NOTIFY pgrst, 'reload schema';
