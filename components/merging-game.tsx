@@ -27,11 +27,48 @@ interface MergingGameProps {
     grade: number
     subject: string
     mode: "solo" | "host" | "join"
+    gameMode: string
     questions: Question[]
     durationSeconds: number
     onEnd: (score: number) => void
     onScoreUpdate?: (score: number) => void
     onAwardTokens?: (amount: number) => void
+}
+
+interface ModeConfig {
+    rewardMultiplier: number
+    dropRateShift: number // Positive increases rare drop chances
+    timeBonus: number // Seconds added to duration
+}
+
+const DEFAULT_CONFIG: ModeConfig = { rewardMultiplier: 1, dropRateShift: 0, timeBonus: 0 }
+
+const MODE_CONFIGS: Record<string, ModeConfig> = {
+    "classic": { rewardMultiplier: 1, dropRateShift: 0, timeBonus: 0 },
+    "factory": { rewardMultiplier: 1.2, dropRateShift: 5, timeBonus: 30 },
+    "cafe": { rewardMultiplier: 1.1, dropRateShift: 2, timeBonus: 0 },
+    "racing": { rewardMultiplier: 1.5, dropRateShift: -5, timeBonus: -30 }, // Stressful/High reward
+    "blook-rush": { rewardMultiplier: 1.3, dropRateShift: 10, timeBonus: 0 },
+    "dino-world": { rewardMultiplier: 1.4, dropRateShift: 0, timeBonus: 60 },
+    "space-explorer": { rewardMultiplier: 1.5, dropRateShift: 2, timeBonus: 120 },
+    "wild-west": { rewardMultiplier: 1.2, dropRateShift: 8, timeBonus: 0 },
+    "city-builder": { rewardMultiplier: 1.1, dropRateShift: 0, timeBonus: 300 },
+    "pirate-booty": { rewardMultiplier: 1.3, dropRateShift: 15, timeBonus: 0 },
+    "alchemy": { rewardMultiplier: 1.6, dropRateShift: 0, timeBonus: 60 },
+    "dungeon-crawl": { rewardMultiplier: 1.4, dropRateShift: 5, timeBonus: 90 },
+    "farm-tycoon": { rewardMultiplier: 1.2, dropRateShift: -2, timeBonus: 180 },
+    "monster-brawl": { rewardMultiplier: 1.4, dropRateShift: 10, timeBonus: 0 },
+    "zombie-uprising": { rewardMultiplier: 1.3, dropRateShift: 0, timeBonus: 45 },
+    "kingdom": { rewardMultiplier: 1.2, dropRateShift: 3, timeBonus: 150 },
+    "escape-room": { rewardMultiplier: 2.0, dropRateShift: 20, timeBonus: -60 }, // Harder, massive rewards
+    "stock-market": { rewardMultiplier: 1.5, dropRateShift: 5, timeBonus: 0 },
+    "cyberpunk": { rewardMultiplier: 1.7, dropRateShift: 10, timeBonus: 30 },
+    "magic-academy": { rewardMultiplier: 1.4, dropRateShift: 5, timeBonus: 60 },
+    "submarine": { rewardMultiplier: 1.3, dropRateShift: -5, timeBonus: 120 },
+    "volcano-escape": { rewardMultiplier: 1.8, dropRateShift: 15, timeBonus: -45 },
+    "candy-land": { rewardMultiplier: 1.1, dropRateShift: 0, timeBonus: 15 },
+    "robot-war": { rewardMultiplier: 1.5, dropRateShift: 5, timeBonus: 60 },
+    "gladiator": { rewardMultiplier: 1.6, dropRateShift: 10, timeBonus: 0 },
 }
 
 const RARITY_DATA = {
@@ -56,13 +93,15 @@ export default function MergingGame({
     grade,
     subject,
     mode,
+    gameMode,
     onEnd,
     questions,
     durationSeconds,
     onScoreUpdate,
     onAwardTokens,
 }: MergingGameProps) {
-    const [timeLeft, setTimeLeft] = useState(durationSeconds)
+    const config = MODE_CONFIGS[gameMode] || DEFAULT_CONFIG
+    const [timeLeft, setTimeLeft] = useState(durationSeconds + config.timeBonus)
     const [score, setScore] = useState(0)
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
     const [mergingBooms, setMergingBooms] = useState<MergeItem[]>([])
@@ -96,7 +135,14 @@ export default function MergingGame({
     const getRandomRarity = () => {
         const r = Math.random() * 100
         let cumulative = 0
-        for (const item of DROP_RATES) {
+
+        // Apply Mode Drop Rate Shift
+        const adjustedRates = DROP_RATES.map(item => ({
+            ...item,
+            chance: item.rarity === "uncommon" ? item.chance : item.chance + (config.dropRateShift / 5)
+        }))
+
+        for (const item of adjustedRates) {
             cumulative += item.chance
             if (r <= cumulative) return item.rarity
         }
@@ -107,10 +153,16 @@ export default function MergingGame({
         const currentQuestion = questions[currentQuestionIndex]
         if (index === currentQuestion.correctIndex) {
             setFeedback("correct")
-            setIsAnswering(false)
+            setScore((prev) => {
+                const newScore = prev + Math.ceil(10 * config.rewardMultiplier)
+                if (onScoreUpdate) onScoreUpdate(newScore)
+                return newScore
+            })
             setTimeout(() => {
                 setFeedback(null)
-            }, 1000)
+                dropBoom()
+                setCurrentQuestionIndex((prev) => (prev + 1) % questions.length)
+            }, 500)
         } else {
             setFeedback("incorrect")
             setTimeout(() => {
@@ -289,17 +341,30 @@ export default function MergingGame({
     return (
         <div className="flex flex-col h-full max-w-6xl mx-auto space-y-4 animate-in fade-in duration-500">
             <div className="flex justify-between items-center bg-white/5 backdrop-blur-md p-4 rounded-2xl border border-white/10">
-                <div className="flex items-center gap-4">
+                {/* Left: Subject & Grade */}
+                <div className="flex items-center gap-4 border-r border-white/10 pr-6">
                     <div className="bg-purple-600 p-2 rounded-xl">
                         <BookOpen className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                        <h2 className="text-xl font-black text-white uppercase tracking-tighter">{subject}</h2>
-                        <p className="text-white/40 text-xs font-bold uppercase tracking-widest">Grade {grade}</p>
+                        <h2 className="text-xl font-black text-white uppercase tracking-tighter leading-tight">{subject}</h2>
+                        <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">Grade {grade}</p>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-6">
+                {/* Center: Active Mode */}
+                <div className="flex items-center gap-3 bg-white/5 px-6 py-2 rounded-2xl border border-white/5">
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+                        <Zap className="w-5 h-5 text-white animate-pulse" />
+                    </div>
+                    <div>
+                        <p className="text-[10px] text-white/40 font-black uppercase tracking-widest leading-none">ACTIVE MODE</p>
+                        <p className="text-sm font-black text-white uppercase tracking-tight">{gameMode.replace(/-/g, ' ')}</p>
+                    </div>
+                </div>
+
+                {/* Right: Time & Score */}
+                <div className="flex items-center gap-8 pl-6 border-l border-white/10">
                     <div className="text-center">
                         <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">Time Left</p>
                         <div className="flex items-center gap-2 text-2xl font-black text-white">

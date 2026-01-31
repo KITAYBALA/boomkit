@@ -43,6 +43,30 @@ export default function HostDashboard({
 }: HostDashboardProps) {
     const [timeLeft, setTimeLeft] = useState(duration * 60)
     const [isPaused, setIsPaused] = useState(false)
+    const [recentActivity, setRecentActivity] = useState<{ id: string, message: string, time: string }[]>([
+        { id: "1", message: "Game started!", time: "just now" },
+        { id: "2", message: "Waiting for first answers...", time: "just now" }
+    ])
+
+    // Simulate some activity for now, in a real game this would come from Supabase
+    useEffect(() => {
+        if (isPaused || players.length === 0) return
+        const interval = setInterval(() => {
+            const player = players[Math.floor(Math.random() * players.length)]
+            const events = [
+                `just got a Correct Answer!`,
+                `is on a 5-streak!`,
+                `just moved up a rank!`,
+                `is playing fast!`,
+            ]
+            const event = events[Math.floor(Math.random() * events.length)]
+            setRecentActivity(prev => [
+                { id: Math.random().toString(), message: `${player.username} ${event}`, time: "now" },
+                ...prev.slice(0, 4)
+            ])
+        }, 5000)
+        return () => clearInterval(interval)
+    }, [players, isPaused])
 
     useEffect(() => {
         if (isPaused) return
@@ -202,6 +226,21 @@ export default function HostDashboard({
                             ))}
                         </div>
                     </Card>
+
+                    <div className="bg-white/5 border border-white/10 rounded-[2rem] p-6 flex-1 flex flex-col min-h-0">
+                        <h4 className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-4">Recent Activity</h4>
+                        <div className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-hide">
+                            {recentActivity.map((activity) => (
+                                <div key={activity.id} className="flex items-start gap-2 text-xs animate-in slide-in-from-right-2 duration-300">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500 mt-1 flex-shrink-0" />
+                                    <div>
+                                        <p className="text-white/80 font-medium">{activity.message}</p>
+                                        <p className="text-white/20 text-[9px] uppercase font-bold">{activity.time}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
 
                     <div className="bg-white/5 border border-white/10 rounded-[2rem] p-6">
                         <h4 className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-4">Host Controls</h4>

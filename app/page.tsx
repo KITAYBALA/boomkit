@@ -270,6 +270,9 @@ interface NewsItem {
   content: string
   date: string
   image?: string
+  imageUrl?: string
+  badge?: string
+  badgeColor?: string
 }
 
 // ... existing code ...
@@ -638,12 +641,34 @@ const PROFILE_PICTURES = [
 
 const NEWS_ITEMS: NewsItem[] = [
   {
-    id: "0",
+    id: "3",
+    title: "Introducing 30+ Game Modes!",
+    content: "Take your learning to the next level with our massive new update. From 'Gold Quest' to 'Cyberpunk', discover 30 unique ways to play and earn rewards. Each mode features custom mechanics and premium 3D visuals.",
+    date: "2026-02-01",
+    image: "🎮",
+    imageUrl: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&q=80",
+    badge: "Major Update",
+    badgeColor: "bg-purple-500"
+  },
+  {
+    id: "2",
+    title: "Solo Play Revolution",
+    content: "You can now play any game mode in Solo Mode! Earn tokens, gain XP, and master the curriculum at your own pace. Perfect for late-night study sessions or competitive practice.",
+    date: "2026-01-31",
+    image: "👤",
+    imageUrl: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=1200&q=80",
+    badge: "New Feature",
+    badgeColor: "bg-blue-500"
+  },
+  {
+    id: "1",
     title: "Boomkit V1.0 is Out!",
-    content:
-      "We are thrilled to announce the official release of Boomkit V1.0! This major milestone brings real-time chat, live auctions, global leaderboards, and pack opening features. Thank you to our amazing community for your support. Special thanks to Oktay Abdullazada (Owner) | Ughur Akparli (Co-Owner - Developer) | Turan Mecidov (Tester) for making this possible!",
+    content: "We are thrilled to announce the official release of Boomkit V1.0! This major milestone brings real-time chat, live auctions, global leaderboards, and pack opening features. Thank you to our amazing community for your support.",
     date: "2024-12-19",
     image: "🎉",
+    imageUrl: "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=1200&q=80",
+    badge: "Official Release",
+    badgeColor: "bg-emerald-500"
   },
 ]
 
@@ -669,6 +694,7 @@ export default function BoomkitGame() {
     grade: number
     subject: string
     mode: "solo" | "host" | "join"
+    gameMode: string
     questions: any[]
   } | null>(null)
   const [isMergingGameActive, setIsMergingGameActive] = useState(false)
@@ -684,6 +710,8 @@ export default function BoomkitGame() {
   const [selectedGameMode, setSelectedGameMode] = useState<GameMode | null>(null)
   const [gameSettings, setGameSettings] = useState<GameSettings | null>(null)
   const [hostingSubject, setHostingSubject] = useState<{ grade: number, subject: string } | null>(null)
+  const [soloFlow, setSoloFlow] = useState<null | 'mode-select'>(null)
+  const [soloSubject, setSoloSubject] = useState<{ grade: number, subject: string } | null>(null)
   const [livePlayers, setLivePlayers] = useState<any[]>([])
   const [aiSetPrompt, setAiSetPrompt] = useState("")
   const [aiQuestionCount, setAiQuestionCount] = useState(25)
@@ -4041,15 +4069,9 @@ export default function BoomkitGame() {
                     return
                   }
 
-                  // Solo game flow (unchanged)
-                  setIsGeneratingSet(true)
-                  const questions = await fetchQuestionsWithAi(grade, subject, 30)
-                  setIsGeneratingSet(false)
-
-                  if (questions && questions.length > 0) {
-                    setActiveDiscoverGame({ grade, subject, mode: "solo", questions })
-                    setIsMergingGameActive(true)
-                  }
+                  // Solo game flow - Switch to mode selection first
+                  setSoloSubject({ grade, subject })
+                  setSoloFlow("mode-select")
                 }}
                 onJoinGame={async () => {
                   const pinInput = prompt("Enter 6-digit Game PIN:")
@@ -4085,7 +4107,6 @@ export default function BoomkitGame() {
                         await supabase
                           .from("game_sessions")
                           .update({ players: updatedPlayers })
-                          .eq("pin", cleanPin)
                       }
                     }
 
@@ -4094,6 +4115,7 @@ export default function BoomkitGame() {
                       grade: session.grade,
                       subject: session.subject,
                       mode: "join",
+                      gameMode: session.mode || "classic",
                       questions: session.questions
                     })
                     setLobbyActive(true)
@@ -4130,6 +4152,7 @@ export default function BoomkitGame() {
                 grade={activeDiscoverGame.grade}
                 subject={activeDiscoverGame.subject}
                 mode={activeDiscoverGame.mode}
+                gameMode={activeDiscoverGame.gameMode}
                 questions={activeDiscoverGame.questions}
                 durationSeconds={selectedDuration}
                 onEnd={(score) => {
@@ -4199,36 +4222,165 @@ export default function BoomkitGame() {
       {/* MODALS */}
       {
         showNews && (
-          <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
-            <Card className="w-full max-w-2xl bg-purple-900 border-purple-700">
-              <CardHeader>
-                <CardTitle className="text-2xl font-bold text-white">Boomkit News</CardTitle>
-                <CardDescription className="text-purple-300">Stay up to date with the latest updates</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4 max-h-96 overflow-y-auto">
-                {NEWS_ITEMS.map((news) => (
-                  <div key={news.id} className="bg-purple-800/50 rounded-lg p-4 border border-purple-600">
-                    <div className="flex items-center gap-2 mb-2">
-                      {news.image && <span className="text-2xl">{news.image}</span>}
-                      <h3 className="text-xl font-bold text-white">{news.title}</h3>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-500">
+            {/* Backdrop with extreme blur and dark tint */}
+            <div
+              className="absolute inset-0 bg-black/80 backdrop-blur-3xl"
+              onClick={() => setShowNews(false)}
+            />
+
+            <Card className="w-full max-w-4xl bg-slate-900/90 border-white/10 shadow-[0_0_100px_rgba(0,0,0,0.8)] relative z-10 overflow-hidden flex flex-col md:flex-row h-[80vh] rounded-[2.5rem]">
+              {/* Left Side: Featured News Image / Gradient */}
+              <div className="md:w-1/3 relative bg-gradient-to-br from-purple-600 to-blue-700 overflow-hidden hidden md:block">
+                <div className="absolute inset-0 opacity-40 mix-blend-overlay">
+                  <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-from)_0%,_transparent_70%)]" />
+                </div>
+                <div className="absolute inset-0 flex flex-col justify-end p-8 text-white">
+                  <Badge className="w-fit mb-4 bg-white/20 backdrop-blur-md border-none text-[10px] font-black uppercase tracking-widest">
+                    Community Updates
+                  </Badge>
+                  <h3 className="text-4xl font-black leading-none tracking-tighter mb-4">
+                    WHAT'S NEW IN BOOMKIT
+                  </h3>
+                  <p className="text-white/70 font-medium text-sm">
+                    Stay ahead of the game with our latest features, patches, and community highlights.
+                  </p>
+                </div>
+                {/* Decorative floating elements */}
+                <div className="absolute top-10 right-10 w-24 h-24 bg-white/10 rounded-full blur-2xl animate-pulse" />
+                <div className="absolute bottom-40 left-10 w-16 h-16 bg-blue-400/20 rounded-full blur-xl animate-bounce-slow" />
+              </div>
+
+              {/* Right Side: News Feed */}
+              <div className="flex-1 flex flex-col bg-slate-900/50 backdrop-blur-sm relative">
+                <CardHeader className="border-b border-white/5 pb-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
+                        <NewspaperIcon className="w-8 h-8 text-purple-400" />
+                        The Daily Boom
+                      </CardTitle>
+                      <CardDescription className="text-white/40 font-bold uppercase tracking-widest text-[10px] mt-1">
+                        Latest updates from the arena
+                      </CardDescription>
                     </div>
-                    <p className="text-purple-200">{news.content}</p>
-                    <p className="text-purple-400 text-sm mt-2">{news.date}</p>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setShowNews(false)}
+                      className="rounded-full bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-all"
+                    >
+                      <XIcon className="w-5 h-5" />
+                    </Button>
                   </div>
-                ))}
-              </CardContent>
-              <div className="p-4 pt-0">
-                <Button
-                  onClick={() => setShowNews(false)}
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white"
-                >
-                  Close
-                </Button>
+                </CardHeader>
+
+                <CardContent className="flex-1 overflow-y-auto p-6 space-y-8 scrollbar-hide">
+                  {NEWS_ITEMS.map((news) => (
+                    <div key={news.id} className="group relative flex flex-col gap-4 animate-in slide-in-from-right-4 duration-500">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl filter drop-shadow-md group-hover:scale-125 transition-transform duration-300">
+                            {news.image}
+                          </span>
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="text-xl font-black text-white tracking-tight group-hover:text-purple-400 transition-colors">
+                                {news.title}
+                              </h4>
+                              {news.badge && (
+                                <Badge className={`${news.badgeColor || 'bg-purple-500'} text-white text-[9px] font-black border-none px-1.5 py-0 rounded-full`}>
+                                  {news.badge}
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-white/30 font-bold uppercase tracking-widest">
+                              {news.date}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {news.imageUrl && (
+                        <div className="relative aspect-[21/9] rounded-2xl overflow-hidden border border-white/5 group-hover:border-white/20 transition-all duration-300">
+                          <img
+                            src={news.imageUrl}
+                            alt={news.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent opacity-60" />
+                        </div>
+                      )}
+
+                      <p className="text-white/60 text-sm leading-relaxed font-medium pl-10 border-l-2 border-white/5 group-hover:border-purple-500/30 transition-all duration-300">
+                        {news.content}
+                      </p>
+                    </div>
+                  ))}
+                </CardContent>
+
+                <div className="p-6 bg-slate-900 border-t border-white/5">
+                  <Button
+                    onClick={() => setShowNews(false)}
+                    className="w-full h-14 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-black text-lg rounded-2xl shadow-[0_10px_20px_rgba(147,51,234,0.3)] hover:shadow-[0_15px_30px_rgba(147,51,234,0.4)] transition-all hover:-translate-y-1 active:scale-[0.98]"
+                  >
+                    RETURN TO ARENA
+                  </Button>
+                </div>
               </div>
             </Card>
           </div>
         )
       }
+
+      {/* Solo Game Mode Selection Flow */}
+      {soloFlow === "mode-select" && soloSubject && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 animate-in zoom-in-95 duration-500">
+          <div className="absolute inset-0 bg-black/90 backdrop-blur-3xl" onClick={() => setSoloFlow(null)} />
+          <div className="relative z-10 w-full max-w-5xl h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-4xl font-black text-white tracking-tighter">Choose Your Solo Challenge</h2>
+                <p className="text-purple-300/60 font-medium">
+                  Playing: {soloSubject.subject} (Grade {soloSubject.grade})
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setSoloFlow(null)}
+                className="rounded-full bg-white/5 hover:bg-white/10 text-white/50 hover:text-white"
+              >
+                <XIcon className="w-6 h-6" />
+              </Button>
+            </div>
+
+            <div className="flex-1 overflow-hidden">
+              <GameModeSelector
+                onSelectMode={async (modeId) => {
+                  console.log("Selected solo mode:", modeId)
+                  setIsGeneratingSet(true)
+                  setSoloFlow(null)
+
+                  const questions = await fetchQuestionsWithAi(soloSubject.grade, soloSubject.subject, 30)
+                  setIsGeneratingSet(false)
+
+                  if (questions && questions.length > 0) {
+                    setActiveDiscoverGame({
+                      grade: soloSubject.grade,
+                      subject: soloSubject.subject,
+                      mode: "solo",
+                      gameMode: modeId,
+                      questions,
+                    })
+                    setIsMergingGameActive(true)
+                  }
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {
         packAnimation.show && (
@@ -5193,6 +5345,7 @@ export default function BoomkitGame() {
                 grade: hostingSubject.grade,
                 subject: hostingSubject.subject,
                 mode: "host",
+                gameMode: selectedGameMode.id,
                 questions
               })
               setLobbyActive(true)
