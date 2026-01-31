@@ -1177,15 +1177,6 @@ export default function BoomkitGame() {
     return currentUser?.isOwner || false
   }
 
-  // Handle logout
-  const handleLogout = () => {
-    updateAndPersistCurrentUser(null)
-    setCurrentView("owner-access")
-    // Clear Supabase session if necessary
-    if (supabase) {
-      supabase.auth.signOut()
-    }
-  }
 
   // XP and Leveling System
   const awardXP = (amount: number) => {
