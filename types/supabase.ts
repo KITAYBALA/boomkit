@@ -114,6 +114,54 @@ export interface Database {
         }
         Relationships: []
       }
+      game_sessions: {
+        Row: {
+          id: string
+          pin: string
+          host_id: string
+          host_username: string
+          grade: number
+          subject: string
+          questions: Json
+          status: string
+          duration: number
+          players: Json
+          mode: string
+          settings: Json
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          pin: string
+          host_id: string
+          host_username: string
+          grade: number
+          subject: string
+          questions: Json
+          status?: string
+          duration: number
+          players?: Json
+          mode?: string
+          settings?: Json
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          pin?: string
+          host_id?: string
+          host_username?: string
+          grade?: number
+          subject?: string
+          questions?: Json
+          status?: string
+          duration?: number
+          players?: Json
+          mode?: string
+          settings?: Json
+          created_at?: string
+        }
+        Relationships: []
+      }
       packs: {
         Row: {
           booms: Json

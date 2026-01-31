@@ -69,7 +69,12 @@ const MODE_CONFIGS: Record<string, ModeConfig> = {
     "candy-land": { rewardMultiplier: 1.1, dropRateShift: 0, timeBonus: 15 },
     "robot-war": { rewardMultiplier: 1.5, dropRateShift: 5, timeBonus: 60 },
     "gladiator": { rewardMultiplier: 1.6, dropRateShift: 10, timeBonus: 0 },
-}
+    "gold-quest": { rewardMultiplier: 1.2, dropRateShift: 20, timeBonus: 0 },
+    "fishing-frenzy": { rewardMultiplier: 1.1, dropRateShift: 5, timeBonus: 60 },
+    "crypto-hack": { rewardMultiplier: 1.4, dropRateShift: 10, timeBonus: 0 },
+    "tower-defense": { rewardMultiplier: 1.5, dropRateShift: 5, timeBonus: 180 },
+    "battle-royale": { rewardMultiplier: 1.6, dropRateShift: 10, timeBonus: -60 },
+};
 
 const RARITY_DATA = {
     uncommon: { emoji: "📦", points: 0, next: "rare", nextPoints: 1, color: "text-green-400", tokenAward: 0 },
