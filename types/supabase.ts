@@ -172,6 +172,8 @@ export interface Database {
           total_value: number
           username: string
           badges: string[] | null
+          xp: number
+          level: number
         }
         Insert: {
           age: number
@@ -200,6 +202,8 @@ export interface Database {
           total_value: number
           username: string
           badges?: string[] | null
+          xp?: number
+          level?: number
         }
         Update: {
           age?: number
@@ -228,108 +232,110 @@ export interface Database {
           total_value?: number
           username?: string
           badges?: string[] | null
+          xp?: number
+          level?: number
         }
         Relationships: []
       }
     }
     Views: {
       [_ WITH_TOTAL_VALUE]: {
-        Row: {
-          age: number | null
-          ban_expiry: number | null
-          ban_reason: string | null
-          banner_color: string | null
-          booms: Json | null
-          daily_tokens: number | null
-          email: string | null
-          id: string | null
-          is_banned: boolean | null
-          is_muted: boolean | null
-          is_owner: boolean | null
-          is_plus_user: boolean | null
-          join_date: string | null
-          last_daily_spin: string | null
-          last_seen: number | null
-          mute_expiry: number | null
-          name_color: string | null
-          packs: string[] | null
-          profile_picture: string | null
-          reason: string | null
-          role: string | null
-          status: string | null
-          tokens: number | null
-          total_value: number | null
-          username: string | null
-          badges: string[] | null
-        }
-      }
+  Row: {
+    age: number | null
+    ban_expiry: number | null
+    ban_reason: string | null
+    banner_color: string | null
+    booms: Json | null
+    daily_tokens: number | null
+    email: string | null
+    id: string | null
+    is_banned: boolean | null
+    is_muted: boolean | null
+    is_owner: boolean | null
+    is_plus_user: boolean | null
+    join_date: string | null
+    last_daily_spin: string | null
+    last_seen: number | null
+    mute_expiry: number | null
+    name_color: string | null
+    packs: string[] | null
+    profile_picture: string | null
+    reason: string | null
+    role: string | null
+    status: string | null
+    tokens: number | null
+    total_value: number | null
+    username: string | null
+    badges: string[] | null
+  }
+}
     }
-    Functions: {
-      [_ WITH_TOTAL_VALUE]: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          age: number | null
-          ban_expiry: number | null
-          ban_reason: string | null
-          banner_color: string | null
-          booms: Json | null
-          daily_tokens: number | null
-          email: string | null
-          id: string | null
-          is_banned: boolean | null
-          is_muted: boolean | null
-          is_owner: boolean | null
-          is_plus_user: boolean | null
-          join_date: string | null
-          last_daily_spin: string | null
-          last_seen: number | null
-          mute_expiry: number | null
-          name_color: string | null
-          packs: string[] | null
-          profile_picture: string | null
-          reason: string | null
-          role: string | null
-          status: string | null
-          tokens: number | null
-          total_value: number | null
-          username: string | null
-          badges: string[] | null
-        }
-      }
+Functions: {
+  [_ WITH_TOTAL_VALUE]: {
+    Args: Record<PropertyKey, never>
+    Returns: {
+      age: number | null
+      ban_expiry: number | null
+      ban_reason: string | null
+      banner_color: string | null
+      booms: Json | null
+      daily_tokens: number | null
+      email: string | null
+      id: string | null
+      is_banned: boolean | null
+      is_muted: boolean | null
+      is_owner: boolean | null
+      is_plus_user: boolean | null
+      join_date: string | null
+      last_daily_spin: string | null
+      last_seen: number | null
+      mute_expiry: number | null
+      name_color: string | null
+      packs: string[] | null
+      profile_picture: string | null
+      reason: string | null
+      role: string | null
+      status: string | null
+      tokens: number | null
+      total_value: number | null
+      username: string | null
+      badges: string[] | null
     }
-    Enums: {
-      [_ WITH_TOTAL_VALUE]: "test"
-    }
-    CompositeTypes: {
-      [_ WITH_TOTAL_VALUE]: {
-        age: number | null
-        ban_expiry: number | null
-        ban_reason: string | null
-        banner_color: string | null
-        booms: Json | null
-        daily_tokens: number | null
-        email: string | null
-        id: string | null
-        is_banned: boolean | null
-        is_muted: boolean | null
-        is_owner: boolean | null
-        is_plus_user: boolean | null
-        join_date: string | null
-        last_daily_spin: string | null
-        last_seen: number | null
-        mute_expiry: number | null
-        name_color: string | null
-        packs: string[] | null
-        profile_picture: string | null
-        reason: string | null
-        role: string | null
-        status: string | null
-        tokens: number | null
-        total_value: number | null
-        username: string | null
-        badges: string[] | null
-      }
-    }
+  }
+}
+Enums: {
+  [_ WITH_TOTAL_VALUE]: "test"
+}
+CompositeTypes: {
+  [_ WITH_TOTAL_VALUE]: {
+    age: number | null
+    ban_expiry: number | null
+    ban_reason: string | null
+    banner_color: string | null
+    booms: Json | null
+    daily_tokens: number | null
+    email: string | null
+    id: string | null
+    is_banned: boolean | null
+    is_muted: boolean | null
+    is_owner: boolean | null
+    is_plus_user: boolean | null
+    join_date: string | null
+    last_daily_spin: string | null
+    last_seen: number | null
+    mute_expiry: number | null
+    name_color: string | null
+    packs: string[] | null
+    profile_picture: string | null
+    reason: string | null
+    role: string | null
+    status: string | null
+    tokens: number | null
+    total_value: number | null
+    username: string | null
+    badges: string[] | null
+  }
+}
   }
 }
 
