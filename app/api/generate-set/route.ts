@@ -30,6 +30,16 @@ const FALLBACK_QUESTIONS: { [key: string]: any[] } = {
     { id: "me23", question: "What is 4 + 4?", options: ["6", "7", "8", "9"], correctIndex: 2 },
     { id: "me24", question: "How many days in a week?", options: ["5", "6", "7", "8"], correctIndex: 2 },
     { id: "me25", question: "What is 11 - 1?", options: ["9", "10", "11", "12"], correctIndex: 1 },
+    { id: "me26", question: "What is 5 + 5?", options: ["8", "10", "12", "15"], correctIndex: 1 },
+    { id: "me27", question: "What is half of 10?", options: ["2", "4", "5", "6"], correctIndex: 2 },
+    { id: "me28", question: "Which is more: 15 or 12?", options: ["15", "12", "They are equal", "Neither"], correctIndex: 0 },
+    { id: "me29", question: "What shape has 4 equal sides?", options: ["Triangle", "Circle", "Square", "Hexagon"], correctIndex: 2 },
+    { id: "me30", question: "What is 2 + 3 + 4?", options: ["7", "8", "9", "10"], correctIndex: 2 },
+    { id: "me31", question: "Count by 5s: 5, 10, 15, ...?", options: ["16", "20", "25", "30"], correctIndex: 1 },
+    { id: "me32", question: "What is 10 + 10?", options: ["10", "20", "30", "40"], correctIndex: 1 },
+    { id: "me33", question: "How many months in a year?", options: ["10", "11", "12", "13"], correctIndex: 2 },
+    { id: "me34", question: "What is 7 - 0?", options: ["0", "1", "7", "8"], correctIndex: 2 },
+    { id: "me35", question: "What is 100 - 0?", options: ["0", "10", "90", "100"], correctIndex: 3 },
   ],
 
   // Grade 4-6 Math (25 questions)
@@ -59,6 +69,16 @@ const FALLBACK_QUESTIONS: { [key: string]: any[] } = {
     { id: "mm23", question: "What is 45 ÷ 5?", options: ["7", "8", "9", "10"], correctIndex: 2 },
     { id: "mm24", question: "What is 0.5 + 0.25?", options: ["0.25", "0.50", "0.75", "1.00"], correctIndex: 2 },
     { id: "mm25", question: "What is the area of a rectangle 6 × 4?", options: ["20", "24", "28", "32"], correctIndex: 1 },
+    { id: "mm26", question: "What is 7 × 7?", options: ["42", "48", "49", "56"], correctIndex: 2 },
+    { id: "mm27", question: "What is 8 × 4?", options: ["24", "28", "32", "36"], correctIndex: 2 },
+    { id: "mm28", question: "What is 1/3 of 18?", options: ["4", "5", "6", "7"], correctIndex: 2 },
+    { id: "mm29", question: "What is 100 ÷ 4?", options: ["20", "25", "30", "40"], correctIndex: 1 },
+    { id: "mm30", question: "What is 15 + 25?", options: ["30", "35", "40", "45"], correctIndex: 2 },
+    { id: "mm31", question: "What is 0.1 × 10?", options: ["0.01", "0.1", "1", "10"], correctIndex: 2 },
+    { id: "mm32", question: "How many degrees in a right angle?", options: ["45°", "90°", "180°", "360°"], correctIndex: 1 },
+    { id: "mm33", question: "What is 10³?", options: ["100", "1000", "10000", "100000"], correctIndex: 1 },
+    { id: "mm34", question: "What is 9 × 8?", options: ["64", "72", "81", "90"], correctIndex: 1 },
+    { id: "mm35", question: "What is 60 ÷ 5?", options: ["10", "11", "12", "13"], correctIndex: 2 },
   ],
 
   // Grade 7-12 Math (25 questions)
@@ -88,6 +108,16 @@ const FALLBACK_QUESTIONS: { [key: string]: any[] } = {
     { id: "mh23", question: "If f(x) = 2x, what is f(5)?", options: ["7", "10", "25", "32"], correctIndex: 1 },
     { id: "mh24", question: "What is the y-intercept of y = 2x + 5?", options: ["2", "5", "7", "10"], correctIndex: 1 },
     { id: "mh25", question: "Simplify: 2(x + 3)", options: ["2x + 3", "2x + 5", "2x + 6", "x + 6"], correctIndex: 2 },
+    { id: "mh26", question: "What is the square root of 64?", options: ["6", "7", "8", "9"], correctIndex: 2 },
+    { id: "mh27", question: "Solve: x/2 = 10", options: ["x=5", "x=10", "x=20", "x=40"], correctIndex: 2 },
+    { id: "mh28", question: "What is 5% of 200?", options: ["5", "10", "15", "20"], correctIndex: 1 },
+    { id: "mh29", question: "What is the value of i²?", options: ["0", "1", "-1", "i"], correctIndex: 2 },
+    { id: "mh30", question: "What is the sum of angles in a triangle?", options: ["90°", "180°", "270°", "360°"], correctIndex: 1 },
+    { id: "mh31", question: "Solve for x: x + x = 10", options: ["2", "5", "10", "20"], correctIndex: 1 },
+    { id: "mh32", question: "What is 10² + 5²?", options: ["105", "125", "150", "225"], correctIndex: 1 },
+    { id: "mh33", question: "What is the slope of a vertical line?", options: ["0", "1", "Undefined", "Infinite"], correctIndex: 2 },
+    { id: "mh34", question: "What is log₂(8)?", options: ["2", "3", "4", "8"], correctIndex: 1 },
+    { id: "mh35", question: "What is the derivative of a constant?", options: ["0", "1", "x", "The constant itself"], correctIndex: 0 },
   ],
 
   // Reading/English (25 questions)
@@ -117,6 +147,16 @@ const FALLBACK_QUESTIONS: { [key: string]: any[] } = {
     { id: "r23", question: "What is the past tense of 'eat'?", options: ["Eated", "Ate", "Eaten", "Eating"], correctIndex: 1 },
     { id: "r24", question: "Which word rhymes with 'cat'?", options: ["Dog", "Hat", "Cup", "Run"], correctIndex: 1 },
     { id: "r25", question: "What is an antonym for 'empty'?", options: ["Hollow", "Full", "Light", "Dark"], correctIndex: 1 },
+    { id: "r26", question: "Which word means 'to break into many pieces'?", options: ["Shatter", "Unite", "Mend", "Build"], correctIndex: 0 },
+    { id: "r27", question: "Identify the suffix in 'rechargeable'.", options: ["re", "charge", "able", "chargeable"], correctIndex: 2 },
+    { id: "r28", question: "What is a story about a person's life written by that person?", options: ["Biography", "Autobiography", "Novel", "Poem"], correctIndex: 1 },
+    { id: "r29", question: "Which is a synonym for 'gigantic'?", options: ["Minute", "Huge", "Slim", "Short"], correctIndex: 1 },
+    { id: "r30", question: "What is the main character in a story called?", options: ["Villain", "Protagonist", "Narrator", "Extras"], correctIndex: 1 },
+    { id: "r31", question: "What is a sentence that asks something?", options: ["Imperative", "Interrogative", "Exclamatory", "Declarative"], correctIndex: 1 },
+    { id: "r32", question: "What is the plural of 'person'?", options: ["Persons", "People", "Peoples", "Persones"], correctIndex: 1 },
+    { id: "r33", question: "Which word is a preposition?", options: ["Under", "Run", "Beautiful", "He"], correctIndex: 0 },
+    { id: "r34", question: "What is a 'prefix'?", options: ["End of a word", "Middle of a word", "Beginning of a word", "A whole word"], correctIndex: 2 },
+    { id: "r35", question: "What does 'anonymous' mean?", options: ["Famous", "Unknown name", "Friendly", "Angry"], correctIndex: 1 },
   ],
 
   // Science (25 questions)
@@ -146,6 +186,16 @@ const FALLBACK_QUESTIONS: { [key: string]: any[] } = {
     { id: "s23", question: "What is the speed of light?", options: ["300 km/s", "3000 km/s", "300,000 km/s", "3,000,000 km/s"], correctIndex: 2 },
     { id: "s24", question: "What is the main gas in Earth's atmosphere?", options: ["Oxygen", "Carbon dioxide", "Nitrogen", "Hydrogen"], correctIndex: 2 },
     { id: "s25", question: "What type of rock is formed from cooled lava?", options: ["Sedimentary", "Metamorphic", "Igneous", "Mineral"], correctIndex: 2 },
+    { id: "s26", question: "What is the freezing point of water?", options: ["-10°C", "0°C", "10°C", "32°C"], correctIndex: 1 },
+    { id: "s27", question: "What part of the atom has a positive charge?", options: ["Electron", "Neutron", "Proton", "Nucleus"], correctIndex: 2 },
+    { id: "s28", question: "What is the study of weather called?", options: ["Geology", "Biology", "Meteorology", "Astronomy"], correctIndex: 2 },
+    { id: "s29", question: "Which planet is closest to the Sun?", options: ["Venus", "Mars", "Mercury", "Earth"], correctIndex: 2 },
+    { id: "s30", question: "What is the power source for electricity in a battery?", options: ["Heat", "Chemicals", "Light", "Motion"], correctIndex: 1 },
+    { id: "s31", question: "What do we call the path Earth takes around the Sun?", options: ["Rotation", "Axis", "Orbit", "Spin"], correctIndex: 2 },
+    { id: "s32", question: "What is the process of water turning into vapor?", options: ["Condensation", "Freezing", "Evaporation", "Melting"], correctIndex: 2 },
+    { id: "s33", question: "How many states of matter are there (basic)?", options: ["2", "3", "4", "5"], correctIndex: 1 },
+    { id: "s34", question: "What is the green pigment in plants?", options: ["Oxygen", "Glucose", "Chlorophyll", "Stem"], correctIndex: 2 },
+    { id: "s35", question: "Which is the largest planet in our solar system?", options: ["Earth", "Saturn", "Jupiter", "Neptune"], correctIndex: 2 },
   ],
 
   // Social Studies / History (25 questions)
@@ -175,6 +225,16 @@ const FALLBACK_QUESTIONS: { [key: string]: any[] } = {
     { id: "h23", question: "What desert is the largest in the world?", options: ["Gobi", "Kalahari", "Sahara", "Arabian"], correctIndex: 2 },
     { id: "h24", question: "What language has the most native speakers?", options: ["English", "Spanish", "Mandarin", "Hindi"], correctIndex: 2 },
     { id: "h25", question: "What is the capital of the United Kingdom?", options: ["Manchester", "London", "Liverpool", "Edinburgh"], correctIndex: 1 },
+    { id: "h26", question: "Who was the ruler of Ancient Egypt?", options: ["King", "Emperor", "Pharaoh", "President"], correctIndex: 2 },
+    { id: "h27", question: "What is the name of the ship that brought pilgrims to America?", options: ["Titanic", "Mayflower", "Santa Maria", "Victory"], correctIndex: 1 },
+    { id: "h28", question: "What is the capital of Italy?", options: ["Florence", "Venice", "Milan", "Rome"], correctIndex: 3 },
+    { id: "h29", question: "What document starts with 'We the People'?", options: ["Dec of Ind", "Constitution", "Bill of Rights", "Magna Carta"], correctIndex: 1 },
+    { id: "h30", question: "What country is the Great Wall in?", options: ["Japan", "India", "China", "Russia"], correctIndex: 2 },
+    { id: "h31", question: "Who invented the light bulb?", options: ["Newton", "Einstein", "Edison", "Tesla"], correctIndex: 2 },
+    { id: "h32", question: "Which ocean is the largest on Earth?", options: ["Atlantic", "Pacific", "Indian", "Arctic"], correctIndex: 1 },
+    { id: "h33", question: "What is the capital of Canada?", options: ["Toronto", "Vancouver", "Montreal", "Ottawa"], correctIndex: 3 },
+    { id: "h34", question: "What was the name of the Egyptian writing system?", options: ["Alphabet", "Cuneiform", "Hieroglyphics", "Emoji"], correctIndex: 2 },
+    { id: "h35", question: "Who was the leader of the Civil Rights Movement?", options: ["Lincoln", "Washington", "MLK Jr.", "Jefferson"], correctIndex: 2 },
   ],
 
   // General Knowledge (25 questions)
@@ -204,6 +264,16 @@ const FALLBACK_QUESTIONS: { [key: string]: any[] } = {
     { id: "g23", question: "What color is a ruby?", options: ["Blue", "Green", "Red", "Yellow"], correctIndex: 2 },
     { id: "g24", question: "How many legs does a spider have?", options: ["4", "6", "8", "10"], correctIndex: 2 },
     { id: "g25", question: "What is the opposite of 'day'?", options: ["Morning", "Evening", "Night", "Afternoon"], correctIndex: 2 },
+    { id: "g26", question: "How many legs does an octopus have?", options: ["6", "8", "10", "12"], correctIndex: 1 },
+    { id: "g27", question: "What is the color of an orange?", options: ["Yellow", "Red", "Orange", "Green"], correctIndex: 2 },
+    { id: "g28", question: "What fruit do kids usually give teachers?", options: ["Banana", "Apple", "Grapes", "Orange"], correctIndex: 1 },
+    { id: "g29", question: "How many letters are in the English alphabet?", options: ["24", "25", "26", "27"], correctIndex: 2 },
+    { id: "g30", question: "What is the largest land animal?", options: ["Lion", "Rhino", "Elephant", "Hippo"], correctIndex: 2 },
+    { id: "g31", question: "What is the capital of your country (General)?", options: ["City", "Town", "Capital", "Village"], correctIndex: 2 },
+    { id: "g32", question: "How many colors in the rainbow?", options: ["5", "6", "7", "8"], correctIndex: 2 },
+    { id: "g33", question: "What do you use to tell time?", options: ["Scale", "Clock", "Ruler", "Compass"], correctIndex: 1 },
+    { id: "g34", question: "What is the first month of the year?", options: ["January", "February", "March", "April"], correctIndex: 0 },
+    { id: "g35", question: "What is a group of fish called?", options: ["Pack", "Herd", "School", "Flock"], correctIndex: 2 },
   ],
 
   // Computer Science (25 questions)
@@ -233,6 +303,16 @@ const FALLBACK_QUESTIONS: { [key: string]: any[] } = {
     { id: "c23", question: "What is an output device?", options: ["Mouse", "Keyboard", "Monitor", "Microphone"], correctIndex: 2 },
     { id: "c24", question: "What is a function in programming?", options: ["Reusable block of code", "An error", "A file type", "A variable"], correctIndex: 0 },
     { id: "c25", question: "What is encryption?", options: ["Deleting data", "Securing data with code", "Copying data", "Printing data"], correctIndex: 1 },
+    { id: "c26", question: "What is an IP address?", options: ["Home address", "Computer's network address", "Email address", "Website name"], correctIndex: 1 },
+    { id: "c27", question: "What is a pixel?", options: ["A big screen", "Smallest unit of a digital image", "A computer part", "A type of code"], correctIndex: 1 },
+    { id: "c28", question: "What is hardware?", options: ["Computer programs", "Physical parts of a computer", "Internet data", "A type of metal"], correctIndex: 1 },
+    { id: "c29", question: "What is software?", options: ["Programs and apps", "Keyboard and mouse", "The monitor", "Wires"], correctIndex: 0 },
+    { id: "c30", question: "What does 'WiFi' stand for (Commonly)?", options: ["Wireless Fidelity", "Wired Fiber", "Wide Field", "Winter Fight"], correctIndex: 0 },
+    { id: "c31", question: "What is a browser?", options: ["A file", "Software used to view websites", "Hardware", "A type of mouse"], correctIndex: 1 },
+    { id: "c32", question: "What does 'save' do?", options: ["Delete file", "Store data permanently", "Open file", "Print file"], correctIndex: 1 },
+    { id: "c33", question: "What is the 'Cloud'?", options: ["Rain", "Internet-based storage", "A fast computer", "The monitor"], correctIndex: 1 },
+    { id: "c34", question: "What is a folder used for?", options: ["Type text", "Organize files", "Draw images", "Play music"], correctIndex: 1 },
+    { id: "c35", question: "What does 'URL' mean (Simple)?", options: ["Email", "Web address", "Password", "Filename"], correctIndex: 1 },
   ],
 
   // Art & Music (25 questions)
@@ -262,6 +342,16 @@ const FALLBACK_QUESTIONS: { [key: string]: any[] } = {
     { id: "a23", question: "What symbol means repeat in music?", options: ["Sharp", "Flat", "Repeat sign", "Rest"], correctIndex: 2 },
     { id: "a24", question: "What is the Italian word for soft in music?", options: ["Forte", "Piano", "Mezzo", "Crescendo"], correctIndex: 1 },
     { id: "a25", question: "What is art made from cut paper called?", options: ["Painting", "Sculpture", "Collage", "Sketch"], correctIndex: 2 },
+    { id: "a26", question: "Who painted the Mona Lisa?", options: ["Picasso", "Da Vinci", "Rembrandt", "Warhol"], correctIndex: 1 },
+    { id: "a27", question: "What is the primary color of a banana?", options: ["Red", "Blue", "Yellow", "Green"], correctIndex: 2 },
+    { id: "a28", question: "What instrument has black and white keys?", options: ["Guitar", "Flute", "Piano", "Drums"], correctIndex: 2 },
+    { id: "a29", question: "What is 'origami'?", options: ["Painting", "Paper folding", "Singing", "Dance"], correctIndex: 1 },
+    { id: "a30", question: "What is a 'tempo' in music?", options: ["The volume", "The speed", "The pitch", "The instrument"], correctIndex: 1 },
+    { id: "a31", question: "What color is made mixing blue and red?", options: ["Green", "Orange", "Purple", "Pink"], correctIndex: 2 },
+    { id: "a32", question: "What is a 'sketch'?", options: ["A finished painting", "A quick drawing", "A sculpture", "A song"], correctIndex: 1 },
+    { id: "a33", question: "What do you use to paint on?", options: ["Palette", "Canvas", "Easel", "Brush"], correctIndex: 1 },
+    { id: "a34", question: "What is harmony?", options: ["Single note", "Multiple notes at once", "Silence", "A drum beat"], correctIndex: 1 },
+    { id: "a35", question: "What style did Andy Warhol use?", options: ["Surrealism", "Pop Art", "Cubism", "Realism"], correctIndex: 1 },
   ],
 
   // Physical Education (25 questions)
@@ -291,43 +381,66 @@ const FALLBACK_QUESTIONS: { [key: string]: any[] } = {
     { id: "p23", question: "How many holes on a standard golf course?", options: ["9", "12", "18", "20"], correctIndex: 2 },
     { id: "p24", question: "What is important to drink during exercise?", options: ["Soda", "Coffee", "Water", "Juice"], correctIndex: 2 },
     { id: "p25", question: "What sport uses a bow and arrow?", options: ["Fencing", "Archery", "Shooting", "Javelin"], correctIndex: 1 },
+    { id: "p26", question: "How many players on a baseball team (Standard)?", options: ["7", "8", "9", "10"], correctIndex: 2 },
+    { id: "p27", question: "What is a 'slam dunk' in?", options: ["Soccer", "Baseball", "Basketball", "Golf"], correctIndex: 2 },
+    { id: "p28", question: "What do you do in a 'relay race'?", options: ["Swim alone", "Pass a baton", "Ride a bike", "Jump over walls"], correctIndex: 1 },
+    { id: "p29", question: "What is the goal of golf?", options: ["Run fast", "Get ball in hole in least strokes", "Score touchdowns", "Kick ball"], correctIndex: 1 },
+    { id: "p30", question: "What do you wear to play soccer (feet)?", options: ["Boots", "Sneakers", "Cleats", "Sandals"], correctIndex: 2 },
+    { id: "p31", question: "What is the Olympics?", options: ["A book", "A world sports competition", "A school", "A city"], correctIndex: 1 },
+    { id: "p32", question: "What is the most popular sport in the world?", options: ["Cricket", "Basketball", "Soccer", "Tennis"], correctIndex: 2 },
+    { id: "p33", question: "How many points is a touchdown worth (no extra)?", options: ["3", "6", "7", "1"], correctIndex: 1 },
+    { id: "p34", question: "What do you use to hit a baseball?", options: ["Stick", "Bat", "Racket", "Club"], correctIndex: 1 },
+    { id: "p35", question: "What color is the flag for the end of a race?", options: ["Red", "Green", "Checkered", "White"], correctIndex: 2 },
   ],
 }
 
 function getFallbackQuestions(grade: number, subject: string, count: number) {
   let pool: any[] = []
   const subjectLower = subject.toLowerCase()
+  let isSubjectSpecific = false
 
   // Match subject to question bank
   if (subjectLower.includes("math") || subjectLower.includes("algebra") || subjectLower.includes("geometry") || subjectLower.includes("calculus") || subjectLower.includes("trigonometry")) {
     if (grade <= 3) pool = [...FALLBACK_QUESTIONS["math_elementary"]]
     else if (grade <= 6) pool = [...FALLBACK_QUESTIONS["math_middle"]]
     else pool = [...FALLBACK_QUESTIONS["math_high"]]
+    isSubjectSpecific = true
   } else if (subjectLower.includes("reading") || subjectLower.includes("english") || subjectLower.includes("writing") || subjectLower.includes("literature") || subjectLower.includes("language")) {
     pool = [...FALLBACK_QUESTIONS["reading"]]
+    isSubjectSpecific = true
   } else if (subjectLower.includes("science") || subjectLower.includes("biology") || subjectLower.includes("chemistry") || subjectLower.includes("physics")) {
     pool = [...FALLBACK_QUESTIONS["science"]]
+    isSubjectSpecific = true
   } else if (subjectLower.includes("history") || subjectLower.includes("social") || subjectLower.includes("geography") || subjectLower.includes("civics")) {
     pool = [...FALLBACK_QUESTIONS["history"]]
+    isSubjectSpecific = true
   } else if (subjectLower.includes("computer") || subjectLower.includes("ict") || subjectLower.includes("programming") || subjectLower.includes("technology")) {
     pool = [...FALLBACK_QUESTIONS["computer"]]
+    isSubjectSpecific = true
   } else if (subjectLower.includes("art") || subjectLower.includes("music")) {
     pool = [...FALLBACK_QUESTIONS["art"]]
+    isSubjectSpecific = true
   } else if (subjectLower.includes("pe") || subjectLower.includes("physical") || subjectLower.includes("sport") || subjectLower.includes("education")) {
     pool = [...FALLBACK_QUESTIONS["pe"]]
+    isSubjectSpecific = true
   } else {
     pool = [...FALLBACK_QUESTIONS["general"]]
   }
 
-  // Add more questions from general pool if needed, but shuffle it first
-  const secondaryPool = [...FALLBACK_QUESTIONS["general"], ...FALLBACK_QUESTIONS["science"], ...FALLBACK_QUESTIONS["history"]]
-
-  // Combine and shuffle everything for maximum variety
+  // Combine and shuffle
   let combined = [...pool]
 
-  // If we don't have enough, pull from secondary
+  // If we don't have enough and it's NOT a specific subject, we can pad with general
+  // If it IS a specific subject, we'd rather duplicate than pollute with science in math
   if (combined.length < count) {
-    combined = [...combined, ...secondaryPool]
+    if (isSubjectSpecific) {
+      // Duplicate some questions to fill the count if pool is small, rather than polluting
+      const extras = [...pool].sort(() => 0.5 - Math.random()).slice(0, count - combined.length)
+      combined = [...combined, ...extras]
+    } else {
+      const secondaryPool = [...FALLBACK_QUESTIONS["general"], ...FALLBACK_QUESTIONS["science"], ...FALLBACK_QUESTIONS["history"]]
+      combined = [...combined, ...secondaryPool]
+    }
   }
 
   // Fisher-Yates shuffle

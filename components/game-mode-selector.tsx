@@ -46,7 +46,8 @@ const GAME_MODES: GameMode[] = [
         difficulty: "Simple",
         skills: ["Luck", "Speed"],
         idealTime: "7 min",
-        questionFrequency: "High"
+        questionFrequency: "High",
+        image: "/images/modes/gold-quest.png"
     },
     {
         id: "fishing-frenzy",
@@ -57,7 +58,8 @@ const GAME_MODES: GameMode[] = [
         difficulty: "Moderate",
         skills: ["Speed", "Precision"],
         idealTime: "10 min",
-        questionFrequency: "Medium"
+        questionFrequency: "Medium",
+        image: "/images/modes/fishing-frenzy.png"
     },
     {
         id: "crypto-hack",
@@ -68,7 +70,8 @@ const GAME_MODES: GameMode[] = [
         difficulty: "Moderate",
         skills: ["Strategy", "Luck"],
         idealTime: "8 min",
-        questionFrequency: "High"
+        questionFrequency: "High",
+        image: "/images/modes/crypto-hack.png"
     },
     {
         id: "tower-defense",
@@ -79,7 +82,8 @@ const GAME_MODES: GameMode[] = [
         difficulty: "Difficult",
         skills: ["Strategy", "Planning"],
         idealTime: "15 min",
-        questionFrequency: "Medium"
+        questionFrequency: "Medium",
+        image: "/images/modes/tower-defense.png"
     },
     {
         id: "battle-royale",
@@ -90,7 +94,8 @@ const GAME_MODES: GameMode[] = [
         difficulty: "Difficult",
         skills: ["Speed", "Accuracy"],
         idealTime: "12 min",
-        questionFrequency: "High"
+        questionFrequency: "High",
+        image: "/images/modes/battle-royale.png"
     },
     {
         id: "classic",
@@ -101,21 +106,273 @@ const GAME_MODES: GameMode[] = [
         difficulty: "Simple",
         skills: ["Accuracy", "Speed"],
         idealTime: "5 min",
+        questionFrequency: "High",
+        image: "/images/modes/classic.png"
+    },
+    {
+        id: "factory",
+        name: "Factory",
+        description: "Industrial production and upgrade simulator.",
+        icon: <Zap className="w-8 h-8" />,
+        color: "from-gray-400 to-yellow-600",
+        difficulty: "Moderate",
+        skills: ["Strategy", "Efficiency"],
+        idealTime: "12 min",
+        questionFrequency: "Medium"
+    },
+    {
+        id: "cafe",
+        name: "Cafe",
+        description: "Fast-paced customer service and recipe management.",
+        icon: <Timer className="w-8 h-8" />,
+        color: "from-orange-400 to-amber-600",
+        difficulty: "Simple",
+        skills: ["Speed", "Memory"],
+        idealTime: "8 min",
         questionFrequency: "High"
     },
-    // Adding 24 more modes as placeholders to hit 30
-    ...Array.from({ length: 24 }).map((_, i) => ({
-        id: `mode-${i + 7}`,
-        name: `Mode ${i + 7}`,
-        description: "More exciting ways to learn and play!",
+    {
+        id: "racing",
+        name: "Racing",
+        description: "A lap-based speed competition.",
+        icon: <Zap className="w-8 h-8" />,
+        color: "from-blue-500 to-indigo-700",
+        difficulty: "Simple",
+        skills: ["Speed", "Reflexes"],
+        idealTime: "6 min",
+        questionFrequency: "High"
+    },
+    {
+        id: "blook-rush",
+        name: "Blook Rush",
+        description: "Quick-reflex icon collection.",
         icon: <Sparkles className="w-8 h-8" />,
-        color: i % 2 === 0 ? "from-fuchsia-400 to-pink-600" : "from-sky-400 to-blue-600",
-        difficulty: "Moderate" as const,
-        skills: ["N/A"],
+        color: "from-pink-400 to-rose-600",
+        difficulty: "Simple",
+        skills: ["Speed", "Luck"],
+        idealTime: "5 min",
+        questionFrequency: "High"
+    },
+    {
+        id: "dino-world",
+        name: "Dino World",
+        description: "Prehistoric evolution and survival.",
+        icon: <Sword className="w-8 h-8" />,
+        color: "from-green-500 to-emerald-700",
+        difficulty: "Moderate",
+        skills: ["Strategy", "Planning"],
         idealTime: "10 min",
-        questionFrequency: "Medium" as const,
-        isPlus: i > 10
-    }))
+        questionFrequency: "Medium"
+    },
+    {
+        id: "space-explorer",
+        name: "Space Explorer",
+        description: "Galactic conquest and planet-claiming.",
+        icon: <Gamepad2 className="w-8 h-8" />,
+        color: "from-indigo-600 to-purple-900",
+        difficulty: "Difficult",
+        skills: ["Strategy", "Control"],
+        idealTime: "15 min",
+        questionFrequency: "Medium"
+    },
+    {
+        id: "wild-west",
+        name: "Wild West",
+        description: "Outlaw duels and bounty hunting.",
+        icon: <Sword className="w-8 h-8" />,
+        color: "from-amber-700 to-orange-900",
+        difficulty: "Moderate",
+        skills: ["Speed", "Precision"],
+        idealTime: "8 min",
+        questionFrequency: "High"
+    },
+    {
+        id: "city-builder",
+        name: "City Builder",
+        description: "Urban planning and infrastructure management.",
+        icon: <Shield className="w-8 h-8" />,
+        color: "from-sky-400 to-blue-600",
+        difficulty: "Moderate",
+        skills: ["Planning", "Economy"],
+        idealTime: "12 min",
+        questionFrequency: "Low"
+    },
+    {
+        id: "pirate-booty",
+        name: "Pirate Booty",
+        description: "High-seas plunder and ship upgrades.",
+        icon: <Coins className="w-8 h-8" />,
+        color: "from-cyan-500 to-blue-700",
+        difficulty: "Moderate",
+        skills: ["Strategy", "Luck"],
+        idealTime: "10 min",
+        questionFrequency: "Medium"
+    },
+    {
+        id: "alchemy",
+        name: "Alchemy",
+        description: "Elemental merging and transmutation.",
+        icon: <Sparkles className="w-8 h-8" />,
+        color: "from-fuchsia-500 to-purple-700",
+        difficulty: "Difficult",
+        skills: ["Memory", "Strategy"],
+        idealTime: "12 min",
+        questionFrequency: "Medium"
+    },
+    {
+        id: "dungeon-crawl",
+        name: "Dungeon Crawl",
+        description: "RPG-style exploration and combat.",
+        icon: <Ghost className="w-8 h-8" />,
+        color: "from-stone-600 to-neutral-900",
+        difficulty: "Difficult",
+        skills: ["Tactics", "Grit"],
+        idealTime: "15 min",
+        questionFrequency: "Medium"
+    },
+    {
+        id: "farm-tycoon",
+        name: "Farm Tycoon",
+        description: "Agriculture and market logistics.",
+        icon: <Trophy className="w-8 h-8" />,
+        color: "from-lime-400 to-green-600",
+        difficulty: "Moderate",
+        skills: ["Efficiency", "Patience"],
+        idealTime: "15 min",
+        questionFrequency: "Low"
+    },
+    {
+        id: "monster-brawl",
+        name: "Monster Brawl",
+        description: "Evolution and arena fighting.",
+        icon: <Sword className="w-8 h-8" />,
+        color: "from-red-500 to-rose-700",
+        difficulty: "Moderate",
+        skills: ["Power", "Speed"],
+        idealTime: "10 min",
+        questionFrequency: "High"
+    },
+    {
+        id: "zombie-uprising",
+        name: "Zombie Uprising",
+        description: "Post-apocalyptic survival.",
+        icon: <Ghost className="w-8 h-8" />,
+        color: "from-emerald-700 to-stone-900",
+        difficulty: "Difficult",
+        skills: ["Survival", "Focus"],
+        idealTime: "12 min",
+        questionFrequency: "High"
+    },
+    {
+        id: "kingdom",
+        name: "Kingdom",
+        description: "Medieval tax collection and expansion.",
+        icon: <Shield className="w-8 h-8" />,
+        color: "from-yellow-400 to-amber-600",
+        difficulty: "Moderate",
+        skills: ["Strategy", "Management"],
+        idealTime: "15 min",
+        questionFrequency: "Medium"
+    },
+    {
+        id: "escape-room",
+        name: "Escape Room",
+        description: "Puzzle-solving under pressure.",
+        icon: <Clock className="w-8 h-8" />,
+        color: "from-teal-400 to-cyan-600",
+        difficulty: "Difficult",
+        skills: ["Logic", "Speed"],
+        idealTime: "10 min",
+        questionFrequency: "Medium"
+    },
+    {
+        id: "stock-market",
+        name: "Stock Market",
+        description: "Financial trading simulation.",
+        icon: <Coins className="w-8 h-8" />,
+        color: "from-green-400 to-emerald-600",
+        difficulty: "Moderate",
+        skills: ["Risk", "Analysis"],
+        idealTime: "10 min",
+        questionFrequency: "Medium"
+    },
+    {
+        id: "cyberpunk",
+        name: "Cyberpunk",
+        description: "High-tech neural upgrades and hacking.",
+        icon: <Zap className="w-8 h-8" />,
+        color: "from-purple-400 to-fuchsia-600",
+        difficulty: "Moderate",
+        skills: ["Speed", "Strategy"],
+        idealTime: "8 min",
+        questionFrequency: "High"
+    },
+    {
+        id: "magic-academy",
+        name: "Magic Academy",
+        description: "Spell-casting duels and rank progression.",
+        icon: <Sparkles className="w-8 h-8" />,
+        color: "from-violet-500 to-indigo-700",
+        difficulty: "Moderate",
+        skills: ["Knowledge", "Reflexes"],
+        idealTime: "10 min",
+        questionFrequency: "High"
+    },
+    {
+        id: "submarine",
+        name: "Submarine",
+        description: "Deep-sea exploration and discovery.",
+        icon: <Fish className="w-8 h-8" />,
+        color: "from-blue-700 to-navy-900",
+        difficulty: "Moderate",
+        skills: ["Exploration", "Speed"],
+        idealTime: "8 min",
+        questionFrequency: "Medium"
+    },
+    {
+        id: "volcano-escape",
+        name: "Volcano Escape",
+        description: "High-stress obstacle navigation.",
+        icon: <Timer className="w-8 h-8" />,
+        color: "from-orange-600 to-red-800",
+        difficulty: "Difficult",
+        skills: ["Precision", "Calm"],
+        idealTime: "7 min",
+        questionFrequency: "High"
+    },
+    {
+        id: "candy-land",
+        name: "Candy Land",
+        description: "Whimsical matching and sugary speed.",
+        icon: <Sparkles className="w-8 h-8" />,
+        color: "from-pink-300 to-fuchsia-500",
+        difficulty: "Simple",
+        skills: ["Speed", "Color Matching"],
+        idealTime: "7 min",
+        questionFrequency: "High"
+    },
+    {
+        id: "robot-war",
+        name: "Robot War",
+        description: "Mechanical engineering and battle.",
+        icon: <Zap className="w-8 h-8" />,
+        color: "from-slate-500 to-blue-900",
+        difficulty: "Moderate",
+        skills: ["Tactics", "Customization"],
+        idealTime: "12 min",
+        questionFrequency: "Medium"
+    },
+    {
+        id: "gladiator",
+        name: "Gladiator",
+        description: "Ancient arena combat and fame building.",
+        icon: <Sword className="w-8 h-8" />,
+        color: "from-amber-600 to-red-600",
+        difficulty: "Difficult",
+        skills: ["Strength", "Fame"],
+        idealTime: "10 min",
+        questionFrequency: "High"
+    }
 ]
 
 interface GameModeSelectorProps {
@@ -142,10 +399,19 @@ export default function GameModeSelector({ onSelect, onBack, subjectName }: Game
                 </Button>
 
                 <div className="space-y-4">
-                    <div className={`w-full aspect-video rounded-3xl bg-gradient-to-br ${selectedMode.color} flex items-center justify-center text-white shadow-2xl text-[80px]`}>
-                        <div className="[&_svg]:w-24 [&_svg]:h-24">
-                            {selectedMode.icon}
-                        </div>
+                    <div className={`w-full aspect-video rounded-3xl bg-gradient-to-br ${selectedMode.color} flex items-center justify-center text-white shadow-2xl relative overflow-hidden`}>
+                        {selectedMode.image ? (
+                            <img
+                                src={selectedMode.image}
+                                alt={selectedMode.name}
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <div className="text-[80px] [&_svg]:w-24 [&_svg]:h-24">
+                                {selectedMode.icon}
+                            </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
                     </div>
 
                     <div>
@@ -226,22 +492,38 @@ export default function GameModeSelector({ onSelect, onBack, subjectName }: Game
                             >
                                 <div className={`
                                     w-full h-full rounded-[1.8rem] bg-gradient-to-br ${mode.color} 
-                                    flex flex-col items-center justify-center p-6 text-white text-center
+                                    flex flex-col items-center justify-center text-white text-center
                                     relative overflow-hidden
                                 `}>
-                                    <div className="bg-white/20 backdrop-blur-md p-4 rounded-2xl mb-4 group-hover:scale-110 transition-transform duration-500">
-                                        {mode.icon}
+                                    {mode.image ? (
+                                        <img
+                                            src={mode.image}
+                                            alt={mode.name}
+                                            className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-80 transition-opacity duration-500"
+                                        />
+                                    ) : (
+                                        <div className="bg-white/20 backdrop-blur-md p-4 rounded-2xl mb-4 group-hover:scale-110 transition-transform duration-500">
+                                            {mode.icon}
+                                        </div>
+                                    )}
+
+                                    <div className="relative z-10 w-full p-6">
+                                        {!mode.image && <span className="text-xl font-black tracking-tight block">{mode.name}</span>}
+                                        {mode.image && (
+                                            <div className="bg-black/40 backdrop-blur-sm p-3 rounded-xl inline-block">
+                                                <span className="text-xl font-black tracking-tight">{mode.name}</span>
+                                            </div>
+                                        )}
                                     </div>
-                                    <span className="text-xl font-black tracking-tight">{mode.name}</span>
 
                                     {mode.isPlus && (
-                                        <Badge className="absolute top-4 right-4 bg-amber-500 text-black font-black border-none">
+                                        <Badge className="absolute top-4 right-4 bg-amber-500 text-black font-black border-none z-20">
                                             PLUS
                                         </Badge>
                                     )}
 
                                     {/* Gloss effect */}
-                                    <div className="absolute top-0 left-0 w-full h-1/2 bg-white/10 skew-y-12 -translate-y-1/2 pointer-events-none" />
+                                    <div className="absolute top-0 left-0 w-full h-1/2 bg-white/10 skew-y-12 -translate-y-1/2 pointer-events-none z-20" />
                                 </div>
                             </button>
                         ))}
