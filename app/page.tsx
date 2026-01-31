@@ -2046,17 +2046,29 @@ export default function BoomkitGame() {
         // Continue with ban even if system signature tracking fails
       }
 
-      // 2. Delete the user from Supabase
-      const { error: deleteError } = await supabase.from("users").delete().eq("id", userToModerate.id)
+      // 2. Update the user in Supabase to set is_banned = true
+      const { error: banError } = await supabase
+        .from("users")
+        .update({
+          is_banned: true,
+          ban_reason: banReason || "Banned by staff",
+          ban_expiry: null // Permanent ban
+        })
+        .eq("id", userToModerate.id)
 
-      if (deleteError) {
-        console.error("Error deleting user:", deleteError)
-        alert(`Failed to delete user account: ${deleteError.message}`)
+      if (banError) {
+        console.error("Error banning user:", banError)
+        alert(`Failed to ban user: ${banError.message}`)
         return
       }
 
-      // 3. Remove user from local state
-      const updatedUsers = users.filter((u) => u.id !== userToModerate.id)
+      // 3. Update local state
+      const updatedUsers = users.map((u) => {
+        if (u.id === userToModerate.id) {
+          return { ...u, isBanned: true, banReason: banReason || "Banned by staff" }
+        }
+        return u
+      })
       setUsers(updatedUsers)
       localStorage.setItem("boomkit_approved_users", JSON.stringify(updatedUsers))
 
@@ -2070,7 +2082,7 @@ export default function BoomkitGame() {
       setShowBanDialog(false)
       setUserToModerate(null)
       setBanReason("")
-      alert(`User ${userToModerate.username} has been banned and their account deleted.`)
+      alert(`User ${userToModerate.username} has been banned successfully.`)
     } catch (err) {
       console.error("Error banning user:", err)
       alert("An error occurred while banning the user. Please try again.")
