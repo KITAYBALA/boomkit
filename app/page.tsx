@@ -4376,8 +4376,26 @@ export default function BoomkitGame() {
                     setIsMergingGameActive(true)
                   }
                 }}
+                onBack={() => setSoloFlow(null)}
+                subjectName={soloSubject.subject}
               />
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Global Loading Overlay */}
+      {isGeneratingSet && (
+        <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center flex-col gap-6 animate-in fade-in duration-300">
+          <div className="relative">
+            <div className="w-24 h-24 rounded-full border-t-4 border-b-4 border-purple-500 animate-spin"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <SparklesIcon className="w-8 h-8 text-purple-400 animate-pulse" />
+            </div>
+          </div>
+          <div className="text-center space-y-2">
+            <h2 className="text-3xl font-black text-white tracking-tight animate-pulse">GENERATING ARENA</h2>
+            <p className="text-white/60 font-medium">Using AI to craft unique questions...</p>
           </div>
         </div>
       )}
