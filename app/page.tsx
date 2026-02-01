@@ -57,6 +57,7 @@ import FishingFrenzy from "@/components/fishing-frenzy"
 import { getFallbackQuestions } from "@/lib/fallback-questions"
 import GameLobby from "@/components/game-lobby"
 import { createBrowserClient } from "@supabase/ssr"
+import GameResults from "@/components/game-results"
 
 // Advanced computer identification system
 const generateSystemSignature = (): string => {
@@ -712,6 +713,8 @@ export default function BoomkitGame() {
   const [selectedGameMode, setSelectedGameMode] = useState<GameMode | null>(null)
   const [gameSettings, setGameSettings] = useState<GameSettings | null>(null)
   const [hostingSubject, setHostingSubject] = useState<{ grade: number, subject: string } | null>(null)
+  const [showGameResults, setShowGameResults] = useState(false)
+  const [gameScore, setGameScore] = useState(0)
   const [soloFlow, setSoloFlow] = useState<null | 'mode-select'>(null)
   const [soloSubject, setSoloSubject] = useState<{ grade: number, subject: string } | null>(null)
   const [livePlayers, setLivePlayers] = useState<any[]>([])
@@ -4157,26 +4160,29 @@ export default function BoomkitGame() {
 
             {currentPage === "discover" && isMergingGameActive && activeDiscoverGame && (
               activeDiscoverGame.gameMode === "fishing-frenzy" ? (
-                <FishingFrenzy
-                  grade={activeDiscoverGame.grade}
-                  subject={activeDiscoverGame.subject}
-                  mode={activeDiscoverGame.mode as "solo" | "host" | "join"}
-                  gameMode={activeDiscoverGame.gameMode}
-                  questions={activeDiscoverGame.questions}
-                  durationSeconds={600}
-                  onEnd={(score) => {
-                    setIsMergingGameActive(false)
-                    setActiveDiscoverGame(null)
-                  }}
-                  onAwardTokens={(amount) => {
-                    if (currentUser) {
-                      updateAndPersistCurrentUser({
-                        ...currentUser,
-                        tokens: (currentUser.tokens || 0) + amount
-                      })
-                    }
-                  }}
-                />
+                <div className={`w-full h-full transition-transform duration-500 origin-center ${activeDiscoverGame.mode === "host" ? "scale-[0.85]" : ""}`}>
+                  <FishingFrenzy
+                    grade={activeDiscoverGame.grade}
+                    subject={activeDiscoverGame.subject}
+                    mode={activeDiscoverGame.mode as "solo" | "host" | "join"}
+                    gameMode={activeDiscoverGame.gameMode}
+                    questions={activeDiscoverGame.questions}
+                    durationSeconds={600}
+                    onEnd={(score) => {
+                      setGameScore(score)
+                      setIsMergingGameActive(false)
+                      setShowGameResults(true)
+                    }}
+                    onAwardTokens={(amount) => {
+                      if (currentUser) {
+                        updateAndPersistCurrentUser({
+                          ...currentUser,
+                          tokens: (currentUser.tokens || 0) + amount
+                        })
+                      }
+                    }}
+                  />
+                </div>
               ) : (
                 <MergingGame
                   grade={activeDiscoverGame.grade}
@@ -4186,8 +4192,9 @@ export default function BoomkitGame() {
                   questions={activeDiscoverGame.questions}
                   durationSeconds={600}
                   onEnd={(score) => {
+                    setGameScore(score)
                     setIsMergingGameActive(false)
-                    setActiveDiscoverGame(null)
+                    setShowGameResults(true)
                   }}
                   onAwardTokens={(amount) => {
                     if (currentUser) {
@@ -5376,25 +5383,52 @@ export default function BoomkitGame() {
         />
       )}
 
-      {/* Host Dashboard Overlay */}
-      {lobbyActive && currentUser && activeDiscoverGame?.mode === "host" && (
-        <div className="fixed inset-0 z-[100]">
-          <HostDashboard
-            pin={activeGamePin || ""}
-            gameMode={selectedGameMode?.name || "Classic"}
-            subject={activeDiscoverGame.subject}
-            duration={gameSettings?.duration || 7}
-            onEndGame={async () => {
-              if (supabase && activeGamePin) {
-                await supabase.from("game_sessions").update({ status: "finished" }).eq("pin", activeGamePin)
-              }
-              setLobbyActive(false)
-              setActiveGamePin("")
-              setActiveDiscoverGame(null)
-            }}
-            players={[]} // This would be populated from a real-time subscription
-          />
+      {/* Host Dashboard Overlay - ONLY SHOW WHEN GAME IS ACTIVE */}
+      {isMergingGameActive && currentUser && activeDiscoverGame?.mode === "host" && (
+        <div className="fixed inset-0 z-[100] pointer-events-none">
+          <div className="pointer-events-auto w-full h-full">
+            <HostDashboard
+              pin={activeGamePin || ""}
+              gameMode={selectedGameMode?.name || "Classic"}
+              subject={activeDiscoverGame.subject}
+              duration={gameSettings?.duration || 7}
+              onEndGame={async () => {
+                if (supabase && activeGamePin) {
+                  await supabase.from("game_sessions").update({ status: "finished" }).eq("pin", activeGamePin)
+                }
+                setIsMergingGameActive(false)
+                setShowGameResults(true)
+              }}
+              players={[]} // This would be populated from a real-time subscription
+            />
+          </div>
         </div>
+      )}
+
+      {/* Game Results Screen */}
+      {showGameResults && (
+        <GameResults
+          score={gameScore}
+          totalQuestions={activeDiscoverGame?.questions?.length || 0}
+          highScore={currentUser?.boomScore || 0}
+          leaderboard={currentUser ? [{
+            id: currentUser.id,
+            username: currentUser.username,
+            score: gameScore,
+            avatar: currentUser.profilePicture
+          }] : []}
+          onExit={() => {
+            setShowGameResults(false)
+            setActiveDiscoverGame(null)
+            setActiveGamePin("")
+            setLobbyActive(false)
+          }}
+          onPlayAgain={() => {
+            setShowGameResults(false)
+            // Logic to restart would go here, for now just close
+            setActiveDiscoverGame(null)
+          }}
+        />
       )}
     </div>
   )

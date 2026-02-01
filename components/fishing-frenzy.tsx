@@ -42,7 +42,7 @@ export default function FishingFrenzy({
     const [timeLeft, setTimeLeft] = useState(durationSeconds)
     const [score, setScore] = useState(0)
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-    const [lastCatch, setLastCatch] = useState<{ name: string; weight: number; rarity: string } | null>(null)
+    const [lastCatch, setLastCatch] = useState<{ name: string; weight: number; rarity: string; color?: string } | null>(null)
     const [isGameOver, setIsGameOver] = useState(false)
 
     // Timer logic
@@ -73,26 +73,60 @@ export default function FishingFrenzy({
         }, 1000)
     }
 
+
     const handleReel = () => {
         if (gameState !== "hooked") return
         setGameState("question")
+    }
+
+    // Weighted tier system
+    const getTierAndWeight = () => {
+        const roll = Math.random() * 100
+
+        // S Tier: 1% chance - SUPER RARE
+        if (roll < 1) {
+            return { tier: "S", weight: 10000, color: "from-yellow-400 to-orange-600 animate-pulse" }
+        }
+        // A Tier: 9% chance (1-10) - High LBS
+        if (roll < 10) {
+            const weight = 500 + Math.floor(Math.random() * 500) // 500-1000 lbs
+            return { tier: "A", weight, color: "from-purple-500 to-pink-600" }
+        }
+        // B Tier: 20% chance (10-30)
+        if (roll < 30) {
+            const weight = 100 + Math.floor(Math.random() * 200) // 100-300 lbs
+            return { tier: "B", weight, color: "from-blue-500 to-cyan-500" }
+        }
+        // C Tier: 30% chance (30-60)
+        if (roll < 60) {
+            const weight = 25 + Math.floor(Math.random() * 50) // 25-75 lbs
+            return { tier: "C", weight, color: "from-green-500 to-emerald-600" }
+        }
+        // D Tier: 40% chance (60-100) - Lowest
+        const weight = 1 + Math.floor(Math.random() * 20) // 1-20 lbs
+        return { tier: "D", weight, color: "from-gray-400 to-slate-500" }
     }
 
     const handleAnswer = (index: number) => {
         const correct = index === questions[currentQuestionIndex].correctIndex
 
         if (correct) {
-            const weights = [10, 15, 22, 35, 50, 100]
-            const weight = weights[Math.floor(Math.random() * weights.length)] + Math.floor(Math.random() * 10)
-            const rarities = ["D Tier", "C Tier", "B Tier", "A Tier", "S Tier"]
-            const rarity = rarities[Math.floor(Math.random() * rarities.length)]
-            const fishNames = ["Clownfish", "Blue Tang", "Goldfish", "Salmon", "Tuna", "Shark"]
+            const { tier, weight, color } = getTierAndWeight()
+
+            const fishByTier: Record<string, string[]> = {
+                "S": ["Golden Kraken", "Diamond Leviathan", "Cosmic Whale", "Radioactive Shark"],
+                "A": ["Great White Shark", "Giant Squid", "Megalodon Pup", "Swordfish Titan"],
+                "B": ["Electric Eel", "Marlin", "Barracuda", "Stingray"],
+                "C": ["Tuna", "Salmon", "Catfish", "Bass"],
+                "D": ["Goldfish", "Sardine", "Clownfish", "Old Boot"]
+            }
+            const fishNames = fishByTier[tier] || fishByTier["D"]
             const fish = fishNames[Math.floor(Math.random() * fishNames.length)]
 
-            setLastCatch({ name: fish, weight, rarity })
+            setLastCatch({ name: fish, weight, rarity: tier, color })
             setScore(prev => prev + weight)
             if (onScoreUpdate) onScoreUpdate(score + weight)
-            if (onAwardTokens) onAwardTokens(Math.floor(weight / 5))
+            if (onAwardTokens) onAwardTokens(tier === "S" ? 500 : Math.floor(weight / 5))
             setGameState("result")
         } else {
             setGameState("idle")
@@ -262,7 +296,14 @@ export default function FishingFrenzy({
                                 🐟
                             </div>
                             <div className="text-center">
-                                <div className="text-orange-500 font-black text-6xl italic">D Tier</div>
+                                <div className={`font-black text-6xl italic ${lastCatch.rarity === "S" ? "text-yellow-500 animate-pulse" :
+                                    lastCatch.rarity === "A" ? "text-purple-500" :
+                                        lastCatch.rarity === "B" ? "text-blue-500" :
+                                            lastCatch.rarity === "C" ? "text-green-500" :
+                                                "text-gray-500"
+                                    }`}>
+                                    {lastCatch.rarity} Tier
+                                </div>
                                 <div className="text-slate-900 font-black text-4xl">{lastCatch.weight} lbs</div>
                             </div>
                         </div>
