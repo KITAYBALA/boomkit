@@ -60,7 +60,7 @@ export default function HostSettingsModal({
         <div className="fixed inset-0 z-[70] bg-black/60 backdrop-blur-2xl flex items-center justify-center p-4 animate-in fade-in duration-500">
             <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 via-transparent to-blue-500/10 pointer-events-none" />
 
-            <Card className="w-full max-w-2xl bg-[#0a0b14]/80 border-white/10 overflow-hidden shadow-[0_0_100px_rgba(0,0,0,0.5)] backdrop-blur-3xl relative animate-in zoom-in-95 duration-500">
+            <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-[#0a0b14]/80 border-white/10 shadow-[0_0_100px_rgba(0,0,0,0.5)] backdrop-blur-3xl relative animate-in zoom-in-95 duration-500">
                 {/* Accent Glow */}
                 <div className={`absolute -top-24 -left-24 w-48 h-48 bg-gradient-to-br ${modeColor} blur-[100px] opacity-20`} />
                 <div className={`absolute -bottom-24 -right-24 w-48 h-48 bg-gradient-to-br ${modeColor} blur-[100px] opacity-10`} />
