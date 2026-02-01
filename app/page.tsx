@@ -4357,8 +4357,8 @@ export default function BoomkitGame() {
 
             <div className="flex-1 overflow-hidden">
               <GameModeSelector
-                onSelectMode={async (modeId) => {
-                  console.log("Selected solo mode:", modeId)
+                onSelect={async (mode) => {
+                  console.log("Selected solo mode:", mode.id)
                   setIsGeneratingSet(true)
                   setSoloFlow(null)
 
@@ -4370,7 +4370,7 @@ export default function BoomkitGame() {
                       grade: soloSubject.grade,
                       subject: soloSubject.subject,
                       mode: "solo",
-                      gameMode: modeId,
+                      gameMode: mode.id,
                       questions,
                     })
                     setIsMergingGameActive(true)
