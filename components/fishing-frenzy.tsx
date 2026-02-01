@@ -255,10 +255,10 @@ export default function FishingFrenzy({
                             </div>
                             <CardContent className="p-12 space-y-12">
                                 <h3 className="text-4xl font-black text-white text-center leading-tight">
-                                    {questions[currentQuestionIndex].question}
+                                    {questions && questions.length > 0 ? questions[currentQuestionIndex]?.question : "Waiting for players..."}
                                 </h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {questions[currentQuestionIndex].options.map((option, idx) => (
+                                    {questions && questions.length > 0 && questions[currentQuestionIndex]?.options.map((option, idx) => (
                                         <Button
                                             key={idx}
                                             onClick={() => handleAnswer(idx)}
