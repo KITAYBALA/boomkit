@@ -73,26 +73,60 @@ export default function FishingFrenzy({
         }, 1000)
     }
 
+
     const handleReel = () => {
         if (gameState !== "hooked") return
         setGameState("question")
+    }
+
+    // Weighted tier system
+    const getTierAndWeight = () => {
+        const roll = Math.random() * 100
+
+        // S Tier: 1% chance - LEGENDARY
+        if (roll < 1) {
+            return { tier: "S", weight: 10000, color: "from-yellow-400 to-orange-500" }
+        }
+        // A Tier: 9% chance (1-10)
+        if (roll < 10) {
+            const weight = 75 + Math.floor(Math.random() * 125) // 75-200
+            return { tier: "A", weight, color: "from-purple-500 to-pink-500" }
+        }
+        // B Tier: 20% chance (10-30)
+        if (roll < 30) {
+            const weight = 35 + Math.floor(Math.random() * 40) // 35-75
+            return { tier: "B", weight, color: "from-blue-500 to-cyan-500" }
+        }
+        // C Tier: 30% chance (30-60)
+        if (roll < 60) {
+            const weight = 15 + Math.floor(Math.random() * 20) // 15-35
+            return { tier: "C", weight, color: "from-green-500 to-emerald-500" }
+        }
+        // D Tier: 40% chance (60-100)
+        const weight = 5 + Math.floor(Math.random() * 10) // 5-15
+        return { tier: "D", weight, color: "from-gray-400 to-slate-500" }
     }
 
     const handleAnswer = (index: number) => {
         const correct = index === questions[currentQuestionIndex].correctIndex
 
         if (correct) {
-            const weights = [10, 15, 22, 35, 50, 100]
-            const weight = weights[Math.floor(Math.random() * weights.length)] + Math.floor(Math.random() * 10)
-            const rarities = ["D Tier", "C Tier", "B Tier", "A Tier", "S Tier"]
-            const rarity = rarities[Math.floor(Math.random() * rarities.length)]
-            const fishNames = ["Clownfish", "Blue Tang", "Goldfish", "Salmon", "Tuna", "Shark"]
+            const { tier, weight, color } = getTierAndWeight()
+
+            const fishByTier: Record<string, string[]> = {
+                "S": ["Golden Whale", "Diamond Shark", "Mythical Kraken", "Celestial Dolphin"],
+                "A": ["Giant Tuna", "Swordfish", "Marlin", "Great White"],
+                "B": ["Salmon", "Bass", "Catfish", "Barracuda"],
+                "C": ["Trout", "Carp", "Perch", "Mackerel"],
+                "D": ["Clownfish", "Goldfish", "Guppy", "Sardine"]
+            }
+            const fishNames = fishByTier[tier] || fishByTier["D"]
             const fish = fishNames[Math.floor(Math.random() * fishNames.length)]
 
-            setLastCatch({ name: fish, weight, rarity })
+            setLastCatch({ name: fish, weight, rarity: tier, color })
             setScore(prev => prev + weight)
             if (onScoreUpdate) onScoreUpdate(score + weight)
-            if (onAwardTokens) onAwardTokens(Math.floor(weight / 5))
+            if (onAwardTokens) onAwardTokens(tier === "S" ? 500 : Math.floor(weight / 5))
             setGameState("result")
         } else {
             setGameState("idle")
