@@ -1236,6 +1236,46 @@ export default function BoomkitGame() {
     setSystemSignature(signature)
   }, [])
 
+  // --- HOSTING REALTIME SUBSCRIPTION ---
+  useEffect(() => {
+    // Only subscribe if we are hosting and the game is active (or about to be)
+    if (!activeGamePin || !supabase || (!isMergingGameActive && !lobbyActive)) return
+    if (activeDiscoverGame?.mode !== "host") return
+
+    console.log("Subscribing to game session:", activeGamePin)
+
+    const channel = supabase
+      .channel(`game_${activeGamePin}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "game_sessions",
+          filter: `pin=eq.${activeGamePin}`,
+        },
+        (payload) => {
+          console.log("Game session update:", payload)
+          const newSession = payload.new as any
+          if (newSession.players) {
+            setLivePlayers(newSession.players || [])
+          }
+          if (newSession.status === "finished") {
+            // If we are a player and game finishes
+            if (activeDiscoverGame?.mode === "join") {
+              setIsMergingGameActive(false)
+              setShowGameResults(true)
+            }
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [activeGamePin, isMergingGameActive, lobbyActive, activeDiscoverGame])
+
   // Domain-specific behavior for boomkit.org
   useEffect(() => {
     if (typeof window !== "undefined" && isStorageLoaded) {
