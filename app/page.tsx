@@ -699,6 +699,7 @@ export default function BoomkitGame() {
     mode: "solo" | "host" | "join"
     gameMode: string
     questions: any[]
+    duration?: number // Added duration
   } | null>(null)
   const [isMergingGameActive, setIsMergingGameActive] = useState(false)
   const [lobbyActive, setLobbyActive] = useState(false)
@@ -4127,7 +4128,8 @@ export default function BoomkitGame() {
                       subject: session.subject,
                       mode: "join",
                       gameMode: session.mode || "classic",
-                      questions: session.questions
+                      questions: session.questions,
+                      duration: session.duration // Store duration
                     })
                     setLobbyActive(true)
                   } else {
@@ -4167,11 +4169,20 @@ export default function BoomkitGame() {
                     mode={activeDiscoverGame.mode as "solo" | "host" | "join"}
                     gameMode={activeDiscoverGame.gameMode}
                     questions={activeDiscoverGame.questions}
-                    durationSeconds={600}
+                    durationSeconds={activeDiscoverGame.duration || 600}
                     onEnd={(score) => {
                       setGameScore(score)
                       setIsMergingGameActive(false)
                       setShowGameResults(true)
+                    }}
+                    onScoreUpdate={async (newScore) => {
+                      if (activeGamePin && supabase && activeDiscoverGame.mode === "join") {
+                        await supabase.rpc("update_game_score", {
+                          p_pin: activeGamePin,
+                          p_user_id: currentUser?.id,
+                          p_score: newScore
+                        })
+                      }
                     }}
                     onAwardTokens={(amount) => {
                       if (currentUser) {
@@ -4190,11 +4201,20 @@ export default function BoomkitGame() {
                   mode={activeDiscoverGame.mode as "solo" | "host" | "join"}
                   gameMode={activeDiscoverGame.gameMode}
                   questions={activeDiscoverGame.questions}
-                  durationSeconds={600}
+                  durationSeconds={activeDiscoverGame.duration || 600}
                   onEnd={(score) => {
                     setGameScore(score)
                     setIsMergingGameActive(false)
                     setShowGameResults(true)
+                  }}
+                  onScoreUpdate={async (newScore) => {
+                    if (activeGamePin && supabase && activeDiscoverGame.mode === "join") {
+                      await supabase.rpc("update_game_score", {
+                        p_pin: activeGamePin,
+                        p_user_id: currentUser?.id,
+                        p_score: newScore
+                      })
+                    }
                   }}
                   onAwardTokens={(amount) => {
                     if (currentUser) {
@@ -5399,7 +5419,7 @@ export default function BoomkitGame() {
                 setIsMergingGameActive(false)
                 setShowGameResults(true)
               }}
-              players={[]} // This would be populated from a real-time subscription
+              players={livePlayers}
             />
           </div>
         </div>
