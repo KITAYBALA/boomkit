@@ -53,6 +53,8 @@ import GameModeSelector, { GameMode } from "@/components/game-mode-selector"
 import HostSettingsModal, { GameSettings } from "@/components/host-settings-modal"
 import HostDashboard from "@/components/host-dashboard"
 import MergingGame from "@/components/merging-game"
+import FishingFrenzy from "@/components/fishing-frenzy"
+import { getFallbackQuestions } from "@/lib/fallback-questions"
 import GameLobby from "@/components/game-lobby"
 import { createBrowserClient } from "@supabase/ssr"
 
@@ -2129,11 +2131,17 @@ export default function BoomkitGame() {
           count
         })
       })
+
+      if (response.status === 429) {
+        console.warn("[AI API] Rate limit hit, using fallback questions")
+        return getFallbackQuestions(grade, subject, count)
+      }
+
       const data = await response.json()
-      return data.questions || []
+      return data.questions || getFallbackQuestions(grade, subject, count)
     } catch (err) {
-      console.error(err)
-      return []
+      console.error("Error fetching AI questions:", err)
+      return getFallbackQuestions(grade, subject, count)
     }
   }
 
@@ -4148,72 +4156,49 @@ export default function BoomkitGame() {
             )}
 
             {currentPage === "discover" && isMergingGameActive && activeDiscoverGame && (
-              <MergingGame
-                grade={activeDiscoverGame.grade}
-                subject={activeDiscoverGame.subject}
-                mode={activeDiscoverGame.mode}
-                gameMode={activeDiscoverGame.gameMode}
-                questions={activeDiscoverGame.questions}
-                durationSeconds={selectedDuration}
-                onEnd={(score) => {
-                  console.log("Game ended with score:", score)
-                  setIsMergingGameActive(false)
-                  setLobbyActive(false)
-
-                  // Reward tokens based on Grade and Performance
-                  if (currentUser) {
-                    const gradeRewards: Record<number, number> = {
-                      1: 3, 2: 5, 3: 10, 4: 20, 5: 25, 6: 50, 7: 75,
-                      8: 100, 9: 125, 10: 150, 11: 175, 12: 200
+              activeDiscoverGame.gameMode === "fishing-frenzy" ? (
+                <FishingFrenzy
+                  grade={activeDiscoverGame.grade}
+                  subject={activeDiscoverGame.subject}
+                  mode={activeDiscoverGame.mode as "solo" | "host" | "join"}
+                  gameMode={activeDiscoverGame.gameMode}
+                  questions={activeDiscoverGame.questions}
+                  durationSeconds={600}
+                  onEnd={(score) => {
+                    setIsMergingGameActive(false)
+                    setActiveDiscoverGame(null)
+                  }}
+                  onAwardTokens={(amount) => {
+                    if (currentUser) {
+                      updateAndPersistCurrentUser({
+                        ...currentUser,
+                        tokens: (currentUser.tokens || 0) + amount
+                      })
                     }
-                    const completionBonus = gradeRewards[activeDiscoverGame.grade] || 3
-                    const performanceBonus = Math.floor(score / 10) // Basic performance incentive
-
-                    const totalReward = completionBonus + performanceBonus
-
-                    if (totalReward > 0) {
-                      const updatedUser = { ...currentUser, tokens: currentUser.tokens + totalReward }
-                      updateAndPersistCurrentUser(updatedUser)
-                      alert(`Game Over! You earned ${totalReward} tokens (${completionBonus} for completion + ${performanceBonus} for score).`)
-
-                      // Award XP
-                      awardXP(Math.floor(score / 2) + 10) // Example XP formula
+                  }}
+                />
+              ) : (
+                <MergingGame
+                  grade={activeDiscoverGame.grade}
+                  subject={activeDiscoverGame.subject}
+                  mode={activeDiscoverGame.mode as "solo" | "host" | "join"}
+                  gameMode={activeDiscoverGame.gameMode}
+                  questions={activeDiscoverGame.questions}
+                  durationSeconds={600}
+                  onEnd={(score) => {
+                    setIsMergingGameActive(false)
+                    setActiveDiscoverGame(null)
+                  }}
+                  onAwardTokens={(amount) => {
+                    if (currentUser) {
+                      updateAndPersistCurrentUser({
+                        ...currentUser,
+                        tokens: (currentUser.tokens || 0) + amount
+                      })
                     }
-                  }
-                }}
-                onScoreUpdate={async (score) => {
-                  if (activeDiscoverGame.mode === "join" && activeGamePin && currentUser && supabase) {
-                    // Get current session data to update this player's score
-                    const { data: session } = await supabase
-                      .from("game_sessions")
-                      .select("players")
-                      .eq("pin", activeGamePin)
-                      .single()
-
-                    if (session && session.players) {
-                      const updatedPlayers = (session.players as any[]).map(p =>
-                        p.id === currentUser.id ? { ...p, score } : p
-                      )
-
-                      // If player not in list (joined late?), add them
-                      if (!updatedPlayers.find(p => p.id === currentUser.id)) {
-                        updatedPlayers.push({ id: currentUser.id, username: currentUser.username, score })
-                      }
-
-                      await supabase
-                        .from("game_sessions")
-                        .update({ players: updatedPlayers })
-                        .eq("pin", activeGamePin)
-                    }
-                  }
-                }}
-                onAwardTokens={(amount) => {
-                  if (currentUser) {
-                    const updatedUser = { ...currentUser, tokens: currentUser.tokens + amount }
-                    updateAndPersistCurrentUser(updatedUser)
-                  }
-                }}
-              />
+                  }}
+                />
+              )
             )}
           </div>
         </div>
@@ -4378,6 +4363,7 @@ export default function BoomkitGame() {
                 }}
                 onBack={() => setSoloFlow(null)}
                 subjectName={soloSubject.subject}
+                isSolo={true}
               />
             </div>
           </div>

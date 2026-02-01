@@ -403,9 +403,10 @@ interface GameModeSelectorProps {
     onSelect: (mode: GameMode) => void
     onBack: () => void
     subjectName: string
+    isSolo?: boolean
 }
 
-export default function GameModeSelector({ onSelect, onBack, subjectName }: GameModeSelectorProps) {
+export default function GameModeSelector({ onSelect, onBack, subjectName, isSolo }: GameModeSelectorProps) {
     const [selectedId, setSelectedId] = useState(GAME_MODES[0].id)
     const [isSelecting, setIsSelecting] = useState(false)
     const selectedMode = GAME_MODES.find(m => m.id === selectedId)!
@@ -490,7 +491,7 @@ export default function GameModeSelector({ onSelect, onBack, subjectName }: Game
                         disabled={selectedMode.isPlus || isSelecting}
                         className={`w-full h-16 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-2xl font-black rounded-2xl shadow-xl shadow-purple-500/20 transition-all ${isSelecting ? "scale-95 opacity-50" : "hover:scale-105"}`}
                     >
-                        {isSelecting ? "Initializing Arena..." : (selectedMode.isPlus ? "Unlock Mode" : "Host Game")}
+                        {isSelecting ? "Initializing Arena..." : (selectedMode.isPlus ? "Unlock Mode" : (isSolo ? "Play Solo" : "Host Game"))}
                     </Button>
                     <p className="text-center text-white/30 text-xs mt-4">
                         Subject: <span className="text-purple-400 font-bold">{subjectName}</span>
