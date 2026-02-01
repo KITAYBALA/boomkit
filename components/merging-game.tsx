@@ -400,12 +400,12 @@ export default function MergingGame({
                         <CardContent className="flex flex-col h-full pt-10">
                             <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
                                 <h3 className="text-2xl md:text-3xl font-black text-white leading-tight mb-8">
-                                    {currentQuestion.question}
+                                    {questions.length > 0 ? currentQuestion.question : "Waiting for game start..."}
                                 </h3>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-6">
-                                {currentQuestion.options.map((option, i) => (
+                                {questions.length > 0 && currentQuestion.options.map((option, i) => (
                                     <Button
                                         key={i}
                                         onClick={() => isAnswering && handleAnswer(i)}
