@@ -126,11 +126,12 @@ export default function FishingFrenzy({
             {/* Game Canvas / World */}
             <div className="relative flex-1 cursor-pointer select-none" onClick={handleCast}>
                 {/* Background */}
-                <div className="absolute inset-0 bg-blue-400">
+                <div className="absolute inset-0 bg-gradient-to-b from-sky-300 via-sky-400 to-blue-600">
                     <img
-                        src="C:/Users/oktay/.gemini/antigravity/brain/1f834dc0-937f-4423-bd3d-eeb43268abf0/fishing_frenzy_bg_1769938845654.png"
+                        src="/images/fishing-frenzy/background.png"
                         alt="Fishing Background"
                         className="w-full h-full object-cover"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
                     />
                 </div>
 
@@ -153,9 +154,10 @@ export default function FishingFrenzy({
                     >
                         <div className="w-32 h-32 flex items-center justify-center">
                             <img
-                                src="C:/Users/oktay/.gemini/antigravity/brain/1f834dc0-937f-4423-bd3d-eeb43268abf0/fishing_robot_blook_1769938862182.png"
+                                src="/images/fishing-frenzy/robot.png"
                                 alt="Fishing Robot"
                                 className="w-full h-full object-contain"
+                                onError={(e) => { (e.target as HTMLImageElement).src = 'https://api.dicebear.com/7.x/bottts/svg?seed=fisher' }}
                             />
                         </div>
                         {/* Fishing Rod Extension (invisible but anchor for line) */}
