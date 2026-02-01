@@ -40,6 +40,7 @@ export default function GameLobby({
     const [duration, setDuration] = useState(120) // Default 2 mins
     const [players, setPlayers] = useState<any[]>([])
     const [isGameStarted, setIsGameStarted] = useState(false)
+    const [hostUsername, setHostUsername] = useState<string>("")
 
     // Sync players and game state via Supabase
     useEffect(() => {
@@ -62,6 +63,9 @@ export default function GameLobby({
                 if (session.status === "started") {
                     setIsGameStarted(true)
                     onStart(session.duration || duration)
+                }
+                if (session.host_username) {
+                    setHostUsername(session.host_username)
                 }
             }
         }
@@ -281,7 +285,7 @@ export default function GameLobby({
             <div className="flex items-center gap-6 text-white/20 font-black uppercase tracking-[0.3em] text-[10px]">
                 <div className="flex items-center gap-2">
                     <CrownIcon className="w-3 h-3 text-yellow-500/40" />
-                    Host: {mode === "host" ? "You" : (players[0]?.username || "...")}
+                    Host: {mode === "host" ? "You" : (hostUsername || players[0]?.username || "...")}
                 </div>
                 <div>•</div>
                 <div>Boomkit LIVE</div>
