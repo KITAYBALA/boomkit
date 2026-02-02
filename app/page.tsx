@@ -3536,7 +3536,11 @@ export default function BoomkitGame() {
                                 {/* Avatar/Image */}
                                 {hasUnlocked ? (
                                   <div className="z-10 flex flex-col items-center gap-1">
-                                    <span className="drop-shadow-lg">{boom.avatar}</span>
+                                    {boom.avatar.startsWith('/') ? (
+                                      <img src={boom.avatar} alt={boom.name} className="w-16 h-16 object-contain drop-shadow-lg" />
+                                    ) : (
+                                      <span className="drop-shadow-lg">{boom.avatar}</span>
+                                    )}
                                     <span className="text-[10px] font-bold text-white/60 uppercase tracking-wider">LVL {boom.level}</span>
                                   </div>
                                 ) : (
