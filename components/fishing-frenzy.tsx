@@ -318,7 +318,13 @@ export default function FishingFrenzy({
                     <h2 className="text-7xl font-black text-white mb-4 tracking-tighter">TIME'S UP!</h2>
                     <p className="text-4xl text-purple-400 font-black mb-12">TOTAL WEIGHT: {score} lbs</p>
                     <Button
-                        onClick={() => onEnd(score)}
+                        onClick={() => {
+                            if (onAwardTokens) {
+                                const tokens = Math.floor(score * 0.01)
+                                if (tokens > 0) onAwardTokens(tokens)
+                            }
+                            onEnd(score)
+                        }}
                         className="px-12 py-8 bg-white text-black text-3xl font-black rounded-3xl hover:bg-purple-400 hover:text-white transition-all transform hover:scale-110"
                     >
                         RETURN TO LOBBY

@@ -115,6 +115,7 @@ export default function MergingGame({
     const [isGameOver, setIsGameOver] = useState(false)
     const [feedback, setFeedback] = useState<"correct" | "incorrect" | null>(null)
     const [currentBoomX, setCurrentBoomX] = useState(50) // Horizontal position 0-100
+    const [correctAnswers, setCorrectAnswers] = useState(0)
 
     const gameAreaRef = useRef<HTMLDivElement>(null)
 
@@ -134,6 +135,10 @@ export default function MergingGame({
 
     const handleGameOver = () => {
         setIsGameOver(true)
+        if (onAwardTokens) {
+            const tokens = grade * correctAnswers
+            if (tokens > 0) onAwardTokens(tokens)
+        }
         onEnd(score)
     }
 
@@ -158,6 +163,7 @@ export default function MergingGame({
         const currentQuestion = questions[currentQuestionIndex]
         if (index === currentQuestion.correctIndex) {
             setFeedback("correct")
+            setCorrectAnswers(prev => prev + 1)
             setScore((prev) => {
                 const newScore = prev + Math.ceil(10 * config.rewardMultiplier)
                 if (onScoreUpdate) onScoreUpdate(newScore)
