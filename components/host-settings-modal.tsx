@@ -100,165 +100,33 @@ export default function HostSettingsModal({
                     </div>
                 </CardHeader>
 
-                <CardContent className="p-8 space-y-10 relative z-10">
-                    {/* Goal Selection Card */}
-                    <div className="grid grid-cols-2 gap-6">
-                        <button
-                            onClick={() => setSettings(s => ({ ...s, goalType: "time" }))}
-                            className={`
-                                group relative p-6 rounded-3xl border transition-all duration-500 flex flex-col items-center gap-4 overflow-hidden
-                                ${settings.goalType === "time"
-                                    ? "bg-cyan-500/10 border-cyan-500/50 shadow-[0_0_30px_rgba(6,182,212,0.2)]"
-                                    : "bg-white/5 border-white/5 hover:border-white/20"}
-                            `}
-                        >
-                            {settings.goalType === "time" && (
-                                <div className="absolute top-0 right-0 p-2">
-                                    <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_10px_rgba(6,182,212,1)]" />
-                                </div>
-                            )}
-                            <div className={`p-4 rounded-2xl transition-all duration-500 ${settings.goalType === "time" ? "bg-cyan-500 text-white shadow-lg" : "bg-white/5 text-white/20 group-hover:text-white/40"}`}>
-                                <Clock className="w-8 h-8" />
-                            </div>
-                            <div className="text-center">
-                                <p className={`font-black text-2xl tracking-tighter transition-colors ${settings.goalType === "time" ? "text-cyan-400" : "text-white/40"}`}>Timed Match</p>
-                                <p className="text-[10px] font-bold uppercase tracking-wider opacity-40">Race against the clock</p>
-                            </div>
-                        </button>
-
-                        <button
-                            onClick={() => setSettings(s => ({ ...s, goalType: "crypto" }))}
-                            className={`
-                                group relative p-6 rounded-3xl border transition-all duration-500 flex flex-col items-center gap-4 overflow-hidden
-                                ${settings.goalType === "crypto"
-                                    ? "bg-amber-500/10 border-amber-500/50 shadow-[0_0_30px_rgba(245,158,11,0.2)]"
-                                    : "bg-white/5 border-white/5 hover:border-white/20"}
-                            `}
-                        >
-                            {settings.goalType === "crypto" && (
-                                <div className="absolute top-0 right-0 p-2">
-                                    <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse shadow-[0_0_10px_rgba(245,158,11,1)]" />
-                                </div>
-                            )}
-                            <div className={`p-4 rounded-2xl transition-all duration-500 ${settings.goalType === "crypto" ? "bg-amber-500 text-black shadow-lg" : "bg-white/5 text-white/20 group-hover:text-white/40"}`}>
-                                <Zap className="w-8 h-8" />
-                            </div>
-                            <div className="text-center">
-                                <p className={`font-black text-2xl tracking-tighter transition-colors ${settings.goalType === "crypto" ? "text-amber-400" : "text-white/40"}`}>Goal Target</p>
-                                <p className="text-[10px] font-bold uppercase tracking-wider opacity-40">First to reach the cap</p>
-                            </div>
-                        </button>
-                    </div>
-
-                    {/* Controls Section */}
-                    <div className="space-y-8 bg-white/5 backdrop-blur-md rounded-[2.5rem] p-10 border border-white/5 shadow-inner">
-                        {settings.goalType === "time" ? (
-                            <div className="space-y-6">
-                                <div className="flex justify-between items-end">
-                                    <div className="space-y-1">
-                                        <Label className="text-white text-2xl font-black tracking-tighter flex items-center gap-3">
-                                            <Timer className="w-6 h-6 text-cyan-400" />
-                                            MATCH DURATION
-                                        </Label>
-                                        <p className="text-white/40 text-xs font-medium">How many minutes of pure intensity?</p>
-                                    </div>
-                                    <div className="flex flex-col items-end">
-                                        <span className="text-cyan-400 font-black text-5xl tracking-tighter leading-none animate-in slide-in-from-bottom-2">
-                                            {settings.duration}
-                                        </span>
-                                        <span className="text-[10px] text-cyan-400/40 font-black uppercase tracking-widest mt-1">minutes</span>
-                                    </div>
-                                </div>
-                                <div className="relative group pt-4">
-                                    <input
-                                        type="range"
-                                        min="1"
-                                        max="60"
-                                        value={settings.duration}
-                                        onChange={(e) => setSettings(s => ({ ...s, duration: parseInt(e.target.value) }))}
-                                        className="w-full h-3 bg-white/10 rounded-full appearance-none cursor-pointer accent-cyan-400 transition-all hover:h-4"
-                                    />
-                                    <div className="flex justify-between mt-4">
-                                        {[1, 15, 30, 45, 60].map(val => (
-                                            <span key={val} className="text-[10px] font-black text-white/20">{val}m</span>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="space-y-6">
-                                <div className="flex justify-between items-end">
-                                    <div className="space-y-1">
-                                        <Label className="text-white text-2xl font-black tracking-tighter flex items-center gap-3">
-                                            <Zap className="w-6 h-6 text-amber-400" />
-                                            CRYPTO GOAL
-                                        </Label>
-                                        <p className="text-white/40 text-xs font-medium">Point threshold for victory</p>
-                                    </div>
-                                    <div className="flex flex-col items-end">
-                                        <span className="text-amber-400 font-black text-5xl tracking-tighter leading-none animate-in slide-in-from-bottom-2">
-                                            {settings.cryptoGoal.toLocaleString()}
-                                        </span>
-                                        <span className="text-[10px] text-amber-400/40 font-black uppercase tracking-widest mt-1">points</span>
-                                    </div>
-                                </div>
-                                <div className="relative group pt-4">
-                                    <input
-                                        type="range"
-                                        min="100"
-                                        max="100000"
-                                        step="100"
-                                        value={settings.cryptoGoal}
-                                        onChange={(e) => setSettings(s => ({ ...s, cryptoGoal: parseInt(e.target.value) }))}
-                                        className="w-full h-3 bg-white/10 rounded-full appearance-none cursor-pointer accent-amber-400 transition-all hover:h-4"
-                                    />
-                                    <div className="flex justify-between mt-4">
-                                        {["100", "25k", "50k", "75k", "100k"].map(val => (
-                                            <span key={val} className="text-[10px] font-black text-white/20">{val}</span>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Toggles Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {[
-                            { id: 'instructions', label: 'Show Instructions', sub: 'The tutorial screen', icon: Info, key: 'showInstructions' },
-                            { id: 'late', label: 'Allow Late Joining', sub: 'Jump in mid-game', icon: UserPlus, key: 'allowLateJoining' },
-                            { id: 'random', label: 'Randomized Names', sub: 'Privacy mode active', icon: Users, key: 'useRandomNames' },
-                        ].map((item) => (
-                            <div key={item.id} className="group flex items-center justify-between p-5 bg-white/5 rounded-3xl border border-white/5 hover:border-white/10 hover:bg-white/[0.08] transition-all">
-                                <div className="flex items-center gap-4">
-                                    <div className="p-2.5 rounded-xl bg-white/5 text-white/40 group-hover:text-white group-hover:bg-white/10 transition-all">
-                                        <item.icon className="w-5 h-5" />
-                                    </div>
-                                    <div className="space-y-0.5">
-                                        <Label className="text-white font-bold tracking-tight leading-none">{item.label}</Label>
-                                        <p className="text-[10px] text-white/30 font-bold uppercase tracking-wide leading-none">{item.sub}</p>
-                                    </div>
-                                </div>
-                                <Switch
-                                    checked={(settings as any)[item.key]}
-                                    onCheckedChange={(v: boolean) => setSettings(s => ({ ...s, [item.key]: v }))}
-                                    className="data-[state=checked]:bg-purple-500"
-                                />
-                            </div>
-                        ))}
+                <CardContent className="space-y-6 pt-6 relative z-10">
+                    <div className="flex flex-col items-center justify-center space-y-4 py-8">
+                        <div className="p-4 rounded-full bg-white/5 border border-white/10 shadow-inner">
+                            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 animate-pulse blur-xl absolute opacity-50" />
+                            <Zap className="w-8 h-8 text-white relative z-10" />
+                        </div>
+                        <div className="text-center space-y-2">
+                            <h3 className="text-2xl font-black text-white">Ready to Host?</h3>
+                            <p className="text-white/40 font-medium max-w-[300px] mx-auto">
+                                Create a lobby for <strong>{modeName}</strong> in <strong>{subject}</strong>. Players can join using the Game PIN.
+                            </p>
+                        </div>
                     </div>
 
                     <Button
                         onClick={() => onHost(settings)}
-                        className="w-full h-20 bg-white hover:bg-white/90 text-black text-3xl font-black rounded-[2rem] shadow-[0_20px_40px_rgba(255,255,255,0.1)] group transition-all active:scale-[0.98]"
+                        className={`w-full h-20 bg-gradient-to-r ${modeColor} hover:brightness-110 text-white font-black text-2xl rounded-[2rem] shadow-xl shadow-purple-900/20 group relative overflow-hidden transition-all active:scale-[0.98]`}
                     >
-                        <Play className="w-8 h-8 mr-3 fill-black group-hover:scale-110 group-hover:rotate-12 transition-all duration-300" />
-                        LAUNCH ARENA
+                        <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                        <span className="relative flex items-center gap-4 justify-center">
+                            <Play className="w-8 h-8 fill-current" />
+                            CREATE LOBBY
+                        </span>
                     </Button>
                 </CardContent>
-            </Card>
 
-            <style jsx global>{`
+                <style jsx global>{`
                 input[type='range']::-webkit-slider-thumb {
                     width: 24px;
                     height: 24px;
