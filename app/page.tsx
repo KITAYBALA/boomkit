@@ -605,6 +605,23 @@ const PACKS: Pack[] = [
     rarity: "rare",
     emoji: "❄️",
   },
+  {
+    id: "ai",
+    name: "AI Pack",
+    price: 35,
+    booms: [
+      { name: "DeepSeek", rarity: "uncommon", avatar: "🐋", description: "Deep thinking AI" },
+      { name: "Microsoft Copilot", rarity: "rare", avatar: "💠", description: "Your daily AI companion" },
+      { name: "Claude", rarity: "epic", avatar: "🎭", description: "Helpful and harmless AI" },
+      { name: "ChatGPT", rarity: "legendary", avatar: "🤖✨", description: "The pioneer of conversational AI" },
+      { name: "Vercel", rarity: "chroma", avatar: "▲", description: "The platform for frontend developers" },
+      { name: "Google Gemini", rarity: "mystical", avatar: "♊✨", description: "The most capable AI from Google" },
+    ],
+    color: "from-indigo-600 to-blue-900",
+    image: "/images/ai-pack.png",
+    rarity: "rare",
+    emoji: "🧠",
+  },
 ]
 
 // Rarity chances for pack opening (total = 100%)
@@ -1329,7 +1346,7 @@ export default function BoomkitGame() {
     // Cap at level 100
     if (newLevel >= 100) {
       newLevel = 100
-      newXP = Math.max(newXP, XP_PER_LEVEL) // Max out XP visual
+      newXP = 100 // Visual cap for max level
     }
 
     if (leveledUp) {
@@ -1358,6 +1375,19 @@ export default function BoomkitGame() {
     }
     updateAndPersistCurrentUser(updatedUser)
   }
+
+  // Grant HadiGidek Max XP (One-time check)
+  useEffect(() => {
+    if (currentUser && currentUser.username === "HadiGidek" && (currentUser.level || 1) < 100) {
+      console.log("Maxing out XP for HadiGidek...")
+      const updatedUser = {
+        ...currentUser,
+        xp: 100,
+        level: 100
+      }
+      updateAndPersistCurrentUser(updatedUser)
+    }
+  }, [currentUser])
 
   // Check if user can spin today
   useEffect(() => {
@@ -4221,6 +4251,26 @@ export default function BoomkitGame() {
                       setGameScore(score)
                       setIsMergingGameActive(false)
                       setShowGameResults(true)
+
+                      // Award Rewards
+                      const tokenReward = Math.floor(score / 5)
+                      const xpReward = Math.floor(score / 2)
+
+                      if (currentUser) {
+                        const updatedUser = {
+                          ...currentUser,
+                          tokens: (currentUser.tokens || 0) + tokenReward,
+                          xp: (currentUser.xp || 0) + xpReward
+                        }
+                        // Leveling is handled inside awardXP but we can just update state here and let the next sync handle it
+                        // Or better yet, use awardXP logic
+                        awardXP(xpReward)
+                        updateAndPersistCurrentUser({
+                          ...updatedUser,
+                          // awardXP might have incremented level, let's just make sure we are consistent
+                          tokens: updatedUser.tokens
+                        })
+                      }
                     }}
                     onScoreUpdate={async (newScore) => {
                       if (activeGamePin && supabase && activeDiscoverGame.mode === "join") {
@@ -4253,6 +4303,23 @@ export default function BoomkitGame() {
                     setGameScore(score)
                     setIsMergingGameActive(false)
                     setShowGameResults(true)
+
+                    // Award Rewards
+                    const tokenReward = Math.floor(score / 5)
+                    const xpReward = Math.floor(score / 2)
+
+                    if (currentUser) {
+                      const updatedUser = {
+                        ...currentUser,
+                        tokens: (currentUser.tokens || 0) + tokenReward,
+                        xp: (currentUser.xp || 0) + xpReward
+                      }
+                      awardXP(xpReward)
+                      updateAndPersistCurrentUser({
+                        ...updatedUser,
+                        tokens: updatedUser.tokens
+                      })
+                    }
                   }}
                   onScoreUpdate={async (newScore) => {
                     if (activeGamePin && supabase && activeDiscoverGame.mode === "join") {
