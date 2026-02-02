@@ -45,6 +45,17 @@ export default function FishingFrenzy({
     const [lastCatch, setLastCatch] = useState<{ name: string; weight: number; rarity: string; color?: string } | null>(null)
     const [isGameOver, setIsGameOver] = useState(false)
 
+    // Crash Prevention
+    if (!questions || questions.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center w-full h-full text-white bg-slate-900">
+                <div className="w-12 h-12 rounded-full border-4 border-blue-500 border-t-transparent animate-spin mb-4" />
+                <p className="font-bold text-lg">Preparing Waters...</p>
+                <p className="text-white/40 text-sm">Waiting for host to sync...</p>
+            </div>
+        )
+    }
+
     // Timer logic
     useEffect(() => {
         if (timeLeft <= 0 || isGameOver) return
