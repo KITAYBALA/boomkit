@@ -4409,28 +4409,36 @@ export default function BoomkitGame() {
 
             <div className="flex-1 overflow-hidden">
               <GameModeSelector
-                onSelect={async (mode) => {
-                  console.log("Selected solo mode:", mode.id)
-                  setIsGeneratingSet(true)
-                  setSoloFlow(null)
-
-                  const questions = await fetchQuestionsWithAi(soloSubject.grade, soloSubject.subject, 30)
-                  setIsGeneratingSet(false)
-
-                  if (questions && questions.length > 0) {
-                    setActiveDiscoverGame({
-                      grade: soloSubject.grade,
-                      subject: soloSubject.subject,
-                      mode: "solo",
-                      gameMode: mode.id,
-                      questions,
-                    })
-                    setIsMergingGameActive(true)
-                  }
-                }}
-                onBack={() => setSoloFlow(null)}
                 subjectName={soloSubject.subject}
+                onBack={() => setSoloFlow(null)}
+                initialDuration={selectedDuration}
                 isSolo={true}
+                onSelect={(mode, duration) => {
+                  console.log("Selected solo mode:", mode.id, "duration:", duration)
+                  setSelectedDuration(duration) // Update shared duration state
+
+                  // Wrap the async part
+                  const startSoloGame = async () => {
+                    setIsGeneratingSet(true)
+                    setSoloFlow(null)
+
+                    const questions = await fetchQuestionsWithAi(soloSubject.grade, soloSubject.subject, 30)
+                    setIsGeneratingSet(false)
+
+                    if (questions && questions.length > 0) {
+                      setActiveDiscoverGame({
+                        grade: soloSubject.grade,
+                        subject: soloSubject.subject,
+                        mode: "solo",
+                        gameMode: mode.id,
+                        questions,
+                        duration,
+                      })
+                      setIsMergingGameActive(true)
+                    }
+                  }
+                  startSoloGame()
+                }}
               />
             </div>
           </div>
