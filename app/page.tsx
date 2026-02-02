@@ -3485,6 +3485,91 @@ export default function BoomkitGame() {
                     </div>
                   ))}
                 </div>
+
+                {/* Gamepass Booms Section */}
+                {(currentUser?.level || 1) >= 10 && (
+                  <div className="mt-16">
+                    <div className="flex items-center gap-4 mb-8">
+                      <div className="w-2 h-12 bg-gradient-to-b from-purple-500 via-pink-500 to-yellow-500 rounded-full shadow-[0_0_20px_rgba(168,85,247,0.5)]" />
+                      <div>
+                        <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-600 tracking-tighter">
+                          GAMEPASS BOOMS
+                        </h2>
+                        <p className="text-white/60 text-sm font-medium mt-1">
+                          Exclusive rewards for reaching milestone levels
+                        </p>
+                      </div>
+                      {(currentUser?.level || 1) >= 100 && (
+                        <div className="ml-auto">
+                          <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-full px-6 py-2 border border-white/20">
+                            <span className="text-white font-black text-sm uppercase tracking-wider">⚡ MAX LEVEL ⚡</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 p-8 shadow-2xl">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                        {GAMEPASS_BOOMS.map((boom) => {
+                          const quantity = currentUser?.booms[boom.name] || 0
+                          const hasUnlocked = quantity > 0
+                          const rarityColor = getRarityColor(boom.rarity)
+
+                          return (
+                            <div key={boom.level} className="group flex flex-col items-center gap-3">
+                              <div
+                                className={`
+                                  w-full aspect-square rounded-2xl border-2 flex flex-col items-center justify-center text-4xl 
+                                  transition-all duration-300 relative overflow-hidden cursor-pointer
+                                  ${hasUnlocked
+                                    ? `${rarityColor} border-white/30 shadow-[0_0_20px_rgba(0,0,0,0.3)] hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]`
+                                    : "bg-black/60 text-white/10 border-white/10 grayscale"
+                                  }
+                                `}
+                                onClick={() => hasUnlocked && handleBoomClick(boom.name)}
+                              >
+                                {/* Glow Effect */}
+                                {hasUnlocked && (
+                                  <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none" />
+                                )}
+
+                                {/* Avatar/Image */}
+                                {hasUnlocked ? (
+                                  <div className="z-10 flex flex-col items-center gap-1">
+                                    <span className="drop-shadow-lg">{boom.avatar}</span>
+                                    <span className="text-[10px] font-bold text-white/60 uppercase tracking-wider">LVL {boom.level}</span>
+                                  </div>
+                                ) : (
+                                  <div className="flex flex-col items-center gap-1">
+                                    <LockIcon className="h-8 w-8 opacity-20" />
+                                    <span className="text-xs font-bold text-white/20 uppercase tracking-wider">LVL {boom.level}</span>
+                                  </div>
+                                )}
+
+                                {/* Quantity Badge */}
+                                {hasUnlocked && quantity > 1 && (
+                                  <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded-full border border-white/20">
+                                    ×{quantity}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Boom Name */}
+                              <div className="text-center">
+                                <p className={`text-sm font-bold ${hasUnlocked ? "text-white" : "text-white/30"} line-clamp-2`}>
+                                  {boom.name}
+                                </p>
+                                {hasUnlocked && (
+                                  <p className="text-xs text-white/50 mt-1 line-clamp-1">{boom.description}</p>
+                                )}
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -3627,88 +3712,6 @@ export default function BoomkitGame() {
                   ))}
                 </div>
 
-                {/* Gamepass Booms Section - Unlocked at Level 100 */}
-                {(currentUser?.level || 1) >= 100 && (
-                  <div className="mt-16">
-                    <div className="flex items-center gap-4 mb-8">
-                      <div className="w-2 h-12 bg-gradient-to-b from-purple-500 via-pink-500 to-yellow-500 rounded-full shadow-[0_0_20px_rgba(168,85,247,0.5)]" />
-                      <div>
-                        <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-600 tracking-tighter">
-                          GAMEPASS BOOMS
-                        </h2>
-                        <p className="text-white/60 text-sm font-medium mt-1">
-                          Exclusive rewards for reaching max level
-                        </p>
-                      </div>
-                      <div className="ml-auto">
-                        <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-full px-6 py-2 border border-white/20">
-                          <span className="text-white font-black text-sm uppercase tracking-wider">⚡ MAX LEVEL ⚡</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 p-8 shadow-2xl">
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                        {GAMEPASS_BOOMS.map((boom) => {
-                          const quantity = currentUser?.booms[boom.name] || 0
-                          const hasUnlocked = quantity > 0
-                          const rarityColor = getRarityColor(boom.rarity)
-
-                          return (
-                            <div key={boom.level} className="group flex flex-col items-center gap-3">
-                              <div
-                                className={`
-                                  w-full aspect-square rounded-2xl border-2 flex flex-col items-center justify-center text-4xl 
-                                  transition-all duration-300 relative overflow-hidden cursor-pointer
-                                  ${hasUnlocked
-                                    ? `${rarityColor} border-white/30 shadow-[0_0_20px_rgba(0,0,0,0.3)] hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]`
-                                    : "bg-black/60 text-white/10 border-white/10 grayscale"
-                                  }
-                                `}
-                                onClick={() => hasUnlocked && handleBoomClick(boom.name)}
-                              >
-                                {/* Glow Effect */}
-                                {hasUnlocked && (
-                                  <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none" />
-                                )}
-
-                                {/* Avatar/Image */}
-                                {hasUnlocked ? (
-                                  <div className="z-10 flex flex-col items-center gap-1">
-                                    <span className="drop-shadow-lg">{boom.avatar}</span>
-                                    <span className="text-[10px] font-bold text-white/60 uppercase tracking-wider">LVL {boom.level}</span>
-                                  </div>
-                                ) : (
-                                  <div className="flex flex-col items-center gap-1">
-                                    <LockIcon className="h-8 w-8 opacity-20" />
-                                    <span className="text-xs font-bold text-white/20 uppercase tracking-wider">LVL {boom.level}</span>
-                                  </div>
-                                )}
-
-                                {/* Quantity Badge */}
-                                {hasUnlocked && quantity > 1 && (
-                                  <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded-full border border-white/20">
-                                    ×{quantity}
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* Boom Name */}
-                              <div className="text-center">
-                                <p className={`text-sm font-bold ${hasUnlocked ? "text-white" : "text-white/30"} line-clamp-2`}>
-                                  {boom.name}
-                                </p>
-                                {hasUnlocked && (
-                                  <p className="text-xs text-white/50 mt-1 line-clamp-1">{boom.description}</p>
-                                )}
-                              </div>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
             )}
 
