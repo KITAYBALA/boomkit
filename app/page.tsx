@@ -4188,8 +4188,15 @@ export default function BoomkitGame() {
                 subject={activeDiscoverGame.subject}
                 grade={activeDiscoverGame.grade}
                 currentUser={currentUser}
-                onStart={(duration) => {
+                onStart={(duration, questions) => {
                   setSelectedDuration(duration)
+                  if (activeDiscoverGame) {
+                    setActiveDiscoverGame({
+                      ...activeDiscoverGame,
+                      duration: duration,
+                      questions: questions || activeDiscoverGame.questions
+                    })
+                  }
                   setIsMergingGameActive(true)
                   setLobbyActive(false)
                 }}
