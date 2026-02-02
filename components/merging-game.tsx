@@ -119,6 +119,17 @@ export default function MergingGame({
 
     const gameAreaRef = useRef<HTMLDivElement>(null)
 
+    // Crash Prevention: If no questions, show loading or error
+    if (!questions || questions.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center w-full h-full text-white bg-slate-900">
+                <div className="w-12 h-12 rounded-full border-4 border-purple-500 border-t-transparent animate-spin mb-4" />
+                <p className="font-bold text-lg">Loading Game Data...</p>
+                <p className="text-white/40 text-sm">Waiting for host to sync...</p>
+            </div>
+        )
+    }
+
     // Timer effect
     useEffect(() => {
         if (timeLeft <= 0 || isGameOver) {

@@ -481,31 +481,33 @@ export default function GameModeSelector({ onSelect, onBack, subjectName, isSolo
                     </CardContent>
                 </Card>
 
-                <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
-                    <CardHeader className="p-4 pb-0">
-                        <CardTitle className="text-white/40 text-sm font-bold uppercase tracking-wider flex items-center gap-2">
-                            <Clock className="w-4 h-4 text-purple-400" />
-                            Game Duration
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-4 pt-4">
-                        <div className="grid grid-cols-2 gap-2">
-                            {durationOptions.map((opt) => (
-                                <Button
-                                    key={opt.value}
-                                    variant="outline"
-                                    onClick={() => setDuration(opt.value)}
-                                    className={`h-10 rounded-xl border-white/10 font-bold transition-all ${duration === opt.value
-                                        ? "bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-500/20"
-                                        : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
-                                        }`}
-                                >
-                                    {opt.label}
-                                </Button>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
+                {isSolo && (
+                    <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+                        <CardHeader className="p-4 pb-0">
+                            <CardTitle className="text-white/40 text-sm font-bold uppercase tracking-wider flex items-center gap-2">
+                                <Clock className="w-4 h-4 text-purple-400" />
+                                Game Duration
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-4 pt-4">
+                            <div className="grid grid-cols-2 gap-2">
+                                {durationOptions.map((opt) => (
+                                    <Button
+                                        key={opt.value}
+                                        variant="outline"
+                                        onClick={() => setDuration(opt.value)}
+                                        className={`h-10 rounded-xl border-white/10 font-bold transition-all ${duration === opt.value
+                                            ? "bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-500/20"
+                                            : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
+                                            }`}
+                                    >
+                                        {opt.label}
+                                    </Button>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
 
                 <div className="mt-auto pt-6">
                     <Button
