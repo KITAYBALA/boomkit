@@ -2553,8 +2553,12 @@ export default function BoomkitGame() {
           {/* Right Content - Boom Grid */}
           <div className="flex-1 grid grid-cols-4 gap-4 max-w-lg p-6 bg-white/5 rounded-3xl backdrop-blur-sm border border-white/10 rotate-3 hover:rotate-0 transition-transform duration-500">
             {showcaseBooms.map((boom, idx) => (
-              <div key={idx} className="aspect-square bg-slate-800 rounded-xl flex items-center justify-center text-4xl shadow-lg border border-slate-700 hover:scale-110 transition-transform cursor-default select-none" title={boom.name}>
-                {boom.avatar}
+              <div key={idx} className="aspect-square bg-slate-800 rounded-xl flex items-center justify-center text-4xl shadow-lg border border-slate-700 hover:scale-110 transition-transform cursor-default select-none overflow-hidden" title={boom.name}>
+                {boom.avatar.startsWith('/') ? (
+                  <img src={boom.avatar} alt={boom.name} className="w-full h-full object-cover" />
+                ) : (
+                  boom.avatar
+                )}
               </div>
             ))}
           </div>
@@ -4769,10 +4773,16 @@ export default function BoomkitGame() {
                     </div>
 
                     {/* Boom Art - Centered */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-8xl relative z-10">
-                        {packAnimation.boom.avatar}
-                      </div>
+                    <div className="absolute inset-0 flex items-center justify-center z-10">
+                      {packAnimation.boom.avatar.startsWith('/') ? (
+                        <img
+                          src={packAnimation.boom.avatar}
+                          alt={packAnimation.boom.name}
+                          className="w-48 h-48 object-contain drop-shadow-2xl animate-in zoom-in duration-500"
+                        />
+                      ) : (
+                        <span className="text-8xl drop-shadow-md">{packAnimation.boom.avatar}</span>
+                      )}
                     </div>
 
                     {/* Boom Name - Top */}
