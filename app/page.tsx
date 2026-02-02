@@ -626,11 +626,11 @@ const PACKS: Pack[] = [
 
 // Gamepass Booms - Unlocked at level milestones
 const GAMEPASS_BOOMS = [
-  { level: 10, name: "Bronze Medal", rarity: "uncommon" as const, avatar: "🥉", description: "Your first milestone" },
-  { level: 20, name: "Silver Trophy", rarity: "uncommon" as const, avatar: "🥈", description: "Rising through the ranks" },
-  { level: 30, name: "Gold Trophy", rarity: "rare" as const, avatar: "🥇", description: "Golden achievement" },
-  { level: 40, name: "Emerald Star", rarity: "rare" as const, avatar: "⭐💚", description: "Shining bright" },
-  { level: 50, name: "Sapphire Heart", rarity: "epic" as const, avatar: "💙💎", description: "Halfway to greatness" },
+  { level: 10, name: "Bronze Medal", rarity: "uncommon" as const, avatar: "/assets/booms/gamepass/bronze_medal.png", description: "Your first milestone" },
+  { level: 20, name: "Silver Trophy", rarity: "uncommon" as const, avatar: "/assets/booms/gamepass/silver_trophy.png", description: "Rising through the ranks" },
+  { level: 30, name: "Gold Trophy", rarity: "rare" as const, avatar: "/assets/booms/gamepass/gold_trophy.png", description: "Golden achievement" },
+  { level: 40, name: "Emerald Star", rarity: "rare" as const, avatar: "/assets/booms/gamepass/emerald_star.png", description: "Shining bright" },
+  { level: 50, name: "Sapphire Heart", rarity: "epic" as const, avatar: "/assets/booms/gamepass/sapphire_heart.png", description: "Halfway to greatness" },
   { level: 60, name: "Ruby Shield", rarity: "epic" as const, avatar: "🛡️❤️", description: "Guardian of progress" },
   { level: 70, name: "Amethyst Sword", rarity: "epic" as const, avatar: "⚔️💜", description: "Blade of dedication" },
   { level: 80, name: "Diamond Crown", rarity: "legendary" as const, avatar: "👑💎", description: "Royalty of the leaderboard" },
