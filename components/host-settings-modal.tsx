@@ -141,7 +141,7 @@ export default function HostSettingsModal({
                 input[type='range']::-webkit-slider-thumb:hover {
                     transform: scale(1.2);
                 }
-            </style>
+            `}</style>
             </Card>
         </div>
     )
@@ -150,7 +150,7 @@ export default function HostSettingsModal({
 function Badge({ children, variant, className }: any) {
     return (
         <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider border ${className}`}>
-                    {children}
-                </div>
-                )
+            {children}
+        </div>
+    )
 }
