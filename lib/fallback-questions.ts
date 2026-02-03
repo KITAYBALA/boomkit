@@ -31,7 +31,23 @@ export const FALLBACK_QUESTIONS: { [key: string]: Question[] } = {
         { id: "me22", question: "What is 100 - 50?", options: ["40", "50", "60", "25"], correctIndex: 1 },
         { id: "me23", question: "How many fingers on one hand?", options: ["4", "5", "6", "10"], correctIndex: 1 },
         { id: "me24", question: "What is 4 x 2?", options: ["6", "8", "10", "12"], correctIndex: 1 },
-        { id: "me25", question: "What is 30 + 20?", options: ["40", "50", "60", "70"], correctIndex: 1 }
+        { id: "me25", question: "What is 30 + 20?", options: ["40", "50", "60", "70"], correctIndex: 1 },
+        // New Math Questions
+        { id: "me26", question: "What is 11 + 9?", options: ["18", "19", "20", "21"], correctIndex: 2 },
+        { id: "me27", question: "What is 25 - 10?", options: ["10", "15", "20", "25"], correctIndex: 1 },
+        { id: "me28", question: "What is 5 x 4?", options: ["15", "20", "25", "30"], correctIndex: 1 },
+        { id: "me29", question: "What is 18 / 2?", options: ["7", "8", "9", "10"], correctIndex: 2 },
+        { id: "me30", question: "How many sides in a pentagon?", options: ["4", "5", "6", "7"], correctIndex: 1 },
+        { id: "me31", question: "What is 100 + 1?", options: ["100", "101", "110", "111"], correctIndex: 1 },
+        { id: "me32", question: "What is 50 - 25?", options: ["20", "25", "30", "35"], correctIndex: 1 },
+        { id: "me33", question: "What is 2 x 10?", options: ["12", "20", "22", "100"], correctIndex: 1 },
+        { id: "me34", question: "What is 16 / 4?", options: ["2", "4", "6", "8"], correctIndex: 1 },
+        { id: "me35", question: "How many hours in a day?", options: ["12", "24", "48", "60"], correctIndex: 1 },
+        { id: "me36", question: "What is 13 + 7?", options: ["18", "19", "20", "21"], correctIndex: 2 },
+        { id: "me37", question: "What is 40 - 5?", options: ["30", "35", "40", "45"], correctIndex: 1 },
+        { id: "me38", question: "What is 6 x 2?", options: ["8", "10", "12", "14"], correctIndex: 2 },
+        { id: "me39", question: "What is 20 / 5?", options: ["2", "4", "5", "10"], correctIndex: 1 },
+        { id: "me40", question: "How many months in a year?", options: ["10", "11", "12", "13"], correctIndex: 2 }
     ],
     "reading_elementary": [
         { id: "re1", question: "Which word is a noun?", options: ["Run", "Happy", "Apple", "Quickly"], correctIndex: 2 },
@@ -58,7 +74,18 @@ export const FALLBACK_QUESTIONS: { [key: string]: Question[] } = {
         { id: "re22", question: "What do birds have?", options: ["Fur", "Scales", "Wings", "Fins"], correctIndex: 2 },
         { id: "re23", question: "Where do you sleep?", options: ["Kitchen", "Bed", "Garage", "Roof"], correctIndex: 1 },
         { id: "re24", question: "Opposite of 'Open'?", options: ["Closed", "Wide", "Broken", "Free"], correctIndex: 0 },
-        { id: "re25", question: "Rhymes with 'Sun'?", options: ["Fun", "Sad", "Mad", "Bad"], correctIndex: 0 }
+        { id: "re25", question: "Rhymes with 'Sun'?", options: ["Fun", "Sad", "Mad", "Bad"], correctIndex: 0 },
+        // New Reading Questions
+        { id: "re26", question: "Which word is an adjective?", options: ["Box", "Beautiful", "Quickly", "Jump"], correctIndex: 1 },
+        { id: "re27", question: "What is the opposite of 'Strong'?", options: ["Fast", "Big", "Weak", "Tough"], correctIndex: 2 },
+        { id: "re28", question: "Which word is a pronoun?", options: ["He", "Car", "Apple", "Run"], correctIndex: 0 },
+        { id: "re29", question: "Rhymes with 'Pink'?", options: ["Sink", "Red", "Blue", "Fast"], correctIndex: 0 },
+        { id: "re30", question: "What is the main character in a book called?", options: ["Author", "Protagonist", "Villain", "Reader"], correctIndex: 1 },
+        { id: "re31", question: "Which is a compound word?", options: ["Sun", "Flower", "Sunflower", "Light"], correctIndex: 2 },
+        { id: "re32", question: "Opposite of 'Dry'?", options: ["Hot", "Wet", "Cold", "Hard"], correctIndex: 1 },
+        { id: "re33", question: "Which word implies 'many'?", options: ["Single", "One", "Several", "None"], correctIndex: 2 },
+        { id: "re34", question: "What do you find at the end of a question?", options: ["Period", "Comma", "Question Mark", "Dash"], correctIndex: 2 },
+        { id: "re35", question: "Which word is a synonym for 'Quick'?", options: ["Slow", "Fast", "Quiet", "Loud"], correctIndex: 1 }
     ],
     "science_elementary": [
         { id: "se1", question: "What planet do we live on?", options: ["Mars", "Venus", "Earth", "Jupiter"], correctIndex: 2 },
@@ -85,7 +112,18 @@ export const FALLBACK_QUESTIONS: { [key: string]: Question[] } = {
         { id: "se22", question: "What melts ice?", options: ["Cold", "Heat", "Darkness", "Wind"], correctIndex: 1 },
         { id: "se23", question: "Which animal can fly?", options: ["Elephant", "Bat", "Tiger", "Hippo"], correctIndex: 1 },
         { id: "se24", question: "What is the center of an atom?", options: ["Electron", "Nucleus", "Proton", "Shell"], correctIndex: 1 },
-        { id: "se25", question: "Hardest mineral?", options: ["Gold", "Iron", "Diamond", "Silver"], correctIndex: 2 }
+        { id: "se25", question: "Hardest mineral?", options: ["Gold", "Iron", "Diamond", "Silver"], correctIndex: 2 },
+        // New Science Questions
+        { id: "se26", question: "What is the closest star to Earth?", options: ["Mars", "Moon", "Sun", "Jupiter"], correctIndex: 2 },
+        { id: "se27", question: "Which animal is an amphibian?", options: ["Dog", "Frog", "Fish", "Bird"], correctIndex: 1 },
+        { id: "se28", question: "What do we use to measure temperature?", options: ["Ruler", "Scale", "Thermometer", "Clock"], correctIndex: 2 },
+        { id: "se29", question: "Which organ is used for thinking?", options: ["Heart", "Lungs", "Brain", "Stomach"], correctIndex: 2 },
+        { id: "se30", question: "What happens when water freezes?", options: ["Turns to Gas", "Turns to Liquid", "Turns to Ice", "Vanishes"], correctIndex: 2 },
+        { id: "se31", question: "Which is a source of renewable energy?", options: ["Coal", "Oil", "Wind", "Gas"], correctIndex: 2 },
+        { id: "se32", question: "How many planets are in our solar system?", options: ["7", "8", "9", "10"], correctIndex: 1 },
+        { id: "se33", question: "Search for 'Photosynthesis' involves which life form?", options: ["Animals", "Plants", "Fungi", "Rocks"], correctIndex: 1 },
+        { id: "se34", question: "What does a caterpillar turn into?", options: ["Ant", "Bee", "Butterfly", "Spider"], correctIndex: 2 },
+        { id: "se35", question: "Which gas do plants absorb?", options: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Helium"], correctIndex: 1 }
     ]
 }
 

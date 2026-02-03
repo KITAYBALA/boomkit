@@ -172,7 +172,7 @@ const SUBJECTS_BY_GRADE: { [key: number]: { name: string; emoji: string }[] } = 
 interface DiscoverPageProps {
     currentUser: any
     onStartGame: (grade: number, subject: string, mode: "solo" | "host") => void
-    onJoinGame: () => void
+    onJoinGame: (pin: string) => void
     onCreateWithAI: () => void
     discoveredSets?: any[]
 }
@@ -593,7 +593,7 @@ export default function DiscoverPage({
                                 <Button
                                     onClick={() => {
                                         if (gamePin.length === 6) {
-                                            onJoinGame()
+                                            onJoinGame(gamePin)
                                             setShowJoinModal(false)
                                         }
                                     }}

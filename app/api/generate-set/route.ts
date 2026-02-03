@@ -44,10 +44,11 @@ export async function POST(req: Request) {
         * Grade 6-8 (Middle): Focus on pre-algebra, ratios, Earth/Life science, world history, literary analysis, and argumentative writing.
         * Grade 9-12 (High): Focus on Algebra I/II, Geometry, Calculus, Biology/Chemistry/Physics, American/European History, and advanced literature/poetry analysis.
       
-      - RANDOMIZATION SEED: ${Date.now()}
+      - RANDOMIZATION SEED: ${Date.now()}_${Math.random()}
       - TOPIC VARIETY: Do not just stick to one sub-topic. If it's Math, mix arithmetic with word problems, geometry, and measurements.
+      - AVOID PATTERNS: Do not use the same formula repeatedly. Ensure questions vary in phrasing and complexity.
       - AVOID "5+5" CLICHÉS: Do not use extremely simple or repetitive math like "5+5" unless it's a very specific context for Grade 1.
-      - PROGRESSION: Questions MUST get progressively harder within the set.
+      - PROGRESSION: Questions MUST get progressively harder within the set. Start with foundation and move to challenge.
 
       Return the response ONLY as a valid JSON object in this format:
       {
@@ -57,7 +58,7 @@ export async function POST(req: Request) {
         "subject": "${subject}",
         "questions": [
           {
-            "id": "unique_id_1",
+            "id": "unique_id_${Date.now()}_1",
             "question": "The question text",
             "options": ["Option A", "Option B", "Option C", "Option D"],
             "correctIndex": 0
