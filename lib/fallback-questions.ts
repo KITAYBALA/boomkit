@@ -29,7 +29,7 @@ export const FALLBACK_QUESTIONS: { [key: string]: Question[] } = {
         { id: "me20", question: "What is 8 + 8?", options: ["14", "15", "16", "17"], correctIndex: 2 },
         { id: "me21", question: "Which is smaller: 5 or 2?", options: ["5", "2", "Equal", "None"], correctIndex: 1 },
         { id: "me22", question: "What is 100 - 50?", options: ["40", "50", "60", "25"], correctIndex: 1 },
-        { id: "me23", question: "How many fingers on one hand?", options: ["4", "5", "6", "10"], correctIndex: 1 },
+        { id: "me23", question: "What is 12 + 12?", options: ["22", "23", "24", "25"], correctIndex: 2 },
         { id: "me24", question: "What is 4 x 2?", options: ["6", "8", "10", "12"], correctIndex: 1 },
         { id: "me25", question: "What is 30 + 20?", options: ["40", "50", "60", "70"], correctIndex: 1 },
         // New Math Questions
