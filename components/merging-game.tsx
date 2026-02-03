@@ -30,6 +30,7 @@ interface MergingGameProps {
     gameMode: string
     questions: Question[]
     durationSeconds: number
+    startTimeOffset?: number
     onEnd: (score: number) => void
     onScoreUpdate?: (score: number) => void
     onAwardTokens?: (amount: number) => void
@@ -104,9 +105,11 @@ export default function MergingGame({
     durationSeconds,
     onScoreUpdate,
     onAwardTokens,
+    startTimeOffset,
 }: MergingGameProps) {
     const config = MODE_CONFIGS[gameMode] || DEFAULT_CONFIG
-    const [timeLeft, setTimeLeft] = useState(durationSeconds + config.timeBonus)
+    const initialTime = Math.max(0, (durationSeconds + config.timeBonus) - (startTimeOffset || 0))
+    const [timeLeft, setTimeLeft] = useState(initialTime)
     const [score, setScore] = useState(0)
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
     const [mergingBooms, setMergingBooms] = useState<MergeItem[]>([])

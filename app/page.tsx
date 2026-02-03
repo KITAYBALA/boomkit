@@ -739,6 +739,7 @@ export default function BoomkitGame() {
   const [discoveredSets, setDiscoveredSets] = useState<any[]>([])
   const [isGeneratingSet, setIsGeneratingSet] = useState(false)
   const [showAiSetCreator, setShowAiSetCreator] = useState(false)
+  const [gameStartOffset, setGameStartOffset] = useState(0) // Added for sync
 
   // Hosting Flow States
   const [hostingFlow, setHostingFlow] = useState<null | 'mode-select' | 'settings'>(null)
@@ -1269,9 +1270,8 @@ export default function BoomkitGame() {
 
   // --- HOSTING REALTIME SUBSCRIPTION ---
   useEffect(() => {
-    // Only subscribe if we are hosting and the game is active (or about to be)
     if (!activeGamePin || !supabase || (!isMergingGameActive && !lobbyActive)) return
-    if (activeDiscoverGame?.mode !== "host") return
+    // Removed host-only restriction so players also see live leaderboard updates
 
     console.log("Subscribing to game session:", activeGamePin)
 
@@ -1290,6 +1290,22 @@ export default function BoomkitGame() {
           const newSession = payload.new as any
           if (newSession.players) {
             setLivePlayers(newSession.players || [])
+          }
+          if (newSession.status && newSession.status.startsWith("started")) {
+            // Extract startTimeOffset if available
+            if (newSession.status.includes(":")) {
+              const ts = parseInt(newSession.status.split(":")[1])
+              if (!isNaN(ts)) {
+                const offset = Math.floor((Date.now() - ts) / 1000)
+                setGameStartOffset(offset)
+              }
+            }
+
+            // If we are a player and game starts (this part is usually handled by Lobby subscription but as backup...)
+            if (activeDiscoverGame?.mode === "join" && !isMergingGameActive && !showGameResults) {
+              setLobbyActive(false)
+              setIsMergingGameActive(true)
+            }
           }
           if (newSession.status === "finished") {
             // If we are a player and game finishes
@@ -4457,6 +4473,7 @@ export default function BoomkitGame() {
                     gameMode={activeDiscoverGame.gameMode}
                     questions={activeDiscoverGame.questions}
                     durationSeconds={activeDiscoverGame.duration || 600}
+                    startTimeOffset={gameStartOffset}
                     onEnd={(score) => {
                       setGameScore(score)
                       setIsMergingGameActive(false)
@@ -4483,7 +4500,7 @@ export default function BoomkitGame() {
                       }
                     }}
                     onScoreUpdate={async (newScore) => {
-                      if (activeGamePin && supabase && activeDiscoverGame.mode === "join") {
+                      if (activeGamePin && supabase) {
                         await supabase.rpc("update_game_score", {
                           p_pin: activeGamePin,
                           p_user_id: currentUser?.id,
@@ -4509,6 +4526,7 @@ export default function BoomkitGame() {
                   gameMode={activeDiscoverGame.gameMode}
                   questions={activeDiscoverGame.questions}
                   durationSeconds={activeDiscoverGame.duration || 600}
+                  startTimeOffset={gameStartOffset}
                   onEnd={(score) => {
                     setGameScore(score)
                     setIsMergingGameActive(false)
@@ -4532,7 +4550,7 @@ export default function BoomkitGame() {
                     }
                   }}
                   onScoreUpdate={async (newScore) => {
-                    if (activeGamePin && supabase && activeDiscoverGame.mode === "join") {
+                    if (activeGamePin && supabase) {
                       await supabase.rpc("update_game_score", {
                         p_pin: activeGamePin,
                         p_user_id: currentUser?.id,
@@ -4550,6 +4568,35 @@ export default function BoomkitGame() {
                   }}
                 />
               )
+            )}
+
+            {/* Live Leaderboard Overlay during game */}
+            {isMergingGameActive && activeGamePin && livePlayers.length > 0 && (
+              <div className="fixed top-24 right-8 z-[60] w-64 animate-in slide-in-from-right-10 duration-500 hidden lg:block">
+                <Card className="bg-black/40 backdrop-blur-xl border-white/10 shadow-2xl overflow-hidden">
+                  <div className="bg-gradient-to-r from-purple-600/50 to-blue-600/50 p-3 border-b border-white/10">
+                    <h3 className="text-white font-black text-xs tracking-widest uppercase flex items-center gap-2">
+                      <TrophyIcon className="w-3 h-3 text-yellow-400" />
+                      Live Rankings
+                    </h3>
+                  </div>
+                  <CardContent className="p-0">
+                    <div className="max-h-[300px] overflow-y-auto">
+                      {[...livePlayers].sort((a, b) => (b.score || 0) - (a.score || 0)).slice(0, 5).map((player, idx) => (
+                        <div key={player.id} className="flex items-center justify-between p-3 border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <span className={`text-[10px] font-black ${idx === 0 ? "text-yellow-400" : "text-white/40"}`}>#{idx + 1}</span>
+                            <span className="text-white font-bold text-sm truncate w-24">{player.username}</span>
+                          </div>
+                          <Badge variant="outline" className="bg-white/5 text-cyan-400 border-cyan-500/20 font-black text-[10px]">
+                            {player.score || 0}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             )}
           </div>
         </div>
@@ -5769,12 +5816,17 @@ export default function BoomkitGame() {
           score={gameScore}
           totalQuestions={activeDiscoverGame?.questions?.length || 0}
           highScore={currentUser?.boomScore || 0}
-          leaderboard={currentUser ? [{
+          leaderboard={livePlayers.length > 0 ? [...livePlayers].sort((a, b) => (b.score || 0) - (a.score || 0)).map(p => ({
+            id: p.id,
+            username: p.username,
+            score: p.score || 0,
+            avatar: p.profilePicture // Use profilePicture mapping if needed
+          })) : (currentUser ? [{
             id: currentUser.id,
             username: currentUser.username,
             score: gameScore,
             avatar: currentUser.profilePicture
-          }] : []}
+          }] : [])}
           onExit={() => {
             setShowGameResults(false)
             setActiveDiscoverGame(null)

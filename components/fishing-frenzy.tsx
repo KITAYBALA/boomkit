@@ -21,6 +21,7 @@ interface FishingFrenzyProps {
     gameMode: string
     questions: Question[]
     durationSeconds: number
+    startTimeOffset?: number
     onEnd: (score: number) => void
     onScoreUpdate?: (score: number) => void
     onAwardTokens?: (amount: number) => void
@@ -36,10 +37,12 @@ export default function FishingFrenzy({
     durationSeconds,
     onEnd,
     onScoreUpdate,
-    onAwardTokens
+    onAwardTokens,
+    startTimeOffset
 }: FishingFrenzyProps) {
     const [gameState, setGameState] = useState<GameState>("idle")
-    const [timeLeft, setTimeLeft] = useState(durationSeconds)
+    const initialTime = Math.max(0, durationSeconds - (startTimeOffset || 0))
+    const [timeLeft, setTimeLeft] = useState(initialTime)
     const [score, setScore] = useState(0)
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
     const [lastCatch, setLastCatch] = useState<{ name: string; weight: number; rarity: string; color?: string } | null>(null)
