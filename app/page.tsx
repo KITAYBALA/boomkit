@@ -2260,7 +2260,7 @@ export default function BoomkitGame() {
           .eq("grade", grade)
           .eq("subject", subject)
           .eq("topic", topic)
-          .limit(100)
+          .limit(500)
 
         if (!bankError && bankQuestions && bankQuestions.length >= 10) {
           console.log(`Pulled ${bankQuestions.length} questions from Global Bank for ${subject}: ${topic}`)

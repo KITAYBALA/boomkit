@@ -227,7 +227,6 @@ export default function MergingGame({
         setMergingBooms((prev) => [...prev, newBoom])
         setNextBooms((prev) => [...prev.slice(1), getRandomRarity()])
         setIsAnswering(true)
-        setCurrentQuestionIndex((prev) => (prev + 1) % questions.length)
         setCurrentBoomX(50) // Reset for next turn
     }
 
