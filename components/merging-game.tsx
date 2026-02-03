@@ -115,8 +115,20 @@ export default function MergingGame({
     const [isGameOver, setIsGameOver] = useState(false)
     const [feedback, setFeedback] = useState<"correct" | "incorrect" | null>(null)
     const [currentBoomX, setCurrentBoomX] = useState(50) // Horizontal position 0-100
+    const [correctAnswers, setCorrectAnswers] = useState(0)
 
     const gameAreaRef = useRef<HTMLDivElement>(null)
+
+    // Crash Prevention: If no questions, show loading or error
+    if (!questions || questions.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center w-full h-full text-white bg-slate-900">
+                <div className="w-12 h-12 rounded-full border-4 border-purple-500 border-t-transparent animate-spin mb-4" />
+                <p className="font-bold text-lg">Loading Game Data...</p>
+                <p className="text-white/40 text-sm">Waiting for host to sync...</p>
+            </div>
+        )
+    }
 
     // Timer effect
     useEffect(() => {
@@ -134,6 +146,10 @@ export default function MergingGame({
 
     const handleGameOver = () => {
         setIsGameOver(true)
+        if (onAwardTokens) {
+            const tokens = grade * correctAnswers
+            if (tokens > 0) onAwardTokens(tokens)
+        }
         onEnd(score)
     }
 
@@ -158,6 +174,7 @@ export default function MergingGame({
         const currentQuestion = questions[currentQuestionIndex]
         if (index === currentQuestion.correctIndex) {
             setFeedback("correct")
+            setCorrectAnswers(prev => prev + 1)
             setScore((prev) => {
                 const newScore = prev + Math.ceil(10 * config.rewardMultiplier)
                 if (onScoreUpdate) onScoreUpdate(newScore)
@@ -210,7 +227,6 @@ export default function MergingGame({
         setMergingBooms((prev) => [...prev, newBoom])
         setNextBooms((prev) => [...prev.slice(1), getRandomRarity()])
         setIsAnswering(true)
-        setCurrentQuestionIndex((prev) => (prev + 1) % questions.length)
         setCurrentBoomX(50) // Reset for next turn
     }
 
@@ -400,12 +416,12 @@ export default function MergingGame({
                         <CardContent className="flex flex-col h-full pt-10">
                             <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
                                 <h3 className="text-2xl md:text-3xl font-black text-white leading-tight mb-8">
-                                    {currentQuestion.question}
+                                    {questions.length > 0 ? currentQuestion.question : "Waiting for game start..."}
                                 </h3>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-6">
-                                {currentQuestion.options.map((option, i) => (
+                                {questions.length > 0 && currentQuestion.options.map((option, i) => (
                                     <Button
                                         key={i}
                                         onClick={() => isAnswering && handleAnswer(i)}

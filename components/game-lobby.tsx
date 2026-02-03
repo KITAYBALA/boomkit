@@ -23,7 +23,7 @@ interface GameLobbyProps {
     subject: string
     grade: number
     currentUser: any
-    onStart: (duration: number) => void
+    onStart: (duration: number, questions: any[] | null) => void // Updated signature
     onCancel: () => void
 }
 
@@ -62,7 +62,7 @@ export default function GameLobby({
                 setPlayers(session.players || [])
                 if (session.status === "started") {
                     setIsGameStarted(true)
-                    onStart(session.duration || duration)
+                    onStart(session.duration || duration, session.questions)
                 }
                 if (session.host_username) {
                     setHostUsername(session.host_username)
@@ -115,7 +115,8 @@ export default function GameLobby({
                 setPlayers(payload.new.players || [])
                 if (payload.new.status === "started") {
                     setIsGameStarted(true)
-                    onStart(payload.new.duration || duration)
+                    // Pass questions from payload so joiners get them immediately
+                    onStart(payload.new.duration || duration, payload.new.questions)
                 }
             })
             .subscribe()
@@ -129,6 +130,7 @@ export default function GameLobby({
     const handleStartGame = async () => {
         if (!supabase) return
 
+        // First update the DB
         const { error } = await supabase
             .from("game_sessions")
             .update({
@@ -141,7 +143,12 @@ export default function GameLobby({
             console.error("Failed to start game:", error)
             alert("Error starting game. Please try again.")
         } else {
-            onStart(duration)
+            // Then locally trigger start for host (host already has questions usually, but good to be consistent)
+            // We need to fetch questions if we don't have them? 
+            // Actually host usually has them in parent state.
+            // But let's pass null for questions here since Host parent handles it.
+            // The subscription will trigger for players.
+            onStart(duration, null)
         }
     }
 

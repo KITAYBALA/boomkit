@@ -398,18 +398,27 @@ const GAME_MODES: GameMode[] = [
         image: "https://images.unsplash.com/photo-1551047116-24ba469444f2?w=800&q=80"
     }
 ]
-
 interface GameModeSelectorProps {
-    onSelect: (mode: GameMode) => void
+    onSelect: (mode: GameMode, duration: number) => void
     onBack: () => void
     subjectName: string
     isSolo?: boolean
+    initialDuration?: number
 }
 
-export default function GameModeSelector({ onSelect, onBack, subjectName, isSolo }: GameModeSelectorProps) {
+export default function GameModeSelector({ onSelect, onBack, subjectName, isSolo, initialDuration = 120 }: GameModeSelectorProps) {
     const [selectedId, setSelectedId] = useState(GAME_MODES[0].id)
     const [isSelecting, setIsSelecting] = useState(false)
+    const [duration, setDuration] = useState(initialDuration)
     const selectedMode = GAME_MODES.find(m => m.id === selectedId)!
+
+    const durationOptions = [
+        { label: "1 Min", value: 60 },
+        { label: "2 Min", value: 120 },
+        { label: "5 Min", value: 300 },
+        { label: "10 Min", value: 600 },
+        { label: "15 Min", value: 900 },
+    ]
 
     return (
         <div className="fixed inset-0 z-[60] bg-[#1a1c2c] flex flex-col md:flex-row overflow-hidden">
@@ -466,25 +475,46 @@ export default function GameModeSelector({ onSelect, onBack, subjectName, isSolo
                             </div>
                         </div>
                         <div className="flex justify-between items-center">
-                            <span className="text-white/40 text-sm font-bold uppercase tracking-wider">Ideal Time</span>
-                            <span className="text-white font-bold flex items-center gap-2">
-                                <Timer className="w-4 h-4 text-purple-400" />
-                                {selectedMode.idealTime}
-                            </span>
-                        </div>
-                        <div className="flex justify-between items-center">
                             <span className="text-white/40 text-sm font-bold uppercase tracking-wider">Questions</span>
                             <span className="text-white font-bold">{selectedMode.questionFrequency}</span>
                         </div>
                     </CardContent>
                 </Card>
 
+                {isSolo && (
+                    <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+                        <CardHeader className="p-4 pb-0">
+                            <CardTitle className="text-white/40 text-sm font-bold uppercase tracking-wider flex items-center gap-2">
+                                <Clock className="w-4 h-4 text-purple-400" />
+                                Game Duration
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-4 pt-4">
+                            <div className="grid grid-cols-2 gap-2">
+                                {durationOptions.map((opt) => (
+                                    <Button
+                                        key={opt.value}
+                                        variant="outline"
+                                        onClick={() => setDuration(opt.value)}
+                                        className={`h-10 rounded-xl border-white/10 font-bold transition-all ${duration === opt.value
+                                            ? "bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-500/20"
+                                            : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
+                                            }`}
+                                    >
+                                        {opt.label}
+                                    </Button>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
+                )}
+
                 <div className="mt-auto pt-6">
                     <Button
                         onClick={() => {
                             setIsSelecting(true)
                             setTimeout(() => {
-                                onSelect(selectedMode)
+                                onSelect(selectedMode, duration)
                                 setIsSelecting(false)
                             }, 800)
                         }}

@@ -605,6 +605,37 @@ const PACKS: Pack[] = [
     rarity: "rare",
     emoji: "❄️",
   },
+  {
+    id: "ai",
+    name: "AI Pack",
+    price: 35,
+    booms: [
+      { name: "DeepSeek", rarity: "uncommon", avatar: "/images/booms/deepseek.png", description: "Deep thinking AI" },
+      { name: "Microsoft Copilot", rarity: "rare", avatar: "/images/booms/copilot.png", description: "Your daily AI companion" },
+      { name: "Claude", rarity: "epic", avatar: "/images/booms/claude.png", description: "Helpful and harmless AI" },
+      { name: "ChatGPT", rarity: "legendary", avatar: "/images/booms/chatgpt.png", description: "The pioneer of conversational AI" },
+      { name: "Vercel", rarity: "chroma", avatar: "/images/booms/vercel.png", description: "The platform for frontend developers" },
+      { name: "Google Gemini", rarity: "mystical", avatar: "/images/booms/gemini.png", description: "The most capable AI from Google" },
+    ],
+    color: "from-indigo-600 to-blue-900",
+    image: "/images/ai-pack.png",
+    rarity: "rare",
+    emoji: "🧠",
+  },
+]
+
+// Gamepass Booms - Unlocked at level milestones
+const GAMEPASS_BOOMS = [
+  { level: 10, name: "Bronze Medal", rarity: "uncommon" as const, avatar: "/assets/booms/gamepass/bronze_medal.png", description: "Your first milestone" },
+  { level: 20, name: "Silver Trophy", rarity: "uncommon" as const, avatar: "/assets/booms/gamepass/silver_trophy.png", description: "Rising through the ranks" },
+  { level: 30, name: "Gold Trophy", rarity: "rare" as const, avatar: "/assets/booms/gamepass/gold_trophy.png", description: "Golden achievement" },
+  { level: 40, name: "Emerald Star", rarity: "rare" as const, avatar: "/assets/booms/gamepass/emerald_star.png", description: "Shining bright" },
+  { level: 50, name: "Sapphire Heart", rarity: "epic" as const, avatar: "/assets/booms/gamepass/sapphire_heart.png", description: "Halfway to greatness" },
+  { level: 60, name: "Ruby Shield", rarity: "epic" as const, avatar: "🛡️❤️", description: "Guardian of progress" },
+  { level: 70, name: "Amethyst Sword", rarity: "epic" as const, avatar: "⚔️💜", description: "Blade of dedication" },
+  { level: 80, name: "Diamond Crown", rarity: "legendary" as const, avatar: "👑💎", description: "Royalty of the leaderboard" },
+  { level: 90, name: "Prismatic Phoenix", rarity: "legendary" as const, avatar: "🐦🌈", description: "Rising from challenges" },
+  { level: 100, name: "Cosmic Admin Engine", rarity: "mystical" as const, avatar: "🌌⚙️", description: "The ultimate achievement" },
 ]
 
 // Rarity chances for pack opening (total = 100%)
@@ -1318,46 +1349,65 @@ export default function BoomkitGame() {
     let newLevel = currentUser.level || 1
     let leveledUp = false
     const XP_PER_LEVEL = 100 // Simple fixed XP per level for now
+    const levelsGained: number[] = []
 
     // Calculate new level
     while (newXP >= XP_PER_LEVEL) {
       newXP -= XP_PER_LEVEL
       newLevel++
       leveledUp = true
+      levelsGained.push(newLevel)
     }
 
     // Cap at level 100
     if (newLevel >= 100) {
       newLevel = 100
-      newXP = Math.max(newXP, XP_PER_LEVEL) // Max out XP visual
+      newXP = 100 // Visual cap for max level
     }
+
+    // Start with current booms
+    let updatedBooms = { ...currentUser.booms }
 
     if (leveledUp) {
       alert(`🎉 LEVEL UP! You are now Level ${newLevel}!`)
 
-      // Check for Milestone Rewards
-      if (newLevel === 100) {
-        alert("🏆 MAX LEVEL REACHED! You unlocked the Admin Boom!")
-        // Grant Admin Boom Logic here or in a separate function
-        const adminBoom = "Admin Boom" // Placeholder name
-        // Check if already has it?
-        if (!currentUser.booms[adminBoom]) {
-          // Logic to add boom would require updating booms object
-          // awardXP handles state update at end, so we can modify a temp object if we want
-          // But simpler to just alert for now and maybe handle in a more complex way if needed
+      // Grant Gamepass Booms for milestone levels
+      for (const level of levelsGained) {
+        const gamepassReward = GAMEPASS_BOOMS.find(gb => gb.level === level)
+        if (gamepassReward) {
+          // Grant the boom
+          updatedBooms[gamepassReward.name] = (updatedBooms[gamepassReward.name] || 0) + 1
+
+          if (level === 100) {
+            alert(`🏆 MAX LEVEL REACHED! You unlocked the ${gamepassReward.name}!`)
+          } else if (level % 10 === 0) {
+            alert(`🎁 CONGRATULATIONS! You reached Level ${level} and unlocked ${gamepassReward.name}!`)
+          }
         }
-      } else if (newLevel % 10 === 0) {
-        alert(`🎁 CONGRATULATIONS! You reached Level ${newLevel} and unlocked a Special Reward! Check your Level Booms!`)
       }
     }
 
     const updatedUser = {
       ...currentUser,
       xp: newXP,
-      level: newLevel
+      level: newLevel,
+      booms: updatedBooms
     }
     updateAndPersistCurrentUser(updatedUser)
   }
+
+  // Grant HadiGidek Max XP (One-time check)
+  useEffect(() => {
+    if (currentUser && currentUser.username === "HadiGidek" && (currentUser.level || 1) < 100) {
+      console.log("Maxing out XP for HadiGidek...")
+      const updatedUser = {
+        ...currentUser,
+        xp: 100,
+        level: 100
+      }
+      updateAndPersistCurrentUser(updatedUser)
+    }
+  }, [currentUser])
 
   // Check if user can spin today
   useEffect(() => {
@@ -1366,6 +1416,37 @@ export default function BoomkitGame() {
       setCanSpin(currentUser.lastDailySpin !== today)
     }
   }, [currentUser])
+
+  // NEW: Auto-grant Gamepass Booms based on level
+  useEffect(() => {
+    if (!currentUser) return
+
+    let hasNewUnlocks = false
+    const updatedBooms = { ...currentUser.booms }
+    const newUnlocks: string[] = []
+
+    GAMEPASS_BOOMS.forEach((boom) => {
+      // Check if user has required level
+      if ((currentUser.level || 1) >= boom.level) {
+        // Check if user already has this boom
+        if (!updatedBooms[boom.name]) {
+          updatedBooms[boom.name] = 1
+          hasNewUnlocks = true
+          newUnlocks.push(boom.name)
+        }
+      }
+    })
+
+    if (hasNewUnlocks) {
+      console.log("Granting missing Gamepass Booms:", newUnlocks)
+      const updatedUser = {
+        ...currentUser,
+        booms: updatedBooms,
+      }
+      updateAndPersistCurrentUser(updatedUser)
+      alert(`🎁 You've recovered missing Gamepass rewards: ${newUnlocks.join(", ")}`)
+    }
+  }, [currentUser?.level, currentUser?.booms]) // Re-run when level or inventory changes
 
   // Real-time listener for host session updates
   useEffect(() => {
@@ -2160,16 +2241,48 @@ export default function BoomkitGame() {
     }
   }
 
-  const fetchQuestionsWithAi = async (grade: number, subject: string, count: number = 30) => {
+  const fetchQuestionsWithAi = async (grade: number, subjectStr: string, count: number = 30) => {
     try {
+      // Split "Subject: Topic" if present
+      let subject = subjectStr
+      let topic = "General"
+      if (subjectStr.includes(": ")) {
+        const parts = subjectStr.split(": ")
+        subject = parts[0]
+        topic = parts[1]
+      }
+
+      // 1. Try to fetch from the global question_bank first
+      if (supabase) {
+        const { data: bankQuestions, error: bankError } = await supabase
+          .from("question_bank")
+          .select("*")
+          .eq("grade", grade)
+          .eq("subject", subject)
+          .eq("topic", topic)
+          .limit(500)
+
+        if (!bankError && bankQuestions && bankQuestions.length >= 10) {
+          console.log(`Pulled ${bankQuestions.length} questions from Global Bank for ${subject}: ${topic}`)
+          // Shuffle and take requested count
+          const shuffled = [...bankQuestions].sort(() => Math.random() - 0.5).slice(0, count)
+
+          return shuffled.map(q => ({
+            id: q.id,
+            question: q.question,
+            options: q.options,
+            correctIndex: q.correct_index
+          }))
+        }
+      }
+
+      // 2. Fallback to AI if not enough in bank
+      console.log(`Not enough questions in bank for ${subject}: ${topic}, calling AI...`)
       const response = await fetch("/api/generate-set", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          prompt: `You are an Official K-12 Curriculum Specialist. Generate 30 high-quality, verified educational questions about ${subject} for Grade ${grade}. 
-          CRITICAL: Follow the American Common Core State Standards (CCSS) or NGSS exactly. 
-          Questions must be accurate, age-appropriate, and professional. 
-          Mix conceptual understanding with factual recall.`,
+          prompt: topic === "General" ? subject : topic,
           grade,
           subject,
           count
@@ -2182,10 +2295,29 @@ export default function BoomkitGame() {
       }
 
       const data = await response.json()
-      return data.questions || getFallbackQuestions(grade, subject, count)
+      const questions = data.questions || []
+
+      // 3. Cache AI results into the global bank (asynchronously)
+      if (supabase && questions.length > 0) {
+        const questionsToBank = questions.map((q: any) => ({
+          grade,
+          subject,
+          topic,
+          question: q.question,
+          options: q.options,
+          correct_index: q.correctIndex
+        }))
+
+        supabase.from("question_bank").insert(questionsToBank).then(({ error }) => {
+          if (error) console.error("Error saving to global bank:", error)
+          else console.log(`Cached ${questionsToBank.length} new questions to Global Bank for ${subject}: ${topic}`)
+        })
+      }
+
+      return questions.length > 0 ? questions : getFallbackQuestions(grade, subject, count)
     } catch (err) {
       console.error("Error fetching AI questions:", err)
-      return getFallbackQuestions(grade, subject, count)
+      return getFallbackQuestions(grade, subject, 30)
     }
   }
 
@@ -2206,12 +2338,31 @@ export default function BoomkitGame() {
         username: userToModerate.username,
       })
 
-      if (banSystemError) {
-        console.error("Error adding to banned_systems:", banSystemError)
-        // Continue with ban even if system signature tracking fails
+      console.error("Error adding to banned_systems:", banSystemError)
+      // Continue with ban even if system signature tracking fails
+    } catch (err) {
+      console.error("Error in system ban tracking:", err)
+    }
+
+    try {
+      // 2. Direct Supabase Update (Redundancy fix)
+      // We try to update directly first. If RLS allows (owner/admin), this is faster and more reliable.
+      const { error: directError } = await supabase
+        .from("users")
+        .update({
+          is_banned: true,
+          ban_reason: banReason || "Banned by staff",
+          ban_expiry: null
+        })
+        .eq("id", userToModerate.id)
+
+      if (directError) {
+        console.warn("Direct Supabase ban update failed (likely RLS), falling back to API:", directError)
+      } else {
+        console.log("Direct Supabase ban update successful")
       }
 
-      // 2. Update the user via Secure API (since RLS prevents direct updates to other users)
+      // 3. Update the user via Secure API (since RLS prevents direct updates to other users)
       const response = await fetch("/api/users/update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -2364,15 +2515,6 @@ export default function BoomkitGame() {
     }
   }
 
-  // Get boom avatar
-  const getBoomAvatar = (boomName: string) => {
-    for (const pack of PACKS) {
-      const boom = pack.booms.find((b) => b.name === boomName)
-      if (boom) return boom.avatar
-    }
-    return "❓"
-  }
-
   // Get boom rarity
   const getBoomRarity = (boomName: string) => {
     for (const pack of PACKS) {
@@ -2503,8 +2645,12 @@ export default function BoomkitGame() {
           {/* Right Content - Boom Grid */}
           <div className="flex-1 grid grid-cols-4 gap-4 max-w-lg p-6 bg-white/5 rounded-3xl backdrop-blur-sm border border-white/10 rotate-3 hover:rotate-0 transition-transform duration-500">
             {showcaseBooms.map((boom, idx) => (
-              <div key={idx} className="aspect-square bg-slate-800 rounded-xl flex items-center justify-center text-4xl shadow-lg border border-slate-700 hover:scale-110 transition-transform cursor-default select-none" title={boom.name}>
-                {boom.avatar}
+              <div key={idx} className="aspect-square bg-slate-800 rounded-xl flex items-center justify-center text-4xl shadow-lg border border-slate-700 hover:scale-110 transition-transform cursor-default select-none overflow-hidden" title={boom.name}>
+                {boom.avatar.startsWith('/') ? (
+                  <img src={boom.avatar || "/placeholder.svg"} alt={boom.name} className="w-full h-full object-cover" />
+                ) : (
+                  boom.avatar
+                )}
               </div>
             ))}
           </div>
@@ -3397,7 +3543,11 @@ export default function BoomkitGame() {
                                   )}
 
                                   {hasBoom ? (
-                                    <span className="z-10 relative drop-shadow-lg">{boom.avatar}</span>
+                                    boom.avatar.startsWith('/') ? (
+                                      <img src={boom.avatar || "/placeholder.svg"} alt={boom.name} className="z-10 relative w-12 h-12 object-contain drop-shadow-lg" />
+                                    ) : (
+                                      <span className="z-10 relative drop-shadow-lg">{boom.avatar}</span>
+                                    )
                                   ) : (
                                     <LockIcon className="h-8 w-8 opacity-20" />
                                   )}
@@ -3431,6 +3581,95 @@ export default function BoomkitGame() {
                     </div>
                   ))}
                 </div>
+
+                {/* Gamepass Booms Section */}
+                {(currentUser?.level || 1) >= 10 && (
+                  <div className="mt-16">
+                    <div className="flex items-center gap-4 mb-8">
+                      <div className="w-2 h-12 bg-gradient-to-b from-purple-500 via-pink-500 to-yellow-500 rounded-full shadow-[0_0_20px_rgba(168,85,247,0.5)]" />
+                      <div>
+                        <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-600 tracking-tighter">
+                          GAMEPASS BOOMS
+                        </h2>
+                        <p className="text-white/60 text-sm font-medium mt-1">
+                          Exclusive rewards for reaching milestone levels
+                        </p>
+                      </div>
+                      {(currentUser?.level || 1) >= 100 && (
+                        <div className="ml-auto">
+                          <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-full px-6 py-2 border border-white/20">
+                            <span className="text-white font-black text-sm uppercase tracking-wider">⚡ MAX LEVEL ⚡</span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 p-8 shadow-2xl">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                        {GAMEPASS_BOOMS.map((boom) => {
+                          const quantity = currentUser?.booms[boom.name] || 0
+                          const hasUnlocked = quantity > 0
+                          const rarityColor = getRarityColor(boom.rarity)
+
+                          return (
+                            <div key={boom.level} className="group flex flex-col items-center gap-3">
+                              <div
+                                className={`
+                                  w-full aspect-square rounded-2xl border-2 flex flex-col items-center justify-center text-4xl 
+                                  transition-all duration-300 relative overflow-hidden cursor-pointer
+                                  ${hasUnlocked
+                                    ? `${rarityColor} border-white/30 shadow-[0_0_20px_rgba(0,0,0,0.3)] hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]`
+                                    : "bg-black/60 text-white/10 border-white/10 grayscale"
+                                  }
+                                `}
+                                onClick={() => hasUnlocked && handleBoomClick(boom.name)}
+                              >
+                                {/* Glow Effect */}
+                                {hasUnlocked && (
+                                  <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none" />
+                                )}
+
+                                {/* Avatar/Image */}
+                                {hasUnlocked ? (
+                                  <div className="z-10 flex flex-col items-center gap-1">
+                                    {boom.avatar.startsWith('/') ? (
+                                      <img src={boom.avatar || "/placeholder.svg"} alt={boom.name} className="w-16 h-16 object-contain drop-shadow-lg" />
+                                    ) : (
+                                      <span className="drop-shadow-lg">{boom.avatar}</span>
+                                    )}
+                                    <span className="text-[10px] font-bold text-white/60 uppercase tracking-wider">LVL {boom.level}</span>
+                                  </div>
+                                ) : (
+                                  <div className="flex flex-col items-center gap-1">
+                                    <LockIcon className="h-8 w-8 opacity-20" />
+                                    <span className="text-xs font-bold text-white/20 uppercase tracking-wider">LVL {boom.level}</span>
+                                  </div>
+                                )}
+
+                                {/* Quantity Badge */}
+                                {hasUnlocked && quantity > 1 && (
+                                  <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded-full border border-white/20">
+                                    ×{quantity}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Boom Name */}
+                              <div className="text-center">
+                                <p className={`text-sm font-bold ${hasUnlocked ? "text-white" : "text-white/30"} line-clamp-2`}>
+                                  {boom.name}
+                                </p>
+                                {hasUnlocked && (
+                                  <p className="text-xs text-white/50 mt-1 line-clamp-1">{boom.description}</p>
+                                )}
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -3572,6 +3811,7 @@ export default function BoomkitGame() {
                     </div>
                   ))}
                 </div>
+
               </div>
             )}
 
@@ -4125,11 +4365,10 @@ export default function BoomkitGame() {
                   setSoloSubject({ grade, subject })
                   setSoloFlow("mode-select")
                 }}
-                onJoinGame={async () => {
-                  const pinInput = prompt("Enter 6-digit Game PIN:")
-                  if (!pinInput) return
+                onJoinGame={async (pin) => {
+                  if (!pin) return
 
-                  const cleanPin = pinInput.trim()
+                  const cleanPin = pin.trim()
 
                   if (supabase) {
                     const { data: session, error } = await supabase
@@ -4159,6 +4398,7 @@ export default function BoomkitGame() {
                         await supabase
                           .from("game_sessions")
                           .update({ players: updatedPlayers })
+                          .eq("pin", cleanPin)
                       }
                     }
 
@@ -4188,8 +4428,15 @@ export default function BoomkitGame() {
                 subject={activeDiscoverGame.subject}
                 grade={activeDiscoverGame.grade}
                 currentUser={currentUser}
-                onStart={(duration) => {
+                onStart={(duration, questions) => {
                   setSelectedDuration(duration)
+                  if (activeDiscoverGame) {
+                    setActiveDiscoverGame({
+                      ...activeDiscoverGame,
+                      duration: duration,
+                      questions: questions || activeDiscoverGame.questions
+                    })
+                  }
                   setIsMergingGameActive(true)
                   setLobbyActive(false)
                 }}
@@ -4214,6 +4461,26 @@ export default function BoomkitGame() {
                       setGameScore(score)
                       setIsMergingGameActive(false)
                       setShowGameResults(true)
+
+                      // Award Rewards
+                      const tokenReward = Math.floor(score / 5)
+                      const xpReward = Math.floor(score / 2)
+
+                      if (currentUser) {
+                        const updatedUser = {
+                          ...currentUser,
+                          tokens: (currentUser.tokens || 0) + tokenReward,
+                          xp: (currentUser.xp || 0) + xpReward
+                        }
+                        // Leveling is handled inside awardXP but we can just update state here and let the next sync handle it
+                        // Or better yet, use awardXP logic
+                        awardXP(xpReward)
+                        updateAndPersistCurrentUser({
+                          ...updatedUser,
+                          // awardXP might have incremented level, let's just make sure we are consistent
+                          tokens: updatedUser.tokens
+                        })
+                      }
                     }}
                     onScoreUpdate={async (newScore) => {
                       if (activeGamePin && supabase && activeDiscoverGame.mode === "join") {
@@ -4246,6 +4513,23 @@ export default function BoomkitGame() {
                     setGameScore(score)
                     setIsMergingGameActive(false)
                     setShowGameResults(true)
+
+                    // Award Rewards
+                    const tokenReward = Math.floor(score / 5)
+                    const xpReward = Math.floor(score / 2)
+
+                    if (currentUser) {
+                      const updatedUser = {
+                        ...currentUser,
+                        tokens: (currentUser.tokens || 0) + tokenReward,
+                        xp: (currentUser.xp || 0) + xpReward
+                      }
+                      awardXP(xpReward)
+                      updateAndPersistCurrentUser({
+                        ...updatedUser,
+                        tokens: updatedUser.tokens
+                      })
+                    }
                   }}
                   onScoreUpdate={async (newScore) => {
                     if (activeGamePin && supabase && activeDiscoverGame.mode === "join") {
@@ -4356,7 +4640,7 @@ export default function BoomkitGame() {
                       {news.imageUrl && (
                         <div className="relative aspect-[21/9] rounded-2xl overflow-hidden border border-white/5 group-hover:border-white/20 transition-all duration-300">
                           <img
-                            src={news.imageUrl}
+                            src={news.imageUrl || "/placeholder.svg"}
                             alt={news.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                           />
@@ -4409,28 +4693,36 @@ export default function BoomkitGame() {
 
             <div className="flex-1 overflow-hidden">
               <GameModeSelector
-                onSelect={async (mode) => {
-                  console.log("Selected solo mode:", mode.id)
-                  setIsGeneratingSet(true)
-                  setSoloFlow(null)
-
-                  const questions = await fetchQuestionsWithAi(soloSubject.grade, soloSubject.subject, 30)
-                  setIsGeneratingSet(false)
-
-                  if (questions && questions.length > 0) {
-                    setActiveDiscoverGame({
-                      grade: soloSubject.grade,
-                      subject: soloSubject.subject,
-                      mode: "solo",
-                      gameMode: mode.id,
-                      questions,
-                    })
-                    setIsMergingGameActive(true)
-                  }
-                }}
-                onBack={() => setSoloFlow(null)}
                 subjectName={soloSubject.subject}
+                onBack={() => setSoloFlow(null)}
+                initialDuration={selectedDuration}
                 isSolo={true}
+                onSelect={(mode, duration) => {
+                  console.log("Selected solo mode:", mode.id, "duration:", duration)
+                  setSelectedDuration(duration) // Update shared duration state
+
+                  // Wrap the async part
+                  const startSoloGame = async () => {
+                    setIsGeneratingSet(true)
+                    setSoloFlow(null)
+
+                    const questions = await fetchQuestionsWithAi(soloSubject.grade, soloSubject.subject, 30)
+                    setIsGeneratingSet(false)
+
+                    if (questions && questions.length > 0) {
+                      setActiveDiscoverGame({
+                        grade: soloSubject.grade,
+                        subject: soloSubject.subject,
+                        mode: "solo",
+                        gameMode: mode.id,
+                        questions,
+                        duration,
+                      })
+                      setIsMergingGameActive(true)
+                    }
+                  }
+                  startSoloGame()
+                }}
               />
             </div>
           </div>
@@ -4573,10 +4865,16 @@ export default function BoomkitGame() {
                     </div>
 
                     {/* Boom Art - Centered */}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="text-8xl relative z-10">
-                        {packAnimation.boom.avatar}
-                      </div>
+                    <div className="absolute inset-0 flex items-center justify-center z-10">
+                      {packAnimation.boom.avatar.startsWith('/') ? (
+                        <img
+                          src={packAnimation.boom.avatar || "/placeholder.svg"}
+                          alt={packAnimation.boom.name}
+                          className="w-48 h-48 object-contain drop-shadow-2xl animate-in zoom-in duration-500"
+                        />
+                      ) : (
+                        <span className="text-8xl drop-shadow-md">{packAnimation.boom.avatar}</span>
+                      )}
                     </div>
 
                     {/* Boom Name - Top */}

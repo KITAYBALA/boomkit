@@ -463,8 +463,12 @@ export default function RealtimeAuctions({
                           : 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/10'
                           }`}
                       >
-                        <div className="text-4xl group-hover:scale-110 transition-transform duration-300">
-                          {getBoomAvatar(boom)}
+                        <div className="text-4xl group-hover:scale-110 transition-transform duration-300 flex items-center justify-center">
+                          {getBoomAvatar(boom).startsWith('/') ? (
+                            <img src={getBoomAvatar(boom)} alt={boom} className="w-[1em] h-[1em] object-contain drop-shadow-md" />
+                          ) : (
+                            getBoomAvatar(boom)
+                          )}
                         </div>
                         <div className="text-center">
                           <p className={`text-xs font-bold leading-tight ${selectedBoom === boom ? 'text-white' : 'text-white/70'}`}>{boom}</p>
@@ -581,8 +585,12 @@ export default function RealtimeAuctions({
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4">
                         <div className="relative">
-                          <div className={`text-6xl drop-shadow-2xl group-hover:rotate-12 transition-transform duration-500 drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]`}>
-                            {getBoomAvatar(item.boom_name)}
+                          <div className={`text-6xl drop-shadow-2xl group-hover:rotate-12 transition-transform duration-500 drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] flex items-center justify-center`}>
+                            {getBoomAvatar(item.boom_name).startsWith('/') ? (
+                              <img src={getBoomAvatar(item.boom_name)} alt={item.boom_name} className="w-[1em] h-[1em] object-contain drop-shadow-lg" />
+                            ) : (
+                              getBoomAvatar(item.boom_name)
+                            )}
                           </div>
                           {rarity === 'legendary' || rarity === 'chroma' || rarity === 'mystical' ? (
                             <div className="absolute -top-2 -right-2">
@@ -710,7 +718,13 @@ export default function RealtimeAuctions({
           <Card className="w-full max-w-md bg-[#0a0a0c]/95 backdrop-blur-2xl border-purple-500/30 shadow-[0_0_80px_rgba(139,92,246,0.3)] rounded-[2.5rem] overflow-hidden">
             <CardHeader className="p-8 text-center">
               <div className="mx-auto w-24 h-24 bg-purple-600/10 rounded-full flex items-center justify-center mb-6 ring-1 ring-purple-500/30">
-                <span className="text-6xl drop-shadow-2xl">{getBoomAvatar(biddingItem.boom_name)}</span>
+                <span className="text-6xl drop-shadow-2xl flex items-center justify-center">
+                  {getBoomAvatar(biddingItem.boom_name).startsWith('/') ? (
+                    <img src={getBoomAvatar(biddingItem.boom_name)} alt={biddingItem.boom_name} className="w-[1em] h-[1em] object-contain drop-shadow-lg" />
+                  ) : (
+                    getBoomAvatar(biddingItem.boom_name)
+                  )}
+                </span>
               </div>
               <CardTitle className="text-3xl font-black text-white tracking-tight">Place Your Bid</CardTitle>
               <CardDescription className="text-purple-300/40 mt-2">You are bidding on {biddingItem.boom_name}</CardDescription>

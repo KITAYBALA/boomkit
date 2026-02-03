@@ -45,6 +45,17 @@ export default function FishingFrenzy({
     const [lastCatch, setLastCatch] = useState<{ name: string; weight: number; rarity: string; color?: string } | null>(null)
     const [isGameOver, setIsGameOver] = useState(false)
 
+    // Crash Prevention
+    if (!questions || questions.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center w-full h-full text-white bg-slate-900">
+                <div className="w-12 h-12 rounded-full border-4 border-blue-500 border-t-transparent animate-spin mb-4" />
+                <p className="font-bold text-lg">Preparing Waters...</p>
+                <p className="text-white/40 text-sm">Waiting for host to sync...</p>
+            </div>
+        )
+    }
+
     // Timer logic
     useEffect(() => {
         if (timeLeft <= 0 || isGameOver) return
@@ -255,10 +266,10 @@ export default function FishingFrenzy({
                             </div>
                             <CardContent className="p-12 space-y-12">
                                 <h3 className="text-4xl font-black text-white text-center leading-tight">
-                                    {questions[currentQuestionIndex].question}
+                                    {questions && questions.length > 0 ? questions[currentQuestionIndex]?.question : "Waiting for players..."}
                                 </h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {questions[currentQuestionIndex].options.map((option, idx) => (
+                                    {questions && questions.length > 0 && questions[currentQuestionIndex]?.options.map((option, idx) => (
                                         <Button
                                             key={idx}
                                             onClick={() => handleAnswer(idx)}
@@ -318,7 +329,13 @@ export default function FishingFrenzy({
                     <h2 className="text-7xl font-black text-white mb-4 tracking-tighter">TIME'S UP!</h2>
                     <p className="text-4xl text-purple-400 font-black mb-12">TOTAL WEIGHT: {score} lbs</p>
                     <Button
-                        onClick={() => onEnd(score)}
+                        onClick={() => {
+                            if (onAwardTokens) {
+                                const tokens = Math.floor(score * 0.01)
+                                if (tokens > 0) onAwardTokens(tokens)
+                            }
+                            onEnd(score)
+                        }}
                         className="px-12 py-8 bg-white text-black text-3xl font-black rounded-3xl hover:bg-purple-400 hover:text-white transition-all transform hover:scale-110"
                     >
                         RETURN TO LOBBY

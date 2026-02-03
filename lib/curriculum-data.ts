@@ -51,6 +51,15 @@ export const TOPICS_BY_GRADE_SUBJECT: Record<number, Record<string, string[]>> =
             "Rules in the Classroom", "Rules at Home", "Being a Kind Friend", "Taking Turns", "Honesty", "Responsibility", "Community Helpers: Doctors", "Community Helpers: Firefighters", "Community Helpers: Police Officers", "Community Helpers: Teachers", "Community Helpers: Farmers",
             "Map Symbols", "What is a Globe?", "North, South, East, West Basics", "My Neighborhood", "The School Map", "Landforms: Mountains", "Bodies of Water: Oceans", "Past vs. Present: School", "Past vs. Present: Toys", "Past vs. Present: Travel", "Calendars and Time", "Timeline of My Life", "The American Flag",
             "The Liberty Bell", "The Bald Eagle", "Pledge of Allegiance", "George Washington", "Abraham Lincoln", "MLK Jr. Day", "Thanksgiving History", "Independence Day", "Veteran's Day", "Family Traditions", "Needs: Food and Water", "Wants: Toys and Games", "Money and Buying", "Saving Money in a Bank"
+        ],
+        "Art": [
+            "Primary Colors", "Secondary Colors", "Drawing Shapes", "Lines and Textures", "Coloring inside the lines", "Famous Paintings intro", "Finger Painting", "Sculpting with Clay", "Paper Collage"
+        ],
+        "Music": [
+            "Keeping a Beat", "High vs. Low Sounds", "Musical Instruments", "Singing Together", "Rhythm Clapping", "Loud and Quiet (Dynamics)", "Different Types of Music"
+        ],
+        "Physical Education": [
+            "Running and Jumping", "Stretching Exercises", "Balancing", "Throwing and Catching", "Following Game Rules", "Teamwork Basics", "Healthy Habits"
         ]
     },
     2: {
@@ -86,6 +95,15 @@ export const TOPICS_BY_GRADE_SUBJECT: Record<number, Record<string, string[]>> =
             "Timelines of History", "Native American Tribes: Coastal", "Native American Tribes: Plains", "Christopher Columbus Intro", "Ponce de Leon and Florida", "Jamestown Colony intro", "The Pilgrims and Plymouth", "The First Thanksgiving", "Colonial Life: School and Toys", "George Washington (President #1)", "Thomas Jefferson (President #3)", "Abraham Lincoln (President #16)", "The Statue of Liberty",
             "Mount Rushmore", "The White House", "Rosa Parks and bravery", "The Continents: North and South America", "The Continents: Europe and Asia", "The Continents: Africa and Oceania", "Antarctica (The Ice Continent)", "The Five Oceans", "Equator and Prime Meridian", "Cardinal vs. Intermediate Directions", "Reading a Map Scale", "Grid Maps", "Rights of a Citizen", "Responsibilities (Chores/Voting)",
             "Rules for Safety", "The Mayor's Job", "The Governor's Job", "The President's Job", "The Three Branches (Very Basic)", "Producers (Makers)", "Consumers (Buyers)", "Bartering (Trading Items)", "Supply and Demand (Basic)", "Community Businesses", "International Trade Intro"
+        ],
+        "Art": [
+            "Mixing Colors", "Landscape Drawing", "Portrait Basics", "Patterns in Art", "Texture Exploration", "Art History: Impressionism", "3D Crafts", "Mask Making"
+        ],
+        "Music": [
+            "Reading Simple Notes", "Tempo (Fast/Slow)", "Instruments of the Orchestra", "Folk Songs", "Composing a Melody", "Chorus and Verse", "Steady Beat vs. Rhythm"
+        ],
+        "Physical Education": [
+            "Team Sports Intro", "Gymnastics Basics", "Relay Races", "Water Safety", "Yoga and Mindfulness", "Ball Control Skills", "Nutrition for Energy"
         ]
     },
     3: {
@@ -114,6 +132,15 @@ export const TOPICS_BY_GRADE_SUBJECT: Record<number, Record<string, string[]>> =
             "General Social Studies (All Topics)",
             "Reading a World Map", "Latitude and Longitude (Intro)", "The Hemispheres", "Physical Regions of the Earth", "Climate Zones (Tropical, Temperate, Polar)", "Natural Resources and the Environment", "Human Impact on the Land", "Native Americans of the Southwest", "Native Americans of the Northeast", "Native Americans of the Plains", "Founding of My Community", "Immigration and Culture", "Customs and Traditions Around the World",
             "Global Trade: Why we buy from other countries", "Local Government Services (Library, Police)", "How Laws are Made", "Taxes and what they pay for", "Rights of Free Speech", "The Judicial Branch (Courts)", "Conflict and Cooperation", "Standard of Living", "Economic Specialization", "Opportunity Cost", "Financial Literacy: Spending vs. Saving", "The Role of Banks"
+        ],
+        "Art": [
+            "Shadow and Light", "Perspective Drawing", "Color Harmony", "Famous Artists: Van Gogh", "Ancient Art History", "Digital Art Basics", "Printmaking", "Mixed Media"
+        ],
+        "Music": [
+            "Musical Notation (Advanced)", "Types of Instruments (Brass, Woodwind)", "Jazz and Blues History", "Singing in Rounds", "Reading Sheet Music", "Famous Composers: Mozart", "Basic Piano Skills"
+        ],
+        "Physical Education": [
+            "Soccer Fundamentals", "Basketball Skills", "Track and Field", "Personal Fitness Goals", "Sportsmanship", "Swimming Basics", "Safety in Sports"
         ],
         "Computer Basics": [
             "General Computer Skills",
