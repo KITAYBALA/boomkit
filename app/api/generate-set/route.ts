@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     const genAI = new GoogleGenerativeAI(apiKey)
 
     // Model retry list for robustness
-    const modelsToTry = ["gemini-1.5-flash-latest", "gemini-1.5-flash", "gemini-pro"]
+    const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"]
     let lastError = null
     let generationSuccessful = false
     let finalData = null
@@ -101,7 +101,8 @@ export async function POST(req: Request) {
           console.log(`[AI API] Successfully generated with ${modelName}`)
         }
       } catch (err: any) {
-        console.warn(`[AI API] Model ${modelName} failed:`, err.message)
+        console.error(`[AI API] Model ${modelName} failed:`, err.message || err)
+        if (err.stack) console.log(err.stack)
         lastError = err
       }
     }
