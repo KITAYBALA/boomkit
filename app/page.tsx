@@ -2289,26 +2289,29 @@ export default function BoomkitGame() {
 
       console.error("Error adding to banned_systems:", banSystemError)
       // Continue with ban even if system signature tracking fails
+    } catch (err) {
+      console.error("Error in system ban tracking:", err)
     }
 
+    try {
       // 2. Direct Supabase Update (Redundancy fix)
       // We try to update directly first. If RLS allows (owner/admin), this is faster and more reliable.
       const { error: directError } = await supabase
-      .from("users")
-      .update({
-        is_banned: true,
-        ban_reason: banReason || "Banned by staff",
-        ban_expiry: null
-      })
-      .eq("id", userToModerate.id)
+        .from("users")
+        .update({
+          is_banned: true,
+          ban_reason: banReason || "Banned by staff",
+          ban_expiry: null
+        })
+        .eq("id", userToModerate.id)
 
-    if (directError) {
-      console.warn("Direct Supabase ban update failed (likely RLS), falling back to API:", directError)
-    } else {
-      console.log("Direct Supabase ban update successful")
-    }
+      if (directError) {
+        console.warn("Direct Supabase ban update failed (likely RLS), falling back to API:", directError)
+      } else {
+        console.log("Direct Supabase ban update successful")
+      }
 
-    // 3. Update the user via Secure API (since RLS prevents direct updates to other users)
+      // 3. Update the user via Secure API (since RLS prevents direct updates to other users)
     const response = await fetch("/api/users/update", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -2362,7 +2365,7 @@ const handleUnbanUnmute = (userId: string, type: "unban" | "unmute") => {
       if (type === "unban") {
         return { ...u, isBanned: false, banReason: "", banExpiry: null }
       }
-      if (type === "unmute") {
+      if (type === "unmute") {\
         return { ...u, isMuted: false, muteExpiry: null }
       }
     }
@@ -2459,15 +2462,6 @@ const removeBadge = (userId: string, badgeId: string) => {
   if (currentUser?.id === userId) {
     updateAndPersistCurrentUser({ ...currentUser, badges: (currentUser.badges ?? []).filter((b) => b !== badgeId) })
   }
-}
-
-// Get boom avatar
-const getBoomAvatar = (boomName: string) => {
-  for (const pack of PACKS) {
-    const boom = pack.booms.find((b) => b.name === boomName)
-    if (boom) return boom.avatar
-  }
-  return "❓"
 }
 
 // Get boom rarity
@@ -2602,7 +2596,7 @@ if (currentView === "owner-access") {
           {showcaseBooms.map((boom, idx) => (
             <div key={idx} className="aspect-square bg-slate-800 rounded-xl flex items-center justify-center text-4xl shadow-lg border border-slate-700 hover:scale-110 transition-transform cursor-default select-none overflow-hidden" title={boom.name}>
               {boom.avatar.startsWith('/') ? (
-                <img src={boom.avatar} alt={boom.name} className="w-full h-full object-cover" />
+                <img src={boom.avatar || "/placeholder.svg"} alt={boom.name} className="w-full h-full object-cover" />
               ) : (
                 boom.avatar
               )}
@@ -3499,7 +3493,7 @@ return (
 
                                 {hasBoom ? (
                                   boom.avatar.startsWith('/') ? (
-                                    <img src={boom.avatar} alt={boom.name} className="z-10 relative w-12 h-12 object-contain drop-shadow-lg" />
+                                    <img src={boom.avatar || "/placeholder.svg"} alt={boom.name} className="z-10 relative w-12 h-12 object-contain drop-shadow-lg" />
                                   ) : (
                                     <span className="z-10 relative drop-shadow-lg">{boom.avatar}</span>
                                   )
@@ -3588,7 +3582,7 @@ return (
                               {hasUnlocked ? (
                                 <div className="z-10 flex flex-col items-center gap-1">
                                   {boom.avatar.startsWith('/') ? (
-                                    <img src={boom.avatar} alt={boom.name} className="w-16 h-16 object-contain drop-shadow-lg" />
+                                    <img src={boom.avatar || "/placeholder.svg"} alt={boom.name} className="w-16 h-16 object-contain drop-shadow-lg" />
                                   ) : (
                                     <span className="drop-shadow-lg">{boom.avatar}</span>
                                   )}
@@ -4595,7 +4589,7 @@ return (
                     {news.imageUrl && (
                       <div className="relative aspect-[21/9] rounded-2xl overflow-hidden border border-white/5 group-hover:border-white/20 transition-all duration-300">
                         <img
-                          src={news.imageUrl}
+                          src={news.imageUrl || "/placeholder.svg"}
                           alt={news.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                         />
@@ -4823,7 +4817,7 @@ return (
                   <div className="absolute inset-0 flex items-center justify-center z-10">
                     {packAnimation.boom.avatar.startsWith('/') ? (
                       <img
-                        src={packAnimation.boom.avatar}
+                        src={packAnimation.boom.avatar || "/placeholder.svg"}
                         alt={packAnimation.boom.name}
                         className="w-48 h-48 object-contain drop-shadow-2xl animate-in zoom-in duration-500"
                       />
@@ -5745,4 +5739,4 @@ return (
     )}
   </div>
 )
-}
+}\
