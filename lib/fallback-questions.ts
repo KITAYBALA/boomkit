@@ -124,6 +124,20 @@ export const FALLBACK_QUESTIONS: { [key: string]: Question[] } = {
         { id: "se33", question: "Search for 'Photosynthesis' involves which life form?", options: ["Animals", "Plants", "Fungi", "Rocks"], correctIndex: 1 },
         { id: "se34", question: "What does a caterpillar turn into?", options: ["Ant", "Bee", "Butterfly", "Spider"], correctIndex: 2 },
         { id: "se35", question: "Which gas do plants absorb?", options: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Helium"], correctIndex: 1 }
+    ],
+    "pe_elementary": [
+        { id: "pe1", question: "What should you do before exercising?", options: ["Sleep", "Warm up", "Eat a big meal", "Watch TV"], correctIndex: 1 },
+        { id: "pe2", question: "Which is a team sport?", options: ["Tennis", "Swimming", "Soccer", "Running"], correctIndex: 2 },
+        { id: "pe3", question: "What do we use to pump blood?", options: ["Lungs", "Brain", "Heart", "Stomach"], correctIndex: 2 },
+        { id: "pe4", question: "Which fruit has the most Vitamin C?", options: ["Apple", "Orange", "Banana", "Grape"], correctIndex: 1 },
+        { id: "pe5", question: "How many players are on a basketball court per team?", options: ["5", "6", "11", "2"], correctIndex: 0 }
+    ],
+    "social_studies_elementary": [
+        { id: "ss1", question: "Who was the first U.S. President?", options: ["Lincoln", "Washington", "Jefferson", "Adams"], correctIndex: 1 },
+        { id: "ss2", question: "Which continent is the South Pole on?", options: ["Africa", "Asia", "Antarctica", "Europe"], correctIndex: 2 },
+        { id: "ss3", question: "What is the capital of the USA?", options: ["New York", "Washington D.C.", "Los Angeles", "Chicago"], correctIndex: 1 },
+        { id: "ss4", question: "What do we use to see where countries are?", options: ["Book", "Calculator", "Map", "Compass"], correctIndex: 2 },
+        { id: "ss5", question: "Which is a holiday in July?", options: ["Christmas", "Halloween", "Independence Day", "Easter"], correctIndex: 2 }
     ]
 }
 
@@ -134,11 +148,12 @@ export function getFallbackQuestions(grade: number, subject: string, count: numb
     if (subjectKey.includes("math")) pool = FALLBACK_QUESTIONS["math_elementary"]
     else if (subjectKey.includes("read") || subjectKey.includes("english")) pool = FALLBACK_QUESTIONS["reading_elementary"]
     else if (subjectKey.includes("science")) pool = FALLBACK_QUESTIONS["science_elementary"]
-    else pool = [
-        ...FALLBACK_QUESTIONS["math_elementary"],
-        ...FALLBACK_QUESTIONS["reading_elementary"],
-        ...FALLBACK_QUESTIONS["science_elementary"]
-    ]
+    else if (subjectKey.includes("physical") || subjectKey.includes("pe") || subjectKey.includes("health")) pool = FALLBACK_QUESTIONS["pe_elementary"]
+    else if (subjectKey.includes("social") || subjectKey.includes("history") || subjectKey.includes("geography")) pool = FALLBACK_QUESTIONS["social_studies_elementary"]
+    else {
+        // Fallback for completely unknown subjects - pick ONE category instead of mixing
+        pool = FALLBACK_QUESTIONS["reading_elementary"]
+    }
 
     // Shuffle and slice
     return [...pool].sort(() => Math.random() - 0.5).slice(0, count)

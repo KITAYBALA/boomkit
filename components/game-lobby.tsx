@@ -113,9 +113,18 @@ export default function GameLobby({
                 filter: `pin=eq.${pin}`
             }, (payload: any) => {
                 setPlayers(payload.new.players || [])
-                if (payload.new.status === "started") {
+                if (payload.new.status && payload.new.status.startsWith("started")) {
                     setIsGameStarted(true)
-                    // Pass questions from payload so joiners get them immediately
+                    // If encoded timestamp exists, calculate offset
+                    let startTimeOffset = 0
+                    if (payload.new.status.includes(":")) {
+                        const ts = parseInt(payload.new.status.split(":")[1])
+                        if (!isNaN(ts)) {
+                            // Calculate how many seconds have passed since the game "officially" started
+                            startTimeOffset = Math.floor((Date.now() - ts) / 1000)
+                        }
+                    }
+
                     onStart(payload.new.duration || duration, payload.new.questions)
                 }
             })
@@ -130,11 +139,12 @@ export default function GameLobby({
     const handleStartGame = async () => {
         if (!supabase) return
 
-        // First update the DB
+        // Encoding start time in status for cross-player sync
+        const startTimestamp = Date.now()
         const { error } = await supabase
             .from("game_sessions")
             .update({
-                status: "started",
+                status: `started:${startTimestamp}`,
                 duration: duration
             })
             .eq("pin", pin)
