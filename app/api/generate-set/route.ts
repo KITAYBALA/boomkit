@@ -23,14 +23,26 @@ export async function POST(req: Request) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" })
+
+    // Model retry list for robustness
+    const modelsToTry = ["gemini-1.5-flash-latest", "gemini-1.5-flash", "gemini-pro"]
+    let lastError = null
+    let generationSuccessful = false
+    let finalData = null
 
     const systemPrompt = `
       You are a world-class educational content creator for a game called Boomkit.
       Generate a set of EXACTLY ${count} multiple-choice questions for the following:
       Grade: ${grade}
       Subject: ${subject}
-      Topic/Instructions: ${prompt}
+      Topic: ${prompt}
+
+      CRITICAL TOPIC RELEVANCE RULE:
+      - EVERY single question MUST be directly related to the Topic: "${prompt}".
+      - DO NOT generate generic educational questions. 
+      - DO NOT use placeholder questions like "How many fingers are on one hand?".
+      - If the topic is specific (e.g., "Counting to 100", "State Capitals", "Photosynthesis"), every question MUST stay within that narrow scope.
+      - Topic adherence is the HIGHEST priority. Failure to follow the topic will result in a system error.
 
       CRITICAL DIFFICULTY & DIVERSITY RULES:
       - EVERY question MUST have EXACTLY 4 options. Never 2 or 3.
@@ -46,20 +58,18 @@ export async function POST(req: Request) {
         * Grade 9-12 (High): Focus on Algebra I/II, Geometry, Calculus, Biology/Chemistry/Physics, American/European History, and advanced literature/poetry analysis.
       
       - RANDOMIZATION SEED: ${Date.now()}_${Math.random()}
-      - TOPIC VARIETY: Do not just stick to one sub-topic. If it's Math, mix arithmetic with word problems, geometry, and measurements.
-      - AVOID PATTERNS: Do not use the same formula repeatedly. Ensure questions vary in phrasing and complexity.
-      - AVOID "5+5" CLICHÉS: Do not use extremely simple or repetitive math like "5+5" unless it's a very specific context for Grade 1.
+      - TOPIC VARIETY: Mix different aspects of the TOPIC specifically.
       - PROGRESSION: Questions MUST get progressively harder within the set. Start with foundation and move to challenge.
 
       Return the response ONLY as a valid JSON object in this format:
       {
-        "title": "Set Title",
-        "description": "Short description",
+        "title": "${prompt} Quiz",
+        "description": "Educational questions about ${prompt}",
         "grade": ${grade},
         "subject": "${subject}",
         "questions": [
           {
-            "id": "q_${Math.random().toString(36).substring(7)}",
+            "id": "q_RANDOM",
             "question": "The question text",
             "options": ["Option A", "Option B", "Option C", "Option D"],
             "correctIndex": 0
@@ -70,37 +80,36 @@ export async function POST(req: Request) {
       Only return the JSON, no other text.
     `
 
-    console.log(`[AI API] Generating ${count} questions for Grade ${grade}, Subject: ${subject}`)
-    const result = await model.generateContent(systemPrompt)
-    const response = await result.response
-    const text = response.text()
+    for (const modelName of modelsToTry) {
+      if (generationSuccessful) break
 
-    console.log("[AI API] Raw response length:", text.length)
+      try {
+        console.log(`[AI API] Attempting generation with model: ${modelName}`)
+        const model = genAI.getGenerativeModel({ model: modelName })
+        const result = await model.generateContent(systemPrompt)
+        const res = await result.response
+        const text = res.text()
 
-    let jsonStr = text
-    const jsonMatch = text.match(/\{[\s\S]*\}/)
-    if (jsonMatch) {
-      jsonStr = jsonMatch[0]
+        let jsonStr = text
+        const jsonMatch = text.match(/\{[\s\S]*\}/)
+        if (jsonMatch) jsonStr = jsonMatch[0]
+
+        const data = JSON.parse(jsonStr)
+        if (data.questions && data.questions.length > 0) {
+          finalData = data
+          generationSuccessful = true
+          console.log(`[AI API] Successfully generated with ${modelName}`)
+        }
+      } catch (err: any) {
+        console.warn(`[AI API] Model ${modelName} failed:`, err.message)
+        lastError = err
+      }
     }
 
-    try {
-      const data = JSON.parse(jsonStr)
-      if (!data.questions || data.questions.length === 0) {
-        throw new Error("AI returned empty question set");
-      }
-      console.log("[AI API] Successfully generated", data.questions.length, "questions");
-      return NextResponse.json(data)
-    } catch (parseError) {
-      console.error("[AI API] Logic/Parsing failed:", parseError)
-      console.log("[AI API] Using fallback questions due to parse error")
-      return NextResponse.json({
-        title: `${subject} Questions`,
-        description: `Pre-generated ${subject} questions for Grade ${grade}`,
-        grade,
-        subject,
-        questions: getFallbackQuestions(grade, subject, count),
-        fallback: true
-      })
+    if (generationSuccessful && finalData) {
+      return NextResponse.json(finalData)
+    } else {
+      throw lastError || new Error("All AI models failed to generate content")
     }
   } catch (error: any) {
     console.error("Critical AI Error:", error)
