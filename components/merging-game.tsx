@@ -124,7 +124,7 @@ export default function MergingGame({
     const gameAreaRef = useRef<HTMLDivElement>(null)
 
     // Crash Prevention: If no questions, show loading or error
-    if (!questions || questions.length === 0) {
+    if (!Array.isArray(questions) || questions.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center w-full h-full text-white bg-slate-900">
                 <div className="w-12 h-12 rounded-full border-4 border-purple-500 border-t-transparent animate-spin mb-4" />
@@ -138,7 +138,7 @@ export default function MergingGame({
     useEffect(() => {
         const question = questions[currentQuestionIndex]
         if (question) {
-            const optionsWithIndices = question.options.map((option, index) => ({
+            const optionsWithIndices = question.options?.map((option, index) => ({
                 text: option,
                 originalIndex: index
             }))
@@ -191,7 +191,7 @@ export default function MergingGame({
     const handleAnswer = (shuffledIndex: number) => {
         const originalIndex = shuffledOptions[shuffledIndex].originalIndex
 
-        if (originalIndex === questions[currentQuestionIndex].correctIndex) {
+        if (originalIndex === questions[currentQuestionIndex]?.correctIndex) {
             setFeedback("correct")
             setCorrectAnswers(prev => prev + 1)
             setScore((prev) => {
@@ -201,6 +201,7 @@ export default function MergingGame({
             })
             setTimeout(() => {
                 setFeedback(null)
+                setIsAnswering(false) // Allow dropping boom
                 dropBoom()
                 setCurrentQuestionIndex((prev) => (prev + 1) % questions.length)
             }, 500)
@@ -433,7 +434,7 @@ export default function MergingGame({
                         <CardContent className="flex flex-col h-full pt-10">
                             <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
                                 <h3 className="text-2xl md:text-3xl font-black text-white leading-tight mb-8">
-                                    {questions.length > 0 ? questions[currentQuestionIndex].question : "Waiting for game start..."}
+                                    {questions.length > 0 ? questions[currentQuestionIndex]?.question : "Waiting for game start..."}
                                 </h3>
                             </div>
 
@@ -443,8 +444,8 @@ export default function MergingGame({
                                         key={i}
                                         onClick={() => isAnswering && handleAnswer(i)}
                                         disabled={!isAnswering}
-                                        className={`h-24 rounded-2xl text-lg font-black transition-all border-b-4 active:border-b-0 active:translate-y-1 ${feedback === "correct" && option.originalIndex === questions[currentQuestionIndex].correctIndex ? "bg-green-500 border-green-700" :
-                                            feedback === "incorrect" && option.originalIndex !== questions[currentQuestionIndex].correctIndex ? "bg-red-500/20 border-red-900/40 text-white/40" :
+                                        className={`h-24 rounded-2xl text-lg font-black transition-all border-b-4 active:border-b-0 active:translate-y-1 ${feedback === "correct" && option.originalIndex === questions[currentQuestionIndex]?.correctIndex ? "bg-green-500 border-green-700" :
+                                            feedback === "incorrect" && option.originalIndex !== questions[currentQuestionIndex]?.correctIndex ? "bg-red-500/20 border-red-900/40 text-white/40" :
                                                 "bg-white/10 hover:bg-white/20 border-white/5 text-white"
                                             }`}
                                     >
