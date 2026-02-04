@@ -8,7 +8,7 @@ async function listModels() {
         // There isn't a direct listModels in the main export of the v1 SDK sometimes 
         // but we can try to hit the endpoint or just try common names.
         // Actually, let's just try to test a few common ones programmatically.
-        const models = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-1.0-pro", "gemini-pro", "gemini-1.5-flash-latest"];
+        const models = ["gemini-flash-latest", "gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-pro-latest", "gemini-2.5-flash"];
 
         for (const modelName of models) {
             try {
