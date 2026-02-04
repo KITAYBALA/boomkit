@@ -402,6 +402,25 @@ const AVAILABLE_BADGES = [
 
 const PACKS: Pack[] = [
   {
+    id: "ai",
+    name: "AI Pack",
+    price: 35,
+    series: 2,
+    isNew: true,
+    booms: [
+      { name: "DeepSeek", rarity: "uncommon", avatar: "/images/booms/deepseek.png", description: "Deep thinking AI" },
+      { name: "Microsoft Copilot", rarity: "rare", avatar: "/images/booms/copilot.png", description: "Your daily AI companion" },
+      { name: "Claude", rarity: "epic", avatar: "/images/booms/chatgpt.png", description: "Helpful and harmless AI" }, // Fixed mixed logos
+      { name: "ChatGPT", rarity: "legendary", avatar: "/images/booms/claude.png", description: "The pioneer of conversational AI" }, // Fixed mixed logos
+      { name: "Vercel", rarity: "chroma", avatar: "/images/booms/vercel.png", description: "The platform for frontend developers" },
+      { name: "Google Gemini", rarity: "mystical", avatar: "/images/booms/gemini.png", description: "The most capable AI from Google" },
+    ],
+    color: "from-indigo-600 to-blue-900",
+    image: "/images/ai-pack.png",
+    rarity: "rare",
+    emoji: "🧠",
+  },
+  {
     id: "bug",
     name: "Bug Pack",
     price: 25,
@@ -605,23 +624,7 @@ const PACKS: Pack[] = [
     rarity: "rare",
     emoji: "❄️",
   },
-  {
-    id: "ai",
-    name: "AI Pack",
-    price: 35,
-    booms: [
-      { name: "DeepSeek", rarity: "uncommon", avatar: "/images/booms/deepseek.png", description: "Deep thinking AI" },
-      { name: "Microsoft Copilot", rarity: "rare", avatar: "/images/booms/copilot.png", description: "Your daily AI companion" },
-      { name: "Claude", rarity: "epic", avatar: "/images/booms/claude.png", description: "Helpful and harmless AI" },
-      { name: "ChatGPT", rarity: "legendary", avatar: "/images/booms/chatgpt.png", description: "The pioneer of conversational AI" },
-      { name: "Vercel", rarity: "chroma", avatar: "/images/booms/vercel.png", description: "The platform for frontend developers" },
-      { name: "Google Gemini", rarity: "mystical", avatar: "/images/booms/gemini.png", description: "The most capable AI from Google" },
-    ],
-    color: "from-indigo-600 to-blue-900",
-    image: "/images/ai-pack.png",
-    rarity: "rare",
-    emoji: "🧠",
-  },
+  // AI pack removed from here as it was moved to front
 ]
 
 // Gamepass Booms - Unlocked at level milestones
@@ -730,6 +733,8 @@ export default function BoomkitGame() {
     mode: "solo" | "host" | "join"
     gameMode: string
     questions: any[]
+    series?: number
+    isNew?: boolean
     duration?: number // Added duration
   } | null>(null)
   const [isMergingGameActive, setIsMergingGameActive] = useState(false)
@@ -1361,24 +1366,28 @@ export default function BoomkitGame() {
   const awardXP = (amount: number) => {
     if (!currentUser) return
 
-    let newXP = (currentUser.xp || 0) + amount
-    let newLevel = currentUser.level || 1
+    let currentXP = currentUser.xp || 0
+    let currentLevel = currentUser.level || 1
+    let totalXP = currentXP + amount
+    let newLevel = currentLevel
     let leveledUp = false
-    const XP_PER_LEVEL = 100 // Simple fixed XP per level for now
+    const XP_PER_LEVEL = 100
     const levelsGained: number[] = []
 
-    // Calculate new level
-    while (newXP >= XP_PER_LEVEL) {
-      newXP -= XP_PER_LEVEL
+    // Calculate new level correctly
+    while (totalXP >= XP_PER_LEVEL) {
+      totalXP -= XP_PER_LEVEL
       newLevel++
       leveledUp = true
       levelsGained.push(newLevel)
     }
 
+    let newXP = totalXP
+
     // Cap at level 100
     if (newLevel >= 100) {
       newLevel = 100
-      newXP = 100 // Visual cap for max level
+      newXP = 0 // Cap XP at 0 once level 100 is reached
     }
 
     // Start with current booms
@@ -3759,6 +3768,21 @@ export default function BoomkitGame() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {PACKS.map((pack) => (
                     <div key={pack.id} className="relative group perspective-1000">
+                      {/* NEW! Label and Series */}
+                      {pack.isNew && (
+                        <div className="absolute -top-3 -right-3 z-30 animate-bounce">
+                          <div className="bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg shadow-red-900/40 border-2 border-white/20 uppercase tracking-widest">
+                            NEW!
+                          </div>
+                        </div>
+                      )}
+                      {pack.series && (
+                        <div className="absolute top-4 left-4 z-30">
+                          <Badge className="bg-black/40 backdrop-blur-md border-white/20 text-[10px] font-black uppercase text-white/80 px-2 py-0.5 rounded-lg">
+                            Series {pack.series}
+                          </Badge>
+                        </div>
+                      )}
                       <div
                         className={`
                           bg-gradient-to-br ${pack.color} rounded-[2rem] overflow-hidden relative shadow-2xl
@@ -4527,25 +4551,23 @@ export default function BoomkitGame() {
                   questions={activeDiscoverGame.questions}
                   durationSeconds={activeDiscoverGame.duration || 600}
                   startTimeOffset={gameStartOffset}
-                  onEnd={(score) => {
+                  onEnd={(score, correctAnswers) => {
                     setGameScore(score)
                     setIsMergingGameActive(false)
                     setShowGameResults(true)
 
-                    // Award Rewards
+                    // Grade-based Reward Logic
+                    // Grade 1: 1 * correctAnswers
+                    // Grade 2: 2 * correctAnswers
+                    // ... etc
+                    const xpReward = activeDiscoverGame.grade * (correctAnswers || 0)
                     const tokenReward = Math.floor(score / 5)
-                    const xpReward = Math.floor(score / 2)
 
                     if (currentUser) {
-                      const updatedUser = {
-                        ...currentUser,
-                        tokens: (currentUser.tokens || 0) + tokenReward,
-                        xp: (currentUser.xp || 0) + xpReward
-                      }
                       awardXP(xpReward)
                       updateAndPersistCurrentUser({
-                        ...updatedUser,
-                        tokens: updatedUser.tokens
+                        ...currentUser,
+                        tokens: (currentUser.tokens || 0) + tokenReward
                       })
                     }
                   }}
