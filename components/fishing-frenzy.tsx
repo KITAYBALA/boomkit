@@ -49,7 +49,7 @@ export default function FishingFrenzy({
     const [isGameOver, setIsGameOver] = useState(false)
 
     // Crash Prevention
-    if (!questions || questions.length === 0) {
+    if (!Array.isArray(questions) || questions.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center w-full h-full text-white bg-slate-900">
                 <div className="w-12 h-12 rounded-full border-4 border-blue-500 border-t-transparent animate-spin mb-4" />
@@ -122,7 +122,7 @@ export default function FishingFrenzy({
     }
 
     const handleAnswer = (index: number) => {
-        const correct = index === questions[currentQuestionIndex].correctIndex
+        const correct = index === questions[currentQuestionIndex]?.correctIndex
 
         if (correct) {
             const { tier, weight, color } = getTierAndWeight()
@@ -272,7 +272,7 @@ export default function FishingFrenzy({
                                     {questions && questions.length > 0 ? questions[currentQuestionIndex]?.question : "Waiting for players..."}
                                 </h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {questions && questions.length > 0 && questions[currentQuestionIndex]?.options.map((option, idx) => (
+                                    {questions && questions.length > 0 && questions[currentQuestionIndex]?.options?.map((option, idx) => (
                                         <Button
                                             key={idx}
                                             onClick={() => handleAnswer(idx)}
