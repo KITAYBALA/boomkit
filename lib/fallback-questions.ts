@@ -138,20 +138,130 @@ export const FALLBACK_QUESTIONS: { [key: string]: Question[] } = {
         { id: "ss3", question: "What is the capital of the USA?", options: ["New York", "Washington D.C.", "Los Angeles", "Chicago"], correctIndex: 1 },
         { id: "ss4", question: "What do we use to see where countries are?", options: ["Book", "Calculator", "Map", "Compass"], correctIndex: 2 },
         { id: "ss5", question: "Which is a holiday in July?", options: ["Christmas", "Halloween", "Independence Day", "Easter"], correctIndex: 2 }
+    ],
+    "math_middle": [
+        { id: "mm1", question: "What is the area of a rectangle with length 5 and width 4?", options: ["9", "20", "18", "10"], correctIndex: 1 },
+        { id: "mm2", question: "Simplify: x + x + x", options: ["x^3", "3x", "x+3", "3+x"], correctIndex: 1 },
+        { id: "mm3", question: "What is 15% of 200?", options: ["15", "20", "30", "45"], correctIndex: 2 },
+        { id: "mm4", question: "Solve for y: y / 3 = 12", options: ["4", "9", "15", "36"], correctIndex: 3 },
+        { id: "mm5", question: "Which is greater: 0.5 or 0.25?", options: ["0.5", "0.25", "They are equal", "Cannot tell"], correctIndex: 0 }
+    ],
+    "science_middle": [
+        { id: "sm1", question: "What is the powerhouse of the cell?", options: ["Nucleus", "Ribosome", "Mitochondria", "Vacuole"], correctIndex: 2 },
+        { id: "sm2", question: "Which gas do humans breathe out?", options: ["Oxygen", "Nitrogen", "Carbon Dioxide", "Hydrogen"], correctIndex: 2 },
+        { id: "sm3", question: "What is the atomic symbol for Water?", options: ["O2", "H2O", "CO2", "HO"], correctIndex: 1 },
+        { id: "sm4", question: "Which layer of the Earth is the hottest?", options: ["Crust", "Mantle", "Outer Core", "Inner Core"], correctIndex: 3 },
+        { id: "sm5", question: "Sound cannot travel through which of these?", options: ["Water", "Air", "Steel", "Vacuum"], correctIndex: 3 }
+    ],
+    "math_high": [
+        { id: "mh1", question: "What is the derivative of x^2?", options: ["x", "2x", "x^3/3", "2"], correctIndex: 1 },
+        { id: "mh2", question: "Solve for x: 2x + 5 = 15", options: ["5", "10", "2", "20"], correctIndex: 0 },
+        { id: "mh3", question: "In a right triangle, if a=3 and b=4, what is c?", options: ["5", "6", "7", "25"], correctIndex: 0 },
+        { id: "mh4", question: "What is the log(100)?", options: ["1", "2", "10", "100"], correctIndex: 1 },
+        { id: "mh5", question: "Which is the formula for the area of a circle?", options: ["2πr", "πr^2", "πd", "2πr^2"], correctIndex: 1 }
+    ],
+    "reading_middle": [
+        { id: "rm1", question: "What is a 'protagonist'?", options: ["The villain", "The sidekick", "The main character", "The narrator"], correctIndex: 2 },
+        { id: "rm2", question: "Which is an example of a simile?", options: ["He is a lion", "As brave as a lion", "Lions roar", "The lion slept"], correctIndex: 1 }
+    ],
+    "social_studies_high": [
+        { id: "ssh1", question: "When was the US Declaration of Independence signed?", options: ["1492", "1776", "1812", "1865"], correctIndex: 1 },
+        { id: "ssh2", question: "Who was the leader of the Soviet Union during WWII?", options: ["Lenin", "Stalin", "Khrushchev", "Gorbachev"], correctIndex: 1 }
     ]
 }
 
-export function getFallbackQuestions(grade: number, subject: string, count: number): Question[] {
+// Topic-specific fallback questions
+export const TOPIC_FALLBACKS: { [key: string]: Question[] } = {
+    "counting by 10s": [
+        { id: "c10_1", question: "10, 20, 30, _?", options: ["35", "40", "50", "60"], correctIndex: 1 },
+        { id: "c10_2", question: "What comes after 80 when counting by 10s?", options: ["81", "85", "90", "100"], correctIndex: 2 },
+        { id: "c10_3", question: "If you have 4 tens, what is the number?", options: ["4", "14", "40", "400"], correctIndex: 2 },
+        { id: "c10_4", question: "How many tens are in 100?", options: ["5", "10", "20", "100"], correctIndex: 1 },
+        { id: "c10_5", question: "50, 60, _, 80", options: ["65", "70", "75", "90"], correctIndex: 1 },
+        { id: "c10_6", question: "What is 10 more than 30?", options: ["31", "40", "50", "60"], correctIndex: 1 },
+        { id: "c10_7", question: "Counting by 10s: 0, 10, 20, 30, 40, _?", options: ["45", "50", "60", "70"], correctIndex: 1 },
+        { id: "c10_8", question: "Which number is not hit when counting by 10s from 0?", options: ["20", "35", "50", "90"], correctIndex: 1 },
+        { id: "c10_9", question: "What is 9 tens?", options: ["9", "19", "90", "900"], correctIndex: 2 },
+        { id: "c10_10", question: "How do you write 'seventy' in numbers?", options: ["17", "7", "70", "700"], correctIndex: 2 }
+    ],
+    "counting by 2s": [
+        { id: "c2_1", question: "2, 4, 6, _?", options: ["7", "8", "9", "10"], correctIndex: 1 },
+        { id: "c2_2", question: "What comes next: 10, 12, 14, _?", options: ["15", "16", "17", "18"], correctIndex: 1 }
+    ],
+    "counting by 5s": [
+        { id: "c5_1", question: "5, 10, 15, _?", options: ["20", "25", "30", "35"], correctIndex: 0 },
+        { id: "c5_2", question: "What comes after 25 when counting by 5s?", options: ["26", "27", "30", "35"], correctIndex: 2 }
+    ],
+    "addition within 20": [
+        { id: "add20_1", question: "What is 8 + 5?", options: ["12", "13", "14", "15"], correctIndex: 1 },
+        { id: "add20_2", question: "What is 9 + 7?", options: ["15", "16", "17", "18"], correctIndex: 1 },
+        { id: "add20_3", question: "What is 12 + 6?", options: ["17", "18", "19", "20"], correctIndex: 1 }
+    ],
+    "multiplication facts": [
+        { id: "mult_1", question: "What is 5 x 5?", options: ["20", "25", "30", "35"], correctIndex: 1 },
+        { id: "mult_2", question: "What is 2 x 8?", options: ["14", "16", "18", "20"], correctIndex: 1 },
+        { id: "mult_3", question: "What is 10 x 4?", options: ["14", "40", "44", "400"], correctIndex: 1 }
+    ],
+    "photosynthesis": [
+        { id: "photo_1", question: "What do plants need for photosynthesis?", options: ["Milk", "Sunlight", "Juice", "Soda"], correctIndex: 1 },
+        { id: "photo_2", question: "What gas do plants release?", options: ["Carbon Dioxide", "Oxygen", "Nitrogen", "Helium"], correctIndex: 1 },
+        { id: "photo_3", question: "Where does photosynthesis happen?", options: ["Roots", "Leaves", "Stem", "Flowers"], correctIndex: 1 }
+    ],
+    "parts of speech": [
+        { id: "pos_1", question: "Which word is a verb?", options: ["Dog", "Run", "Blue", "Big"], correctIndex: 1 },
+        { id: "pos_2", question: "Which word is an adjective?", options: ["Table", "Apple", "Beautiful", "Jump"], correctIndex: 2 },
+        { id: "pos_3", question: "Which is a proper noun?", options: ["city", "country", "Paris", "street"], correctIndex: 2 }
+    ],
+    "state capitals": [
+        { id: "sc_1", question: "What is the capital of New York?", options: ["New York City", "Albany", "Buffalo", "Rochester"], correctIndex: 1 },
+        { id: "sc_2", question: "What is the capital of California?", options: ["Los Angeles", "San Francisco", "Sacramento", "San Diego"], correctIndex: 2 },
+        { id: "sc_3", question: "What is the capital of Texas?", options: ["Houston", "Dallas", "Austin", "San Antonio"], correctIndex: 2 }
+    ]
+}
+
+export function getFallbackQuestions(grade: number, subject: string, count: number, topic?: string): Question[] {
     const subjectKey = subject.toLowerCase()
+    const topicKey = topic?.toLowerCase() || ""
     let pool: Question[] = []
 
-    if (subjectKey.includes("math")) pool = FALLBACK_QUESTIONS["math_elementary"]
-    else if (subjectKey.includes("read") || subjectKey.includes("english")) pool = FALLBACK_QUESTIONS["reading_elementary"]
-    else if (subjectKey.includes("science")) pool = FALLBACK_QUESTIONS["science_elementary"]
-    else if (subjectKey.includes("physical") || subjectKey.includes("pe") || subjectKey.includes("health")) pool = FALLBACK_QUESTIONS["pe_elementary"]
-    else if (subjectKey.includes("social") || subjectKey.includes("history") || subjectKey.includes("geography")) pool = FALLBACK_QUESTIONS["social_studies_elementary"]
-    else {
-        // Fallback for completely unknown subjects - pick ONE category instead of mixing
+    // 1. Try topic-specific pool first
+    if (topicKey && TOPIC_FALLBACKS[topicKey]) {
+        pool = TOPIC_FALLBACKS[topicKey]
+    }
+
+    // 2. If no topic pool or too few questions, use subject pool
+    if (pool.length < count) {
+        let subjectPool: Question[] = []
+
+        // Advanced Grade-Based Routing
+        if (grade >= 9) {
+            if (subjectKey.includes("math")) subjectPool = FALLBACK_QUESTIONS["math_high"]
+            else if (subjectKey.includes("science")) subjectPool = FALLBACK_QUESTIONS["math_high"] // Fallback to math if no high science
+            else subjectPool = FALLBACK_QUESTIONS["social_studies_high"]
+        } else if (grade >= 6) {
+            if (subjectKey.includes("math")) subjectPool = FALLBACK_QUESTIONS["math_middle"]
+            else if (subjectKey.includes("science")) subjectPool = FALLBACK_QUESTIONS["science_middle"]
+            else subjectPool = FALLBACK_QUESTIONS["reading_middle"]
+        } else {
+            // Elementary
+            if (subjectKey.includes("math")) subjectPool = FALLBACK_QUESTIONS["math_elementary"]
+            else if (subjectKey.includes("read") || subjectKey.includes("english")) subjectPool = FALLBACK_QUESTIONS["reading_elementary"]
+            else if (subjectKey.includes("science")) subjectPool = FALLBACK_QUESTIONS["science_elementary"]
+            else if (subjectKey.includes("physical") || subjectKey.includes("pe") || subjectKey.includes("health")) subjectPool = FALLBACK_QUESTIONS["pe_elementary"]
+            else if (subjectKey.includes("social") || subjectKey.includes("history") || subjectKey.includes("geography")) subjectPool = FALLBACK_QUESTIONS["social_studies_elementary"]
+            else {
+                subjectPool = FALLBACK_QUESTIONS["reading_elementary"]
+            }
+        }
+
+        // Merge pools and avoid duplicates
+        const existingIds = new Set(pool.map(q => q.id))
+        const filteredSubjectPool = subjectPool.filter(q => !existingIds.has(q.id))
+        pool = [...pool, ...filteredSubjectPool]
+    }
+
+    // 3. Ultimate safety check - if still empty, use elementary reading as global fallback
+    if (pool.length === 0) {
         pool = FALLBACK_QUESTIONS["reading_elementary"]
     }
 

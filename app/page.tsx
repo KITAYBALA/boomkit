@@ -2316,7 +2316,7 @@ export default function BoomkitGame() {
 
       if (response.status === 429) {
         console.warn("[AI API] Rate limit hit, using fallback questions")
-        return getFallbackQuestions(grade, subject, count)
+        return getFallbackQuestions(grade, subject, count, topic === "General" ? subject : topic)
       }
 
       const data = await response.json()
@@ -2339,10 +2339,10 @@ export default function BoomkitGame() {
         })
       }
 
-      return questions.length > 0 ? questions : getFallbackQuestions(grade, subject, count)
+      return questions.length > 0 ? questions : getFallbackQuestions(grade, subject, count, topic === "General" ? subject : topic)
     } catch (err) {
       console.error("Error fetching AI questions:", err)
-      return getFallbackQuestions(grade, subject, 30)
+      return getFallbackQuestions(grade, subject, count, topic === "General" ? subject : topic)
     }
   }
 

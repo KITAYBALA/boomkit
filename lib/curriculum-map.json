@@ -1,0 +1,81 @@
+{
+    "grades": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12
+    ],
+    "subjects": {
+        "Math": [
+            "Counting and Cardinality",
+            "Addition and Subtraction",
+            "Multiplication and Division",
+            "Fractions and Decimals",
+            "Measurement and Data",
+            "Geometry",
+            "Algebraic Thinking",
+            "Ratios and Proportional Relationships",
+            "Number System",
+            "Expressions and Equations",
+            "Functions",
+            "Statistics and Probability",
+            "Algebra I",
+            "Algebra II",
+            "Pre-Calculus",
+            "Calculus"
+        ],
+        "Reading": [
+            "Phonics and Word Recognition",
+            "Vocabulary Acquisition",
+            "Grammar and Usage",
+            "Main Idea and Details",
+            "Theme and Plot",
+            "Character Analysis",
+            "Inference and Evidence",
+            "Figurative Language",
+            "Text Structure",
+            "Point of View",
+            "Literary Devices",
+            "Rhetoric and Persuasion",
+            "Classical Literature"
+        ],
+        "Science": [
+            "Plants and Animals",
+            "Earth and Stars",
+            "Weather and Seasons",
+            "States of Matter",
+            "Human Body Systems",
+            "Ecosystems and Environment",
+            "Forces and Motion",
+            "Simple Machines",
+            "Chemistry Basics",
+            "Cell Biology",
+            "Genetics and Evolution",
+            "Physics: Energy and Waves",
+            "Earth Science: Geology",
+            "Space Science: Astronomy"
+        ],
+        "Social Studies": [
+            "Communities and Citizenship",
+            "Maps and Geography",
+            "Holidays and Traditions",
+            "Biographies of Famous People",
+            "Ancient Civilizations",
+            "US History: Colonial Times",
+            "US History: Civil War",
+            "World History: Middle Ages",
+            "World History: Modern Era",
+            "Economics and Money",
+            "Government and Law",
+            "Psychology and Sociology"
+        ]
+    }
+}

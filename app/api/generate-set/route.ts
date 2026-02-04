@@ -17,7 +17,7 @@ export async function POST(req: Request) {
         description: `Pre-generated ${subject} questions for Grade ${grade}`,
         grade,
         subject,
-        questions: getFallbackQuestions(grade, subject, count),
+        questions: getFallbackQuestions(grade, subject, count, prompt),
         fallback: true
       })
     }
@@ -121,7 +121,7 @@ export async function POST(req: Request) {
       description: `Error: ${errorMsg}. Using fallback questions.`,
       grade,
       subject,
-      questions: getFallbackQuestions(grade, subject, count),
+      questions: getFallbackQuestions(grade, subject, count, prompt),
       fallback: true,
       error: errorMsg
     })
