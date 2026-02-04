@@ -1024,6 +1024,21 @@ export default function BoomkitGame() {
     [setUsers, handleLogout],
   )
 
+  const handleScoreUpdate = useCallback(async (newScore: number) => {
+    if (!activeGamePin || !supabase || !currentUser?.id) return
+
+    try {
+      const { error } = await supabase.rpc("update_game_score", {
+        p_pin: activeGamePin,
+        p_user_id: currentUser.id,
+        p_score: Math.floor(newScore)
+      })
+      if (error) console.error("Score sync error:", error)
+    } catch (err) {
+      console.error("Score sync exception:", err)
+    }
+  }, [activeGamePin, supabase, currentUser?.id])
+
   // Load initial data from localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -4524,15 +4539,7 @@ export default function BoomkitGame() {
                         })
                       }
                     }}
-                    onScoreUpdate={async (newScore) => {
-                      if (activeGamePin && supabase) {
-                        await supabase.rpc("update_game_score", {
-                          p_pin: activeGamePin,
-                          p_user_id: currentUser?.id,
-                          p_score: newScore
-                        })
-                      }
-                    }}
+                    onScoreUpdate={handleScoreUpdate}
                     onAwardTokens={(amount) => {
                       if (currentUser) {
                         updateAndPersistCurrentUser({
@@ -4572,15 +4579,7 @@ export default function BoomkitGame() {
                       })
                     }
                   }}
-                  onScoreUpdate={async (newScore) => {
-                    if (activeGamePin && supabase) {
-                      await supabase.rpc("update_game_score", {
-                        p_pin: activeGamePin,
-                        p_user_id: currentUser?.id,
-                        p_score: newScore
-                      })
-                    }
-                  }}
+                  onScoreUpdate={handleScoreUpdate}
                   onAwardTokens={(amount) => {
                     if (currentUser) {
                       updateAndPersistCurrentUser({
