@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
 
     // Create user - use only columns that exist in database (matching login route select)
     const newUser = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       username,
       email: email || `no_email_${username}_${Date.now()}@boomkit.local`,
       age: Number.parseInt(age),
