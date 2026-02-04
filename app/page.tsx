@@ -5819,7 +5819,7 @@ export default function BoomkitGame() {
               pin={activeGamePin || ""}
               gameMode={selectedGameMode?.name || "Classic"}
               subject={activeDiscoverGame.subject}
-              duration={gameSettings?.duration || activeDiscoverGame.duration || 120}
+              duration={selectedDuration || activeDiscoverGame.duration || 120}
               onEndGame={async () => {
                 if (supabase && activeGamePin) {
                   await supabase.from("game_sessions").update({ status: "finished" }).eq("pin", activeGamePin)
@@ -5827,7 +5827,12 @@ export default function BoomkitGame() {
                 setIsMergingGameActive(false)
                 setShowGameResults(true)
               }}
-              players={livePlayers}
+              players={livePlayers.map(p => ({
+                id: p.id,
+                username: p.username,
+                score: p.score || 0,
+                avatar: p.profile_picture || p.profilePicture
+              }))}
             />
           </div>
         </div>

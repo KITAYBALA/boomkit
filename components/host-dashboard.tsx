@@ -41,7 +41,7 @@ export default function HostDashboard({
     onEndGame,
     players = []
 }: HostDashboardProps) {
-    const [timeLeft, setTimeLeft] = useState(duration)
+    const [timeLeft, setTimeLeft] = useState(duration || 120)
     const [isPaused, setIsPaused] = useState(false)
     const [recentActivity, setRecentActivity] = useState<{ id: string, message: string, time: string }[]>([
         { id: "1", message: "Game started!", time: "just now" },
@@ -74,11 +74,18 @@ export default function HostDashboard({
         if (isPaused) return
 
         const timer = setInterval(() => {
-            setTimeLeft(prev => Math.max(0, prev - 1))
+            setTimeLeft(prev => {
+                if (prev <= 1) {
+                    clearInterval(timer)
+                    onEndGame()
+                    return 0
+                }
+                return prev - 1
+            })
         }, 1000)
 
         return () => clearInterval(timer)
-    }, [isPaused])
+    }, [isPaused, onEndGame])
 
     const sortedPlayers = [...players].filter(Boolean).sort((a, b) => (b.score || 0) - (a.score || 0))
     const topPlayer = sortedPlayers[0]
@@ -181,7 +188,9 @@ export default function HostDashboard({
                                     </div>
                                     <div className="text-right">
                                         <p className="text-2xl font-black text-white">{(player.score || 0).toLocaleString()}</p>
-                                        <p className="text-[10px] text-purple-400 font-bold uppercase tracking-widest">Points</p>
+                                        <p className="text-[10px] text-purple-400 font-bold uppercase tracking-widest">
+                                            {gameMode === "fishing-frenzy" ? "LBS" : "Points"}
+                                        </p>
                                     </div>
                                 </div>
                             ))
@@ -201,8 +210,13 @@ export default function HostDashboard({
                         <h3 className="text-4xl font-black truncate mb-4">{topPlayer?.username || "---"}</h3>
                         <div className="flex items-center justify-between bg-white/10 rounded-xl p-4">
                             <div>
-                                <p className="text-white/60 text-[10px] font-bold uppercase">Current Score</p>
-                                <p className="text-2xl font-black">{(topPlayer?.score || 0).toLocaleString()}</p>
+                                <p className="text-[10px] text-white/60 font-bold uppercase">
+                                    {gameMode === "fishing-frenzy" ? "Current Weight" : "Current Score"}
+                                </p>
+                                <p className="text-2xl font-black">
+                                    {(topPlayer?.score || 0).toLocaleString()}
+                                    {gameMode === "fishing-frenzy" && <span className="text-sm ml-1 opacity-60">lbs</span>}
+                                </p>
                             </div>
                             <Trophy className="w-10 h-10 text-amber-300" />
                         </div>
