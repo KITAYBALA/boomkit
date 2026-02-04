@@ -39,10 +39,11 @@ export async function POST(req: Request) {
 
       CRITICAL TOPIC RELEVANCE RULE:
       - EVERY single question MUST be directly related to the Topic: "${prompt}".
-      - DO NOT generate generic educational questions. 
-      - DO NOT use placeholder questions like "How many fingers are on one hand?".
+      - DO NOT generate generic educational questions like "What is 3+3?" or "How many legs does an insect have?" unless it is EXACTLY what the topic asks for.
+      - DO NOT use placeholder questions or generic math if the topic is NOT about that specific math.
       - If the topic is specific (e.g., "Counting to 100", "State Capitals", "Photosynthesis"), every question MUST stay within that narrow scope.
       - Topic adherence is the HIGHEST priority. Failure to follow the topic will result in a system error.
+      - If the topic is "Counting by 10s", DO NOT ask about "3x3". Ask about "10, 20, 30, _?" or "What comes after 80 when counting by 10s?".
 
       CRITICAL DIFFICULTY & DIVERSITY RULES:
       - EVERY question MUST have EXACTLY 4 options. Never 2 or 3.
