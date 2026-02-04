@@ -59,12 +59,21 @@ export default function FishingFrenzy({
         )
     }
 
-    // Timer logic
+    // Timer logic with sync
     useEffect(() => {
-        if (timeLeft <= 0 || isGameOver) return
-        const timer = setInterval(() => setTimeLeft(prev => prev - 1), 1000)
+        // Calculate initial time left based on offset
+        const initialTime = Math.max(0, durationSeconds - (startTimeOffset || 0))
+        setTimeLeft(initialTime)
+
+        const timer = setInterval(() => {
+            setTimeLeft(prev => {
+                const next = prev - 1
+                return next > 0 ? next : 0
+            })
+        }, 1000)
+
         return () => clearInterval(timer)
-    }, [timeLeft, isGameOver])
+    }, [durationSeconds, startTimeOffset])
 
     useEffect(() => {
         if (timeLeft <= 0) {
@@ -122,7 +131,7 @@ export default function FishingFrenzy({
     }
 
     const handleAnswer = (index: number) => {
-        const correct = index === questions[currentQuestionIndex]?.correctIndex
+        const correct = index === (questions[currentQuestionIndex]?.correctIndex ?? -1)
 
         if (correct) {
             const { tier, weight, color } = getTierAndWeight()
@@ -139,16 +148,20 @@ export default function FishingFrenzy({
 
             setLastCatch({ name: fish, weight, rarity: tier, color })
             setScore(prev => prev + weight)
-            if (onScoreUpdate) onScoreUpdate(score + weight)
             if (onAwardTokens) onAwardTokens(tier === "S" ? 500 : Math.floor(weight / 5))
             setGameState("result")
         } else {
-            setGameState("idle")
+            setGameState("result")
         }
-
-        // Move to next question or loop
-        setCurrentQuestionIndex((prev) => (prev + 1) % questions.length)
+        setCurrentQuestionIndex((prev) => (prev + 1) % (questions?.length || 1))
     }
+
+    // Report score changes to host
+    useEffect(() => {
+        if (onScoreUpdate && score > 0) {
+            onScoreUpdate(score)
+        }
+    }, [score, onScoreUpdate])
 
     return (
         <div className="relative w-full h-full bg-[#1a1c2c] overflow-hidden flex flex-col">
