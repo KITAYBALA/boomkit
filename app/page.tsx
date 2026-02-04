@@ -4604,7 +4604,7 @@ export default function BoomkitGame() {
                   </div>
                   <CardContent className="p-0">
                     <div className="max-h-[300px] overflow-y-auto">
-                      {[...livePlayers].sort((a, b) => (b.score || 0) - (a.score || 0)).slice(0, 5).map((player, idx) => (
+                      {[...livePlayers].filter(Boolean).sort((a, b) => (b.score || 0) - (a.score || 0)).slice(0, 5).map((player, idx) => (
                         <div key={player.id} className="flex items-center justify-between p-3 border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
                           <div className="flex items-center gap-3">
                             <span className={`text-[10px] font-black ${idx === 0 ? "text-yellow-400" : "text-white/40"}`}>#{idx + 1}</span>
@@ -5838,7 +5838,7 @@ export default function BoomkitGame() {
           score={gameScore}
           totalQuestions={activeDiscoverGame?.questions?.length || 0}
           highScore={currentUser?.boomScore || 0}
-          leaderboard={livePlayers.length > 0 ? [...livePlayers].sort((a, b) => (b.score || 0) - (a.score || 0)).map(p => ({
+          leaderboard={livePlayers.length > 0 ? [...livePlayers].filter(Boolean).sort((a, b) => (b.score || 0) - (a.score || 0)).map(p => ({
             id: p.id,
             username: p.username,
             score: p.score || 0,
