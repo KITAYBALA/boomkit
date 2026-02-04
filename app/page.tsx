@@ -38,6 +38,7 @@ import {
   Settings2Icon,
   Users2Icon,
   InfoIcon,
+  TrophyIcon,
 } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 
