@@ -5819,7 +5819,7 @@ export default function BoomkitGame() {
               pin={activeGamePin || ""}
               gameMode={selectedGameMode?.name || "Classic"}
               subject={activeDiscoverGame.subject}
-              duration={gameSettings?.duration || 7}
+              duration={gameSettings?.duration || activeDiscoverGame.duration || 120}
               onEndGame={async () => {
                 if (supabase && activeGamePin) {
                   await supabase.from("game_sessions").update({ status: "finished" }).eq("pin", activeGamePin)
