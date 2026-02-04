@@ -119,6 +119,7 @@ export default function MergingGame({
     const [feedback, setFeedback] = useState<"correct" | "incorrect" | null>(null)
     const [currentBoomX, setCurrentBoomX] = useState(50) // Horizontal position 0-100
     const [correctAnswers, setCorrectAnswers] = useState(0)
+    const [shuffledOptions, setShuffledOptions] = useState<{ text: string, originalIndex: number }[]>([])
 
     const gameAreaRef = useRef<HTMLDivElement>(null)
 
@@ -132,6 +133,24 @@ export default function MergingGame({
             </div>
         )
     }
+
+    // Shuffle options whenever the question changes
+    useEffect(() => {
+        const question = questions[currentQuestionIndex]
+        if (question) {
+            const optionsWithIndices = question.options.map((option, index) => ({
+                text: option,
+                originalIndex: index
+            }))
+            // Fisher-Yates shuffle
+            const shuffled = [...optionsWithIndices]
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+            }
+            setShuffledOptions(shuffled)
+        }
+    }, [currentQuestionIndex, questions])
 
     // Timer effect
     useEffect(() => {
@@ -169,9 +188,10 @@ export default function MergingGame({
         return "uncommon"
     }
 
-    const handleAnswer = (index: number) => {
-        const currentQuestion = questions[currentQuestionIndex]
-        if (index === currentQuestion.correctIndex) {
+    const handleAnswer = (shuffledIndex: number) => {
+        const originalIndex = shuffledOptions[shuffledIndex].originalIndex
+
+        if (originalIndex === questions[currentQuestionIndex].correctIndex) {
             setFeedback("correct")
             setCorrectAnswers(prev => prev + 1)
             setScore((prev) => {
@@ -324,8 +344,6 @@ export default function MergingGame({
         return () => clearInterval(simulation)
     }, [isGameOver])
 
-    const currentQuestion = questions[currentQuestionIndex]
-
     if (isGameOver) {
         return (
             <div className="flex items-center justify-center min-h-[600px] animate-in zoom-in-95 duration-500">
@@ -415,22 +433,22 @@ export default function MergingGame({
                         <CardContent className="flex flex-col h-full pt-10">
                             <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
                                 <h3 className="text-2xl md:text-3xl font-black text-white leading-tight mb-8">
-                                    {questions.length > 0 ? currentQuestion.question : "Waiting for game start..."}
+                                    {questions.length > 0 ? questions[currentQuestionIndex].question : "Waiting for game start..."}
                                 </h3>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pb-6">
-                                {questions.length > 0 && currentQuestion.options.map((option, i) => (
+                                {questions.length > 0 && shuffledOptions.map((option, i) => (
                                     <Button
                                         key={i}
                                         onClick={() => isAnswering && handleAnswer(i)}
                                         disabled={!isAnswering}
-                                        className={`h-24 rounded-2xl text-lg font-black transition-all border-b-4 active:border-b-0 active:translate-y-1 ${feedback === "correct" && i === currentQuestion.correctIndex ? "bg-green-500 border-green-700" :
-                                            feedback === "incorrect" && i !== currentQuestion.correctIndex ? "bg-red-500/20 border-red-900/40 text-white/40" :
+                                        className={`h-24 rounded-2xl text-lg font-black transition-all border-b-4 active:border-b-0 active:translate-y-1 ${feedback === "correct" && option.originalIndex === questions[currentQuestionIndex].correctIndex ? "bg-green-500 border-green-700" :
+                                            feedback === "incorrect" && option.originalIndex !== questions[currentQuestionIndex].correctIndex ? "bg-red-500/20 border-red-900/40 text-white/40" :
                                                 "bg-white/10 hover:bg-white/20 border-white/5 text-white"
                                             }`}
                                     >
-                                        {option}
+                                        {option.text}
                                     </Button>
                                 ))}
                             </div>

@@ -61,6 +61,7 @@ export async function POST(req: Request) {
       - RANDOMIZATION SEED: ${Date.now()}_${Math.random()}
       - TOPIC VARIETY: Mix different aspects of the TOPIC specifically.
       - PROGRESSION: Questions MUST get progressively harder within the set. Start with foundation and move to challenge.
+      - ANSWER RANDOMIZATION: The "correctIndex" MUST be randomly distributed across 0, 1, 2, and 3. DO NOT always put the correct answer in the same position.
 
       Return the response ONLY as a valid JSON object in this format:
       {
