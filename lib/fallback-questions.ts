@@ -144,29 +144,85 @@ export const FALLBACK_QUESTIONS: { [key: string]: Question[] } = {
         { id: "mm2", question: "Simplify: x + x + x", options: ["x^3", "3x", "x+3", "3+x"], correctIndex: 1 },
         { id: "mm3", question: "What is 15% of 200?", options: ["15", "20", "30", "45"], correctIndex: 2 },
         { id: "mm4", question: "Solve for y: y / 3 = 12", options: ["4", "9", "15", "36"], correctIndex: 3 },
-        { id: "mm5", question: "Which is greater: 0.5 or 0.25?", options: ["0.5", "0.25", "They are equal", "Cannot tell"], correctIndex: 0 }
+        { id: "mm5", question: "Which is greater: 0.5 or 0.25?", options: ["0.5", "0.25", "They are equal", "Cannot tell"], correctIndex: 0 },
+        { id: "mm6", question: "What is the square root of 64?", options: ["6", "7", "8", "9"], correctIndex: 2 },
+        { id: "mm7", question: "If 2x = 10, what is x?", options: ["2", "3", "5", "8"], correctIndex: 2 },
+        { id: "mm8", question: "How many degrees are in a triangle?", options: ["90", "180", "270", "360"], correctIndex: 1 },
+        { id: "mm9", question: "What is 3 squared?", options: ["6", "9", "12", "15"], correctIndex: 1 },
+        { id: "mm10", question: "Which is a prime number?", options: ["4", "6", "7", "9"], correctIndex: 2 }
     ],
     "science_middle": [
         { id: "sm1", question: "What is the powerhouse of the cell?", options: ["Nucleus", "Ribosome", "Mitochondria", "Vacuole"], correctIndex: 2 },
         { id: "sm2", question: "Which gas do humans breathe out?", options: ["Oxygen", "Nitrogen", "Carbon Dioxide", "Hydrogen"], correctIndex: 2 },
         { id: "sm3", question: "What is the atomic symbol for Water?", options: ["O2", "H2O", "CO2", "HO"], correctIndex: 1 },
         { id: "sm4", question: "Which layer of the Earth is the hottest?", options: ["Crust", "Mantle", "Outer Core", "Inner Core"], correctIndex: 3 },
-        { id: "sm5", question: "Sound cannot travel through which of these?", options: ["Water", "Air", "Steel", "Vacuum"], correctIndex: 3 }
+        { id: "sm5", question: "Sound cannot travel through which of these?", options: ["Water", "Air", "Steel", "Vacuum"], correctIndex: 3 },
+        { id: "sm6", question: "Which planet is known as the Red Planet?", options: ["Venus", "Mars", "Jupiter", "Saturn"], correctIndex: 1 },
+        { id: "sm7", question: "What is the boiling point of water in Celsius?", options: ["0", "50", "100", "200"], correctIndex: 2 },
+        { id: "sm8", question: "Which organ filters blood?", options: ["Heart", "Lungs", "Kidneys", "Stomach"], correctIndex: 2 },
+        { id: "sm9", question: "What is the largest organ of the human body?", options: ["Liver", "Brain", "Skin", "Heart"], correctIndex: 2 },
+        { id: "sm10", question: "Which force pulls objects toward Earth?", options: ["Magnetism", "Friction", "Gravity", "Inertia"], correctIndex: 2 }
     ],
     "math_high": [
         { id: "mh1", question: "What is the derivative of x^2?", options: ["x", "2x", "x^3/3", "2"], correctIndex: 1 },
         { id: "mh2", question: "Solve for x: 2x + 5 = 15", options: ["5", "10", "2", "20"], correctIndex: 0 },
         { id: "mh3", question: "In a right triangle, if a=3 and b=4, what is c?", options: ["5", "6", "7", "25"], correctIndex: 0 },
         { id: "mh4", question: "What is the log(100)?", options: ["1", "2", "10", "100"], correctIndex: 1 },
-        { id: "mh5", question: "Which is the formula for the area of a circle?", options: ["2πr", "πr^2", "πd", "2πr^2"], correctIndex: 1 }
+        { id: "mh5", question: "Which is the formula for the area of a circle?", options: ["2πr", "πr^2", "πd", "2πr^2"], correctIndex: 1 },
+        { id: "mh6", question: "What is the sine of 90 degrees?", options: ["0", "0.5", "1", "-1"], correctIndex: 2 },
+        { id: "mh7", question: "Solve: x^2 = 49", options: ["5", "6", "7", "8"], correctIndex: 2 },
+        { id: "mh8", question: "What is the value of Pi (to 2 decimal places)?", options: ["3.12", "3.14", "3.16", "3.18"], correctIndex: 1 },
+        { id: "mh9", question: "Which is a quadratic equation?", options: ["y=mx+b", "ax^2+bx+c=0", "a^2+b^2=c^2", "V=IR"], correctIndex: 1 },
+        { id: "mh10", question: "What is the limit of 1/x as x goes to infinity?", options: ["1", "0", "Infinity", "Undefined"], correctIndex: 1 }
     ],
     "reading_middle": [
         { id: "rm1", question: "What is a 'protagonist'?", options: ["The villain", "The sidekick", "The main character", "The narrator"], correctIndex: 2 },
-        { id: "rm2", question: "Which is an example of a simile?", options: ["He is a lion", "As brave as a lion", "Lions roar", "The lion slept"], correctIndex: 1 }
+        { id: "rm2", question: "Which is an example of a simile?", options: ["He is a lion", "As brave as a lion", "Lions roar", "The lion slept"], correctIndex: 1 },
+        { id: "rm3", question: "What is the main idea of a story?", options: ["The first sentence", "The character names", "What the story is mostly about", "The ending"], correctIndex: 2 },
+        { id: "rm4", question: "What does 'anonymous' mean?", options: ["Famous", "Unknown", "Angry", "Fast"], correctIndex: 1 },
+        { id: "rm5", question: "Which is a synonym for 'happy'?", options: ["Sad", "Gloomy", "Joyful", "Bored"], correctIndex: 2 },
+        { id: "rm6", question: "What is a 'metaphor'?", options: ["Direct comparison", "Using 'like' or 'as'", "Exaggeration", "Repeating sounds"], correctIndex: 0 },
+        { id: "rm7", question: "What is the 'climax' of a plot?", options: ["The beginning", "The turning point", "The resolution", "The character introduction"], correctIndex: 1 },
+        { id: "rm8", question: "Which word is an adverb?", options: ["Quickly", "Fast", "Green", "House"], correctIndex: 0 },
+        { id: "rm9", question: "What is 'foreshadowing'?", options: ["Looking back", "Hints about future events", "The main character", "The setting"], correctIndex: 1 },
+        { id: "rm10", question: "What is 'alliteration'?", options: ["Vowel sounds", "Repeating initial consonant sounds", "Rhyming", "Exaggeration"], correctIndex: 1 },
+        { id: "rm11", question: "What is 'onomatopoeia'?", options: ["Words that sound like their meaning", "A long journey", "A type of bird", "A figure of speech"], correctIndex: 0 },
+        { id: "rm12", question: "Which is an example of personification?", options: ["The wind whispered", "Strong as an ox", "Life is a highway", "Bang!"], correctIndex: 0 }
     ],
     "social_studies_high": [
         { id: "ssh1", question: "When was the US Declaration of Independence signed?", options: ["1492", "1776", "1812", "1865"], correctIndex: 1 },
-        { id: "ssh2", question: "Who was the leader of the Soviet Union during WWII?", options: ["Lenin", "Stalin", "Khrushchev", "Gorbachev"], correctIndex: 1 }
+        { id: "ssh2", question: "Who was the leader of the Soviet Union during WWII?", options: ["Lenin", "Stalin", "Khrushchev", "Gorbachev"], correctIndex: 1 },
+        { id: "ssh3", question: "Which was the first human-made satellite?", options: ["Apollo 11", "Sputnik 1", "Voyager", "Explorer"], correctIndex: 1 },
+        { id: "ssh4", question: "Who wrote 'The Communist Manifesto'?", options: ["Adam Smith", "Karl Marx", "John Locke", "Thomas Hobbes"], correctIndex: 1 },
+        { id: "ssh5", question: "What was the main cause of the French Revolution?", options: ["Tea tax", "Inequality and debt", "Invasion by England", "Religion"], correctIndex: 1 },
+        { id: "ssh6", question: "Which empire did Julius Caesar lead?", options: ["Greek", "Roman", "Persian", "Egyptian"], correctIndex: 1 },
+        { id: "ssh7", question: "What was the Cold War primarily about?", options: ["Territory", "Ideology (Capitalism vs Communism)", "Trade", "Oil"], correctIndex: 1 },
+        { id: "ssh8", question: "Who was the first woman to win a Nobel Prize?", options: ["Marie Curie", "Rosa Parks", "Jane Addams", "Ada Lovelace"], correctIndex: 0 },
+        { id: "ssh9", question: "Which treaty ended WWI?", options: ["Treaty of Paris", "Treaty of Versailles", "Treaty of Ghent", "Treaty of London"], correctIndex: 1 },
+        { id: "ssh10", question: "What is the supreme law of the Land in the US?", options: ["The Bible", "The Constitution", "The Declaration", "Common sense"], correctIndex: 1 },
+        { id: "ssh11", question: "Who was the first President to live in the White House?", options: ["Washington", "Adams", "Jefferson", "Madison"], correctIndex: 1 },
+        { id: "ssh12", question: "Which planet is closest to the Sun?", options: ["Mars", "Venus", "Mercury", "Earth"], correctIndex: 2 }
+    ],
+    "reading_high": [
+        { id: "rh1", question: "What is an 'allegory'?", options: ["A type of poem", "A story with a hidden meaning", "A short summary", "A character name"], correctIndex: 1 },
+        { id: "rh2", question: "In literature, what is 'hubris'?", options: ["Bravery", "Extreme pride", "Wisdom", "Sadness"], correctIndex: 1 },
+        { id: "rh3", question: "Who wrote '1984'?", options: ["Aldous Huxley", "George Orwell", "Ray Bradbury", "Ernest Hemingway"], correctIndex: 1 },
+        { id: "rh4", question: "What is 'soliloquy'?", options: ["A group song", "A character speaking their thoughts alone", "A type of dance", "A short poem"], correctIndex: 1 },
+        { id: "rh5", question: "Which is a characteristic of 'Modernism'?", options: ["Strict rhyme", "Fragmentation and stream of consciousness", "Focus on nature only", "Heroic couplets"], correctIndex: 1 }
+    ],
+    "science_high": [
+        { id: "sh1", question: "What is the result of mitosis?", options: ["Two identical cells", "Four different cells", "One larger cell", "No cells"], correctIndex: 0 },
+        { id: "sh2", question: "What is the chemical formula for Glucose?", options: ["H2O", "CO2", "C6H12O6", "NaCl"], correctIndex: 2 },
+        { id: "sh3", question: "What is the speed of light in a vacuum?", options: ["300,000 km/s", "150,000 km/s", "500,000 km/s", "1,000,000 km/s"], correctIndex: 0 },
+        { id: "sh4", question: "Which law states that energy cannot be created or destroyed?", options: ["Newton's First Law", "Law of Conservation of Energy", "Ohm's Law", "Boyle's Law"], correctIndex: 1 },
+        { id: "sh5", question: "What is the pH of a neutral solution?", options: ["1", "7", "14", "0"], correctIndex: 1 }
+    ],
+    "social_studies_middle": [
+        { id: "ssm1", question: "Which civilization built the pyramids?", options: ["Greek", "Roman", "Egyptian", "Mayan"], correctIndex: 2 },
+        { id: "ssm2", question: "What was the main purpose of the Silk Road?", options: ["War", "Trade", "Religion", "Tourism"], correctIndex: 1 },
+        { id: "ssm3", question: "Who was the leader of the Underground Railroad?", options: ["Harriet Tubman", "Abraham Lincoln", "Frederick Douglass", "John Brown"], correctIndex: 0 },
+        { id: "ssm4", question: "What is the longest river in the world?", options: ["Amazon", "Nile", "Mississippi", "Yangtze"], correctIndex: 1 },
+        { id: "ssm5", question: "Which document begins 'We the People'?", options: ["Declaration", "Bill of Rights", "Constitution", "Magna Carta"], correctIndex: 2 }
     ]
 }
 
@@ -236,16 +292,18 @@ export function getFallbackQuestions(grade: number, subject: string, count: numb
         // Advanced Grade-Based Routing
         if (grade >= 9) {
             if (subjectKey.includes("math")) subjectPool = FALLBACK_QUESTIONS["math_high"]
-            else if (subjectKey.includes("science")) subjectPool = FALLBACK_QUESTIONS["math_high"] // Fallback to math if no high science
+            else if (subjectKey.includes("science")) subjectPool = FALLBACK_QUESTIONS["science_high"]
+            else if (subjectKey.includes("read") || subjectKey.includes("english") || subjectKey.includes("write")) subjectPool = FALLBACK_QUESTIONS["reading_high"]
             else subjectPool = FALLBACK_QUESTIONS["social_studies_high"]
         } else if (grade >= 6) {
             if (subjectKey.includes("math")) subjectPool = FALLBACK_QUESTIONS["math_middle"]
             else if (subjectKey.includes("science")) subjectPool = FALLBACK_QUESTIONS["science_middle"]
-            else subjectPool = FALLBACK_QUESTIONS["reading_middle"]
+            else if (subjectKey.includes("read") || subjectKey.includes("english") || subjectKey.includes("write")) subjectPool = FALLBACK_QUESTIONS["reading_middle"]
+            else subjectPool = FALLBACK_QUESTIONS["social_studies_middle"]
         } else {
             // Elementary
             if (subjectKey.includes("math")) subjectPool = FALLBACK_QUESTIONS["math_elementary"]
-            else if (subjectKey.includes("read") || subjectKey.includes("english")) subjectPool = FALLBACK_QUESTIONS["reading_elementary"]
+            else if (subjectKey.includes("read") || subjectKey.includes("english") || subjectKey.includes("write")) subjectPool = FALLBACK_QUESTIONS["reading_elementary"]
             else if (subjectKey.includes("science")) subjectPool = FALLBACK_QUESTIONS["science_elementary"]
             else if (subjectKey.includes("physical") || subjectKey.includes("pe") || subjectKey.includes("health")) subjectPool = FALLBACK_QUESTIONS["pe_elementary"]
             else if (subjectKey.includes("social") || subjectKey.includes("history") || subjectKey.includes("geography")) subjectPool = FALLBACK_QUESTIONS["social_studies_elementary"]

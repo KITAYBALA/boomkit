@@ -76,6 +76,16 @@
             "Economics and Money",
             "Government and Law",
             "Psychology and Sociology"
+        ],
+        "Writing": [
+            "Narrative Writing",
+            "Expository Writing",
+            "Persuasive Writing",
+            "Punctuation and Capitalization",
+            "Sentence Structure",
+            "Voice and Style",
+            "Research Skills",
+            "Creative Writing"
         ]
     }
 }
