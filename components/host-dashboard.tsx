@@ -41,7 +41,7 @@ export default function HostDashboard({
     onEndGame,
     players = []
 }: HostDashboardProps) {
-    const [timeLeft, setTimeLeft] = useState(duration * 60)
+    const [timeLeft, setTimeLeft] = useState(duration)
     const [isPaused, setIsPaused] = useState(false)
     const [recentActivity, setRecentActivity] = useState<{ id: string, message: string, time: string }[]>([
         { id: "1", message: "Game started!", time: "just now" },

@@ -153,11 +153,7 @@ export default function GameLobby({
             console.error("Failed to start game:", error)
             alert("Error starting game. Please try again.")
         } else {
-            // Then locally trigger start for host (host already has questions usually, but good to be consistent)
-            // We need to fetch questions if we don't have them? 
-            // Actually host usually has them in parent state.
-            // But let's pass null for questions here since Host parent handles it.
-            // The subscription will trigger for players.
+            // Then locally trigger start for host using LOCAL duration state
             onStart(duration, null)
         }
     }
