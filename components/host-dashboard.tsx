@@ -52,7 +52,9 @@ export default function HostDashboard({
     useEffect(() => {
         if (isPaused || players.length === 0) return
         const interval = setInterval(() => {
-            const player = players[Math.floor(Math.random() * players.length)]
+            const validPlayers = players.filter(Boolean)
+            if (validPlayers.length === 0) return
+            const player = validPlayers[Math.floor(Math.random() * validPlayers.length)]
             const events = [
                 `just got a Correct Answer!`,
                 `is on a 5-streak!`,
@@ -78,7 +80,7 @@ export default function HostDashboard({
         return () => clearInterval(timer)
     }, [isPaused])
 
-    const sortedPlayers = [...players].sort((a, b) => b.score - a.score)
+    const sortedPlayers = [...players].filter(Boolean).sort((a, b) => (b.score || 0) - (a.score || 0))
     const topPlayer = sortedPlayers[0]
 
     const formatTime = (seconds: number) => {
@@ -178,7 +180,7 @@ export default function HostDashboard({
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <p className="text-2xl font-black text-white">{player.score.toLocaleString()}</p>
+                                        <p className="text-2xl font-black text-white">{(player.score || 0).toLocaleString()}</p>
                                         <p className="text-[10px] text-purple-400 font-bold uppercase tracking-widest">Points</p>
                                     </div>
                                 </div>
@@ -200,7 +202,7 @@ export default function HostDashboard({
                         <div className="flex items-center justify-between bg-white/10 rounded-xl p-4">
                             <div>
                                 <p className="text-white/60 text-[10px] font-bold uppercase">Current Score</p>
-                                <p className="text-2xl font-black">{topPlayer?.score.toLocaleString() || "0"}</p>
+                                <p className="text-2xl font-black">{(topPlayer?.score || 0).toLocaleString()}</p>
                             </div>
                             <Trophy className="w-10 h-10 text-amber-300" />
                         </div>

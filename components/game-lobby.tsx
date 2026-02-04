@@ -273,7 +273,7 @@ export default function GameLobby({
                     </CardHeader>
                     <CardContent>
                         <div className="grid grid-cols-2 gap-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                            {players.map((player, i) => (
+                            {players.filter(Boolean).map((player, i) => (
                                 <div
                                     key={player.id || i}
                                     className="bg-white/10 border border-white/10 rounded-2xl p-4 flex flex-col items-center gap-2 transition-all hover:scale-105 hover:bg-white/20 animate-in slide-in-from-bottom-2 duration-300"

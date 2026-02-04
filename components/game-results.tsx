@@ -133,8 +133,8 @@ export default function GameResults({
                                         animate={{ opacity: 1, y: 0 }}
                                         transition={{ delay: index * 0.1 }}
                                         className={`flex items-center justify-between p-4 rounded-2xl ${player.score === score
-                                                ? "bg-purple-500/20 border border-purple-500/50"
-                                                : "bg-white/5 border border-white/5"
+                                            ? "bg-purple-500/20 border border-purple-500/50"
+                                            : "bg-white/5 border border-white/5"
                                             }`}
                                     >
                                         <div className="flex items-center gap-4">
@@ -148,7 +148,7 @@ export default function GameResults({
                                             </div>
                                             <div className="font-bold truncate max-w-[120px]">{player.username}</div>
                                         </div>
-                                        <div className="font-mono font-black text-white/80">{player.score.toLocaleString()}</div>
+                                        <div className="font-mono font-black text-white/80">{(player.score || 0).toLocaleString()}</div>
                                     </motion.div>
                                 ))}
                             </div>
