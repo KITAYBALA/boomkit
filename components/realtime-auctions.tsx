@@ -160,17 +160,30 @@ export default function RealtimeAuctions({
       return
     }
 
+    if (!currentUser || currentUser.tokens < bidAmount) {
+      setStatusModal({
+        show: true,
+        title: "Insufficient Tokens",
+        message: `You need ${bidAmount.toLocaleString()} tokens to place this bid, but you only have ${(currentUser?.tokens || 0).toLocaleString()}.`,
+        type: "error"
+      })
+      return
+    }
+
     setLoading(true)
     if (supabase) {
-      const { error } = await supabase
-        .from('auction_items')
-        .update({ current_bid: bidAmount, top_bidder: currentUser?.username ?? null })
-        .eq('id', biddingItem.id)
+      const { data, error } = await supabase.rpc('place_bid', {
+        p_auction_id: biddingItem.id,
+        p_amount: bidAmount,
+        p_username: currentUser.username,
+        p_user_id: currentUser.id
+      })
+
       if (error) {
         setStatusModal({
           show: true,
           title: "Bidding Error",
-          message: "We couldn't process your bid: " + error.message,
+          message: error.message || "We couldn't process your bid.",
           type: "error"
         })
       } else {
