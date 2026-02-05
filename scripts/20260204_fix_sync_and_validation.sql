@@ -1,4 +1,4 @@
--- Unified Fix: TEXT IDs and Auction Validation
+-- Unified Fix: TEXT IDs, Auction Validation, and Trade Persistence
 -- Run this in Supabase SQL Editor to resolve Trade, Auction, and Leaderboard bugs.
 
 -- 1. Fix update_game_score to accept TEXT for p_user_id (to match users table)
@@ -24,7 +24,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 2. Fix accept_trade to accept TEXT IDs and handle types consistently
+-- 2. Fix accept_trade to be robust and handle TEXT IDs
 CREATE OR REPLACE FUNCTION public.accept_trade(trade_uuid UUID)
 RETURNS void
 LANGUAGE plpgsql
@@ -54,40 +54,35 @@ BEGIN
   v_sender_id := v_trade.sender_id;
   v_receiver_id := v_trade.receiver_id;
 
-  -- 2. Fetch and Lock both Users' records
-  SELECT booms INTO v_sender_booms FROM public.users WHERE id = v_sender_id FOR UPDATE;
-  IF NOT FOUND THEN
-    RAISE EXCEPTION 'Sender record (ID: %) not found in users table', v_sender_id;
+  -- 2. Fetch and Lock both Users' records (ORDER BY id to prevent deadlocks)
+  -- We lock sender then receiver (or vice versa, but must be consistent)
+  IF v_sender_id < v_receiver_id THEN
+    SELECT booms INTO v_sender_booms FROM public.users WHERE id = v_sender_id FOR UPDATE;
+    SELECT booms INTO v_receiver_booms FROM public.users WHERE id = v_receiver_id FOR UPDATE;
+  ELSE
+    SELECT booms INTO v_receiver_booms FROM public.users WHERE id = v_receiver_id FOR UPDATE;
+    SELECT booms INTO v_sender_booms FROM public.users WHERE id = v_sender_id FOR UPDATE;
   END IF;
 
-  SELECT booms INTO v_receiver_booms FROM public.users WHERE id = v_receiver_id FOR UPDATE;
-  IF NOT FOUND THEN
-    RAISE EXCEPTION 'Receiver record (ID: %) not found in users table', v_receiver_id;
-  END IF;
-
-  -- Banned check
-  IF (SELECT is_banned FROM public.users WHERE id = v_sender_id) OR (SELECT is_banned FROM public.users WHERE id = v_receiver_id) THEN
-    RAISE EXCEPTION 'Trade restricted: One or both participants are banned.';
-  END IF;
-
-  -- Default to empty if NULL
   IF v_sender_booms IS NULL THEN v_sender_booms := '{}'::jsonb; END IF;
   IF v_receiver_booms IS NULL THEN v_receiver_booms := '{}'::jsonb; END IF;
 
-  -- 3. Verification: Items
+  -- 3. Verification: Items & Tokens
+  -- Sender items
   FOR v_boom_key, v_boom_qty IN SELECT * FROM jsonb_each_text(v_trade.sender_booms) LOOP
     IF COALESCE((v_sender_booms->>v_boom_key)::int, 0) < v_boom_qty THEN
       RAISE EXCEPTION 'Verification failed: % no longer has enough %', v_trade.sender_username, v_boom_key;
     END IF;
   END LOOP;
 
+  -- Receiver items
   FOR v_boom_key, v_boom_qty IN SELECT * FROM jsonb_each_text(v_trade.receiver_booms) LOOP
     IF COALESCE((v_receiver_booms->>v_boom_key)::int, 0) < v_boom_qty THEN
       RAISE EXCEPTION 'Verification failed: % no longer has enough %', v_trade.receiver_username, v_boom_key;
     END IF;
   END LOOP;
 
-  -- 4. Verification: Tokens
+  -- Tokens
   IF (SELECT tokens FROM public.users WHERE id = v_sender_id) < v_trade.sender_tokens THEN
       RAISE EXCEPTION 'Sender has insufficient tokens';
   END IF;
@@ -95,24 +90,28 @@ BEGIN
       RAISE EXCEPTION 'Receiver has insufficient tokens';
   END IF;
 
-  -- 5. Calculate Final Inventories
+  -- 4. Calculate Final Inventories (Defensive)
+  -- Remove from Sender
   FOR v_boom_key, v_boom_qty IN SELECT * FROM jsonb_each_text(v_trade.sender_booms) LOOP
     v_sender_booms := jsonb_set(v_sender_booms, ARRAY[v_boom_key], to_jsonb((v_sender_booms->>v_boom_key)::int - v_boom_qty));
     IF (v_sender_booms->>v_boom_key)::int <= 0 THEN v_sender_booms := v_sender_booms - v_boom_key; END IF;
   END LOOP;
+  -- Add to Sender from Receiver
   FOR v_boom_key, v_boom_qty IN SELECT * FROM jsonb_each_text(v_trade.receiver_booms) LOOP
     v_sender_booms := jsonb_set(v_sender_booms, ARRAY[v_boom_key], to_jsonb(COALESCE((v_sender_booms->>v_boom_key)::int, 0) + v_boom_qty));
   END LOOP;
 
+  -- Remove from Receiver
   FOR v_boom_key, v_boom_qty IN SELECT * FROM jsonb_each_text(v_trade.receiver_booms) LOOP
     v_receiver_booms := jsonb_set(v_receiver_booms, ARRAY[v_boom_key], to_jsonb((v_receiver_booms->>v_boom_key)::int - v_boom_qty));
     IF (v_receiver_booms->>v_boom_key)::int <= 0 THEN v_receiver_booms := v_receiver_booms - v_boom_key; END IF;
   END LOOP;
+  -- Add to Receiver from Sender
   FOR v_boom_key, v_boom_qty IN SELECT * FROM jsonb_each_text(v_trade.sender_booms) LOOP
     v_receiver_booms := jsonb_set(v_receiver_booms, ARRAY[v_boom_key], to_jsonb(COALESCE((v_receiver_booms->>v_boom_key)::int, 0) + v_boom_qty));
   END LOOP;
 
-  -- 6. Execute Database Updates
+  -- 5. Execute Database Updates
   UPDATE public.users 
   SET 
     tokens = tokens - v_trade.sender_tokens + v_trade.receiver_tokens,

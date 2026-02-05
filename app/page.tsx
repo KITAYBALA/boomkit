@@ -4514,6 +4514,7 @@ export default function BoomkitGame() {
                     questions={activeDiscoverGame.questions}
                     durationSeconds={activeDiscoverGame.duration || 600}
                     startTimeOffset={gameStartOffset}
+                    onScoreUpdate={handleScoreUpdate}
                     onEnd={(score) => {
                       setGameScore(score)
                       setIsMergingGameActive(false)
