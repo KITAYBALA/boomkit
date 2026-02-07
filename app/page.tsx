@@ -1257,11 +1257,51 @@ export default function BoomkitGame() {
     // Sync immediately on mount
     syncCurrentUserRole()
 
-    // Then sync every 15 seconds for ban/role detection (reduced from 1s to prevent 429 errors)
+    // Real-time listener for current user's data (inventory, tokens, etc.)
+    let channel: any = null
+    if (currentUser?.id && supabase) {
+      console.log("[v0] Subscribing to user profile updates:", currentUser.id)
+      channel = supabase
+        .channel(`user_profile_${currentUser.id}`)
+        .on(
+          'postgres_changes',
+          {
+            event: 'UPDATE',
+            schema: 'public',
+            table: 'users',
+            filter: `id=eq.${currentUser.id}`
+          },
+          (payload: any) => {
+            console.log("[v0] Profile changed in DB, syncing state:", payload.new)
+            const u = payload.new
+            const updatedUser: GameUser = {
+              ...currentUser,
+              tokens: u.tokens ?? currentUser.tokens,
+              dailyTokens: u.daily_tokens ?? currentUser.dailyTokens,
+              booms: u.booms ?? currentUser.booms,
+              role: u.role ?? currentUser.role,
+              badges: u.badges ?? currentUser.badges,
+              isMuted: u.is_muted ?? currentUser.isMuted,
+              isBanned: u.is_banned ?? currentUser.isBanned,
+              status: u.status ?? currentUser.status,
+              xp: u.xp ?? currentUser.xp,
+              level: u.level ?? currentUser.level,
+            }
+            setCurrentUser(updatedUser)
+            localStorage.setItem("boomkit_current_user", JSON.stringify(updatedUser))
+          }
+        )
+        .subscribe()
+    }
+
+    // Then sync every 15 seconds for ban/role detection (fallback/security)
     const interval = setInterval(syncCurrentUserRole, 15000)
 
-    return () => clearInterval(interval)
-  }, [syncCurrentUserRole])
+    return () => {
+      clearInterval(interval)
+      if (channel) supabase.removeChannel(channel)
+    }
+  }, [syncCurrentUserRole, currentUser?.id, supabase])
 
   // Custom roles feature removed for security - no longer loading from Supabase
 
@@ -1297,15 +1337,14 @@ export default function BoomkitGame() {
     setSystemSignature(signature)
   }, [])
 
-  // --- HOSTING REALTIME SUBSCRIPTION ---
+  // --- GAME SESSION REALTIME SUBSCRIPTION (Host & Joiners) ---
   useEffect(() => {
     if (!activeGamePin || !supabase || (!isMergingGameActive && !lobbyActive)) return
-    // Removed host-only restriction so players also see live leaderboard updates
 
-    console.log("Subscribing to game session:", activeGamePin)
+    console.log("[v0] Subscribing to game session:", activeGamePin)
 
     const channel = supabase
-      .channel(`game_${activeGamePin}`)
+      .channel(`game_session_${activeGamePin}`)
       .on(
         "postgres_changes",
         {
@@ -1315,13 +1354,15 @@ export default function BoomkitGame() {
           filter: `pin=eq.${activeGamePin}`,
         },
         (payload) => {
-          console.log("Game session update:", payload)
+          console.log("[v0] Session Update:", payload)
           const newSession = payload.new as any
+
           if (newSession.players) {
-            setLivePlayers(newSession.players || [])
+            setLivePlayers(newSession.players)
           }
+
           if (newSession.status && newSession.status.startsWith("started")) {
-            // Extract startTimeOffset if available
+            // Sync game clock
             if (newSession.status.includes(":")) {
               const ts = parseInt(newSession.status.split(":")[1])
               if (!isNaN(ts)) {
@@ -1330,14 +1371,14 @@ export default function BoomkitGame() {
               }
             }
 
-            // If we are a player and game starts (this part is usually handled by Lobby subscription but as backup...)
+            // JOINER: Transition to game screen if not already there
             if (activeDiscoverGame?.mode === "join" && !isMergingGameActive && !showGameResults) {
               setLobbyActive(false)
               setIsMergingGameActive(true)
             }
           }
+
           if (newSession.status === "finished") {
-            // If we are a player and game finishes
             if (activeDiscoverGame?.mode === "join") {
               setIsMergingGameActive(false)
               setShowGameResults(true)
@@ -1350,7 +1391,7 @@ export default function BoomkitGame() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [activeGamePin, isMergingGameActive, lobbyActive, activeDiscoverGame])
+  }, [activeGamePin, isMergingGameActive, lobbyActive, activeDiscoverGame, supabase])
 
   // Domain-specific behavior for boomkit.org
   useEffect(() => {
@@ -1504,34 +1545,6 @@ export default function BoomkitGame() {
     }
   }, [currentUser?.level, currentUser?.booms]) // Re-run when level or inventory changes
 
-  // Real-time listener for host session updates
-  useEffect(() => {
-    if (!lobbyActive || !activeGamePin || !supabase || activeDiscoverGame?.mode !== "host") return
-
-    console.log("Setting up host listener for PIN:", activeGamePin)
-    const channel = supabase
-      .channel(`host-game-${activeGamePin}`)
-      .on(
-        'postgres_changes' as any,
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'game_sessions',
-          filter: `pin=eq.${activeGamePin}`
-        },
-        (payload: any) => {
-          console.log("Host updated with payload:", payload)
-          if (payload.new && payload.new.players) {
-            setLivePlayers(payload.new.players)
-          }
-        }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [lobbyActive, activeGamePin, activeDiscoverGame, supabase])
 
   // Handle daily spin
   // handleDailySpin removed - logic moved to DailySpinWheel component and its onWin callback
@@ -4475,18 +4488,7 @@ export default function BoomkitGame() {
 
                     console.log("Joined session from Supabase:", cleanPin)
 
-                    // Add current user to the session players list if they aren't already there
-                    if (currentUser) {
-                      const currentPlayers = session.players || []
-                      if (!currentPlayers.find((p: any) => p.id === currentUser.id)) {
-                        const updatedPlayers = [...currentPlayers, { id: currentUser.id, username: currentUser.username, score: 0 }]
-                        await supabase
-                          .from("game_sessions")
-                          .update({ players: updatedPlayers })
-                          .eq("pin", cleanPin)
-                      }
-                    }
-
+                    // Join game flow: Just set PIN and state, let GameLobby handle the DB registration
                     setActiveGamePin(cleanPin)
                     setActiveDiscoverGame({
                       grade: session.grade,
@@ -4494,7 +4496,7 @@ export default function BoomkitGame() {
                       mode: "join",
                       gameMode: session.mode || "classic",
                       questions: session.questions,
-                      duration: session.duration // Store duration
+                      duration: session.duration
                     })
                     setLobbyActive(true)
                   } else {
