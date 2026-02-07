@@ -1041,7 +1041,7 @@ export default function BoomkitGame() {
     // Update local livePlayers state immediately for the current player
     // to provide instant feedback in rankings overlay
     setLivePlayers(prev =>
-      prev.map(p => p.id === currentUser.id ? { ...p, score: sanitizedScore } : p)
+      prev.map(p => String(p.id) === String(currentUser.id) ? { ...p, score: sanitizedScore } : p)
     )
 
     // Throttle RPC calls to max once every 2 seconds UNLESS forced
@@ -1387,10 +1387,11 @@ export default function BoomkitGame() {
           filter: `pin=eq.${activeGamePin}`,
         },
         (payload) => {
-          console.log("[v0] Session Update:", payload)
+          console.log("[v0] Session Update Received:", payload)
           const newSession = payload.new as any
 
           if (newSession.players) {
+            console.log("[v0] Syncing livePlayers from DB:", newSession.players.length, "players")
             setLivePlayers(newSession.players)
           }
 
@@ -5894,7 +5895,7 @@ export default function BoomkitGame() {
           <div className="pointer-events-auto w-full h-full">
             <HostDashboard
               pin={activeGamePin || ""}
-              gameMode={selectedGameMode?.name || "Classic"}
+              gameMode={activeDiscoverGame.gameMode || "classic"}
               subject={activeDiscoverGame.subject}
               duration={selectedDuration || activeDiscoverGame.duration || 120}
               onEndGame={async () => {
@@ -5925,7 +5926,7 @@ export default function BoomkitGame() {
             id: p.id,
             username: p.username,
             score: p.score || 0,
-            avatar: p.profilePicture // Use profilePicture mapping if needed
+            avatar: p.profilePicture || p.profile_picture || "👤"
           })) : (currentUser ? [{
             id: currentUser.id,
             username: currentUser.username,
