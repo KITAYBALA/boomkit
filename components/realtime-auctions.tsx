@@ -36,6 +36,7 @@ type Props = {
   getBoomRarity: (name: string) => string
   getRarityColor: (rarity: string) => string
   onAuctionCreated?: () => void
+  onClaimComplete?: () => void
 }
 
 type DbAuction = {
@@ -66,6 +67,7 @@ export default function RealtimeAuctions({
   getBoomRarity,
   getRarityColor,
   onAuctionCreated,
+  onClaimComplete,
 }: Props) {
   const supabase = useMemo(() => getSupabaseBrowserClient(), [])
   const [items, setItems] = useState<DbAuction[]>([])
@@ -339,40 +341,17 @@ export default function RealtimeAuctions({
       const isSeller = currentUser.username === item.seller
 
       if (isWinner) {
-        // Winner pays tokens, gets boom
-        if (currentUser.tokens < item.current_bid) {
-          setStatusModal({
-            show: true,
-            title: "Insufficient Funds",
-            message: "You need more tokens to claim this " + item.boom_name + ".",
-            type: "error"
-          })
-          setLoading(false)
-          return
+        // Winner pays tokens, gets boom via RPC for security and RLS bypass
+        const { error: claimError } = await supabase.rpc('claim_auction', {
+          p_auction_id: item.id,
+          p_user_id: currentUser.id
+        })
+
+        if (claimError) {
+          console.error("Claim Error:", claimError)
+          throw claimError
         }
 
-        // 1. Deduct Tokens & Add Boom for Winner
-        const newTokens = currentUser.tokens - item.current_bid
-        const newBooms = { ...currentUser.booms }
-        newBooms[item.boom_name] = (newBooms[item.boom_name] || 0) + 1
-
-        const { error: winnerError } = await supabase
-          .from('users')
-          .update({ tokens: newTokens, booms: newBooms })
-          .eq('id', currentUser.id)
-
-        if (winnerError) throw winnerError
-
-        // 2. Pay Seller
-        // Need seller ID, but we only have username. In real app, store seller_id. 
-        // Workaround: Find seller by username (unique)
-        const { data: sellerData } = await supabase.from('users').select('id, tokens').eq('username', item.seller).single()
-        if (sellerData) {
-          await supabase.from('users').update({ tokens: sellerData.tokens + item.current_bid }).eq('id', sellerData.id)
-        }
-
-        // 3. Mark processed
-        await supabase.from('auction_items').update({ status: 'processed' }).eq('id', item.id)
         setStatusModal({
           show: true,
           title: "Prize Claimed",
@@ -380,6 +359,7 @@ export default function RealtimeAuctions({
           type: "success"
         })
 
+        if (onClaimComplete) onClaimComplete()
       } else if (isSeller) {
         if (!item.top_bidder) {
           // Seller reclaims item (no bids)
