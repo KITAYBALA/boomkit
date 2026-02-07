@@ -5,6 +5,8 @@ export interface Question {
     correctIndex: number
 }
 
+import { CURATED_TOPIC_QUESTIONS } from "./curated-curriculum"
+
 export const FALLBACK_QUESTIONS: { [key: string]: Question[] } = {
     "math_elementary": [
         { id: "me1", question: "What is 3 + 4?", options: ["5", "6", "7", "8"], correctIndex: 2 },
@@ -280,9 +282,14 @@ export function getFallbackQuestions(grade: number, subject: string, count: numb
     const topicKey = topic?.toLowerCase() || ""
     let pool: Question[] = []
 
-    // 1. Try topic-specific pool first
-    if (topicKey && TOPIC_FALLBACKS[topicKey]) {
-        pool = TOPIC_FALLBACKS[topicKey]
+    // 0. Try curated curriculum first
+    if (topicKey && CURATED_TOPIC_QUESTIONS[topicKey]) {
+        pool = CURATED_TOPIC_QUESTIONS[topicKey]
+    }
+
+    // 1. Try old topic-specific pool next
+    if (pool.length < count && topicKey && TOPIC_FALLBACKS[topicKey]) {
+        pool = [...pool, ...TOPIC_FALLBACKS[topicKey]]
     }
 
     // 2. If no topic pool or too few questions, use subject pool
