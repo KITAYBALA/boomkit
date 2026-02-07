@@ -1029,23 +1029,56 @@ export default function BoomkitGame() {
     [setUsers, handleLogout],
   )
 
-  const handleScoreUpdate = useCallback(async (newScore: number) => {
+  const lastScoreSyncRef = useRef<number>(0)
+  const lastScoreValueRef = useRef<number>(0)
+
+  const handleScoreUpdate = useCallback(async (newScore: number, force: boolean = false) => {
     if (!activeGamePin || !supabase || !currentUser?.id) return
 
-    // Update locally for results screen
-    setGameScore(Math.floor(newScore))
+    const sanitizedScore = Math.floor(newScore)
+    setGameScore(sanitizedScore)
+
+    // Update local livePlayers state immediately for the current player
+    // to provide instant feedback in rankings overlay
+    setLivePlayers(prev =>
+      prev.map(p => p.id === currentUser.id ? { ...p, score: sanitizedScore } : p)
+    )
+
+    // Throttle RPC calls to max once every 2 seconds UNLESS forced
+    const now = Date.now()
+    if (!force && now - lastScoreSyncRef.current < 2000) {
+      lastScoreValueRef.current = sanitizedScore
+      return
+    }
+
+    lastScoreSyncRef.current = now
+    lastScoreValueRef.current = sanitizedScore
 
     try {
       const { error } = await supabase.rpc("update_game_score", {
         p_pin: activeGamePin,
         p_user_id: currentUser.id,
-        p_score: Math.floor(newScore)
+        p_score: sanitizedScore
       })
       if (error) console.error("Score sync error:", error)
     } catch (err) {
       console.error("Score sync exception:", err)
     }
   }, [activeGamePin, supabase, currentUser?.id])
+
+  // Periodic fallback to ensure the throttled final score is sent
+  useEffect(() => {
+    if (!isMergingGameActive && !lobbyActive) return
+
+    const interval = setInterval(() => {
+      const now = Date.now()
+      // If no sync in 4s and we have a pending value
+      if (now - lastScoreSyncRef.current >= 4000 && lastScoreValueRef.current !== 0) {
+        handleScoreUpdate(lastScoreValueRef.current, true)
+      }
+    }, 5000)
+    return () => clearInterval(interval)
+  }, [isMergingGameActive, lobbyActive, showGameResults, activeGamePin, supabase, handleScoreUpdate])
 
   // Load initial data from localStorage
   useEffect(() => {
@@ -1339,7 +1372,7 @@ export default function BoomkitGame() {
 
   // --- GAME SESSION REALTIME SUBSCRIPTION (Host & Joiners) ---
   useEffect(() => {
-    if (!activeGamePin || !supabase || (!isMergingGameActive && !lobbyActive)) return
+    if (!activeGamePin || !supabase || (!isMergingGameActive && !lobbyActive && !showGameResults)) return
 
     console.log("[v0] Subscribing to game session:", activeGamePin)
 
@@ -1379,6 +1412,15 @@ export default function BoomkitGame() {
           }
 
           if (newSession.status === "finished") {
+            // Final fetch to ensure total sync
+            supabase.from("game_sessions")
+              .select("players")
+              .eq("pin", activeGamePin)
+              .single()
+              .then(({ data }) => {
+                if (data?.players) setLivePlayers(data.players)
+              })
+
             if (activeDiscoverGame?.mode === "join") {
               setIsMergingGameActive(false)
               setShowGameResults(true)
@@ -1391,7 +1433,7 @@ export default function BoomkitGame() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [activeGamePin, isMergingGameActive, lobbyActive, activeDiscoverGame, supabase])
+  }, [activeGamePin, isMergingGameActive, lobbyActive, showGameResults, activeDiscoverGame, supabase])
 
   // Domain-specific behavior for boomkit.org
   useEffect(() => {
@@ -4547,6 +4589,8 @@ export default function BoomkitGame() {
                     startTimeOffset={gameStartOffset}
                     onScoreUpdate={handleScoreUpdate}
                     onEnd={(score) => {
+                      // Final unthrottled sync
+                      handleScoreUpdate(score, true)
                       setGameScore(score)
                       setIsMergingGameActive(false)
                       setShowGameResults(true)
@@ -4592,6 +4636,8 @@ export default function BoomkitGame() {
                   durationSeconds={activeDiscoverGame.duration || 600}
                   startTimeOffset={gameStartOffset}
                   onEnd={(score, correctAnswers) => {
+                    // Final unthrottled sync
+                    handleScoreUpdate(score, true)
                     setGameScore(score)
                     setIsMergingGameActive(false)
                     setShowGameResults(true)
@@ -5862,7 +5908,7 @@ export default function BoomkitGame() {
                 id: p.id,
                 username: p.username,
                 score: p.score || 0,
-                avatar: p.profile_picture || p.profilePicture
+                profilePicture: p.profile_picture || p.profilePicture // Pass both to be safe
               }))}
             />
           </div>
