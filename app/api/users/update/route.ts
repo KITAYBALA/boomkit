@@ -35,15 +35,16 @@ export async function POST(request: NextRequest) {
         }
 
         // 3. Sensitive Field Protection
-        const protectedFields = [
-            'role', 'is_owner', 'is_banned', 'is_plus_user', 'tokens', 'boom_score',
-            'total_value', 'badges', 'is_muted', 'ban_reason', 'ban_expiry'
+        const strictlyProtectedFields = [
+            'role', 'is_owner', 'is_banned', 'is_plus_user', 'badges', 'is_muted', 'ban_reason', 'ban_expiry'
         ]
+        const progressionFields = ['tokens', 'boom_score', 'total_value', 'xp', 'level']
 
-        const updatingProtectedFields = Object.keys(updates).some(key => protectedFields.includes(key))
+        const updatingStrictlyProtected = Object.keys(updates).some(key => strictlyProtectedFields.includes(key))
+        const updatingProgression = Object.keys(updates).some(key => progressionFields.includes(key))
 
-        if (updatingProtectedFields) {
-            // Only staff can update protected fields
+        if (updatingStrictlyProtected) {
+            // Only staff can update strictly protected fields
             if (!isStaff) {
                 return NextResponse.json({ success: false, message: 'Security violation: restricted fields' }, { status: 403 })
             }
@@ -52,19 +53,23 @@ export async function POST(request: NextRequest) {
             if ((updates.role || updates.is_owner !== undefined)) {
                 // Fetch the current user data to compare
                 const supabase = getSupabaseServerClient()
-                const { data: currentUser } = await supabase
+                const { data: currentUserData } = await supabase
                     .from('users')
                     .select('role, is_owner')
                     .eq('id', targetUserId)
                     .single()
 
-                const isChangingRole = updates.role && updates.role !== currentUser?.role
-                const isChangingOwner = updates.is_owner !== undefined && updates.is_owner !== currentUser?.is_owner
+                const isChangingRole = updates.role && updates.role !== currentUserData?.role
+                const isChangingOwner = updates.is_owner !== undefined && updates.is_owner !== currentUserData?.is_owner
 
                 if ((isChangingRole || isChangingOwner) && !isOwner && !isAdmin) {
                     return NextResponse.json({ success: false, message: 'Insufficient permission to modify roles' }, { status: 403 })
                 }
             }
+        }
+
+        if (updatingProgression && !isSelf && !isStaff) {
+            return NextResponse.json({ success: false, message: 'Access denied: cannot update other people progression' }, { status: 403 })
         }
 
         // 4. Perform Update via Service Role

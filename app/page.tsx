@@ -59,6 +59,7 @@ import { getFallbackQuestions } from "@/lib/fallback-questions"
 import GameLobby from "@/components/game-lobby"
 import { createBrowserClient } from "@supabase/ssr"
 import GameResults from "@/components/game-results"
+import DailySpinWheel from "@/components/daily-spin-wheel"
 
 // Advanced computer identification system
 const generateSystemSignature = (): string => {
@@ -630,16 +631,20 @@ const PACKS: Pack[] = [
 
 // Gamepass Booms - Unlocked at level milestones
 const GAMEPASS_BOOMS = [
-  { level: 10, name: "Bronze Medal", rarity: "uncommon" as const, avatar: "/assets/booms/gamepass/bronze_medal.png", description: "Your first milestone" },
-  { level: 20, name: "Silver Trophy", rarity: "uncommon" as const, avatar: "/assets/booms/gamepass/silver_trophy.png", description: "Rising through the ranks" },
-  { level: 30, name: "Gold Trophy", rarity: "rare" as const, avatar: "/assets/booms/gamepass/gold_trophy.png", description: "Golden achievement" },
-  { level: 40, name: "Emerald Star", rarity: "rare" as const, avatar: "/assets/booms/gamepass/emerald_star.png", description: "Shining bright" },
-  { level: 50, name: "Sapphire Heart", rarity: "epic" as const, avatar: "/assets/booms/gamepass/sapphire_heart.png", description: "Halfway to greatness" },
-  { level: 60, name: "Ruby Shield", rarity: "epic" as const, avatar: "🛡️❤️", description: "Guardian of progress" },
-  { level: 70, name: "Amethyst Sword", rarity: "epic" as const, avatar: "⚔️💜", description: "Blade of dedication" },
-  { level: 80, name: "Diamond Crown", rarity: "legendary" as const, avatar: "👑💎", description: "Royalty of the leaderboard" },
-  { level: 90, name: "Prismatic Phoenix", rarity: "legendary" as const, avatar: "🐦🌈", description: "Rising from challenges" },
-  { level: 100, name: "Cosmic Admin Engine", rarity: "mystical" as const, avatar: "🌌⚙️", description: "The ultimate achievement" },
+  { level: 10, rarity: "uncommon" as const, name: "Random Uncommon" },
+  { level: 20, rarity: "rare" as const, name: "Random Rare" },
+  { level: 30, rarity: "epic" as const, name: "Random Epic" },
+  { level: 40, rarity: "legendary" as const, name: "Random Legendary" },
+  { level: 50, rarity: "chroma" as const, name: "Random Chroma" },
+  { level: 60, rarity: "mystical" as const, name: "Random Mystical" },
+  { level: 70, rarity: "mystical" as const, name: "The Trophy", isLimited: true },
+]
+
+const LIMITED_BOOMS = [
+  { name: "Void Dragon", rarity: "mystical", avatar: "🐲🌌", description: "Ruler of the dark matter", price: 5000 },
+  { name: "Infinity Gauntlet", rarity: "mystical", avatar: "💎🥊", description: "Power to reshape reality", price: 7500 },
+  { name: "Cosmic Phoenix", rarity: "mystical", avatar: "🔥🦅", description: "Eternal rebirth in starlight", price: 10000 },
+  { name: "God Eye", rarity: "mystical", avatar: "👁️✨", description: "See all, know all", price: 15000 },
 ]
 
 // Rarity chances for pack opening (total = 100%)
@@ -652,7 +657,7 @@ const RARITY_CHANCES = {
   mystical: 0.1,
 }
 
-const DAILY_SPIN_REWARDS = [500, 750, 1000, 1250, 1500, 2000, 2500, 5000]
+const DAILY_SPIN_REWARDS = [100, 150, 200, 250, 300, 350, 400, 500]
 
 const PROFILE_PICTURES = [
   "🎯",
@@ -1027,6 +1032,9 @@ export default function BoomkitGame() {
   const handleScoreUpdate = useCallback(async (newScore: number) => {
     if (!activeGamePin || !supabase || !currentUser?.id) return
 
+    // Update locally for results screen
+    setGameScore(Math.floor(newScore))
+
     try {
       const { error } = await supabase.rpc("update_game_score", {
         p_pin: activeGamePin,
@@ -1133,7 +1141,7 @@ export default function BoomkitGame() {
     } catch (err) {
       console.error("[v0] Failed to fetch users from Supabase:", err)
     }
-  }, [supabase])
+  }, [supabase, currentUser?.id])
 
   // NEW: Session validation to handle sync issues
   useEffect(() => {
@@ -1387,12 +1395,11 @@ export default function BoomkitGame() {
     let totalXP = currentXP + amount
     let newLevel = currentLevel
     let leveledUp = false
-    const XP_PER_LEVEL = 100
     const levelsGained: number[] = []
 
-    // Calculate new level correctly
-    while (totalXP >= XP_PER_LEVEL) {
-      totalXP -= XP_PER_LEVEL
+    // Calculate new level correctly with dynamic requirement: Level * 100
+    while (totalXP >= newLevel * 100) {
+      totalXP -= (newLevel * 100)
       newLevel++
       leveledUp = true
       levelsGained.push(newLevel)
@@ -1403,26 +1410,33 @@ export default function BoomkitGame() {
     // Cap at level 100
     if (newLevel >= 100) {
       newLevel = 100
-      newXP = 0 // Cap XP at 0 once level 100 is reached
+      newXP = 0
     }
 
-    // Start with current booms
     let updatedBooms = { ...currentUser.booms }
 
     if (leveledUp) {
       alert(`🎉 LEVEL UP! You are now Level ${newLevel}!`)
 
-      // Grant Gamepass Booms for milestone levels
       for (const level of levelsGained) {
-        const gamepassReward = GAMEPASS_BOOMS.find(gb => gb.level === level)
-        if (gamepassReward) {
-          // Grant the boom
-          updatedBooms[gamepassReward.name] = (updatedBooms[gamepassReward.name] || 0) + 1
+        const milestone = GAMEPASS_BOOMS.find(gb => gb.level === level)
+        if (milestone) {
+          let rewardName = ""
+          if (milestone.isLimited) {
+            rewardName = "The Trophy"
+            alert(`🏆 CONGRATULATIONS! You reached Level 70 and unlocked THE TROPHY! 🏆\nYou have unlocked the Limited Section!`)
+          } else {
+            // Pick a random boom of that rarity
+            const pool = PACKS.flatMap(p => p.booms).filter(b => b.rarity === milestone.rarity)
+            if (pool.length > 0) {
+              const randomBoom = pool[Math.floor(Math.random() * pool.length)]
+              rewardName = randomBoom.name
+              alert(`🎁 Level ${level} Milestone! You unlocked a random ${milestone.rarity} Boom: ${rewardName}!`)
+            }
+          }
 
-          if (level === 100) {
-            alert(`🏆 MAX LEVEL REACHED! You unlocked the ${gamepassReward.name}!`)
-          } else if (level % 10 === 0) {
-            alert(`🎁 CONGRATULATIONS! You reached Level ${level} and unlocked ${gamepassReward.name}!`)
+          if (rewardName) {
+            updatedBooms[rewardName] = (updatedBooms[rewardName] || 0) + 1
           }
         }
       }
@@ -1432,7 +1446,8 @@ export default function BoomkitGame() {
       ...currentUser,
       xp: newXP,
       level: newLevel,
-      booms: updatedBooms
+      booms: updatedBooms,
+      boomScore: (currentUser.boomScore || 0) + (amount * 10) // Small boost to score too
     }
     updateAndPersistCurrentUser(updatedUser)
   }
@@ -3400,29 +3415,34 @@ export default function BoomkitGame() {
                 </div>
 
                 {/* Daily Spin Wheel */}
-                <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
-                  <div className="bg-orange-500 text-white px-4 py-2 rounded-lg inline-block mb-4 font-bold">
-                    Daily Spin Wheel
+                <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-slate-800 rounded-3xl p-8 relative overflow-hidden group shadow-2xl">
+                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <SparklesIcon className="w-20 h-20 text-indigo-400" />
                   </div>
-                  <div className="text-center">
-                    <div
-                      className={`w-32 h-32 mx-auto mb-4 rounded-full border-4 border-yellow-500 flex items-center justify-center text-4xl ${spinning ? "animate-spin" : ""
-                        } bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500`}
-                    >
-                      🎯
-                    </div>
-                    {spinResult && (
-                      <div className="mb-4 p-4 bg-green-500 rounded-lg text-white font-bold animate-bounce">
-                        You won {spinResult} tokens! 🎉
-                      </div>
+
+                  <div className="relative z-10 flex flex-col items-center">
+                    <DailySpinWheel
+                      onWin={(amount) => {
+                        setSpinResult(amount)
+                        const updatedUser = {
+                          ...currentUser!,
+                          tokens: (currentUser?.tokens || 0) + amount,
+                          lastDailySpin: new Date().toDateString(),
+                        }
+                        updateAndPersistCurrentUser(updatedUser)
+                        setCanSpin(false)
+
+                        setTimeout(() => setSpinResult(null), 5000)
+                      }}
+                      isSpinning={spinning}
+                      setIsSpinning={setSpinning}
+                    />
+
+                    {!canSpin && !spinning && (
+                      <p className="text-white/40 font-bold uppercase tracking-widest text-sm mt-4 animate-pulse">
+                        Come back tomorrow for another spin!
+                      </p>
                     )}
-                    <Button
-                      onClick={handleDailySpin}
-                      disabled={!canSpin || spinning}
-                      className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold"
-                    >
-                      {spinning ? "Spinning..." : canSpin ? "Spin Now!" : "Come back tomorrow!"}
-                    </Button>
                   </div>
                 </div>
 
@@ -3711,6 +3731,93 @@ export default function BoomkitGame() {
                     </div>
                   </div>
                 )}
+
+                {/* Limited Section - Unlocked at Level 70 */}
+                {((currentUser?.level || 1) >= 70 || (currentUser?.booms["The Trophy"] || 0) > 0) && (
+                  <div className="mt-16 animate-in zoom-in duration-1000">
+                    <div className="flex items-center gap-4 mb-8">
+                      <div className="w-2 h-12 bg-gradient-to-b from-red-600 via-pink-600 to-purple-600 rounded-full shadow-[0_0_30px_rgba(220,38,38,0.5)] animate-pulse" />
+                      <div>
+                        <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-purple-500 to-indigo-600 tracking-tighter">
+                          LIMITED SECTION
+                        </h2>
+                        <p className="text-red-400/80 text-sm font-black mt-1 uppercase tracking-widest">
+                          The Vault of the Ancients has opened
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-red-950/40 to-purple-950/40 backdrop-blur-xl rounded-[2.5rem] border-2 border-red-500/30 p-10 shadow-[0_0_50px_rgba(220,38,38,0.2)] ring-1 ring-white/10">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                        {LIMITED_BOOMS.map((boom) => {
+                          const hasIt = (currentUser?.booms[boom.name] || 0) > 0
+                          const canAfford = (currentUser?.tokens || 0) >= boom.price
+
+                          return (
+                            <div key={boom.name} className="group flex flex-col items-center gap-4 relative">
+                              <div className="absolute -top-4 -right-2 z-20">
+                                <Badge className="bg-red-600 text-white font-black border-none px-3 py-1 animate-bounce">LIMITED</Badge>
+                              </div>
+
+                              <div
+                                className={`
+                                  w-full aspect-square rounded-[2rem] border-2 flex flex-col items-center justify-center text-6xl 
+                                  transition-all duration-500 relative overflow-hidden cursor-pointer
+                                  ${hasIt
+                                    ? "text-cyan-400 border-cyan-500/50 shadow-[0_0_40px_rgba(34,211,238,0.3)] bg-cyan-950/40"
+                                    : "bg-black/80 text-white/5 border-white/5 hover:border-red-500/40 hover:shadow-[0_0_30px_rgba(220,38,38,0.2)]"
+                                  }
+                                `}
+                                onClick={() => {
+                                  if (hasIt) {
+                                    handleBoomClick(boom.name)
+                                  } else if (canAfford) {
+                                    if (confirm(`Purchase ${boom.name} for ${boom.price} tokens?`)) {
+                                      const updatedUser = {
+                                        ...currentUser!,
+                                        tokens: currentUser!.tokens - boom.price,
+                                        booms: {
+                                          ...currentUser!.booms,
+                                          [boom.name]: (currentUser!.booms[boom.name] || 0) + 1
+                                        }
+                                      }
+                                      updateAndPersistCurrentUser(updatedUser)
+                                    }
+                                  } else {
+                                    alert("You need more tokens for this ancient treasure.")
+                                  }
+                                }}
+                              >
+                                {/* Particle Effect Background */}
+                                <div className="absolute inset-0 opacity-20 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+
+                                <span className={`z-10 drop-shadow-[0_0_20px_rgba(255,255,255,0.4)] transform group-hover:scale-110 transition-transform duration-500 ${!hasIt && 'filter grayscale brightness-50'}`}>
+                                  {boom.avatar}
+                                </span>
+
+                                {!hasIt && (
+                                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-[2px] z-20 group-hover:bg-black/20 transition-all">
+                                    <div className="flex items-center gap-1 bg-yellow-500 text-black px-3 py-1 rounded-full font-black text-sm shadow-xl">
+                                      <CoinsIcon className="w-4 h-4" />
+                                      {boom.price}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="text-center space-y-1">
+                                <p className={`text-lg font-black tracking-tight ${hasIt ? "text-cyan-400" : "text-white/40"}`}>
+                                  {boom.name}
+                                </p>
+                                <p className="text-[10px] text-white/30 font-bold uppercase tracking-widest">{boom.description}</p>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -3900,66 +4007,8 @@ export default function BoomkitGame() {
                 getBoomAvatar={getBoomAvatar}
                 getBoomRarity={getBoomRarity}
                 getRarityColor={getRarityColor}
-                onAuctionCreated={() => {
-                  // Refresh all users data after auction creation to ensure everyone's inventory is in sync
-                  const fetchAllUsers = async () => {
-                    if (!supabase) return
-                    try {
-                      const { data, error } = await supabase.from("users").select("*")
-                      if (error) throw error
-
-                      if (data) {
-                        const mappedUsers: GameUser[] = data.map((u: any) => ({
-                          id: u.id,
-                          username: u.username,
-                          email: u.email,
-                          password: "",
-                          age: u.age || 0,
-                          tokens: u.tokens || 0,
-                          dailyTokens: u.daily_tokens || 0,
-                          packs: u.packs || [],
-                          booms: u.booms || {},
-                          isOwner: u.is_owner || false,
-                          isBanned: u.is_banned || false,
-                          isMuted: u.is_muted || false,
-                          status: u.status || "approved",
-                          reason: u.reason || "",
-                          role: u.role || "player",
-                          joinDate: u.join_date || new Date().toISOString(),
-                          boomScore: u.boom_score || 0,
-                          totalValue: u.total_value || 0,
-                          profilePicture: u.profile_picture || "",
-                          isPlusUser: u.is_plus_user || false,
-                          nameColor: u.name_color || "",
-                          bannerColor: u.banner_color || "from-purple-600 to-pink-600",
-                          lastDailySpin: u.last_daily_spin || null,
-                          badges: u.badges || [],
-                          muteExpiry: u.mute_expiry || null,
-                          banExpiry: u.ban_expiry || null,
-                          banReason: u.ban_reason || "",
-                          lastSeen: u.last_seen || Date.now(),
-                          packsOpened: u.packs_opened || 0,
-                          lastIp: u.last_ip || "",
-                          xp: u.xp || 0,
-                          level: u.level || 1,
-                        }))
-
-                        setUsers(mappedUsers)
-                        localStorage.setItem("boomkit_approved_users", JSON.stringify(mappedUsers))
-
-                        // Also update current user if their data changed
-                        const self = mappedUsers.find(u => u.id === currentUser?.id)
-                        if (self) {
-                          setCurrentUser(self)
-                          localStorage.setItem("boomkit_current_user", JSON.stringify(self))
-                        }
-                      }
-                    } catch (err) {
-                      console.error("Error refreshing users after auction:", err)
-                    }
-                  }
-                  fetchAllUsers()
-                }}
+                onAuctionCreated={() => fetchUsersFromSupabase(true)}
+                onClaimComplete={() => fetchUsersFromSupabase(true)}
               />
             )}
 
