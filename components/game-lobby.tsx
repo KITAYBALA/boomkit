@@ -85,7 +85,8 @@ export default function GameLobby({
                         const updatedPlayers = [...currentPlayers, {
                             username: currentUser.username,
                             profilePicture: currentUser.profilePicture,
-                            id: currentUser.id
+                            id: currentUser.id,
+                            score: 0
                         }]
 
                         await supabase
