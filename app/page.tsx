@@ -1534,28 +1534,7 @@ export default function BoomkitGame() {
   }, [lobbyActive, activeGamePin, activeDiscoverGame, supabase])
 
   // Handle daily spin
-  const handleDailySpin = () => {
-    if (!canSpin || spinning || !currentUser) return
-
-    setSpinning(true)
-
-    setTimeout(() => {
-      const reward = DAILY_SPIN_REWARDS[Math.floor(Math.random() * DAILY_SPIN_REWARDS.length)]
-      setSpinResult(reward)
-
-      const updatedUser = {
-        ...currentUser,
-        tokens: currentUser.tokens + reward,
-        lastDailySpin: new Date().toDateString(),
-      }
-      updateAndPersistCurrentUser(updatedUser)
-
-      setSpinning(false)
-      setCanSpin(false)
-
-      setTimeout(() => setSpinResult(null), 3000)
-    }, 2000)
-  }
+  // handleDailySpin removed - logic moved to DailySpinWheel component and its onWin callback
 
   // Handle owner access - redirects to login (master key removed for security)
   const handleOwnerAccess = (e: React.FormEvent) => {
@@ -3436,6 +3415,7 @@ export default function BoomkitGame() {
                       }}
                       isSpinning={spinning}
                       setIsSpinning={setSpinning}
+                      canSpin={canSpin}
                     />
 
                     {!canSpin && !spinning && (

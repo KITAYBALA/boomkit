@@ -8,6 +8,7 @@ interface DailySpinWheelProps {
     onWin: (amount: number) => void
     isSpinning: boolean
     setIsSpinning: (val: boolean) => void
+    canSpin: boolean
 }
 
 const SECTORS = [
@@ -21,39 +22,49 @@ const SECTORS = [
     { amount: 500, color: '#DC2626' }, // Red (Jackpot)
 ]
 
-export default function DailySpinWheel({ onWin, isSpinning, setIsSpinning }: DailySpinWheelProps) {
+export default function DailySpinWheel({ onWin, isSpinning, setIsSpinning, canSpin }: DailySpinWheelProps) {
     const [rotation, setRotation] = useState(0)
     const [result, setResult] = useState<number | null>(null)
 
     const handleSpin = () => {
-        if (isSpinning) return
+        if (isSpinning || !canSpin) return
 
         setIsSpinning(true)
         setResult(null)
 
-        // Random spin: multiple full rotations + random offset
-        const extraDegrees = Math.floor(Math.random() * 360)
-        const totalRotation = 3600 + extraDegrees // 10 full spins + extra
+        // 1. Pick result FIRST to ensure consistency
+        const winIndex = Math.floor(Math.random() * SECTORS.length)
+        const winAmount = SECTORS[winIndex].amount
 
-        setRotation(prev => prev + totalRotation)
+        // 2. Calculate rotation
+        // Each sector is 45 degrees. Sector 0 is at -90deg (top)
+        // We want to land at the top pointer.
+        // The rotation needed is: (full rotations) + (offset to bring the sector to top)
+        // Since the wheel starts at 0 and sector 0 is at top (if we account for -90 rotation in SVG),
+        // to bring sector i to top, we need to rotate by - (i * 45) degrees?
+        // Let's make it simpler: current rotation + 10 spins + angle to winIndex
 
-        // Calculate result based on degrees
-        // Each sector is 360 / 8 = 45 degrees
-        // (TotalRotation % 360) is where it lands. 
-        // We need to invert it because the wheel rotates clockwise but index 0 is at top
+        const sectorSize = 360 / SECTORS.length
+        const extraSpins = 5 // Slower, so fewer spins feels better
+        const currentRotationBase = Math.ceil(rotation / 360) * 360
+
+        // Target angle: To bring sector 'winIndex' to the top (pointer at 0 degrees relative to wheel center)
+        // Because index 0 is at top-right (0 in math, but SVG -rotate-90 makes it top),
+        // we need to rotate wheel so that sector 'winIndex' is at the top.
+        // Sector i starts at i*45 degrees.
+        // To put sector i at the top (which is 0 degrees in SVG -rotate-90 space),
+        // we need to rotate the wheel by -(i * 45) degrees, or 360 - (i * 45).
+        const targetSectorAngle = 360 - (winIndex * sectorSize)
+        const totalRotation = currentRotationBase + (extraSpins * 360) + targetSectorAngle
+
+        setRotation(totalRotation)
+
+        // 3. Set timer for the UI to catch up (8 seconds for slower feel)
         setTimeout(() => {
-            const actualDegrees = (rotation + totalRotation) % 360
-            // Find the index. We subtract from 360 because rotation is clockwise
-            // but the array is indexed clockwise too. 
-            // Pointer is at the top (270deg in SVG space usually, but easier to rotate wheel)
-            const sectorSize = 360 / SECTORS.length
-            const index = Math.floor(((360 - (actualDegrees % 360)) + sectorSize / 2) % 360 / sectorSize)
-            const winAmount = SECTORS[index % SECTORS.length].amount
-
             setResult(winAmount)
             setIsSpinning(false)
             onWin(winAmount)
-        }, 4000)
+        }, 8000)
     }
 
     return (
@@ -66,7 +77,7 @@ export default function DailySpinWheel({ onWin, isSpinning, setIsSpinning }: Dai
 
                 {/* The Wheel */}
                 <div
-                    className="w-full h-full rounded-full border-8 border-slate-800 shadow-2xl relative transition-transform duration-[4000ms] cubic-bezier(0.15, 0, 0.15, 1)"
+                    className="w-full h-full rounded-full border-8 border-slate-800 shadow-2xl relative transition-transform duration-[8000ms] cubic-bezier(0.15, 0, 0.15, 1)"
                     style={{ transform: `rotate(${rotation}deg)` }}
                 >
                     <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
@@ -110,10 +121,10 @@ export default function DailySpinWheel({ onWin, isSpinning, setIsSpinning }: Dai
 
             <Button
                 onClick={handleSpin}
-                disabled={isSpinning}
+                disabled={isSpinning || !canSpin}
                 className="h-16 px-12 text-2xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-black rounded-2xl shadow-xl shadow-purple-500/20 active:scale-95 transition-all"
             >
-                {isSpinning ? 'SPINNING...' : 'SPIN NOW!'}
+                {isSpinning ? 'SPINNING...' : !canSpin ? 'SPUN TODAY' : 'SPIN NOW!'}
             </Button>
 
             {result && (
