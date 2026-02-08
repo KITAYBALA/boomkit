@@ -2346,9 +2346,13 @@ export default function BoomkitGame() {
         localStorage.setItem("boomkit_ai_sets", JSON.stringify([data, ...cachedSets]))
         setShowAiSetCreator(false)
         setAiSetPrompt("")
-        alert(`Set "${data.title}" generated successfully!`)
-        if (data.fallback) {
-          alert("Note: Used fallback questions due to AI model unavailability.")
+
+        if (data.isQuotaError) {
+          alert(`Set "${data.title}" generated using relevant fallback questions because the AI is busy. Please wait about ${data.retryAfter || 60} seconds before trying to use the AI again.`)
+        } else if (data.fallback) {
+          alert(`Set "${data.title}" generated using fallback questions. Note: ${data.description}`)
+        } else {
+          alert(`Set "${data.title}" generated successfully with AI!`)
         }
       } else {
         alert("Failed to generate set. Please try a different prompt.")
