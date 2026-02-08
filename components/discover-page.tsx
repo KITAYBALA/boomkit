@@ -167,7 +167,7 @@ const SUBJECTS_BY_GRADE: { [key: number]: { name: string; emoji: string }[] } = 
 
 interface DiscoverPageProps {
     currentUser: any
-    onStartGame: (grade: number, subject: string, mode: "solo" | "host") => void
+    onStartGame: (grade: number, subject: string, mode: "solo" | "host", questions?: any[]) => void
     onJoinGame: (pin: string) => void
     onCreateWithAI: () => void
     discoveredSets?: any[]
@@ -378,14 +378,27 @@ export default function DiscoverPage({
                                         </Badge>
                                     </div>
                                 </CardHeader>
-                                <CardContent className="pt-0">
-                                    <Button
-                                        onClick={() => onStartGame(set.grade, set.subject, "solo")}
-                                        className="w-full bg-pink-600 hover:bg-pink-500 text-white font-bold rounded-xl h-12 shadow-lg shadow-pink-900/20 transition-all border border-pink-400/20"
-                                    >
-                                        <PlayIcon className="w-5 h-5 mr-2 fill-current" />
-                                        Play Now
-                                    </Button>
+                                <CardContent className="pt-0 space-y-2">
+                                    <div className="flex gap-2">
+                                        <Button
+                                            onClick={() => onStartGame(set.grade, set.subject, "solo", set.questions)}
+                                            className="flex-1 bg-pink-600 hover:bg-pink-500 text-white font-bold rounded-xl h-10 shadow-lg shadow-pink-900/20 transition-all border border-pink-400/20 text-xs"
+                                        >
+                                            <PlayIcon className="w-4 h-4 mr-1 fill-current" />
+                                            Solo
+                                        </Button>
+                                        <Button
+                                            onClick={() => onStartGame(set.grade, set.subject, "host", set.questions)}
+                                            className="flex-1 bg-violet-600 hover:bg-violet-500 text-white font-bold rounded-xl h-10 shadow-lg shadow-violet-900/20 transition-all border border-violet-400/20 text-xs"
+                                        >
+                                            <UsersIcon className="w-4 h-4 mr-1" />
+                                            Host
+                                        </Button>
+                                    </div>
+                                    <div className="flex items-center justify-between text-[10px] text-pink-200/40 px-1">
+                                        <span>{set.is_public ? "🌍 Public" : "🔒 Private"}</span>
+                                        <span>{new Date(set.created_at).toLocaleDateString()}</span>
+                                    </div>
                                 </CardContent>
                             </Card>
                         ))}
