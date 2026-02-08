@@ -2,55 +2,31 @@ export const TOPICS_BY_GRADE_SUBJECT: Record<number, Record<string, string[]>> =
     1: {
         "Math": [
             "General Math (All Topics)",
-            // Numbers & Counting
-            "Counting to 100", "Counting by 2s", "Counting by 5s", "Counting by 10s", "Counting Backward from 20", "Writing Numbers 0-20", "Number Words 1-10", "Number Words 11-20", "Ordinal Numbers (1st-5th)", "Ordinal Numbers (6th-10th)",
-            "Estimating Quantities", "Comparing Numbers (More)", "Comparing Numbers (Less)", "Equal To", "Even Numbers Intro", "Odd Numbers Intro", "Patterns with Shapes", "Patterns with Numbers", "Before and After Numbers", "Missing Numbers in Sequence",
-            // Operations
-            "Addition within 5", "Addition within 10", "Addition within 20", "Subtraction within 5", "Subtraction within 10", "Subtraction within 20",
-            "Missing Addends (Sum to 10)", "Number Bonds to 10", "Number Bonds to 20", "Doubles Facts (1+1 to 5+5)", "Doubles Facts (6+6 to 10+10)", "Doubles Plus One (2+3, 4+5)", "Making 10 to Add", "Commutative Property (2+3=3+2)",
-            "Word Problems: Adding Animals", "Word Problems: Adding Fruit", "Word Problems: Taking Away Toys", "Word Problems: Taking Away Balloons", "Fact Families (Addition/Subtraction)", "Mental Math: Adding 1", "Mental Math: Subtracting 1",
-            // Place Value
-            "Tens and Ones (Intro)", "Counting with Base Ten Blocks", "Comparing Two-Digit Numbers", "Expanded Form Basics", "10 More, 10 Less", "Identifying the Tens Digit", "Identifying the Ones Digit",
-            // Measurement & Data
-            "Measuring with Paper Clips", "Measuring with Cubes", "Longer vs. Shorter", "Taller vs. Shorter", "Heavier vs. Lighter", "Full vs. Empty", "Telling Time to the Hour", "Telling Time to the Half Hour",
-            "Morning, Afternoon, Night", "Yesterday, Today, Tomorrow", "Days of the Week", "Months of the Year", "Season Names", "Reading a Simple Calendar", "Identifying Pennies", "Identifying Nickels", "Identifying Dimes", "Identifying Quarters",
-            "Value of a Penny", "Value of a Nickel", "Value of a Dime", "Value of a Quarter", "Counting Pennies", "Counting Nickels", "Simple Bar Graphs", "Reading Tally Charts", "Making a Picture Graph", "Sorting Objects by Color", "Sorting Objects by Shape",
-            // Geometry
-            "Circles", "Squares", "Triangles", "Rectangles", "Hexagons", "Cubes", "Spheres", "Cones", "Cylinders", "Sides of a Shape", "Corners (Vertices)", "Open vs. Closed Shapes", "Fractions: Halves", "Fractions: Quarters", "Folding Shapes", "Symmetry intro"
+            "Numbers & Counting",
+            "Addition & Subtraction",
+            "Place Value & Measurement",
+            "Geometry & Data"
         ],
-        "Reading": [
-            "General Reading (All Topics)",
-            // Phonics & Phonemic Awareness
-            "Recognizing Syllables", "Rhyming Words (Short A)", "Rhyming Words (Short O)", "Rhyming Words (Short I)", "Beginning Sounds (Consonants)", "Ending Sounds (Consonants)", "Short A Vowel Sound", "Short E Vowel Sound", "Short I Vowel Sound", "Short O Vowel Sound", "Short U Vowel Sound",
-            "Long A with Silent E", "Long I with Silent E", "Long O with Silent E", "Long U with Silent E", "Consonant Blends: BL, CL, FL", "Consonant Blends: BR, CR, FR", "Consonant Blends: ST, SP, SK", "Digraphs: CH", "Digraphs: SH", "Digraphs: TH", "Digraphs: WH",
-            "R-Controlled Vowels: AR", "R-Controlled Vowels: OR", "R-Controlled Vowels: ER, IR, UR", "Soft C sounds", "Soft G sounds", "Word Family: -AT", "Word Family: -AN", "Word Family: -IG", "Word Family: -OP", "Word Family: -UG",
-            // Sight Words & Vocabulary
-            "High Frequency Words: Pre-Primer", "High Frequency Words: Primer", "High Frequency Words: First Grade", "Color Words Spellings", "Animal Name Vocabulary", "Family Member Vocabulary", "Opposites (Antonyms)", "Words for Actions (Verbs)", "Compound Words (Butterfly, Basketball)",
-            // Comprehension
-            "Retelling the Story", "Identifying the Main Character", "Describing the Setting", "What happened first?", "What happened last?", "Identifying the Problem", "Finding the Solution", "Making a Prediction", "Connecting the Story to My Life", "Author's Purpose (Tell/Teach/Fun)",
-            "Fiction vs. Real Life", "Picture Clues", "Character Feelings", "Summary of the Story", "Asking Questions while Reading"
-        ],
-        "Writing": [
-            "General Writing (All Topics)",
-            // Mechanics
-            "Holding a Pencil correctly", "Writing Capital Letters", "Writing Lowercase Letters", "Space between Words", "Starting with a Capital Letter", "Using a Period", "Using a Question Mark", "Using an Exclamation Point", "Spelling Short Words", "Proper Finger Spacing",
-            // Grammar
-            "Identifying Nouns", "Identifying Verbs", "Naming People", "Naming Places", "Naming Things", "Singular vs. Plural (Adding -s)", "Action Words in Sentences", "Describing Words (Adjectives)", "Using 'I' in a sentence", "The word 'and'", "Simple Sentences",
-            // Composition
-            "Writing My Name", "Writing a Label", "Writing a List", "Writing a Card", "Journal Entry: My Day", "Story: Once Upon a Time", "How-To: Making Toast", "Opinion: My Favorite Animal", "Informative: All about Dogs", "Writing to a Friend", "Describing a Picture"
+        "English Language Arts": [
+            "General ELA (All Topics)",
+            "Phonics & Spelling",
+            "Grammar & Sentences",
+            "Vocabulary & Word Meanings",
+            "Reading Comprehension"
         ],
         "Science": [
             "General Science (All Topics)",
-            "Plants: Parts of a Seed", "Plants: Roots and Stems", "Plants: Leaves and Flowers", "What Plants Need: Water", "What Plants Need: Light", "Life Cycle of a Bean", "Types of Living Things", "Non-Living Things", "Animals: Mammals", "Animals: Birds", "Animals: Fish", "Animals: Reptiles",
-            "Animals: Insects", "Animal Life Cycles", "Animal Coverings (Fur, Feathers, Scales)", "Hibernation", "Migration", "Camouflage", "Nocturnal Animals", "Five Senses: Sight", "Five Senses: Hearing", "Five Senses: Smell", "Five Senses: Taste", "Five Senses: Touch", "Eating Healthy Food", "Parts of the Human Body",
-            "Keeping Clean (Germs)", "The Sun", "The Moon", "Day vs. Night", "Stars and Constellations", "Weather: Sunny Days", "Weather: Rainy Days", "Weather: Snowy Days", "Weather: Windy Days", "Clouds in the Sky", "The Four Seasons: Spring", "The Four Seasons: Summer", "The Four Seasons: Fall", "The Four Seasons: Winter",
-            "Recycling Paper and Plastic", "Saving Water", "Rocks and Pebbles", "Soil and Dirt", "Solids (Hard and Soft)", "Liquids (Water and Juice)", "Gases (Air and Bubbles)", "Sinking and Floating", "Magnets: Attraction", "Pushes and Pulls", "Gravity (Falling down)", "Fast vs. Slow Motion", "Light and Shadows", "Sound and Vibrations"
+            "Plants & Animals",
+            "Earth & Space",
+            "Matter & Energy",
+            "Human Body & Health"
         ],
         "Social Studies": [
             "General Social Studies (All Topics)",
-            "Rules in the Classroom", "Rules at Home", "Being a Kind Friend", "Taking Turns", "Honesty", "Responsibility", "Community Helpers: Doctors", "Community Helpers: Firefighters", "Community Helpers: Police Officers", "Community Helpers: Teachers", "Community Helpers: Farmers",
-            "Map Symbols", "What is a Globe?", "North, South, East, West Basics", "My Neighborhood", "The School Map", "Landforms: Mountains", "Bodies of Water: Oceans", "Past vs. Present: School", "Past vs. Present: Toys", "Past vs. Present: Travel", "Calendars and Time", "Timeline of My Life", "The American Flag",
-            "The Liberty Bell", "The Bald Eagle", "Pledge of Allegiance", "George Washington", "Abraham Lincoln", "MLK Jr. Day", "Thanksgiving History", "Independence Day", "Veteran's Day", "Family Traditions", "Needs: Food and Water", "Wants: Toys and Games", "Money and Buying", "Saving Money in a Bank"
+            "Civics & Responsibility",
+            "Geography & Maps",
+            "History & Traditions",
+            "Economics (Needs & Wants)"
         ],
         "Art": [
             "Primary Colors", "Secondary Colors", "Drawing Shapes", "Lines and Textures", "Coloring inside the lines", "Famous Paintings intro", "Finger Painting", "Sculpting with Clay", "Paper Collage"
@@ -65,36 +41,31 @@ export const TOPICS_BY_GRADE_SUBJECT: Record<number, Record<string, string[]>> =
     2: {
         "Math": [
             "General Math (All Topics)",
-            "Counting to 1000", "Skip Counting by 2s to 100", "Skip Counting by 5s to 500", "Skip Counting by 10s to 1000", "Skip Counting by 100s", "Place Value: Hundreds, Tens, Ones", "Identifying Values of Digits", "Comparing 3-Digit Numbers (>, <, =)", "Ordering Numbers to 1000", "Reading & Writing 3-Digit Numbers", "Expanded Form to 1000",
-            "Mental Math: Adding 10", "Mental Math: Subtracting 10", "Mental Math: Adding 100", "Mental Math: Subtracting 100", "Addition within 100 (No Regrouping)", "Addition within 100 (with Regrouping)", "Subtraction within 100 (No Borrowing)", "Subtraction within 100 (with Borrowing)", "Adding Three 2-Digit Numbers", "Adding Four 2-Digit Numbers",
-            "Addition within 1000 (Standard Algorithm)", "Subtraction within 1000 (Standard Algorithm)", "One-Step Word Problems", "Two-Step Word Problems", "Even and Odd Numbers (Grouping)", "Pairs of Objects", "Intro to Arrays (Rows and Columns)", "Rectangular Arrays", "Repeated Addition (Basis for Multiplication)", "Partitioning Rectangles",
-            "Measuring in Inches (Ruler)", "Measuring in Centimeters", "Measuring in Feet and Yards", "Measuring in Meters", "Comparing Lengths (Difference)", "Estimating Length in Inches/CM", "Number Line Addition", "Number Line Subtraction", "Telling Time to 5 Minutes", "Using AM and PM", "Quarter Past and Quarter To", "Counting Pennies, Nickels, Dimes",
-            "Counting Quarters and Dollars", "Money Word Problems: Making Change", "Money Word Problems: Buying Items", "Reading a Line Plot", "Reading a Bar Graph (Scales)", "Creating a Picture Graph", "Interpreting Data from Graphs", "Recognizing Shapes: Triangles and Quadrilaterals", "Recognizing Pentagons and Hexagons", "Count Sides and Angles",
-            "Properties of Cubes", "Partitioning Circles: Halves", "Partitioning Circles: Fourths", "Partitioning Rectangles: Thirds", "Equal Shares", "Number of Thirds in a Whole"
+            "Numbers, Place Value & Fractions",
+            "Addition & Subtraction (Concepts & Word Problems)",
+            "Measurement, Time & Money",
+            "Geometry & Data Analysis"
         ],
-        "Reading": [
-            "General Reading (All Topics)",
-            "Vowel Teams: AI and AY", "Vowel Teams: EE and EA", "Vowel Teams: IE and Y", "Vowel Teams: OA and OW", "Diphthongs: OI and OY", "Diphthongs: OU and OW", "Vowel Digraphs: OO, AU, AW", "Consonant Digraphs: KN, GN", "Silent Letters: WR", "Hard and Soft C", "Hard and Soft G", "Prefix: UN-", "Prefix: RE-", "Prefix: DIS-", "Suffix: -FUL", "Suffix: -LESS", "Suffix: -LY", "Suffix: -ABLE",
-            "Fluency: Reading with Feeling", "Fluency: Self-Correction", "Fluency: Pacing", "Context Clues for New Words", "Compound Word Review", "Multi-Syllable Words", "Identifying the Moral of a Fable", "Folktales from Different Cultures", "Character Traits: Brave, Kind, Sneaky", "Character Motivations (Why they do it)", "Comparing the Start and End of a Story", "Information within Illustrations",
-            "Comparing Two Versions of a Fairy Tale", "Identifying the Main Goal of a Text", "Text Features: Table of Contents", "Text Features: Glossary", "Text Features: Index", "Text Features: Electronic Menus", "Bold and Italic Words purpose", "Fact vs. Opinion basics", "Answering 5W Questions (Who, What, etc.)", "Making Connections: Text-to-Self", "Making Connections: Text-to-Text"
-        ],
-        "Writing": [
-            "General Writing (All Topics)",
-            "Collective Nouns (Group, Flock)", "Irregular Plurals (Children, Feet)", "Singular vs. Plural Nouns review", "Reflexive Pronouns (Myself, Himself)", "Identifying the Subject of a Sentence", "Identifying the Predicate", "Past Tense Irregular Verbs (Came, Saw, Went)", "Future Tense with 'Will'", "Adverbs that end in -LY", "Adjectives for Comparison (-ER, -EST)",
-            "Simple vs. Compound Sentences", "Using a Comma in a Friendly Letter", "Using a Comma in a Series", "Capitalizing Holidays", "Capitalizing Geographic Names", "Apostrophes in Contractions (Don't, Can't)", "Apostrophes in Possessives (User's Book)", "Dictionary Skills: First Letter", "Dictionary Skills: Guide Words", "Personal Narrative: A Memory", "Opinion: My Favorite Book",
-            "Informative: How to Play a Sport", "Descriptive Writing: Using Senses", "Fictional Narrative: Animals that Talk", "Poetry: Rhyme Schemes", "Poetry: Cinquain", "Editing: Checking for Capitals", "Publishing: Final Drafts"
+        "English Language Arts": [
+            "General ELA (All Topics)",
+            "Phonics & Word Recognition",
+            "Grammar (Nouns, Verbs, Adjectives)",
+            "Sentence Structure & Punctuation",
+            "Reading Comprehension & Literary Elements"
         ],
         "Science": [
             "General Science (All Topics)",
-            "What is Matter?", "Weight vs. Mass basics", "Measuring Liquid Volume", "Solids changing to Liquids", "Liquids changing to Solids", "What is an Ecosystem?", "Desert Habitats", "Rainforest Habitats", "Tundra Habitats", "Grassland Habitats", "Marine (Ocean) Habitats", "Freshwater Habitats", "Forest Habitats", "How Animals depend on Plants", "Pollination: Bees and Butterflies",
-            "How Seeds Travel", "Adaptations for Survival", "Life Cycle: Honeybee", "Life Cycle: Ant", "Diversity of Life", "Fast Changes on Earth", "Earthquakes (Causes)", "Volcanoes (Eruptions)", "Slow Changes on Earth", "Weathering by Water", "Weathering by Wind", "Erosion: Soil moving", "Landforms: Plateaus and Plains", "Landforms: Canyons and Valleys", "Lakes, Streams, and Rivers", "Oceans and Seas",
-            "Mapping Local Landforms", "Protecting the Environment", "Engineering: Building a Bridge", "Engineering: Testing a Model"
+            "Life Science & Ecosystems",
+            "Earth's Systems & Surface Changes",
+            "Matter: Properties & Changes",
+            "Engineering, Mapping & Natural Resources"
         ],
         "Social Studies": [
             "General Social Studies (All Topics)",
-            "Timelines of History", "Native American Tribes: Coastal", "Native American Tribes: Plains", "Christopher Columbus Intro", "Ponce de Leon and Florida", "Jamestown Colony intro", "The Pilgrims and Plymouth", "The First Thanksgiving", "Colonial Life: School and Toys", "George Washington (President #1)", "Thomas Jefferson (President #3)", "Abraham Lincoln (President #16)", "The Statue of Liberty",
-            "Mount Rushmore", "The White House", "Rosa Parks and bravery", "The Continents: North and South America", "The Continents: Europe and Asia", "The Continents: Africa and Oceania", "Antarctica (The Ice Continent)", "The Five Oceans", "Equator and Prime Meridian", "Cardinal vs. Intermediate Directions", "Reading a Map Scale", "Grid Maps", "Rights of a Citizen", "Responsibilities (Chores/Voting)",
-            "Rules for Safety", "The Mayor's Job", "The Governor's Job", "The President's Job", "The Three Branches (Very Basic)", "Producers (Makers)", "Consumers (Buyers)", "Bartering (Trading Items)", "Supply and Demand (Basic)", "Community Businesses", "International Trade Intro"
+            "Government & Citizenship",
+            "Geography & Landforms",
+            "History, Culture & Economics",
+            "Maps, Continents & Oceans"
         ],
         "Art": [
             "Mixing Colors", "Landscape Drawing", "Portrait Basics", "Patterns in Art", "Texture Exploration", "Art History: Impressionism", "3D Crafts", "Mask Making"
@@ -115,7 +86,7 @@ export const TOPICS_BY_GRADE_SUBJECT: Record<number, Record<string, string[]>> =
             "Fractions equal to 1", "Telling Time to the Minute", "Calculating Elapsed Time", "Word Problems with Time", "Measuring Liquid Volume (Liters)", "Measuring Mass (Grams/Kilograms)", "Word Problems with Mass/Volume", "Interpreting Bar Graphs with Scales", "Creating Bar Graphs with Scales", "Reading Line Plots with Quarter Inches", "The Concept of Area", "Area of Rectangles (Counting Squares)",
             "Area using Multiplication side lengths", "Area of Composite Shapes", "The Perimeter of Polygons", "Finding a Missing Side length with Perimeter", "Area vs. Perimeter: Same Area, Different Perimeter", "Classifying Quadrilaterals", "Rhombus vs. Square", "Trapezoids and Parallelograms", "Partitioning Shapes into Equal Areas"
         ],
-        "English (Reading & Writing)": [
+        "English Language Arts": [
             "General ELA (All Topics)",
             "Asking Questions (Who, What, etc.)", "Citing Evidence from the Text", "Recounting Fables and Folktales", "Moral of the Story", "Describing Characters (Traits, Feelings)", "Character Perspective vs. Action", "Sequence of Events in Stories", "Cause and Effect in Literature", "Literal vs. Nonliteral Language", "Point of View (1st vs. 3rd Person)", "Illustrations and Meaning", "Comparing Characters in a Series",
             "Main Idea of Informational Text", "Supporting Details", "Text Structure: Time Order", "Text Structure: Cause and Effect", "Vocabulary: Using Context Clues", "Using a Glossary/Dictionary", "Using Maps and Photos in Reading", "Sentence Fragments and Run-ons", "Abstract Nouns (Kindness, Bravery)", "Regular Verbs (Past, Present, Future)", "Irregular Verbs (Past Tense)", "Subject-Verb Agreement", "Pronoun-Antecedent Agreement",
@@ -187,7 +158,7 @@ export const TOPICS_BY_GRADE_SUBJECT: Record<number, Record<string, string[]>> =
             "Dividing Whole Numbers by Unit Fractions", "Conversions within Metric System (Meters, Grams, Liters)", "Conversions within Customary System (Inches, Pounds, Quarts)", "Multi-Step Measurement Word Problems", "Line Plots with Fractional Intervals", "Understanding Volume", "Unit Cubes and Volume", "Volume of Rectangular Prisms (l x w x h)", "Volume of Composite Figures (Additive)", "Coordinate Planes: X and Y Axis", "Plotting Points in the 1st Quadrant",
             "Geometry: Properties of 2D Figures", "Classifying Triangles (Isosceles, Scalene, Equilateral)", "Classifying Quadrilaterals Hierarchy", "Properties of Regular Polygons"
         ],
-        "English": [
+        "English Language Arts": [
             "General ELA (All Topics)",
             "Quoting accurately from a text", "Theme determination from details", "Summarizing complex stories", "Character comparisons across stories", "Setting comparisons across stories", "Metaphors and Similes in Poetry", "Analyzing Poetry Structures", "Analyzing Drama Structures", "Comparison of Visual vs. Written Texts", "Analyzing Mystery Genre elements", "Historical Fiction Characteristics", "Graphic Novel Analysis",
             "Determining Main Ideas of Info Text", "Explain relationships in Scientific/Historic text", "Analyzing multiple accounts of same event", "Comparing First vs. Secondhand POV", "Evaluating Evidence in an Argument", "Analyzing how an author uses reasons", "Technical Vocabulary", "Integrating Information from Several Texts", "Fluency and Accuracy in Reading", "Conjunctions and Prepositions", "Interjections!", "Perfect Verb Tenses (Has/Had)",
@@ -218,7 +189,7 @@ export const TOPICS_BY_GRADE_SUBJECT: Record<number, Record<string, string[]>> =
             "Solving One-Step Equations (Add/Sub)", "Solving One-Step Equations (Mult/Div)", "Inequalities on a Number Line", "Dependent vs. Independent Variables", "Area of Triangles (Formula)", "Area of Special Quadrilaterals", "Area of Polygons (Decomposition)", "Volume of Rectangular Prisms with Fractions", "Surface Area using Nets", "Statistical Questions and Variability", "The Mean (Average)", "The Median (Middle)", "The Mode (Most Common)",
             "The Range of Data", "Dot Plots", "Histograms", "Box Plots (Five-Number Summary)", "Mean Absolute Deviation (MAD)"
         ],
-        "English": [
+        "English Language Arts": [
             "General ELA (All Topics)",
             "Citing textual evidence (Middle School level)", "Determining Theme and Summaring Literature", "Plot Development: Introduction to Climax", "Character response to change", "Figurative/Connotative Meanings", "Tone Analysis in Fiction", "Analyze how a chapter fits into a book", "Point of View: Author vs. Character", "Integrating diverse media in literature", "Literature vs. Film comparisons", "Central Ideas in Informational Text", "Summarizing Nonfiction",
             "Analyzing Key individuals in history/science", "Word choice in technical text", "Analyzing text structure (Info)", "Determining point of view in nonfiction", "Evaluate arguments and claims", "Comparing Two Authors' views", "Objective view and Tone", "Pronoun Case (Subjective/Objective)", "Intensive Pronouns", "Vague Pronouns", "Punctuation for Effect (Commas, Parentheses, Dashes)", "Spelling correctly (Grade 6 level)", "Expanding Vocabulary (Academic)",
@@ -244,7 +215,7 @@ export const TOPICS_BY_GRADE_SUBJECT: Record<number, Record<string, string[]>> =
             "Circumference of a Circle formula", "Angle Relationships (Supplementary/Complementary)", "Vertical and Adjacent Angles", "Solving for Unknown Angles", "Volume of Right Prisms", "Surface Area of Right Prisms", "Volume of Pyramids", "Random Sampling for Inferences", "Comparing Two Data Distributions", "Using the Mean Absolute Deviation (MAD)", "The Concept of Probability", "Predicting Results using Probability", "Theoretical vs. Experimental Probability",
             "Probability of Compound Events", "Tree Diagrams for Outcomes"
         ],
-        "English": [
+        "English Language Arts": [
             "General ELA (All Topics)",
             "Citing multiple pieces of evidence", "Theme development in Middle School Literature", "Summarizing stories objectively", "In-depth character analysis", "Poetic Form: Sonnets and Ballads", "Analyzing Drama Scenes", "Character Points of View", "Literary Allusions in Modern Writing", "Determining Central Ideas and Summarizing Nonfiction", "Analyzing interactions between individuals/events", "Technical Word Meanings in Nonfiction", "Analyzing Text Structure for Persuasion",
             "Authors' Points of View in multiple texts", "Evaluating the logic of a claim", "Comparing two authors on the same topic", "Phrases vs. Clauses", "Independent vs. Dependent Clauses", "Simple, Compound, Complex, Compound-Complex Sentences", "Comma usage after clauses", "Misplaced Modifiers", "Dangling Modifiers", "Words with Positive/Negative Connotations", "Figures of Speech: Personification and Hyperbole", "Argumentative Writing: Logic and Transitions",
@@ -269,7 +240,7 @@ export const TOPICS_BY_GRADE_SUBJECT: Record<number, Record<string, string[]>> =
             "Geometric Transformations: Rotations", "Geometric Transformations: Dilations", "Similarity of Figures", "Congruence of Figures", "Parallel Lines and Transversals (Angles)", "The Pythagorean Theorem Formula", "Pythagorean Theorem: Solving for Hypotenuse", "Pythagorean Theorem: Solving for a Leg", "Converse of the Pythagorean Theorem", "Pythagorean Theorem in 3D", "The Distance Formula", "Volume of Cylinders", "Volume of Cones", "Volume of Spheres",
             "Scatter Plots and Patterns", "The Line of Best Fit", "Interpreting Linear Models", "Two-Way Frequency Tables"
         ],
-        "English": [
+        "English Language Arts": [
             "General ELA (All Topics)",
             "Citing the strongest textual evidence", "Theme development (8th Grade Level)", "Objectively summarizing literature", "Internal vs. External Conflict in characters", "Tone and Mood Deep Analysis", "Impact of Analogies in Text", "Analyzing how Dialogue reveals character", "Standard Plot Structure vs. Nonlinear plots", "Biblical and Mythological Allusions (Deep dive)", "Literary Archetypes", "Main Idea and Support in Nonfiction",
             "Connection between ideas/individuals across a text", "Analyzing Author Perspective and Bias", "Conflicting viewpoints in Nonfiction", "Analyzing Persuasive Rhetoric", "Evaluating the Credibility of an Argument", "Verbals: Gerunds", "Verbals: Participles", "Verbals: Infinitives", "Active vs. Passive Voice", "Imperative, Interrogative, and Indicative Moods", "Subjective and Conditional Moods", "Punctuation: Ellipsis and Dashes", "Irony and Satire", "Word Nuances and Connotations",
@@ -294,7 +265,7 @@ export const TOPICS_BY_GRADE_SUBJECT: Record<number, Record<string, string[]>> =
             "Systems of Equations Applications", "Graphing Linear Inequalities in two variables", "Systems of Linear Inequalities", "Laws of Exponents review", "Radical Expressions (Simplifying)", "Rational Exponents", "Polynomial Operations (Add/Sub/Mult)", "Factoring: GCF and Triomials", "Factoring: Difference of Squares", "Factoring: Grouping", "Solving Quadratics by Factoring", "Solving Quadratics by Square Roots", "Completing the Square", "The Quadratic Formula",
             "The Discriminant", "Graphing Parabolas (Vertex Form)", "Quadratic Applications (Projectile Motion)", "Exponential Growth and Decay", "Sequences (Arithmetic and Geometric)", "Statistics: Variance and Standard Deviation", "Euclidean Geometry Foundations", "Logical Reasoning: Conditional Statements", "Geometric Proofs (Two-Column)", "Congruent Triangles: SSS, SAS, ASA, AAS, HL", "Properties of Isosceles Triangles", "Triangle Midsegments"
         ],
-        "English Literature": [
+        "English Language Arts": [
             "General ELA (All Topics)",
             "Literary Device: Foreshadowing", "Literary Device: Flashback", "Themes in World Myths", "In-depth Literary Analysis (Grade 9)", "The Hero's Journey Archetype", "Analyzing The Odyssey", "Analyzing Romeo and Juliet", "Analyzing To Kill a Mockingbird", "Poetic Devices: Metonymy and Synecdoche", "Epic Poetry structure", "Shakespearean Sonnets", "Soliloquy vs. Monologue", "Dynamic vs. Static Characters", "Symbolism and Motif", "Imagery and Descriptive Power",
             "Narrative Perspectives (Deep Dive)", "Tone and Mood shifts", "Irony: Verbal, Situational, Dramatic", "Deductive vs. Inductive reasoning", "Writing a Thesis Statement", "Argumentative Writing Structure", "Persuasive Appeals (Ethos, Pathos, Logos)", "The Writing Process: Pre-writing to Publishing", "Annotation Strategies", "Vocabulary from Word Roots", "MLA Formatting Styles"
@@ -312,7 +283,7 @@ export const TOPICS_BY_GRADE_SUBJECT: Record<number, Record<string, string[]>> =
             "Volume of Cylinders, Cones, and Spheres", "Density and Geometric Modeling", "Design with Geometry", "Complex Numbers and Imaginary Units", "Operations with Complex Numbers", "Higher-Order Polynomial Operations", "Synthetic and Long Division of Polynomials", "Rational Exponents and Radical Expressions", "Exponential Functions and Graphs", "The number 'e'", "Logarithmic Functions and Graphs", "Properties of Logs (Product, Quotient, Power)",
             "Solving Exponential and Log Equations", "Rational Functions: Asymptotes and Slants", "Solving Rational Equations", "Transformation of Functions (Parent Functions)", "Composition of Functions", "Inverse Functions", "Parabolas, Circles, Ellipses, and Hyperbolas", "Systems of Non-Linear Equations"
         ],
-        "English Literature": [
+        "English Language Arts": [
             "General ELA (All Topics)",
             "Rhetorical Analysis foundations", "Analyzing Persuasive Text (Speeches)", "Satire and Allegory (Animal Farm)", "Analyzing Lord of the Flies", "Analyzing Fahrenheit 451", "Dystopian Literature themes", "Analyzing Greek Tragedy (Antigone)", "Analyzing Night (Ellie Wiesel)", "Cultural Context in World Literature", "Irony in Mystery Texts", "Authorial Choice in Nonfiction", "Synthesizing themes from multiple texts", "Analyzing the Rhetorical Triangle",
             "Logical Fallacies (Ad Hominem, Straw Man, etc.)", "Advanced Vocabulary: Tone words", "Research methodology", "Developing a unique authorial voice", "Creative Writing: Show, Don't Tell", "Citing sources via APA/MLA Styles"
@@ -329,7 +300,7 @@ export const TOPICS_BY_GRADE_SUBJECT: Record<number, Record<string, string[]>> =
             "Unit Circle and Radians", "Trig Functions of Any Angle", "Graphing Sin, Cos, Tan", "Amplitude, Period, and Phase Shift", "Fundamental Trig Identities", "Proving Trig Identities", "Sum and Difference Formulas", "Double-Angle and Half-Angle Formulas", "Solving Trig Equations (Complex)", "Polar Coordinates and Equations", "De Moivre's Theorem", "Vector Operations (Dot Product)", "Matrices: Adding and Multiplying", "Calculating Determinants and Inverses",
             "Conic Sections: Circles and Parabolas", "Conic Sections: Ellipses and Hyperbolas", "Parametric Equations", "Arithmetic and Geometric Sequences", "Summation Notation (Sigma)", "Limits: Definition and Evaluation", "Infinity and Limits", "Continuity of Functions", "The Difference Quotient", "Binomial Theorem and Pascal's Triangle", "Mathematical Induction Intro", "Introduction to Derivatives (Power Rule)"
         ],
-        "English": [
+        "English Language Arts": [
             "General ELA (All Topics)",
             "Analyzing The Great Gatsby", "Analyzing The Crucible", "Analyzing The Scarlet Letter", "Voice and Style in Emily Dickinson", "Themes in Transcendentalism (Emerson/Thoreau)", "Harlem Renaissance Literature", "Modernism in American Poetry", "Beats Generation and Post-Modernism", "Contemporary Voices in America", "Rhetorical Situation: Audience/Purpose", "Persuasive Appeals: Logos and Pathos", "Analyzing Persuasive Strategies", "Synthesis Essay Development",
             "Argumentative Essay: Nuance and Evidence", "Rhetorical Analysis Essay", "The Power of Persuasion in Speeches", "Vocabulary: Latin and Greek roots deep dive", "Advanced Sentence Structures (Style)", "Research and Bibliography (AP/College Level)"
@@ -347,7 +318,7 @@ export const TOPICS_BY_GRADE_SUBJECT: Record<number, Record<string, string[]>> =
             "Limits at a Point", "Limits at Infinity", "One-Sided Limits", "Continuity and Differentiability", "The Derivative as a Slope", "Power Rule and Constant Multiple Rule", "Product and Quotient Rules", "The Chain Rule", "Implicit Differentiation", "Logarithmic Differentiation", "Related Rates Problems", "Mean Value Theorem", "Extreme Value Theorem", "Optimization Problems", "First and Second Derivative Tests", "Curve Sketching", "Riemann Sums", "Definite Integrals",
             "Indefinite Integrals", "The Fundamental Theorem of Calculus", "U-Substitution for Integration", "Integration by Parts", "Area Between Curves", "Volumes of Solids of Revolution", "Arc Length", "Differential Equations (Separable)", "Logistic Growth Models", "Population Density Models", "Statistics: Data Collection", "Statistics: Confidence Intervals", "Statistics: Hypothesis Testing", "Statistics: Regression and Correlation"
         ],
-        "English": [
+        "English Language Arts": [
             "General ELA (All Topics)",
             "Analyzing Beowulf (Anglo-Saxon)", "Analyzing The Canterbury Tales (Middle English)", "Shakespearean Tragedy: Macbeth", "Shakespearean Tragedy: Hamlet", "Mary Shelley's Frankenstein", "19th Century British Novel: Jane Eyre", "Dystopian Vision: 1984", "Themes in Brave New World", "Post-Colonial Voices in English Literature", "Satire in British Literature (Swift)", "Modernist British Poetry", "Advanced Literary Theory", "Senior Research Project",
             "The Transition to College Writing", "Business and Technical Communications", "The Power of a Narrative Portfolio", "Analyzing Global Voices in Translation"
