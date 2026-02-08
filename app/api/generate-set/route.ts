@@ -24,8 +24,8 @@ export async function POST(req: Request) {
 
     const genAI = new GoogleGenerativeAI(apiKey)
 
-    // Model retry list for robustness - Updated with valid Gemini models
-    const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-pro"]
+    // Model retry list for robustness - Updated with verified available models
+    const modelsToTry = ["gemini-2.0-flash", "gemini-flash-latest", "gemini-pro-latest", "gemini-2.5-flash-lite", "gemini-exp-1206"]
     let lastError = null
     let generationSuccessful = false
     let finalData = null
