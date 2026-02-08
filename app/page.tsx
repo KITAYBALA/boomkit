@@ -793,7 +793,7 @@ export default function BoomkitGame() {
   const [showPasswordEdit, setShowPasswordEdit] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [staffSearchQuery, setStaffSearchQuery] = useState("") // Added for Staff search
-  const [staffTab, setStaffTab] = useState<"all" | "active" | "muted" | "banned">("all")
+  const [staffTab, setStaffTab] = useState<"all" | "active" | "muted" | "banned" | "applications">("all")
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false) // Fixed typo from setShowShowPrivacyPolicy
   const [showTermsOfService, setShowTermsOfService] = useState(false)
   const [newName, setNewName] = useState("")
@@ -1711,6 +1711,12 @@ export default function BoomkitGame() {
         level: user.level || 1,
       }
 
+      if (newUser.status === "pending") {
+        alert("Registration successful! Your application is pending staff approval. Please wait for an admin to review your request.")
+        setCurrentView("owner-access") // Return to start screen
+        return
+      }
+
       updateAndPersistCurrentUser(newUser)
       setCurrentView("game")
     } catch (error) {
@@ -1788,6 +1794,12 @@ export default function BoomkitGame() {
       // Check if user is banned (double-check from server response)
       if (foundUser.isBanned) {
         router.push(`/banned?reason=${encodeURIComponent(foundUser.banReason || "")}`)
+        return
+      }
+
+      // Check if user is pending approval
+      if (foundUser.status === "pending") {
+        alert("Your application is still pending approval. Please check back later.")
         return
       }
 
@@ -2527,6 +2539,46 @@ export default function BoomkitGame() {
     })
     updateAndPersistUsers(updatedUsers, userId)
   }
+
+  // Handle Application Approval
+  const handleApproveUser = async (userId: string) => {
+    if (!confirm("Are you sure you want to approve this user?")) return
+
+    const updatedUsers = users.map((u) => {
+      if (u.id === userId) {
+        return { ...u, status: "approved" }
+      }
+      return u
+    })
+
+    // Optimistic update
+    setUsers(updatedUsers)
+
+    // Secure update via API (or direct DB update if using client inside component which we are)
+    // We reuse updateAndPersistUsers which calls the API
+    await updateAndPersistUsers(updatedUsers, userId)
+    alert("User application approved!")
+  }
+
+  // Handle Application Rejection
+  const handleRejectUser = async (userId: string) => {
+    const reason = prompt("Please provide a reason for rejection:")
+    if (!reason) return
+
+    // Rejection essentially bans them or just deletes them? 
+    // Plan said "status: rejected". Let's stick to that.
+
+    const updatedUsers = users.map((u) => {
+      if (u.id === userId) {
+        return { ...u, status: "rejected", banReason: reason, isBanned: true }
+      }
+      return u
+    })
+
+    await updateAndPersistUsers(updatedUsers, userId)
+    alert("User application rejected.")
+  }
+
 
   // Edit User Functions
   const openEditUserDialog = (user: GameUser) => {
@@ -4152,6 +4204,17 @@ export default function BoomkitGame() {
                         {(users || []).filter(u => u && u.isBanned).length}
                       </Badge>
                     </button>
+                    <button
+                      onClick={() => setStaffTab("applications")}
+                      className={`px-6 py-2 rounded-xl text-sm font-black transition-all duration-300 flex items-center gap-2 ${staffTab === "applications" ? "bg-orange-600 text-white shadow-lg shadow-orange-900/40" : "text-white/40 hover:text-white hover:bg-white/5"
+                        }`}
+                    >
+                      <FileTextIcon className="w-4 h-4" />
+                      Applications
+                      <Badge className="ml-1 bg-white/10 text-white border-none px-1.5 py-0 min-w-[20px] justify-center text-orange-400">
+                        {(users || []).filter(u => u && u.status === "pending").length}
+                      </Badge>
+                    </button>
                   </div>
 
                   {/* Search and Filters Strip */}
@@ -4172,10 +4235,11 @@ export default function BoomkitGame() {
                         if (!u) return false
                         const matchesSearch = u.username.toLowerCase().includes(staffSearchQuery.toLowerCase())
                         const matchesTab =
-                          staffTab === "all" ||
-                          (staffTab === "active" && !u.isBanned) ||
+                          (staffTab === "all" && u.status !== "pending") ||
+                          (staffTab === "active" && !u.isBanned && u.status !== "pending") ||
                           (staffTab === "muted" && u.isMuted) ||
-                          (staffTab === "banned" && u.isBanned)
+                          (staffTab === "banned" && u.isBanned) ||
+                          (staffTab === "applications" && u.status === "pending")
                         return matchesSearch && matchesTab
                       })
                       .map((user) => {
@@ -4185,20 +4249,41 @@ export default function BoomkitGame() {
                           <div key={user.id} className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 group hover:bg-white/10 transition-all duration-300">
                             <div className="flex items-center gap-4">
                               <div className="relative">
-                                <div className={`h-3 w-3 rounded-full ${isActive ? "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]" : "bg-zinc-600"}`} />
+                                <div className={`h-3 w-3 rounded-full ${isActive ? "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]" : user.status === "pending" ? "bg-orange-500 animate-pulse" : "bg-zinc-600"}`} />
                                 {isActive && <div className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-20" />}
                               </div>
                               <div className="flex flex-col">
                                 <div className="flex items-center gap-2">
                                   <span className="text-white font-black tracking-tight">{user.username}</span>
-                                  <Badge className={`${userRole?.color || "bg-zinc-600"} text-white text-[10px] font-black uppercase tracking-widest px-2 py-0.5 border-none shadow-sm`}>
-                                    {userRole?.name || "Player"}
-                                  </Badge>
+                                  {user.status === "pending" ? (
+                                    <Badge className="bg-orange-500/20 text-orange-400 text-[10px] font-black uppercase tracking-widest px-2 py-0.5 border border-orange-500/30 shadow-sm">
+                                      Pending Approval
+                                    </Badge>
+                                  ) : (
+                                    <Badge className={`${userRole?.color || "bg-zinc-600"} text-white text-[10px] font-black uppercase tracking-widest px-2 py-0.5 border-none shadow-sm`}>
+                                      {userRole?.name || "Player"}
+                                    </Badge>
+                                  )}
                                 </div>
-                                <div className="flex items-center gap-2 mt-1">
-                                  {user.isMuted && <span className="text-yellow-500/80 text-[10px] font-black uppercase tracking-widest flex items-center gap-1">🔇 Muted</span>}
-                                  {user.isBanned && <span className="text-red-500/80 text-[10px] font-black uppercase tracking-widest flex items-center gap-1">🚫 Banned</span>}
-                                </div>
+
+                                {user.status === "pending" ? (
+                                  <div className="mt-2 text-xs text-white/80 bg-black/20 p-2 rounded-lg border border-white/5">
+                                    <p className="flex items-center gap-2 mb-1">
+                                      <span className="text-orange-400 font-bold uppercase text-[10px] tracking-wider w-12">Age:</span>
+                                      <span className="font-mono">{user.age || "N/A"}</span>
+                                    </p>
+                                    <p className="flex items-start gap-2">
+                                      <span className="text-orange-400 font-bold uppercase text-[10px] tracking-wider w-12 mt-0.5">Reason:</span>
+                                      <span className="italic text-white/90">{user.reason || "No reason provided"}</span>
+                                    </p>
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center gap-2 mt-1">
+                                    {user.isMuted && <span className="text-yellow-500/80 text-[10px] font-black uppercase tracking-widest flex items-center gap-1">🔇 Muted</span>}
+                                    {user.isBanned && <span className="text-red-500/80 text-[10px] font-black uppercase tracking-widest flex items-center gap-1">🚫 Banned</span>}
+                                  </div>
+                                )}
+
                                 {staffTab === "banned" && user.banReason && (
                                   <div className="mt-2 p-2 bg-red-500/10 rounded-lg border border-red-500/20 text-xs text-red-100/70 italic">
                                     "{user.banReason}"
@@ -4214,68 +4299,89 @@ export default function BoomkitGame() {
                                 currentUser?.role === "tester" ||
                                 isOwner()) && (
                                   <>
-                                    {isOwner() && (
-                                      <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => openEditUserDialog(user)}
-                                        className="h-9 w-9 p-0 text-white/40 hover:text-purple-400 hover:bg-purple-500/10 rounded-xl transition-all"
-                                      >
-                                        <PencilIcon className="h-4 w-4" />
-                                      </Button>
-                                    )}
-                                    <select
-                                      value={user.role}
-                                      onChange={(e) => quickAssignRole(user.id, e.target.value)}
-                                      className="bg-zinc-900 border border-white/10 text-white text-xs font-bold rounded-xl px-3 py-1.5 focus:border-purple-500/50 outline-none h-9"
-                                    >
-                                      {DEFAULT_ROLES.filter(
-                                        (role) => role.id !== "owner" || (isOwner() && user.id === currentUser?.id),
-                                      ).map((role) => (
-                                        <option key={role.id} value={role.id}>
-                                          {role.name}
-                                        </option>
-                                      ))}
-                                    </select>
-
-                                    <div className="h-6 w-px bg-white/10 mx-1 hidden md:block" />
-
-                                    {user.isMuted ? (
-                                      <Button
-                                        size="sm"
-                                        onClick={() => handleUnbanUnmute(user.id, "unmute")}
-                                        className="bg-yellow-500/10 hover:bg-yellow-500 text-yellow-500 hover:text-white border border-yellow-500/20 rounded-xl font-bold h-9 px-4 transition-all"
-                                      >
-                                        Unmute
-                                      </Button>
+                                    {user.status === "pending" ? (
+                                      <>
+                                        <Button
+                                          size="sm"
+                                          onClick={() => handleApproveUser(user.id)}
+                                          className="bg-green-600 hover:bg-green-500 text-white border border-green-500/30 rounded-xl font-bold h-9 px-4 transition-all shadow-lg shadow-green-900/20"
+                                        >
+                                          Approve
+                                        </Button>
+                                        <Button
+                                          size="sm"
+                                          onClick={() => handleRejectUser(user.id)}
+                                          className="bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/30 rounded-xl font-bold h-9 px-4 transition-all"
+                                        >
+                                          Reject
+                                        </Button>
+                                      </>
                                     ) : (
-                                      <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => openMuteDialog(user)}
-                                        className="text-white/40 hover:text-yellow-500 hover:bg-yellow-500/10 rounded-xl font-bold h-9 px-4 transition-all"
-                                      >
-                                        Mute
-                                      </Button>
-                                    )}
+                                      <>
+                                        {isOwner() && (
+                                          <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => openEditUserDialog(user)}
+                                            className="h-9 w-9 p-0 text-white/40 hover:text-purple-400 hover:bg-purple-500/10 rounded-xl transition-all"
+                                          >
+                                            <PencilIcon className="h-4 w-4" />
+                                          </Button>
+                                        )}
+                                        <select
+                                          value={user.role}
+                                          onChange={(e) => quickAssignRole(user.id, e.target.value)}
+                                          className="bg-zinc-900 border border-white/10 text-white text-xs font-bold rounded-xl px-3 py-1.5 focus:border-purple-500/50 outline-none h-9"
+                                        >
+                                          {DEFAULT_ROLES.filter(
+                                            (role) => role.id !== "owner" || (isOwner() && user.id === currentUser?.id),
+                                          ).map((role) => (
+                                            <option key={role.id} value={role.id}>
+                                              {role.name}
+                                            </option>
+                                          ))}
+                                        </select>
 
-                                    {user.isBanned ? (
-                                      <Button
-                                        size="sm"
-                                        onClick={() => handleUnbanUnmute(user.id, "unban")}
-                                        className="bg-green-500/10 hover:bg-green-500 text-green-500 hover:text-white border border-green-500/20 rounded-xl font-bold h-9 px-4 transition-all"
-                                      >
-                                        Unban
-                                      </Button>
-                                    ) : (
-                                      <Button
-                                        size="sm"
-                                        variant="ghost"
-                                        onClick={() => openBanDialog(user)}
-                                        className="text-white/40 hover:text-red-500 hover:bg-red-500/10 rounded-xl font-bold h-9 px-4 transition-all"
-                                      >
-                                        Ban
-                                      </Button>
+                                        <div className="h-6 w-px bg-white/10 mx-1 hidden md:block" />
+
+                                        {user.isMuted ? (
+                                          <Button
+                                            size="sm"
+                                            onClick={() => handleUnbanUnmute(user.id, "unmute")}
+                                            className="bg-yellow-500/10 hover:bg-yellow-500 text-yellow-500 hover:text-white border border-yellow-500/20 rounded-xl font-bold h-9 px-4 transition-all"
+                                          >
+                                            Unmute
+                                          </Button>
+                                        ) : (
+                                          <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => openMuteDialog(user)}
+                                            className="text-white/40 hover:text-yellow-500 hover:bg-yellow-500/10 rounded-xl font-bold h-9 px-4 transition-all"
+                                          >
+                                            Mute
+                                          </Button>
+                                        )}
+
+                                        {user.isBanned ? (
+                                          <Button
+                                            size="sm"
+                                            onClick={() => handleUnbanUnmute(user.id, "unban")}
+                                            className="bg-green-500/10 hover:bg-green-500 text-green-500 hover:text-white border border-green-500/20 rounded-xl font-bold h-9 px-4 transition-all"
+                                          >
+                                            Unban
+                                          </Button>
+                                        ) : (
+                                          <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            onClick={() => openBanDialog(user)}
+                                            className="text-white/40 hover:text-red-500 hover:bg-red-500/10 rounded-xl font-bold h-9 px-4 transition-all"
+                                          >
+                                            Ban
+                                          </Button>
+                                        )}
+                                      </>
                                     )}
                                   </>
                                 )}
