@@ -5,7 +5,7 @@ import { generateGeminiResponse } from "@/lib/gemini"
 export async function GET() {
   try {
     const supabase = getSupabaseServerClient()
-    const { data, error } = await supabase.from("chat_messages").select("*").order("inserted_at", { ascending: true })
+    const { data, error } = await supabase.from("chat_messages").select("*").order("created_at", { ascending: true })
 
     if (error) {
       console.error("[v0] Error fetching chat messages:", error)
@@ -96,15 +96,15 @@ export async function POST(request: Request) {
     // BURST SLOWMODE CHECK (allow 5 messages per 15 seconds)
     const { data: previousMessages } = await supabase
       .from("chat_messages")
-      .select("inserted_at")
+      .select("created_at")
       .eq("username", username)
-      .order("inserted_at", { ascending: false })
+      .order("created_at", { ascending: false })
       .limit(5)
 
     if (previousMessages && previousMessages.length === 5) {
       // Check the 5th message back. If it was less than 15s ago, user is too fast.
       const fifthLastMessage = previousMessages[4]
-      const lastTime = new Date(fifthLastMessage.inserted_at).getTime()
+      const lastTime = new Date(fifthLastMessage.created_at).getTime()
       const timeDiff = Date.now() - lastTime
       if (timeDiff < 15000) {
         const waitTime = Math.ceil((15000 - timeDiff) / 1000)

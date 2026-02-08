@@ -14,7 +14,7 @@ type Props = {
   onUsernameClick: (username: string) => void
 }
 
-type DbChatRow = { id: string; username: string; message: string; role: string; inserted_at: string }
+type DbChatRow = { id: string; username: string; message: string; role: string; created_at: string }
 type LocalChatRow = { id: string; username: string; message: string; role: string; timestamp: string }
 
 const LS_KEY = "boomkit_chat_messages"
@@ -92,7 +92,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
         const { data, error } = await supabase
           .from("chat_messages")
           .select("*")
-          .order("inserted_at", { ascending: true })
+          .order("created_at", { ascending: true })
           .limit(200)
 
         if (error) {
@@ -107,7 +107,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
             username: d.username,
             message: d.message,
             role: d.role,
-            timestamp: d.inserted_at,
+            timestamp: d.created_at,
           })) ?? []
         setMessages(mapped)
 
@@ -124,7 +124,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
                 const d = payload.new as DbChatRow
                 setMessages((prev) => [
                   ...prev,
-                  { id: d.id, username: d.username, message: d.message, role: d.role, timestamp: d.inserted_at },
+                  { id: d.id, username: d.username, message: d.message, role: d.role, timestamp: d.created_at },
                 ])
               } else if (payload.eventType === "UPDATE") {
                 const d = payload.new as DbChatRow
