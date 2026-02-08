@@ -1054,13 +1054,25 @@ export default function BoomkitGame() {
     lastScoreSyncRef.current = now
     lastScoreValueRef.current = sanitizedScore
 
+    // For debugging, only on first few updates
+    if (sanitizedScore > 0 && lastScoreValueRef.current === 0) {
+      console.log("[v0] Score Update Triggered:", { sanitizedScore, activeGamePin, userId: currentUser.id, username: currentUser.username })
+    }
+
     try {
       const { error } = await supabase.rpc("update_game_score", {
         p_pin: activeGamePin,
-        p_user_id: currentUser.id,
+        p_player_id: String(currentUser.id),
+        p_player_username: currentUser.username,
         p_score: sanitizedScore
       })
-      if (error) console.error("Score sync error:", error)
+      if (error) {
+        console.error("Score sync error:", error)
+        // If it's a critical final sync and it fails, alert for debugging
+        if (force) {
+          console.warn("Final score sync failed. Check database permissions.")
+        }
+      }
     } catch (err) {
       console.error("Score sync exception:", err)
     }
