@@ -285,7 +285,17 @@ export const TOPIC_FALLBACKS: { [key: string]: Question[] } = {
         { id: "ratio_7", question: "A unit rate always has a denominator of ___.", options: ["0", "1", "10", "100"], correctIndex: 1 },
         { id: "ratio_8", question: "If 3 apples cost $6, what is the unit rate?", options: ["$2/apple", "$3/apple", "$0.50/apple", "$1/apple"], correctIndex: 0 },
         { id: "ratio_9", question: "A car travels 120 miles in 2 hours. What is the rate in mph?", options: ["50", "60", "70", "120"], correctIndex: 1 },
-        { id: "ratio_10", question: "What is 50% written as a ratio?", options: ["1:1", "1:2", "1:4", "1:5"], correctIndex: 1 }
+        { id: "ratio_10", question: "What is 50% written as a ratio?", options: ["1:1", "1:2", "1:4", "1:5"], correctIndex: 1 },
+        { id: "ratio_11", question: "A unit rate always has a denominator of 1.", options: ["True", "False"], correctIndex: 0 },
+        { id: "ratio_12", question: "If 5 pencils cost $1.25, what is the unit cost per pencil?", options: ["$0.25", "$0.20", "$0.12", "$0.10"], correctIndex: 0 },
+        { id: "ratio_13", question: "Ratio of 5 boys to 10 girls. Simplest form?", options: ["1:2", "2:1", "5:10", "1:5"], correctIndex: 0 },
+        { id: "ratio_14", question: "Heart beats 150 times in 2 minutes. BPM?", options: ["75", "150", "300", "50"], correctIndex: 0 },
+        { id: "ratio_15", question: "A typist does 200 words in 4 mins. WPM?", options: ["40", "50", "60", "80"], correctIndex: 1 },
+        { id: "ratio_16", question: "Percent means 'per ___'.", options: ["Ten", "Million", "Hundred", "Thousand"], correctIndex: 2 },
+        { id: "ratio_17", question: "Convert 3/4 to percent.", options: ["34%", "75%", "30%", "43%"], correctIndex: 1 },
+        { id: "ratio_18", question: "40 is 50% of what number?", options: ["20", "80", "100", "60"], correctIndex: 1 },
+        { id: "ratio_19", question: "Which is cheaper: 2 for $5 or 4 for $9?", options: ["2 for $5", "4 for $9", "Equal", "None"], correctIndex: 1 },
+        { id: "ratio_20", question: "Ratio of 2 red to 3 blue. How many red if there are 6 blue?", options: ["4", "5", "9", "12"], correctIndex: 0 }
     ],
     "equations": [
         { id: "eq_1", question: "Solve for x: x + 5 = 12", options: ["7", "17", "60", "5"], correctIndex: 0 },
@@ -306,14 +316,65 @@ export function getFallbackQuestions(grade: number, subject: string, count: numb
     const topicKey = topic?.toLowerCase() || ""
     let pool: Question[] = []
 
-    // 0. Try curated curriculum first
-    if (topicKey && CURATED_TOPIC_QUESTIONS[topicKey]) {
+    // 0. Smart keyword matching (Search for relevant keys within the prompt)
+    const topicMappings: { [key: string]: string } = {
+        "ratio": "ratios",
+        "proportion": "ratios",
+        "percent": "ratios",
+        "equation": "equations",
+        "algebra": "equations",
+        "solve": "equations",
+        "cell": "cells",
+        "biology": "cells",
+        "mitosis": "cells",
+        "dna": "cells",
+        "sun": "solar system",
+        "planet": "solar system",
+        "space": "solar system",
+        "mars": "solar system",
+        "multiplication": "multiplication",
+        "multiply": "multiplication",
+        "division": "division",
+        "divide": "division",
+        "fraction": "fractions",
+        "addition": "addition & subtraction",
+        "add": "addition & subtraction",
+        "subtract": "addition & subtraction",
+        "counting": "numbers & counting",
+        "number": "numbers & counting",
+        "shape": "shapes & geometry",
+        "geometry": "shapes & geometry",
+        "money": "time & money",
+        "time": "time & money",
+        "photo": "photosynthesis",
+        "plant": "photosynthesis",
+        "gramm": "parts of speech",
+        "verb": "parts of speech",
+        "noun": "parts of speech"
+    }
+
+    // Try to find a matching key in the topic prompt
+    for (const [keyword, actualKey] of Object.entries(topicMappings)) {
+        if (topicKey.includes(keyword)) {
+            if (CURATED_TOPIC_QUESTIONS[actualKey]) {
+                pool = [...pool, ...CURATED_TOPIC_QUESTIONS[actualKey]]
+            } else if (TOPIC_FALLBACKS[actualKey]) {
+                pool = [...pool, ...TOPIC_FALLBACKS[actualKey]]
+            }
+        }
+    }
+
+    // 0b. Try exact match in curated curriculum if no keyword match yet
+    if (pool.length === 0 && topicKey && CURATED_TOPIC_QUESTIONS[topicKey]) {
         pool = CURATED_TOPIC_QUESTIONS[topicKey]
     }
 
-    // 1. Try old topic-specific pool next
+    // 1. Try exact match in old topic-specific pool next
     if (pool.length < count && topicKey && TOPIC_FALLBACKS[topicKey]) {
-        pool = [...pool, ...TOPIC_FALLBACKS[topicKey]]
+        const exactMatch = TOPIC_FALLBACKS[topicKey]
+        // Avoid adding duplicates if already found via keywords
+        const existingIds = new Set(pool.map(q => q.id))
+        pool = [...pool, ...exactMatch.filter(q => !existingIds.has(q.id))]
     }
 
     // 2. If no topic pool or too few questions, use subject pool
@@ -354,6 +415,15 @@ export function getFallbackQuestions(grade: number, subject: string, count: numb
         pool = FALLBACK_QUESTIONS["reading_elementary"]
     }
 
-    // Shuffle and slice
-    return [...pool].sort(() => Math.random() - 0.5).slice(0, count)
+    // Smart Shuffle: Shuffle the topic-specific part, then pad with the rest
+    // This ensures relevant questions are always included and appear first
+    const shuffledTopicPool = [...pool].sort(() => Math.random() - 0.5)
+
+    // If we have enough topic-specific questions, just return them
+    if (shuffledTopicPool.length >= count) {
+        return shuffledTopicPool.slice(0, count)
+    }
+
+    // Otherwise, return all topic-specific questions + some random fillers from the subject pool
+    return shuffledTopicPool
 }
