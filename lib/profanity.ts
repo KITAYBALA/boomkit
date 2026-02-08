@@ -155,9 +155,19 @@ export function containsProfanity(message: string): boolean {
     for (const word of PROFANITY_LIST) {
         if (word.length < 3) continue; // Skip too short
 
-        const spreadRegex = new RegExp(word.split('').join('\\s*'), 'i');
-        if (spreadRegex.test(message)) {
-            return true;
+        // Escape existing special chars in the word first to avoid double quantifiers like `\s**`
+        // e.g. "f*ck" -> "f\*ck" -> split -> f, \*, c, k -> join \s* -> f\s*\* \s*c\s*k
+        const escapedWordChars = word.split('').map(c => c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+        const spreadRegexPattern = escapedWordChars.join('\\s*');
+
+        try {
+            const spreadRegex = new RegExp(spreadRegexPattern, 'i');
+            if (spreadRegex.test(message)) {
+                return true;
+            }
+        } catch (e) {
+            console.error("Invalid regex generated for word:", word, spreadRegexPattern);
+            continue;
         }
     }
 
