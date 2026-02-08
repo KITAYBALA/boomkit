@@ -764,6 +764,7 @@ export default function BoomkitGame() {
   const [livePlayers, setLivePlayers] = useState<any[]>([])
   const [aiSetPrompt, setAiSetPrompt] = useState("")
   const [aiQuestionCount, setAiQuestionCount] = useState(25)
+  const [aiIsPublic, setAiIsPublic] = useState(false)
   const [aiGrade, setAiGrade] = useState(3)
   const [aiSubject, setAiSubject] = useState("Math")
   const [currentUser, setCurrentUser] = useState<GameUser | null>(null)
@@ -953,6 +954,41 @@ export default function BoomkitGame() {
       sb.auth.signOut()
     }
   }, [])
+
+  // Fetch Custom AI/User sets from Supabase
+  const fetchCustomSets = useCallback(async () => {
+    if (!supabase) return
+
+    try {
+      // Fetch both public sets and user's private sets
+      const { data, error } = await supabase
+        .from("custom_sets")
+        .select("*")
+        .order("created_at", { ascending: false })
+
+      if (error) {
+        console.error("Error fetching custom sets:", error.message)
+        return
+      }
+
+      if (data) {
+        // Merge with local discovered sets to avoid duplicates, prioritize DB
+        setDiscoveredSets(prev => {
+          const dbIds = new Set(data.map(s => s.id))
+          const localOnly = prev.filter(s => s.id && !dbIds.has(s.id))
+          return [...data, ...localOnly]
+        })
+      }
+    } catch (err) {
+      console.error("Critical error fetching custom sets:", err)
+    }
+  }, [supabase])
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && supabase) {
+      fetchCustomSets()
+    }
+  }, [fetchCustomSets, currentUser?.id])
 
   const updateAndPersistCurrentUser = useCallback(
     async (updatedUser: GameUser | null) => {
@@ -2340,10 +2376,37 @@ export default function BoomkitGame() {
       })
       const data = await response.json()
       if (data.questions) {
-        setDiscoveredSets(prev => [data, ...prev])
+        // Add more metadata for persistence
+        const newSet = {
+          ...data,
+          id: data.id || Math.random().toString(36).substr(2, 9),
+          creator_id: currentUser?.id,
+          is_public: aiIsPublic,
+          created_at: new Date().toISOString(),
+          questions: data.questions
+        }
+
+        setDiscoveredSets(prev => [newSet, ...prev])
+
+        // Persist to Supabase if possible
+        if (supabase && currentUser) {
+          supabase.from("custom_sets").insert({
+            creator_id: currentUser.id,
+            title: newSet.title,
+            description: newSet.description || "",
+            grade: aiGrade,
+            subject: aiSubject,
+            questions: data.questions,
+            is_public: aiIsPublic
+          }).then(({ error }) => {
+            if (error) console.error("Error saving custom set to DB:", error)
+            else console.log("Saved custom set to database successfully")
+          })
+        }
+
         // Cache this set in local storage
         const cachedSets = JSON.parse(localStorage.getItem("boomkit_ai_sets") || "[]")
-        localStorage.setItem("boomkit_ai_sets", JSON.stringify([data, ...cachedSets]))
+        localStorage.setItem("boomkit_ai_sets", JSON.stringify([newSet, ...cachedSets]))
         setShowAiSetCreator(false)
         setAiSetPrompt("")
 
@@ -4637,15 +4700,18 @@ export default function BoomkitGame() {
               <DiscoverPage
                 currentUser={currentUser}
                 discoveredSets={discoveredSets}
-                onStartGame={async (grade, subject, mode) => {
+                onStartGame={async (grade, subject, mode, questions) => {
                   if (mode === "host") {
                     setHostingSubject({ grade, subject })
+                    // Pass questions in a way that the hosting flow can use them
+                    if (questions) (setHostingSubject as any)(prev => ({ ...prev, questions }))
                     setHostingFlow("mode-select")
                     return
                   }
 
                   // Solo game flow - Switch to mode selection first
                   setSoloSubject({ grade, subject })
+                  if (questions) (setSoloSubject as any)(prev => ({ ...prev, questions }))
                   setSoloFlow("mode-select")
                 }}
                 onJoinGame={async (pin) => {
@@ -4996,7 +5062,12 @@ export default function BoomkitGame() {
                     setIsGeneratingSet(true)
                     setSoloFlow(null)
 
-                    const questions = await fetchQuestionsWithAi(soloSubject.grade, soloSubject.subject, 30)
+                    // Use pre-existing questions if they were passed via the subject state
+                    let questions = (soloSubject as any)?.questions
+                    if (!questions) {
+                      questions = await fetchQuestionsWithAi(soloSubject.grade, soloSubject.subject, 30)
+                    }
+
                     setIsGeneratingSet(false)
 
                     if (questions && questions.length > 0) {
@@ -5961,6 +6032,19 @@ export default function BoomkitGame() {
                   />
                   <p className="text-[10px] text-white/30 italic">Default is 30 questions (Recommended for best experience).</p>
                 </div>
+
+                <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10">
+                  <div>
+                    <Label className="text-white font-bold block">Public Visibility</Label>
+                    <p className="text-[10px] text-white/50">Allow others to find and host this set.</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={aiIsPublic}
+                    onChange={(e) => setAiIsPublic(e.target.checked)}
+                    className="w-5 h-5 accent-purple-500 cursor-pointer"
+                  />
+                </div>
                 <div className="flex gap-2">
                   <Button
                     onClick={() => setShowAiSetCreator(false)}
@@ -6006,7 +6090,13 @@ export default function BoomkitGame() {
 
             // Now create the actual session
             setIsGeneratingSet(true)
-            const questions = await fetchQuestionsWithAi(hostingSubject.grade, hostingSubject.subject, 30)
+
+            // Use pre-existing questions if available
+            let questions = (hostingSubject as any)?.questions
+            if (!questions) {
+              questions = await fetchQuestionsWithAi(hostingSubject.grade, hostingSubject.subject, 30)
+            }
+
             setIsGeneratingSet(false)
 
             if (!questions || questions.length === 0) {
