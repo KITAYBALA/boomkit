@@ -2973,6 +2973,21 @@ export default function BoomkitGame() {
                 </div>
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="reason" className="text-white font-bold tracking-wide ml-1">Application Reason</Label>
+                <div className="relative group">
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl blur opacity-30 group-focus-within:opacity-100 transition duration-500" />
+                  <textarea
+                    id="reason"
+                    value={registerForm.reason}
+                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, reason: e.target.value }))}
+                    className="w-full bg-black/40 border-white/10 text-white placeholder:text-white/30 rounded-xl relative p-3 min-h-[80px] focus:outline-none focus:ring-0"
+                    placeholder="Tell us why you want to join Boomkit..."
+                    required
+                  />
+                </div>
+              </div>
+
               {/* ToS Checkbox */}
               <div className="flex items-center space-x-3 pt-2">
                 <div className="relative flex items-center">
@@ -3011,8 +3026,8 @@ export default function BoomkitGame() {
                 Already have an account? Login
               </Button>
               <div className="w-full h-px bg-white/10" />
-              <Button variant="link" className="text-white/40 hover:text-white/80 text-xs" onClick={() => setCurrentView("owner-access")}>
-                Owner Access
+              <Button variant="link" className="text-white/40 hover:text-white/80 text-xs" onClick={() => setCurrentView("intro")}>
+                Back to Main Menu
               </Button>
             </div>
           </CardContent>
@@ -3105,8 +3120,8 @@ export default function BoomkitGame() {
                 Need an account? Register
               </Button>
               <div className="w-full h-px bg-white/10" />
-              <Button variant="link" className="text-white/40 hover:text-white/80 text-xs" onClick={() => setCurrentView("owner-access")}>
-                Owner Access
+              <Button variant="link" className="text-white/40 hover:text-white/80 text-xs" onClick={() => setCurrentView("intro")}>
+                Back to Main Menu
               </Button>
             </div>
           </CardContent>
