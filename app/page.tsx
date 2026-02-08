@@ -764,6 +764,8 @@ export default function BoomkitGame() {
   const [livePlayers, setLivePlayers] = useState<any[]>([])
   const [aiSetPrompt, setAiSetPrompt] = useState("")
   const [aiQuestionCount, setAiQuestionCount] = useState(25)
+  const [aiGrade, setAiGrade] = useState(3)
+  const [aiSubject, setAiSubject] = useState("Math")
   const [currentUser, setCurrentUser] = useState<GameUser | null>(null)
   const [users, setUsers] = useState<GameUser[]>([])
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
@@ -2331,8 +2333,8 @@ export default function BoomkitGame() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           prompt: aiSetPrompt,
-          grade: 1, // Default or selected
-          subject: "AI Generated",
+          grade: aiGrade,
+          subject: aiSubject,
           count: aiQuestionCount
         })
       })
@@ -2345,6 +2347,9 @@ export default function BoomkitGame() {
         setShowAiSetCreator(false)
         setAiSetPrompt("")
         alert(`Set "${data.title}" generated successfully!`)
+        if (data.fallback) {
+          alert("Note: Used fallback questions due to AI model unavailability.")
+        }
       } else {
         alert("Failed to generate set. Please try a different prompt.")
       }
@@ -5894,11 +5899,49 @@ export default function BoomkitGame() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <Textarea
-                  placeholder="e.g., Solar system facts for 10th grade, or basic multiplication..."
+                  placeholder="e.g., Solar system facts, or basic multiplication..."
                   value={aiSetPrompt}
-                  onChange={(e) => setAiSetPrompt(e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value
+                    setAiSetPrompt(val)
+                    // Auto-sync question count if a number is detected (e.g., "10 questions")
+                    const match = val.match(/(\d+)\s+questions?/i)
+                    if (match) {
+                      const count = parseInt(match[1])
+                      if (count >= 5 && count <= 50) setAiQuestionCount(count)
+                    }
+                  }}
                   className="bg-black/50 border-purple-500/30 text-white min-h-[100px]"
                 />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-white/70 text-sm font-bold block">Grade Level</label>
+                    <select
+                      value={aiGrade}
+                      onChange={(e) => setAiGrade(parseInt(e.target.value))}
+                      className="w-full bg-black/50 border-purple-500/30 text-white rounded-md p-2 text-sm outline-none focus:border-purple-500"
+                    >
+                      {gradingGroups.map(g => (
+                        <option key={g.grade} value={g.grade}>{g.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-white/70 text-sm font-bold block">Subject</label>
+                    <select
+                      value={aiSubject}
+                      onChange={(e) => setAiSubject(e.target.value)}
+                      className="w-full bg-black/50 border-purple-500/30 text-white rounded-md p-2 text-sm outline-none focus:border-purple-500"
+                    >
+                      <option value="Math">Math</option>
+                      <option value="Science">Science</option>
+                      <option value="Social Studies">Social Studies</option>
+                      <option value="English Language Arts">English Language Arts</option>
+                      <option value="General">General/Other</option>
+                    </select>
+                  </div>
+                </div>
 
                 <div className="space-y-2">
                   <label className="text-white/70 text-sm font-bold block">
