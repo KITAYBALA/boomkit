@@ -226,6 +226,8 @@ export default function RealtimeAuctions({
 
   const createAuction = async () => {
     if (!currentUser || !selectedBoom) return
+
+    // Optimistic check
     if ((currentUser.booms[selectedBoom] || 0) < 1) {
       setStatusModal({
         show: true,
@@ -238,52 +240,21 @@ export default function RealtimeAuctions({
 
     setLoading(true)
 
-    const endsAt = new Date(Date.now() + duration * 60 * 60 * 1000).toISOString()
-
     if (supabase) {
-      // 1. Deduct Boom from User
-      const newBooms = { ...currentUser.booms }
-      if (newBooms[selectedBoom] > 1) {
-        newBooms[selectedBoom]--
-      } else {
-        delete newBooms[selectedBoom]
-      }
+      // Use RPC for atomic deduction and creation
+      const { data, error } = await supabase.rpc('create_auction', {
+        p_boom_name: selectedBoom,
+        p_starting_bid: startingBid,
+        p_duration_hours: duration
+      })
 
-      const { error: userError } = await supabase
-        .from('users')
-        .update({ booms: newBooms })
-        .eq('id', currentUser.id)
-
-      if (userError) {
-        setStatusModal({
-          show: true,
-          title: "Vault Error",
-          message: "Couldn't update your inventory: " + userError.message,
-          type: "error"
-        })
-        setLoading(false)
-        return
-      }
-
-      // 2. Create Auction
-      const { error: auctionError } = await supabase
-        .from('auction_items')
-        .insert({
-          boom_name: selectedBoom,
-          seller: currentUser.username,
-          current_bid: startingBid,
-          ends_at: endsAt,
-          status: 'active'
-        })
-
-      if (auctionError) {
+      if (error) {
         setStatusModal({
           show: true,
           title: "Auction Failed",
-          message: "System error while creating auction: " + auctionError.message,
+          message: error.message || "System error while creating auction.",
           type: "error"
         })
-        // Ideally revert boom deduction here, keeping it simple for now
       } else {
         setShowCreateModal(false)
         setSelectedBoom("")
@@ -294,6 +265,12 @@ export default function RealtimeAuctions({
           type: "success"
         })
         if (onAuctionCreated) onAuctionCreated()
+        // Force refresh items
+        const { data: newItems } = await supabase
+          .from('auction_items')
+          .select('*')
+          .order('ends_at', { ascending: true })
+        setItems((newItems as DbAuction[]) ?? [])
       }
     } else {
       // Local Storage Logic
@@ -312,7 +289,6 @@ export default function RealtimeAuctions({
       localStorage.setItem(LS_KEY, JSON.stringify(updated))
       setItems(convertLocal(updated))
 
-      // Deduct boom locally for display (not persistent properly without full user sync in this mode)
       alert("Auction created (Local Mode)")
       setShowCreateModal(false)
     }
