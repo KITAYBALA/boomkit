@@ -274,6 +274,30 @@ export const TOPIC_FALLBACKS: { [key: string]: Question[] } = {
         { id: "sc_1", question: "What is the capital of New York?", options: ["New York City", "Albany", "Buffalo", "Rochester"], correctIndex: 1 },
         { id: "sc_2", question: "What is the capital of California?", options: ["Los Angeles", "San Francisco", "Sacramento", "San Diego"], correctIndex: 2 },
         { id: "sc_3", question: "What is the capital of Texas?", options: ["Houston", "Dallas", "Austin", "San Antonio"], correctIndex: 2 }
+    ],
+    "ratios": [
+        { id: "ratio_1", question: "A ratio is a comparison of two quantities using ___.", options: ["Addition", "Division", "Subtraction", "Parentheses"], correctIndex: 1 },
+        { id: "ratio_2", question: "What is the simplest form of 12:16?", options: ["6:8", "3:4", "2:3", "1:2"], correctIndex: 1 },
+        { id: "ratio_3", question: "If there are 2 red marbles for every 3 blue marbles, what is the ratio?", options: ["2/3", "2:3", "3:2", "3/2"], correctIndex: 1 },
+        { id: "ratio_4", question: "Equivalent ratio to 1:3?", options: ["2:4", "3:9", "4:10", "1:2"], correctIndex: 1 },
+        { id: "ratio_5", question: "If a=2 and b=3, what is the ratio a:b?", options: ["2:3", "3:2", "2:5", "5:3"], correctIndex: 0 },
+        { id: "ratio_6", question: "In a class of 30, 10 are boys. Ratio of boys to girls?", options: ["10:30", "1:2", "1:3", "2:1"], correctIndex: 1 },
+        { id: "ratio_7", question: "A unit rate always has a denominator of ___.", options: ["0", "1", "10", "100"], correctIndex: 1 },
+        { id: "ratio_8", question: "If 3 apples cost $6, what is the unit rate?", options: ["$2/apple", "$3/apple", "$0.50/apple", "$1/apple"], correctIndex: 0 },
+        { id: "ratio_9", question: "A car travels 120 miles in 2 hours. What is the rate in mph?", options: ["50", "60", "70", "120"], correctIndex: 1 },
+        { id: "ratio_10", question: "What is 50% written as a ratio?", options: ["1:1", "1:2", "1:4", "1:5"], correctIndex: 1 }
+    ],
+    "equations": [
+        { id: "eq_1", question: "Solve for x: x + 5 = 12", options: ["7", "17", "60", "5"], correctIndex: 0 },
+        { id: "eq_2", question: "Solve for y: 3y = 15", options: ["5", "12", "18", "45"], correctIndex: 0 },
+        { id: "eq_3", question: "If 2x - 3 = 7, then x = ___", options: ["2", "5", "10", "4"], correctIndex: 1 },
+        { id: "eq_4", question: "Solve for z: z/2 = 10", options: ["5", "12", "20", "100"], correctIndex: 2 }
+    ],
+    "cells": [
+        { id: "cell_1", question: "What is the 'powerhouse' of the cell?", options: ["Nucleus", "Ribosome", "Mitochondria", "Vacuole"], correctIndex: 2 },
+        { id: "cell_2", question: "Which part of the cell contains DNA?", options: ["Mitochondria", "Nucleus", "Cytoplasm", "Cell Wall"], correctIndex: 1 },
+        { id: "cell_3", question: "Plants have this part, but animals do not:", options: ["Nucleus", "Cell Wall", "Membrane", "Ribosome"], correctIndex: 1 },
+        { id: "cell_4", question: "Smallest unit of life is called a ___.", options: ["Atom", "Cell", "Tissue", "Organ"], correctIndex: 1 }
     ]
 }
 

@@ -121,14 +121,28 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("Critical AI Error:", error)
     const errorMsg = error.message || "Unknown AI error"
+
+    // Check if it's a 429 and try to extract retry time
+    let isQuotaError = false
+    let retryAfter = 60 // Default 60s
+    if (error.status === 429 || errorMsg.includes("429") || errorMsg.includes("quota")) {
+      isQuotaError = true
+      const delayMatch = errorMsg.match(/retry in ([\d.]+)s/i)
+      if (delayMatch) retryAfter = Math.ceil(parseFloat(delayMatch[1]))
+    }
+
     return NextResponse.json({
-      title: `${subject} Questions`,
-      description: `Error: ${errorMsg}. Using fallback questions.`,
+      title: `${subject} Quiz`,
+      description: isQuotaError
+        ? `API Rate Limit hit. Please wait ${retryAfter}s. Using relevant fallback questions.`
+        : `Error: ${errorMsg}. Using fallback questions.`,
       grade,
       subject,
       questions: getFallbackQuestions(grade, subject, count, prompt),
       fallback: true,
-      error: errorMsg
+      error: errorMsg,
+      isQuotaError,
+      retryAfter
     })
   }
 }
