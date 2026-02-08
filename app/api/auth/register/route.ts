@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
       age: Number.parseInt(age),
       password_hash: passwordHash,
       password_reset_required: false,
-      status: 'approved',
+      status: 'pending', // Default to pending for staff approval
       join_date: new Date().toLocaleDateString('en-US', {
         weekday: 'long',
         year: 'numeric',
