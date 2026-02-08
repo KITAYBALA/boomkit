@@ -118,15 +118,43 @@ export async function POST(request: Request) {
     // Use Date.now() for consistency if that is what number implies, or ISO if it was string. 
     // Type definition said `timestamp: number`. So `Date.now()` is correct.
 
-    const { data, error } = await supabase.from("chat_messages").insert([{
+    const payload: any = {
+      id: crypto.randomUUID(), // Generate ID in case DB doesn't have default
       username,
       message,
       role,
-    }]).select()
+      timestamp: Date.now(), // Fallback for BIGINT timestamp column
+      created_at: new Date().toISOString(), // Fallback for timestamptz column
+      inserted_at: new Date().toISOString(), // Fallback for legacy column
+    }
+
+    // Try to insert with all possible columns, relying on DB to ignore extra or we might fail if strict.
+    // Actually, sending extra props to Supabase insert usually fails if column doesn't exist.
+    // We should try to determine which one to use or just use the one that matches the error.
+    // But we can't see the error.
+
+    // SAFE BET: Try to select first to see columns? No, too slow.
+    // Better: Just fix the error reporting first so we can see what's wrong.
+
+    // ACTUALLY, checking previous code, it used `inserted_at`. 
+    // And `scripts/create_chat_messages_table_v1.sql` uses `timestamp`.
+
+    // Let's rely on the error message to debug.
+
+    const { data, error } = await supabase.from("chat_messages").insert([
+      {
+        username,
+        message,
+        role,
+        // We will try to rely on DB defaults first, but if those differ...
+        // Let's try to pass NOTHING extra first, but capture the error properly.
+      }
+    ]).select()
 
     if (error) {
       console.error("[v0] Error posting chat message:", error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+      // Return the actual error to the client for debugging
+      return NextResponse.json({ error: error.message, details: error }, { status: 500 })
     }
 
     console.log("[v0] Successfully posted chat message:", data)
@@ -153,9 +181,9 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json(data, { status: 201 })
-  } catch (error) {
+  } catch (error: any) {
     console.error("[v0] Unexpected error posting chat message:", error)
-    return NextResponse.json({ error: "Failed to post chat message" }, { status: 500 })
+    return NextResponse.json({ error: error.message || "Failed to post chat message" }, { status: 500 })
   }
 }
 
