@@ -5,7 +5,15 @@ import { generateGeminiResponse } from "@/lib/gemini"
 export async function GET() {
   try {
     const supabase = getSupabaseServerClient()
-    const { data, error } = await supabase.from("chat_messages").select("*").order("timestamp", { ascending: true })
+    // Try created_at first, then inserted_at then id
+    let { data, error } = await supabase.from("chat_messages").select("*").order("created_at", { ascending: true })
+
+    if (error && error.message.includes("column \"created_at\" does not exist")) {
+      console.log("[v0] Falling back to inserted_at for chat fetch")
+      const fallback = await supabase.from("chat_messages").select("*").order("inserted_at", { ascending: true })
+      data = fallback.data
+      error = fallback.error
+    }
 
     if (error) {
       console.error("[v0] Error fetching chat messages:", error)
@@ -94,24 +102,38 @@ export async function POST(request: Request) {
     }
 
     // BURST SLOWMODE CHECK (allow 5 messages per 15 seconds)
-    const { data: previousMessages } = await supabase
+    let { data: previousMessages }: { data: any[] | null } = await supabase
       .from("chat_messages")
-      .select("timestamp")
+      .select("created_at")
       .eq("username", username)
-      .order("timestamp", { ascending: false })
+      .order("created_at", { ascending: false })
       .limit(5)
+
+    if (!previousMessages) {
+      // Try fallback column
+      const fallback = await supabase
+        .from("chat_messages")
+        .select("inserted_at")
+        .eq("username", username)
+        .order("inserted_at", { ascending: false })
+        .limit(5)
+      previousMessages = fallback.data
+    }
 
     if (previousMessages && previousMessages.length === 5) {
       // Check the 5th message back. If it was less than 15s ago, user is too fast.
       const fifthLastMessage = previousMessages[4]
-      const lastTime = Number(fifthLastMessage.timestamp)
-      const timeDiff = Date.now() - lastTime
-      if (timeDiff < 15000) {
-        const waitTime = Math.ceil((15000 - timeDiff) / 1000)
-        return NextResponse.json({
-          error: "SLOWMODE",
-          message: `Burst limit reached. Please wait ${waitTime} seconds before typing again.`
-        }, { status: 429 })
+      const timeStr = fifthLastMessage.created_at || (fifthLastMessage as any).inserted_at
+      if (timeStr) {
+        const lastTime = new Date(timeStr).getTime()
+        const timeDiff = Date.now() - lastTime
+        if (timeDiff < 15000) {
+          const waitTime = Math.ceil((15000 - timeDiff) / 1000)
+          return NextResponse.json({
+            error: "SLOWMODE",
+            message: `Burst limit reached. Please wait ${waitTime} seconds before typing again.`
+          }, { status: 429 })
+        }
       }
     }
 
@@ -143,11 +165,10 @@ export async function POST(request: Request) {
 
     const { data, error } = await supabase.from("chat_messages").insert([
       {
-        id: crypto.randomUUID(),
         username,
         message,
         role,
-        timestamp: Date.now(),
+        // The DB will handle the timestamp (created_at or inserted_at) via defaults
       }
     ]).select()
 
@@ -168,11 +189,9 @@ export async function POST(request: Request) {
           const aiResponse = await generateGeminiResponse(query)
           if (aiResponse) {
             await supabase.from("chat_messages").insert([{
-              id: crypto.randomUUID(),
               username: "Gemini 🤖",
               message: aiResponse,
               role: "admin", // Bot gets admin role for special color/status
-              timestamp: Date.now(),
             }])
             console.log("[GEMINI] Successfully responded to query in production mode")
           }
