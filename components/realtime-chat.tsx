@@ -87,8 +87,35 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
     let channel: ReturnType<NonNullable<typeof supabase>["channel"]> | null = null
 
     const load = async () => {
+      console.log("[v0] Initializing chat load...")
+
+      // 1. Try API Route (Most reliable, bypasses RLS via Service Role)
+      try {
+        console.log("[v0] Fetching chat history from API...")
+        const response = await fetch("/api/chat-messages")
+        if (response.ok) {
+          const data = await response.json()
+          console.log("[v0] API chat history loaded:", data.length, "messages")
+          const mapped = data.map((d: any) => ({
+            id: d.id,
+            username: d.username,
+            message: d.message,
+            role: d.role,
+            timestamp: d.created_at || d.inserted_at || d.timestamp || new Date().toISOString(),
+          }))
+          setMessages(mapped)
+          setupRealtime()
+          return
+        } else {
+          console.warn("[v0] API fetch failed, status:", response.status)
+        }
+      } catch (err) {
+        console.error("[v0] API fetch error:", err)
+      }
+
+      // 2. Fallback to direct Supabase Browser Client
       if (supabase) {
-        console.log("[v0] Loading chat messages from Supabase...")
+        console.log("[v0] Falling back to direct Supabase fetch...")
         let { data, error } = await supabase
           .from("chat_messages")
           .select("*")
@@ -96,7 +123,6 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
           .limit(200)
 
         if (error && error.message.includes("column \"created_at\" does not exist")) {
-          console.log("[v0] Falling back to inserted_at for chat fetch (client side)")
           const fallback = await supabase
             .from("chat_messages")
             .select("*")
@@ -106,71 +132,62 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
           error = fallback.error
         }
 
-        if (error) {
-          console.error("[v0] Error loading chat messages:", error)
-        } else {
-          console.log("[v0] Loaded", data?.length || 0, "chat messages")
-        }
-
-        const mapped =
-          (data as any[] | null)?.map((d) => ({
+        if (!error && data) {
+          const mapped = data.map((d: any) => ({
             id: d.id,
             username: d.username,
             message: d.message,
             role: d.role,
             timestamp: d.created_at || d.inserted_at || d.timestamp || new Date().toISOString(),
-          })) ?? []
-        setMessages(mapped)
-
-        // Realtime subscription
-        console.log("[v0] Setting up realtime subscription...")
-        channel = supabase
-          .channel("chat_room")
-          .on(
-            "postgres_changes",
-            { event: "*", schema: "public", table: "chat_messages" },
-            (payload) => {
-              console.log("[v0] Realtime change received:", payload)
-              if (payload.eventType === "INSERT") {
-                const d = payload.new as any
-                setMessages((prev) => [
-                  ...prev,
-                  {
-                    id: d.id,
-                    username: d.username,
-                    message: d.message,
-                    role: d.role,
-                    timestamp: d.created_at || d.inserted_at || d.timestamp || new Date().toISOString()
-                  },
-                ])
-              } else if (payload.eventType === "UPDATE") {
-                const d = payload.new as DbChatRow
-                setMessages((prev) =>
-                  prev.map(m => m.id === d.id ? { ...m, message: d.message } : m)
-                )
-              } else if (payload.eventType === "DELETE") {
-                const oldId = payload.old.id
-                setMessages((prev) => prev.filter(m => m.id !== oldId))
-              }
-            },
-          )
-          .subscribe((status) => {
-            console.log("[v0] Realtime subscription status:", status)
-          })
-      } else {
-        // LocalStorage fallback
-        console.log("[v0] Using localStorage fallback for chat")
-        const raw = localStorage.getItem(LS_KEY)
-        setMessages(raw ? (JSON.parse(raw) as LocalChatRow[]) : [])
-
-        const onStorage = (e: StorageEvent) => {
-          if (e.key === LS_KEY && e.newValue) {
-            setMessages(JSON.parse(e.newValue))
-          }
+          }))
+          setMessages(mapped)
+          setupRealtime()
+          return
         }
-        window.addEventListener("storage", onStorage)
-        return () => window.removeEventListener("storage", onStorage)
       }
+
+      // 3. Fallback to LocalStorage
+      console.log("[v0] Using localStorage fallback")
+      const raw = localStorage.getItem(LS_KEY)
+      setMessages(raw ? (JSON.parse(raw) as LocalChatRow[]) : [])
+      setupRealtime()
+    }
+
+    const setupRealtime = () => {
+      if (!supabase) return
+
+      console.log("[v0] Setting up realtime subscription...")
+      channel = supabase
+        .channel("chat_room")
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "chat_messages" },
+          (payload) => {
+            console.log("[v0] Realtime change received:", payload)
+            if (payload.eventType === "INSERT") {
+              const d = payload.new as any
+              setMessages((prev) => [
+                ...prev,
+                {
+                  id: d.id,
+                  username: d.username,
+                  message: d.message,
+                  role: d.role,
+                  timestamp: d.created_at || d.inserted_at || d.timestamp || new Date().toISOString()
+                },
+              ])
+            } else if (payload.eventType === "UPDATE") {
+              const d = payload.new as any
+              setMessages((prev) =>
+                prev.map(m => m.id === d.id ? { ...m, message: d.message } : m)
+              )
+            } else if (payload.eventType === "DELETE") {
+              const oldId = payload.old.id
+              setMessages((prev) => prev.filter(m => m.id !== oldId))
+            }
+          },
+        )
+        .subscribe()
     }
 
     load()
