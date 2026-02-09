@@ -16,12 +16,13 @@ export async function GET() {
     }
 
     if (error) {
-      console.error("[v0] Error fetching chat messages:", error)
+      console.error("[v0] Error fetching chat messages from DB:", error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    console.log("[v0] Successfully fetched chat messages:", data?.length || 0)
-    return NextResponse.json(data, { status: 200 })
+    const count = data?.length || 0
+    console.log(`[v0] [API] Successfully fetched ${count} chat messages at ${new Date().toISOString()}`)
+    return NextResponse.json(data || [], { status: 200 })
   } catch (error) {
     console.error("[v0] Unexpected error fetching chat messages:", error)
     return NextResponse.json({ error: "Failed to fetch chat messages" }, { status: 500 })
