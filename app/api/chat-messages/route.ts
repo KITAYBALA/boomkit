@@ -5,15 +5,8 @@ import { generateGeminiResponse } from "@/lib/gemini"
 export async function GET() {
   try {
     const supabase = getSupabaseServerClient()
-    // Try created_at first, then inserted_at then id
-    let { data, error } = await supabase.from("chat_messages").select("*").order("created_at", { ascending: true })
-
-    if (error && error.message.includes("column \"created_at\" does not exist")) {
-      console.log("[v0] Falling back to inserted_at for chat fetch")
-      const fallback = await supabase.from("chat_messages").select("*").order("inserted_at", { ascending: true })
-      data = fallback.data
-      error = fallback.error
-    }
+    // We've confirmed 'inserted_at' is the correct column in the live DB
+    const { data, error } = await supabase.from("chat_messages").select("*").order("inserted_at", { ascending: true })
 
     if (error) {
       console.error("[v0] Error fetching chat messages from DB:", error)
@@ -103,28 +96,17 @@ export async function POST(request: Request) {
     }
 
     // BURST SLOWMODE CHECK (allow 5 messages per 15 seconds)
-    let { data: previousMessages }: { data: any[] | null } = await supabase
+    const { data: previousMessages }: { data: any[] | null } = await supabase
       .from("chat_messages")
-      .select("created_at")
+      .select("inserted_at")
       .eq("username", username)
-      .order("created_at", { ascending: false })
+      .order("inserted_at", { ascending: false })
       .limit(5)
-
-    if (!previousMessages) {
-      // Try fallback column
-      const fallback = await supabase
-        .from("chat_messages")
-        .select("inserted_at")
-        .eq("username", username)
-        .order("inserted_at", { ascending: false })
-        .limit(5)
-      previousMessages = fallback.data
-    }
 
     if (previousMessages && previousMessages.length === 5) {
       // Check the 5th message back. If it was less than 15s ago, user is too fast.
       const fifthLastMessage = previousMessages[4]
-      const timeStr = fifthLastMessage.created_at || (fifthLastMessage as any).inserted_at
+      const timeStr = fifthLastMessage.inserted_at
       if (timeStr) {
         const lastTime = new Date(timeStr).getTime()
         const timeDiff = Date.now() - lastTime
