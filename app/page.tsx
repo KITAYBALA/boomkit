@@ -2212,7 +2212,8 @@ export default function BoomkitGame() {
         const endsAt = new Date(Date.now() + duration * 60 * 60 * 1000).toISOString()
         const { error } = await supabase.from("auction_items").insert({
           boom_name: selectedBoom,
-          seller: currentUser.username,
+          seller_username: currentUser.username,
+          seller_user_id: currentUser.id,
           current_bid: startingBid,
           ends_at: endsAt,
           status: "active",
