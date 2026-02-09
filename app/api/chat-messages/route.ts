@@ -5,7 +5,7 @@ import { generateGeminiResponse } from "@/lib/gemini"
 export async function GET() {
   try {
     const supabase = getSupabaseServerClient()
-    const { data, error } = await supabase.from("chat_messages").select("*").order("created_at", { ascending: true })
+    const { data, error } = await supabase.from("chat_messages").select("*").order("timestamp", { ascending: true })
 
     if (error) {
       console.error("[v0] Error fetching chat messages:", error)
@@ -96,15 +96,15 @@ export async function POST(request: Request) {
     // BURST SLOWMODE CHECK (allow 5 messages per 15 seconds)
     const { data: previousMessages } = await supabase
       .from("chat_messages")
-      .select("created_at")
+      .select("timestamp")
       .eq("username", username)
-      .order("created_at", { ascending: false })
+      .order("timestamp", { ascending: false })
       .limit(5)
 
     if (previousMessages && previousMessages.length === 5) {
       // Check the 5th message back. If it was less than 15s ago, user is too fast.
       const fifthLastMessage = previousMessages[4]
-      const lastTime = new Date(fifthLastMessage.created_at).getTime()
+      const lastTime = Number(fifthLastMessage.timestamp)
       const timeDiff = Date.now() - lastTime
       if (timeDiff < 15000) {
         const waitTime = Math.ceil((15000 - timeDiff) / 1000)
@@ -143,11 +143,11 @@ export async function POST(request: Request) {
 
     const { data, error } = await supabase.from("chat_messages").insert([
       {
+        id: crypto.randomUUID(),
         username,
         message,
         role,
-        // We will try to rely on DB defaults first, but if those differ...
-        // Let's try to pass NOTHING extra first, but capture the error properly.
+        timestamp: Date.now(),
       }
     ]).select()
 
@@ -168,9 +168,11 @@ export async function POST(request: Request) {
           const aiResponse = await generateGeminiResponse(query)
           if (aiResponse) {
             await supabase.from("chat_messages").insert([{
+              id: crypto.randomUUID(),
               username: "Gemini 🤖",
               message: aiResponse,
               role: "admin", // Bot gets admin role for special color/status
+              timestamp: Date.now(),
             }])
             console.log("[GEMINI] Successfully responded to query in production mode")
           }

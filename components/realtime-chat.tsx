@@ -92,7 +92,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
         const { data, error } = await supabase
           .from("chat_messages")
           .select("*")
-          .order("created_at", { ascending: true })
+          .order("timestamp", { ascending: true })
           .limit(200)
 
         if (error) {
@@ -107,7 +107,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
             username: d.username,
             message: d.message,
             role: d.role,
-            timestamp: d.created_at,
+            timestamp: String(d.timestamp),
           })) ?? []
         setMessages(mapped)
 
@@ -124,7 +124,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
                 const d = payload.new as DbChatRow
                 setMessages((prev) => [
                   ...prev,
-                  { id: d.id, username: d.username, message: d.message, role: d.role, timestamp: d.created_at },
+                  { id: d.id, username: d.username, message: d.message, role: d.role, timestamp: String(d.timestamp) },
                 ])
               } else if (payload.eventType === "UPDATE") {
                 const d = payload.new as DbChatRow
@@ -426,7 +426,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
                     </div>
 
                     <span className="text-[9px] text-white/20 mt-1 px-1 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
-                      {new Date(msg.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      {new Date(isNaN(Number(msg.timestamp)) ? msg.timestamp : Number(msg.timestamp)).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                     </span>
                   </div>
                 )
