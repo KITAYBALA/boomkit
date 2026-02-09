@@ -89,11 +89,22 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
     const load = async () => {
       if (supabase) {
         console.log("[v0] Loading chat messages from Supabase...")
-        const { data, error } = await supabase
+        let { data, error } = await supabase
           .from("chat_messages")
           .select("*")
-          .order("timestamp", { ascending: true })
+          .order("created_at", { ascending: true })
           .limit(200)
+
+        if (error && error.message.includes("column \"created_at\" does not exist")) {
+          console.log("[v0] Falling back to inserted_at for chat fetch (client side)")
+          const fallback = await supabase
+            .from("chat_messages")
+            .select("*")
+            .order("inserted_at", { ascending: true })
+            .limit(200)
+          data = fallback.data
+          error = fallback.error
+        }
 
         if (error) {
           console.error("[v0] Error loading chat messages:", error)
@@ -102,12 +113,12 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
         }
 
         const mapped =
-          (data as DbChatRow[] | null)?.map((d) => ({
+          (data as any[] | null)?.map((d) => ({
             id: d.id,
             username: d.username,
             message: d.message,
             role: d.role,
-            timestamp: String(d.timestamp),
+            timestamp: d.created_at || d.inserted_at || d.timestamp || new Date().toISOString(),
           })) ?? []
         setMessages(mapped)
 
@@ -121,10 +132,16 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
             (payload) => {
               console.log("[v0] Realtime change received:", payload)
               if (payload.eventType === "INSERT") {
-                const d = payload.new as DbChatRow
+                const d = payload.new as any
                 setMessages((prev) => [
                   ...prev,
-                  { id: d.id, username: d.username, message: d.message, role: d.role, timestamp: String(d.timestamp) },
+                  {
+                    id: d.id,
+                    username: d.username,
+                    message: d.message,
+                    role: d.role,
+                    timestamp: d.created_at || d.inserted_at || d.timestamp || new Date().toISOString()
+                  },
                 ])
               } else if (payload.eventType === "UPDATE") {
                 const d = payload.new as DbChatRow
