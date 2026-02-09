@@ -6,7 +6,7 @@ import { BOOMKIT_SYSTEM_INSTRUCTION } from "./boomkit-knowledge"
  */
 export async function generateGeminiResponse(prompt: string): Promise<string> {
     // Use env var first, fallback to the key provided by user to avoid restart issues
-    const apiKey = process.env.GOOGLE_GEMINI_API_KEY || "AIzaSyBJcKB1BFqEIlcL8VGJ-q6BKFvBLB8jXmc"
+    const apiKey = process.env.GOOGLE_GEMINI_API_KEY || "AIzaSyCv9OwGnmGHPysSYqxw9H55rmmStGtR9Zw"
 
     if (!apiKey) {
         console.error("GOOGLE_GEMINI_API_KEY is not defined in environment variables.")
@@ -15,7 +15,7 @@ export async function generateGeminiResponse(prompt: string): Promise<string> {
 
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({
-        model: "gemini-2.5-flash"
+        model: "gemini-1.5-flash"
     })
 
     try {
