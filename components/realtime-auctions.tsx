@@ -245,7 +245,8 @@ export default function RealtimeAuctions({
       const { data, error } = await supabase.rpc('create_auction', {
         p_boom_name: selectedBoom,
         p_starting_bid: startingBid,
-        p_duration_hours: duration
+        p_duration_hours: duration,
+        p_user_id: currentUser.id // Explicitly pass the ID for custom session support
       })
 
       if (error) {

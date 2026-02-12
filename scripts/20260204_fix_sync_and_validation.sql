@@ -71,14 +71,16 @@ BEGIN
   -- Sender items
   FOR v_boom_key, v_boom_qty IN SELECT * FROM jsonb_each_text(v_trade.sender_booms) LOOP
     IF COALESCE((v_sender_booms->>v_boom_key)::int, 0) < v_boom_qty THEN
-      RAISE EXCEPTION 'Verification failed: % no longer has enough %', v_trade.sender_username, v_boom_key;
+      RAISE EXCEPTION 'Verification failed: % no longer has enough % (Has: %, Needs: %). Full inventory: %', 
+        v_trade.sender_username, v_boom_key, COALESCE((v_sender_booms->>v_boom_key)::int, 0), v_boom_qty, v_sender_booms;
     END IF;
   END LOOP;
 
   -- Receiver items
   FOR v_boom_key, v_boom_qty IN SELECT * FROM jsonb_each_text(v_trade.receiver_booms) LOOP
     IF COALESCE((v_receiver_booms->>v_boom_key)::int, 0) < v_boom_qty THEN
-      RAISE EXCEPTION 'Verification failed: % no longer has enough %', v_trade.receiver_username, v_boom_key;
+      RAISE EXCEPTION 'Verification failed: % no longer has enough % (Has: %, Needs: %). Full inventory: %', 
+        v_trade.receiver_username, v_boom_key, COALESCE((v_receiver_booms->>v_boom_key)::int, 0), v_boom_qty, v_receiver_booms;
     END IF;
   END LOOP;
 
@@ -130,11 +132,12 @@ END;
 $$;
 
 -- 3. Enhance Auction place_bid with token check
+DROP FUNCTION IF EXISTS public.place_bid(uuid, int, text, text);
 CREATE OR REPLACE FUNCTION public.place_bid(p_auction_id uuid, p_amount int, p_username text, p_user_id text)
 RETURNS public.auction_items
 LANGUAGE plpgsql
 SECURITY DEFINER
-AS $$
+AS $body$
 declare
   updated_row public.auction_items;
   v_user_tokens int;
@@ -161,4 +164,4 @@ begin
 
   return updated_row;
 end;
-$$;
+$body$;
