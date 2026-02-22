@@ -51,7 +51,7 @@ BEGIN
   
   INSERT INTO public.auction_items (
     boom_name,
-    seller_user_id,
+    seller,
     seller_username,
     current_bid,
     ends_at,
