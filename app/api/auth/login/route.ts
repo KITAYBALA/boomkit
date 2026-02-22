@@ -114,7 +114,8 @@ export async function POST(request: NextRequest) {
     // Check if user is banned
     if (userData.is_banned) {
       if (DEBUG_AUTH) console.log('[AUTH DEBUG] User is banned - returning 403')
-      return NextResponse.json({ success: false, message: 'Account is banned' }, { status: 403 })
+      const reason = userData.ban_reason ? `Banned: ${userData.ban_reason}` : 'Account is banned'
+      return NextResponse.json({ success: false, message: reason }, { status: 403 })
     }
 
     // Check if password reset is required

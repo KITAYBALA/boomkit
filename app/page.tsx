@@ -1655,29 +1655,7 @@ export default function BoomkitGame() {
       return
     }
 
-    // Check if this system is banned
-    if (supabase) {
-      try {
-        const currentSystemSignature = generateSystemSignature()
-        const { data: bannedSystem, error } = await supabase
-          .from("banned_systems")
-          .select("*")
-          .eq("system_signature", currentSystemSignature)
-          .single()
 
-        if (bannedSystem && !error) {
-          alert(
-            "This system has been banned from Boomkit. You cannot create a new account.\n\n" +
-            `Reason: ${bannedSystem.reason || "Violation of terms"}\n` +
-            `Banned on: ${new Date(bannedSystem.banned_at).toLocaleDateString()}`
-          )
-          return
-        }
-      } catch (err) {
-        // If error is "no rows", it means not banned - continue with registration
-        console.log("System not banned, allowing registration")
-      }
-    }
 
     try {
       const response = await fetch("/api/auth/register", {
@@ -2502,25 +2480,6 @@ export default function BoomkitGame() {
   // Confirm ban action
   const handleConfirmBan = async () => {
     if (!userToModerate || !supabase) return
-
-    try {
-      // Get the current system signature (will be used if banning current user from different device)
-      const currentSystemSignature = generateSystemSignature()
-
-      // 1. Add system signature to banned_systems table
-      const { error: banSystemError } = await supabase.from("banned_systems").insert({
-        system_signature: currentSystemSignature,
-        banned_by: currentUser?.username || "System",
-        reason: banReason || "Banned by staff",
-        user_id: userToModerate.id,
-        username: userToModerate.username,
-      })
-
-      console.error("Error adding to banned_systems:", banSystemError)
-      // Continue with ban even if system signature tracking fails
-    } catch (err) {
-      console.error("Error in system ban tracking:", err)
-    }
 
     try {
       // 2. Direct Supabase Update (Redundancy fix)
