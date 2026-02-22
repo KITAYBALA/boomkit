@@ -8,7 +8,7 @@ export async function POST(req: Request) {
   const { prompt, grade, subject, count = 25 } = await req.json()
 
   try {
-    const apiKey = process.env.GOOGLE_GEMINI_API_KEY || "AIzaSyBJcKB1BFqEIlcL8VGJ-q6BKFvBLB8jXmc"
+    const apiKey = process.env.GOOGLE_GEMINI_API_KEY
 
     if (!apiKey) {
       console.log("[AI API] No API key, using fallback questions")
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     const genAI = new GoogleGenerativeAI(apiKey)
 
     // Model retry list for robustness - Updated with verified available models
-    const modelsToTry = ["gemini-2.0-flash", "gemini-flash-latest", "gemini-pro-latest", "gemini-2.5-flash-lite", "gemini-exp-1206"]
+    const modelsToTry = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-pro-latest"]
     let lastError = null
     let generationSuccessful = false
     let finalData = null

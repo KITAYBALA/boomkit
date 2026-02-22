@@ -1261,7 +1261,7 @@ export default function BoomkitGame() {
   // Load users from Supabase on mount
   useEffect(() => {
     if (supabase) {
-      fetchUsersFromSupabase()
+      fetchUsersFromSupabase(true)
     }
   }, [supabase, fetchUsersFromSupabase])
 
@@ -2213,7 +2213,7 @@ export default function BoomkitGame() {
         const { error } = await supabase.from("auction_items").insert({
           boom_name: selectedBoom,
           seller_username: currentUser.username,
-          seller_user_id: currentUser.id,
+          seller: currentUser.id,
           current_bid: startingBid,
           ends_at: endsAt,
           status: "active",
