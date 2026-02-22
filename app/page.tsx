@@ -1010,7 +1010,7 @@ export default function BoomkitGame() {
       })
 
       try {
-        // Use the secure API
+        // Use the secure API - Omit strictly protected fields to avoid 403 errors for standard users
         const updates = {
           username: userWithActivity.username,
           email: userWithActivity.email || "",
@@ -1019,24 +1019,14 @@ export default function BoomkitGame() {
           daily_tokens: userWithActivity.dailyTokens || 0,
           packs: userWithActivity.packs || [],
           booms: userWithActivity.booms || {},
-          is_owner: userWithActivity.isOwner || false,
-          is_banned: userWithActivity.isBanned || false,
-          is_muted: userWithActivity.isMuted || false,
-          status: userWithActivity.status || "approved",
           reason: userWithActivity.reason || "",
-          role: userWithActivity.role || "player",
           join_date: userWithActivity.joinDate,
           boom_score: userWithActivity.boomScore || 0,
           total_value: userWithActivity.totalValue || 0,
           profile_picture: userWithActivity.profilePicture || "🎯",
-          is_plus_user: userWithActivity.isPlusUser || false,
           name_color: userWithActivity.nameColor || "",
           banner_color: userWithActivity.bannerColor || "",
           last_daily_spin: userWithActivity.lastDailySpin || "",
-          badges: userWithActivity.badges || [],
-          mute_expiry: userWithActivity.muteExpiry || 0,
-          ban_expiry: userWithActivity.banExpiry || 0,
-          ban_reason: userWithActivity.banReason || "",
           last_seen: userWithActivity.lastSeen,
           packs_opened: userWithActivity.packsOpened || 0,
           last_ip: userWithActivity.lastIp || "",
