@@ -1,28 +1,32 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-async function listModels() {
-    const apiKey = "AIzaSyBJcKB1BFqEIlcL8VGJ-q6BKFvBLB8jXmc";
+async function testKey(apiKey, keyName) {
+    console.log(`\n--- Testing Key: ${keyName} (${apiKey.substring(0, 10)}...) ---`);
     const genAI = new GoogleGenerativeAI(apiKey);
+    const models = ["gemini-flash-latest", "gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-pro-latest", "gemini-1.5-flash"];
 
-    try {
-        // There isn't a direct listModels in the main export of the v1 SDK sometimes 
-        // but we can try to hit the endpoint or just try common names.
-        // Actually, let's just try to test a few common ones programmatically.
-        const models = ["gemini-flash-latest", "gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-pro-latest", "gemini-2.5-flash"];
-
-        for (const modelName of models) {
-            try {
-                const model = genAI.getGenerativeModel({ model: modelName });
-                const result = await model.generateContent("test");
-                console.log(`SUCCESS: ${modelName}`);
-                process.exit(0);
-            } catch (e) {
-                console.log(`FAILED: ${modelName} - ${e.message}`);
-            }
+    for (const modelName of models) {
+        try {
+            const model = genAI.getGenerativeModel({ model: modelName });
+            const result = await model.generateContent("test");
+            const response = await result.response;
+            console.log(`  SUCCESS: [${keyName}] ${modelName}`);
+            return true;
+        } catch (e) {
+            console.log(`  FAILED: [${keyName}] ${modelName} - ${e.message}`);
         }
-    } catch (error) {
-        console.error("General error:", error);
     }
+    return false;
 }
 
-listModels();
+async function runTests() {
+    const key1 = "AIzaSyBJcKB1BFqEIlcL8VGJ-q6BKFvBLB8jXmc";
+    const key2 = "AIzaSyCv9OwGnmGHPysSYqxw9H55rmmStGtR9Zw";
+    const key3 = "AIzaSyAKbRCF1FOfIo7HY622NwIa-8PpCI2KAVc"; // New key
+
+    await testKey(key1, "Key from generate-set");
+    await testKey(key2, "Key from gemini.ts");
+    await testKey(key3, "New Key provided by user");
+}
+
+runTests();
