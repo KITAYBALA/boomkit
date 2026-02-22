@@ -52,14 +52,12 @@ BEGIN
   INSERT INTO public.auction_items (
     boom_name,
     seller,
-    seller_username,
     current_bid,
     ends_at,
     status
   )
   SELECT
     p_boom_name,
-    p_user_id,
     (SELECT username FROM public.users WHERE id = p_user_id),
     p_starting_bid,
     v_ends_at,
