@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { supabaseServerClient } from '@/lib/supabase-server-client';
+import { verifySession } from '@/lib/auth-server';
 
 export async function GET() {
   try {
@@ -21,11 +22,22 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { boom_name, seller, current_bid, time_left, bidders } = await request.json();
+    const session = await verifySession()
+    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+    const { boom_name, current_bid, time_left, bidders } = await request.json();
+
+    const { data: userData, error: userError } = await supabaseServerClient()
+      .from("users")
+      .select("username")
+      .eq("id", session.userId)
+      .single()
+
+    if (userError || !userData) return NextResponse.json({ error: "User not found" }, { status: 404 })
 
     const { data, error } = await supabaseServerClient()
       .from('auction_items')
-      .insert([{ boom_name, seller, current_bid, time_left, bidders }])
+      .insert([{ boom_name, seller: userData.username, current_bid, time_left, bidders }])
       .select()
 
     if (error) {
