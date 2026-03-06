@@ -1156,7 +1156,9 @@ export default function BoomkitGame() {
     if (!supabase) return
 
     try {
-      const { data, error } = await supabase.from("users").select("*")
+      // Only select safe fields; never expose password_hash, last_ip, or email to clients.
+      const safeColumns = "id, username, age, tokens, daily_tokens, packs, booms, is_owner, is_banned, is_muted, status, reason, role, join_date, boom_score, total_value, profile_picture, is_plus_user, name_color, banner_color, last_daily_spin, badges, mute_expiry, ban_expiry, last_seen, packs_opened, xp, level"
+      const { data, error } = await supabase.from("users").select(safeColumns)
 
       if (error) {
         console.error("[v0] Error fetching users from Supabase:", error.message)
@@ -1424,11 +1426,10 @@ export default function BoomkitGame() {
         .subscribe()
     }
 
-    // Then sync every 15 seconds for ban/role detection (fallback/security)
-    const interval = setInterval(syncCurrentUserRole, 15000)
+    // The Realtime listener above already handles updates.
+    // Removed the 15-second polling fallback to fix battery and DB drain.
 
     return () => {
-      clearInterval(interval)
       if (channel) supabase.removeChannel(channel)
     }
   }, [syncCurrentUserRole, currentUser?.id, supabase])

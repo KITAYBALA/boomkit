@@ -9,17 +9,27 @@ export const dynamic = 'force-dynamic'
  * Server-side login with password validation
  * SECURITY: This route validates passwords server-side to prevent client-side bypass
  */
+import { checkRateLimiter } from '@/lib/rate-limiter'
+
 export async function POST(request: NextRequest) {
   const DEBUG_AUTH = process.env.DEBUG_AUTH === 'true' || process.env.NODE_ENV !== 'production'
 
   try {
     if (DEBUG_AUTH) console.log('[AUTH DEBUG] ===== LOGIN START =====')
 
-    const { username, password } = await request.json()
-
-    // Get client IP
     const forwarded = request.headers.get("x-forwarded-for")
     const ip = forwarded ? forwarded.split(",")[0] : request.headers.get("x-real-ip") || "127.0.0.1"
+
+    // 1. RATE LIMIT CHECK
+    const rateLimit = checkRateLimiter(ip)
+    if (!rateLimit.allowed) {
+      return NextResponse.json({
+        success: false,
+        message: rateLimit.message
+      }, { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfter) } })
+    }
+
+    const { username, password } = await request.json()
 
     const supabase = getSupabaseServerClient()
 
@@ -167,8 +177,37 @@ export async function POST(request: NextRequest) {
     // Update last_ip in background
     await supabase.from('users').update({ last_ip: ip }).eq('id', userData.id)
 
-    // Password is valid - return user data (excluding password_hash)
-    const { password_hash: _, ...userWithoutPassword } = userData
+    // Password is valid - return user data (EXPLICITLY PICK SAFE FIELDS)
+    const safeUser = {
+      id: userData.id,
+      username: userData.username,
+      email: userData.email,
+      age: userData.age,
+      tokens: userData.tokens,
+      daily_tokens: userData.daily_tokens,
+      packs: userData.packs,
+      booms: userData.booms,
+      role: userData.role,
+      is_owner: userData.is_owner,
+      is_banned: userData.is_banned,
+      is_muted: userData.is_muted,
+      status: userData.status,
+      badges: userData.badges,
+      name_color: userData.name_color,
+      banner_color: userData.banner_color,
+      profile_picture: userData.profile_picture,
+      join_date: userData.join_date,
+      boom_score: userData.boom_score,
+      total_value: userData.total_value,
+      is_plus_user: userData.is_plus_user,
+      last_daily_spin: userData.last_daily_spin,
+      mute_expiry: userData.mute_expiry,
+      ban_expiry: userData.ban_expiry,
+      last_seen: userData.last_seen,
+      packs_opened: userData.packs_opened,
+      xp: userData.xp,
+      level: userData.level
+    }
 
     // Create secure session
     await createSession(
@@ -179,7 +218,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      user: userWithoutPassword
+      user: safeUser
     })
   } catch (error) {
     console.error('[AUTH DEBUG] Login error (full stack):', error)

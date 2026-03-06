@@ -119,10 +119,12 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
         const { data, error } = await supabase
           .from("chat_messages")
           .select("*")
-          .order("inserted_at", { ascending: true })
-          .limit(200)
+          .order("inserted_at", { ascending: false })
+          .limit(50)
 
+        // Reverse so that oldest of the 50 is first
         if (!error && data) {
+          data.reverse()
           const mapped = data.map((d: any) => ({
             id: d.id,
             username: d.username,

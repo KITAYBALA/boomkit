@@ -9,14 +9,23 @@ export const dynamic = 'force-dynamic'
  * Server-side registration with password hashing
  * SECURITY: Passwords are hashed server-side using SHA-256 (matching login)
  */
+import { checkRateLimiter } from '@/lib/rate-limiter'
+
 export async function POST(request: NextRequest) {
   try {
-    const { username, email, password, age, reason } = await request.json()
-
-    // Get client IP
     const forwarded = request.headers.get("x-forwarded-for")
     const ip = forwarded ? forwarded.split(",")[0] : request.headers.get("x-real-ip") || "127.0.0.1"
 
+    // 1. RATE LIMIT CHECK
+    const rateLimit = checkRateLimiter(ip)
+    if (!rateLimit.allowed) {
+      return NextResponse.json({
+        success: false,
+        message: rateLimit.message
+      }, { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfter) } })
+    }
+
+    const { username, email, password, age, reason } = await request.json()
     const supabase = getSupabaseServerClient()
 
     // CHECK IP BLACKLIST
@@ -173,12 +182,41 @@ export async function POST(request: NextRequest) {
       insertedUser.is_owner || false
     )
 
-    // Return user data (excluding password_hash)
-    const { password_hash: _, ...userWithoutPassword } = insertedUser
+    // Return user data (EXPLICITLY PICK SAFE FIELDS)
+    const safeUser = {
+      id: insertedUser.id,
+      username: insertedUser.username,
+      email: insertedUser.email,
+      age: insertedUser.age,
+      tokens: insertedUser.tokens,
+      daily_tokens: insertedUser.daily_tokens,
+      packs: insertedUser.packs,
+      booms: insertedUser.booms,
+      role: insertedUser.role,
+      is_owner: insertedUser.is_owner,
+      is_banned: insertedUser.is_banned,
+      is_muted: insertedUser.is_muted,
+      status: insertedUser.status,
+      badges: insertedUser.badges,
+      name_color: insertedUser.name_color,
+      banner_color: insertedUser.banner_color,
+      profile_picture: insertedUser.profile_picture,
+      join_date: insertedUser.join_date,
+      boom_score: insertedUser.boom_score,
+      total_value: insertedUser.total_value,
+      is_plus_user: insertedUser.is_plus_user,
+      last_daily_spin: insertedUser.last_daily_spin,
+      mute_expiry: insertedUser.mute_expiry,
+      ban_expiry: insertedUser.ban_expiry,
+      last_seen: insertedUser.last_seen,
+      packs_opened: insertedUser.packs_opened,
+      xp: insertedUser.xp,
+      level: insertedUser.level
+    }
 
     return NextResponse.json({
       success: true,
-      user: userWithoutPassword,
+      user: safeUser,
     })
   } catch (error) {
     console.error('Registration error:', error)
