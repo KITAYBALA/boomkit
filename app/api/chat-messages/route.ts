@@ -23,30 +23,34 @@ export async function GET() {
 }
 
 import { containsProfanity } from "@/lib/profanity"
+import { verifySession } from "@/lib/auth-server"
 
 export async function POST(request: Request) {
   try {
-    const { username, message, role } = await request.json()
+    const session = await verifySession()
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
 
+    const { message } = await request.json()
     const supabase = getSupabaseServerClient()
 
-    console.log("[v0] Verifying user for chat:", username)
-    // Check if user is muted before allowing message
+    // Get the actual user data corresponding to the verified session
     const { data: userData, error: userError } = await supabase
       .from("users")
-      .select("id, is_muted, mute_expiry")
-      .ilike("username", username)
-      .maybeSingle()
+      .select("id, username, role, is_muted, mute_expiry")
+      .eq("id", session.userId)
+      .single()
 
-    if (userError) {
-      console.error("[v0] Error checking user mute status:", userError)
-      return NextResponse.json({ error: `Failed to verify user status: ${userError.message}` }, { status: 500 })
-    }
-
-    if (!userData) {
-      console.error("[v0] User not found for chat verification:", username)
+    if (userError || !userData) {
+      console.error("[v0] User not found for chat verification:", session.userId)
       return NextResponse.json({ error: "User not found" }, { status: 404 })
     }
+
+    const username = userData.username
+    const role = userData.role
+
+    console.log("[v0] Verifying user for chat:", username)
 
     // Check if mute has expired
     if (userData.is_muted && userData.mute_expiry) {
@@ -193,8 +197,21 @@ export async function POST(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
-    const { id, username, message } = await request.json()
+    const session = await verifySession()
+    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+    const { id, message } = await request.json()
     const supabase = getSupabaseServerClient()
+
+    // Get the requester's username
+    const { data: userData, error: userError } = await supabase
+      .from("users")
+      .select("username")
+      .eq("id", session.userId)
+      .single()
+
+    if (userError || !userData) return NextResponse.json({ error: "User not found" }, { status: 404 })
+    const username = userData.username
 
     // Ensure the message belongs to the user
     const { data: existingMessage, error: fetchError } = await supabase
@@ -233,27 +250,30 @@ export async function PATCH(request: Request) {
 
 export async function DELETE(request: Request) {
   try {
+    const session = await verifySession()
+    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
     const { searchParams } = new URL(request.url)
     const id = searchParams.get("id")
-    const username = searchParams.get("username")
 
-    if (!id || !username) {
+    if (!id) {
       return NextResponse.json({ error: "Missing parameters" }, { status: 400 })
     }
 
     const supabase = getSupabaseServerClient()
 
-    // Get the requester's role
+    // Get the requester's info
     const { data: requesterData, error: requesterError } = await supabase
       .from("users")
-      .select("role")
-      .ilike("username", username)
+      .select("username, role")
+      .eq("id", session.userId)
       .single()
 
     if (requesterError || !requesterData) {
       return NextResponse.json({ error: "Requester not found" }, { status: 403 })
     }
 
+    const username = requesterData.username
     const isStaff = ["owner", "admin", "senior_moderator", "moderator", "tester"].includes(requesterData.role)
 
     // Ensure the message belongs to the user or requester is staff

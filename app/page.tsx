@@ -1216,7 +1216,7 @@ export default function BoomkitGame() {
     }
   }, [supabase, currentUser?.id])
 
-  // NEW: Session validation to handle sync issues
+  // NEW: Session validation to handle sync issues and prevent LocalStorage spoofing
   useEffect(() => {
     const validateSession = async () => {
       // Don't validate if we haven't even tried to load storage yet
@@ -1229,13 +1229,66 @@ export default function BoomkitGame() {
         if (!data.authenticated) {
           // If client thinks they are logged in but server has no session
           if (currentUser) {
-            console.log("[v0] Session lost or expired, logging out")
+            console.log("[v0] Session lost, expired, or manipulated. Logging out.")
             handleLogout()
           }
-        } else if (currentUser && data.user.id !== currentUser.id) {
-          // If IDs don't match (should rarely happen unless cookie/storage is manipulated)
-          console.log("[v0] Session ID mismatch, logging out")
-          handleLogout()
+        } else if (data.authenticated && data.user) {
+          // Compare crucial security fields stored locally with the server truth.
+          // If they differ (User tampered with LocalStorage), aggressively overwrite.
+
+          if (currentUser) {
+            const needsOverride =
+              data.user.id !== currentUser.id ||
+              data.user.role !== currentUser.role ||
+              data.user.is_owner !== currentUser.isOwner ||
+              data.user.tokens !== currentUser.tokens ||
+              data.user.is_banned !== currentUser.isBanned;
+
+            if (needsOverride) {
+              console.warn("[v0] LocalStorage tampering detected or severe desync. Overwriting with server truth.")
+
+              const authoritativeUser: GameUser = {
+                id: data.user.id,
+                username: data.user.username,
+                email: data.user.email,
+                age: data.user.age || 18,
+                tokens: data.user.tokens || 0,
+                dailyTokens: data.user.daily_tokens || 0,
+                packs: data.user.packs || [],
+                booms: data.user.booms || {},
+                isOwner: data.user.is_owner || false,
+                isBanned: data.user.is_banned || false,
+                isMuted: data.user.is_muted || false,
+                status: data.user.status || "pending",
+                reason: data.user.reason || "",
+                role: data.user.role || "player",
+                joinDate: data.user.join_date || new Date().toISOString(),
+                boomScore: data.user.boom_score || 0,
+                totalValue: data.user.total_value || 0,
+                profilePicture: data.user.profile_picture || "🎯",
+                isPlusUser: data.user.is_plus_user || false,
+                nameColor: data.user.name_color || "",
+                bannerColor: data.user.banner_color || "",
+                lastDailySpin: data.user.last_daily_spin || null,
+                badges: data.user.badges || [],
+                muteExpiry: data.user.mute_expiry || null,
+                banExpiry: data.user.ban_expiry || null,
+                banReason: data.user.ban_reason || "",
+                lastSeen: data.user.last_seen || Date.now(),
+                packsOpened: data.user.packs_opened || 0,
+                lastIp: data.user.last_ip || "",
+                xp: data.user.xp || 0,
+                level: data.user.level || 1,
+              }
+
+              if (authoritativeUser.isBanned) {
+                router.push(`/banned?reason=${encodeURIComponent(authoritativeUser.banReason || "")}`)
+              } else {
+                setCurrentUser(authoritativeUser)
+                localStorage.setItem("boomkit_current_user", JSON.stringify(authoritativeUser))
+              }
+            }
+          }
         }
       } catch (err) {
         console.error("[v0] Failed to validate session:", err)
@@ -1245,8 +1298,12 @@ export default function BoomkitGame() {
     if (isStorageLoaded && !(window as any).sessionValidated) {
       validateSession()
         ; (window as any).sessionValidated = true
+
+      // Also run validation periodically to ensure manipulation doesn't work long-term
+      const interval = setInterval(validateSession, 30000)
+      return () => clearInterval(interval)
     }
-  }, [isStorageLoaded, currentUser, handleLogout])
+  }, [isStorageLoaded, currentUser, handleLogout, router])
 
   // Load users from Supabase on mount
   useEffect(() => {

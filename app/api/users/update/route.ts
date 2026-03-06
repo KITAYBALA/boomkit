@@ -68,8 +68,11 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        if (updatingProgression && !isSelf && !isStaff) {
-            return NextResponse.json({ success: false, message: 'Access denied: cannot update other people progression' }, { status: 403 })
+        if (updatingProgression) {
+            // Only staff can update progression fields directly via API
+            if (!isStaff) {
+                return NextResponse.json({ success: false, message: 'Access denied: cannot update progression fields directly' }, { status: 403 })
+            }
         }
 
         // 4. Perform Update via Service Role
