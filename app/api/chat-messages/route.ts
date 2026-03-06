@@ -6,16 +6,18 @@ export async function GET() {
   try {
     const supabase = getSupabaseServerClient()
     // We've confirmed 'inserted_at' is the correct column in the live DB
-    const { data, error } = await supabase.from("chat_messages").select("*").order("inserted_at", { ascending: true })
+    const { data, error } = await supabase.from("chat_messages").select("*").order("inserted_at", { ascending: false }).limit(50)
+    // Reverse the data so it renders in chronological order
+    const chronologicalData = data ? [...data].reverse() : []
 
     if (error) {
       console.error("[v0] Error fetching chat messages from DB:", error)
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    const count = data?.length || 0
+    const count = chronologicalData.length || 0
     console.log(`[v0] [API] Successfully fetched ${count} chat messages at ${new Date().toISOString()}`)
-    return NextResponse.json(data || [], { status: 200 })
+    return NextResponse.json(chronologicalData, { status: 200 })
   } catch (error) {
     console.error("[v0] Unexpected error fetching chat messages:", error)
     return NextResponse.json({ error: "Failed to fetch chat messages" }, { status: 500 })
