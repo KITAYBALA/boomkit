@@ -2679,6 +2679,54 @@ export default function BoomkitGame() {
     alert("User application rejected.")
   }
 
+  // -- Transfer Actions --
+  const handleGiftTokens = async (receiverUsername: string, amount: number) => {
+    if (!currentUser || amount <= 0) return
+
+    // Optimistic UI checks but actual check on server
+    if (currentUser.tokens < amount) {
+      alert("Not enough tokens to gift.");
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.rpc('transfer_tokens', {
+        p_sender_id: currentUser.id,
+        p_receiver_username: receiverUsername,
+        p_amount: amount
+      })
+      if (error) throw error
+      alert(`🎉 Successfully gifted ${amount.toLocaleString()} tokens to ${receiverUsername}!`)
+      fetchUsersFromSupabase(true) // Refresh user data to see updated balances
+    } catch (e: any) {
+      alert(e.message || "Gift failed")
+    }
+  }
+
+  const handleGiftBoom = async (receiverUsername: string, boomName: string, amount: number) => {
+    if (!currentUser || amount <= 0) return
+
+    const qty = currentUser.booms[boomName] || 0
+    if (qty < amount) {
+      alert(`You do not have enough ${boomName} to gift.`);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.rpc('transfer_boom', {
+        p_sender_id: currentUser.id,
+        p_receiver_username: receiverUsername,
+        p_boom_name: boomName,
+        p_amount: amount
+      })
+      if (error) throw error
+      alert(`🎁 Successfully gifted ${amount}x ${boomName} to ${receiverUsername}!`)
+      fetchUsersFromSupabase(true)
+    } catch (e: any) {
+      alert(e.message || "Gift failed")
+    }
+  }
+
   // --- Profile Features ---
 
   // Open Public Player Profile
@@ -5277,6 +5325,56 @@ export default function BoomkitGame() {
                   <span className="text-[10px] uppercase font-bold text-slate-400">Player Rank</span>
                 </div>
               </div>
+
+              {/* Action Buttons */}
+              {currentUser && selectedProfileUser.id !== currentUser.id && (
+                <div className="w-full mt-6 grid grid-cols-2 gap-3">
+                  <Button
+                    variant="outline"
+                    className="w-full bg-white/5 border-white/10 hover:bg-white/10 text-white font-black h-12 rounded-xl transition-colors"
+                    onClick={() => {
+                      const amountStr = prompt(`How many tokens do you want to safely gift to ${selectedProfileUser.username}?`);
+                      if (!amountStr) return;
+                      const amount = parseInt(amountStr, 10);
+                      if (isNaN(amount) || amount <= 0) {
+                        alert("Invalid amount.");
+                        return;
+                      }
+                      handleGiftTokens(selectedProfileUser.username, amount);
+                    }}
+                  >
+                    <CoinsIcon className="w-4 h-4 mr-2" />
+                    Gift Tokens
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="w-full bg-white/5 border-white/10 hover:bg-white/10 text-white font-black h-12 rounded-xl transition-colors"
+                    onClick={() => {
+                      const allBooms = Object.keys(currentUser?.booms || {}).filter(b => currentUser?.booms[b] > 0);
+                      if (allBooms.length === 0) {
+                        alert("You have no Booms to gift!");
+                        return;
+                      }
+                      const boomName = prompt(`Which Boom would you like to gift to ${selectedProfileUser.username}?\n\nAvailable: ${allBooms.join(", ")}`);
+                      if (!boomName || !allBooms.includes(boomName)) {
+                        if (boomName) alert(`Invalid Boom or you don't own any ${boomName}!`);
+                        return;
+                      }
+                      const amountStr = prompt(`How many ${boomName} would you like to gift? (You have ${currentUser.booms[boomName]})`);
+                      if (!amountStr) return;
+                      const amount = parseInt(amountStr, 10);
+                      if (isNaN(amount) || amount <= 0) {
+                        alert("Invalid amount.");
+                        return;
+                      }
+                      handleGiftBoom(selectedProfileUser.username, boomName, amount);
+                    }}
+                  >
+                    <PackageIcon className="w-4 h-4 mr-2" />
+                    Gift Boom
+                  </Button>
+                </div>
+              )}
 
               {/* Footer Info */}
               <div className="w-full mt-6 pt-4 border-t border-white/10 flex justify-between items-center text-xs text-slate-500 font-medium">

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button"
 import { SendIcon, MessageCircleIcon, PencilIcon, Trash2Icon, CheckIcon, XIcon, AlertTriangleIcon } from "lucide-react"
 
 type Props = {
-  currentUser: { username: string; isMuted?: boolean; role?: string } | null
+  currentUser: { id: string; username: string; isMuted?: boolean; role?: string } | null
   roleName: string
   onUsernameClick: (username: string) => void
 }
@@ -198,6 +198,47 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
     // Client-side check (also enforced server-side)
     if (isMuted) {
       return
+    }
+
+    // Intercept /gift command
+    if (text.trim().startsWith("/gift ")) {
+      const parts = text.trim().split(" ")
+      if (parts.length >= 3) {
+        const receiverUsername = parts[1]
+        const amount = parseInt(parts[2], 10)
+
+        if (isNaN(amount) || amount <= 0) {
+          alert("Invalid amount for gift.")
+          setText("")
+          return
+        }
+
+        try {
+          if (!supabase) throw new Error("Supabase client not initialized")
+          const { data, error } = await supabase.rpc('transfer_tokens', {
+            p_sender_id: currentUser.id,
+            p_receiver_username: receiverUsername,
+            p_amount: amount
+          })
+
+          if (error) {
+            console.error("[v0] /gift error:", error)
+            alert(error.message || "Gift failed")
+          } else {
+            console.log("[v0] /gift success:", data)
+            alert(`🎉 Successfully sent ${amount.toLocaleString()} tokens to ${receiverUsername}!`)
+          }
+        } catch (e: any) {
+          console.error("[v0] /gift catch error:", e)
+          alert(e.message || "Gift failed")
+        }
+
+        setText("")
+        return
+      } else {
+        alert("Usage: /gift [username] [amount]")
+        return
+      }
     }
 
     const userRole = currentUser.role || roleName
