@@ -39,6 +39,7 @@ import {
   Users2Icon,
   InfoIcon,
   TrophyIcon,
+  BoxIcon,
 } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 
@@ -223,6 +224,7 @@ interface GameUser {
   lastIp?: string // Added for IP blacklisting
   xp: number // Added for leveling system
   level: number // Added for leveling system
+  pinned_boom?: string // Selected boom to show off
   // password?: string; // Removed password from interface to avoid unintended exposure
 }
 
@@ -805,6 +807,12 @@ export default function BoomkitGame() {
   const [canSpin, setCanSpin] = useState(true)
   const [spinning, setSpinning] = useState(false)
   const [spinResult, setSpinResult] = useState<number | null>(null)
+
+  // Player Profiles
+  const [showPlayerProfile, setShowPlayerProfile] = useState(false)
+  const [selectedProfileUser, setSelectedProfileUser] = useState<GameUser | null>(null)
+
+  // Admin stats dialog (existing)
   const [showUserStats, setShowUserStats] = useState(false)
   const [selectedUserStats, setSelectedUserStats] = useState<GameUser | null>(null)
   const [systemSignature, setSystemSignature] = useState<string>("")
@@ -880,9 +888,8 @@ export default function BoomkitGame() {
       if (!user) return
 
       try {
-        const updates = {
+        const updates: any = {
           username: user.username,
-          email: user.email || "",
           tokens: user.tokens || 0,
           boom_score: user.boomScore || 0,
           role: user.role,
@@ -906,7 +913,14 @@ export default function BoomkitGame() {
           name_color: user.nameColor || "text-white",
           last_seen: user.lastSeen || Date.now(),
           reason: user.reason || "",
-          last_ip: user.lastIp || "",
+        }
+
+        // Only include sensitive/unique fields if they were successfully fetched / exist
+        if (user.email && user.email.trim() !== "") {
+          updates.email = user.email;
+        }
+        if (user.lastIp && user.lastIp.trim() !== "") {
+          updates.last_ip = user.lastIp;
         }
 
         const response = await fetch("/api/users/update", {
@@ -1011,9 +1025,8 @@ export default function BoomkitGame() {
 
       try {
         // Use the secure API - Omit strictly protected fields to avoid 403 errors for standard users
-        const updates = {
+        const updates: any = {
           username: userWithActivity.username,
-          email: userWithActivity.email || "",
           age: userWithActivity.age || 18,
           tokens: userWithActivity.tokens || 0,
           daily_tokens: userWithActivity.dailyTokens || 0,
@@ -1029,9 +1042,15 @@ export default function BoomkitGame() {
           last_daily_spin: userWithActivity.lastDailySpin || "",
           last_seen: userWithActivity.lastSeen,
           packs_opened: userWithActivity.packsOpened || 0,
-          last_ip: userWithActivity.lastIp || "",
           xp: userWithActivity.xp || 0,
           level: userWithActivity.level || 1,
+        }
+
+        if (userWithActivity.email && userWithActivity.email.trim() !== "") {
+          updates.email = userWithActivity.email;
+        }
+        if (userWithActivity.lastIp && userWithActivity.lastIp.trim() !== "") {
+          updates.last_ip = userWithActivity.lastIp;
         }
 
         const response = await fetch("/api/users/update", {
@@ -1199,6 +1218,7 @@ export default function BoomkitGame() {
           lastIp: u.last_ip || "",
           xp: u.xp || 0,
           level: u.level || 1,
+          pinned_boom: u.pinned_boom || null,
         }))
 
         setUsers(mappedUsers)
@@ -2657,6 +2677,47 @@ export default function BoomkitGame() {
 
     await updateAndPersistUsers(updatedUsers, userId)
     alert("User application rejected.")
+  }
+
+  // --- Profile Features ---
+
+  // Open Public Player Profile
+  const openPlayerProfile = (userOrId: GameUser | string) => {
+    let userObj: GameUser | undefined
+
+    if (typeof userOrId === "string") {
+      userObj = users.find(u => u.id === userOrId || u.username === userOrId)
+    } else {
+      userObj = userOrId
+    }
+
+    if (userObj) {
+      setSelectedProfileUser(userObj)
+      setShowPlayerProfile(true)
+    }
+  }
+
+  // Pin Boom to Profile
+  const pinBoomToProfile = async (boomName: string) => {
+    if (!currentUser) return
+
+    if (!confirm(`Do you want to pin ${boomName} to your showcase? It will be visible to everyone on your profile.`)) return
+
+    const updatedUser = { ...currentUser, pinned_boom: boomName }
+
+    // Optimistic update
+    setCurrentUser(updatedUser)
+
+    try {
+      const { error } = await supabase!.from("users").update({ pinned_boom: boomName }).eq("id", currentUser.id)
+      if (error) throw error
+      alert(`Successfully pinned ${boomName}!`)
+    } catch (err) {
+      console.error("Error pinning boom:", err)
+      alert("Failed to pin boom. Try again.")
+      // Revert optimism
+      setCurrentUser(currentUser)
+    }
   }
 
 
@@ -4185,13 +4246,13 @@ export default function BoomkitGame() {
             )}
 
             {/* Private Chat Page */}
-            {currentPage === "private-chat" && (
+            {currentPage === "private-chat" && currentUser && (
               <div className="space-y-12">
                 <div className="flex items-center gap-3 mb-8">
                   <div className="w-1.5 h-8 bg-purple-500 rounded-full shadow-[0_0_15px_purple]" />
                   <h2 className="text-4xl font-black text-white tracking-tighter">Private Quarters</h2>
                 </div>
-                <PrivateChat currentUser={currentUser} />
+                <PrivateChat currentUser={currentUser} onPlayerClick={openPlayerProfile} />
               </div>
             )}
 
@@ -4204,6 +4265,7 @@ export default function BoomkitGame() {
                 getRarityColor={getRarityColor}
                 onAuctionCreated={() => fetchUsersFromSupabase(true)}
                 onClaimComplete={() => fetchUsersFromSupabase(true)}
+                onPlayerClick={openPlayerProfile}
               />
             )}
 
@@ -4218,6 +4280,7 @@ export default function BoomkitGame() {
                 getRarityColor={getRarityColor}
                 getUserRoleName={getUserRoleName}
                 isOwner={isOwner}
+                onPlayerClick={openPlayerProfile}
               />
             )}
 
@@ -5086,6 +5149,11 @@ export default function BoomkitGame() {
                         gameMode: mode.id,
                         questions,
                         duration,
+                        onPlayAgain: () => {
+                          setShowGameResults(false)
+                          setLobbyActive(true)
+                          // Just keep activeGamePin and mode the same
+                        }
                       })
                       setIsMergingGameActive(true)
                     }
@@ -5093,6 +5161,129 @@ export default function BoomkitGame() {
                   startSoloGame()
                 }}
               />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* PUBLIC PLAYER PROFILE MODAL */}
+      {showPlayerProfile && selectedProfileUser && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-slate-900 border border-slate-700/50 rounded-2xl w-full max-w-md my-8 relative overflow-hidden shadow-2xl flex flex-col">
+
+            {/* Banner & Close Button */}
+            <div className={`h-32 w-full bg-gradient-to-r ${selectedProfileUser.bannerColor || "from-slate-700 to-slate-800"} relative`}>
+              <div className="absolute inset-0 bg-black/20" />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-4 right-4 text-white/70 hover:text-white bg-black/20 hover:bg-black/40 rounded-full"
+                onClick={() => setShowPlayerProfile(false)}
+              >
+                <XIcon className="h-5 w-5" />
+              </Button>
+            </div>
+
+            {/* Profile Content Body */}
+            <div className="px-6 pb-6 relative flex flex-col items-center -mt-16">
+
+              {/* Avatar Outline */}
+              <div className="rounded-full p-1.5 bg-slate-900 relative">
+                <Avatar className="h-28 w-28 border-4 border-slate-800 shadow-xl" style={{ backgroundColor: '#1a1d27' }}>
+                  <AvatarFallback className="text-5xl">{selectedProfileUser.profilePicture || "🎮"}</AvatarFallback>
+                </Avatar>
+
+                {/* Status Indicator */}
+                <div
+                  className={`absolute bottom-3 right-3 h-5 w-5 rounded-full border-4 border-slate-900 ${Date.now() - (selectedProfileUser.lastSeen || 0) < 5 * 60 * 1000 ? "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]" : "bg-slate-500"
+                    }`}
+                  title={Date.now() - (selectedProfileUser.lastSeen || 0) < 5 * 60 * 1000 ? "Online" : "Offline"}
+                />
+              </div>
+
+              {/* Name & Role */}
+              <div className="text-center mt-3 mb-6">
+                <h2 className={`text-2xl font-black ${selectedProfileUser.nameColor || "text-white"} flex items-center justify-center gap-2`}>
+                  {selectedProfileUser.username}
+                  {selectedProfileUser.isPlusUser && <SparklesIcon className="text-yellow-400 h-5 w-5 fill-yellow-400/20" />}
+                </h2>
+
+                <div className="flex flex-wrap justify-center gap-2 mt-2">
+                  <Badge className={`${getRoleColor(selectedProfileUser.role)} border-none px-3 py-1 text-xs uppercase font-extrabold tracking-wider`}>
+                    {getUserRoleName(selectedProfileUser)}
+                  </Badge>
+
+                  {selectedProfileUser.badges?.map(badgeId => {
+                    const b = AVAILABLE_BADGES.find(x => x.id === badgeId)
+                    return b ? (
+                      <Badge key={b.id} className={`${b.color} border-none font-bold`} title={b.name}>
+                        {b.emoji} {b.name}
+                      </Badge>
+                    ) : null;
+                  })}
+                </div>
+              </div>
+
+              {/* Boom Showcase Area */}
+              <div className="w-full bg-slate-800/50 rounded-xl p-4 mb-6 border border-white/5 relative overflow-hidden group">
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40" />
+                <h3 className="text-xs uppercase font-black tracking-widest text-slate-400 mb-3 relative z-10 flex items-center gap-2">
+                  <Star className="h-4 w-4 text-yellow-500" />
+                  Showcase Boom
+                </h3>
+
+                <div className="relative z-10 flex flex-col items-center justify-center p-2 min-h-[120px]">
+                  {selectedProfileUser.pinned_boom ? (
+                    <div className={`p-4 rounded-xl border-2 flex flex-col items-center bg-black/40 backdrop-blur-md shadow-xl ${getAnimationClass(getBoomRarity(selectedProfileUser.pinned_boom))} ${getBoomRarity(selectedProfileUser.pinned_boom) === "legendary" ? "border-orange-500/50" :
+                      getBoomRarity(selectedProfileUser.pinned_boom) === "mystical" ? "border-purple-500/50" : "border-slate-700"
+                      }`}>
+                      <div className="text-6xl mb-2 drop-shadow-2xl">{getBoomAvatar(selectedProfileUser.pinned_boom)}</div>
+                      <Badge className={`${getRarityColor(getBoomRarity(selectedProfileUser.pinned_boom))} px-3 uppercase text-[10px] font-black`}>
+                        {selectedProfileUser.pinned_boom}
+                      </Badge>
+                    </div>
+                  ) : (
+                    <div className="text-slate-500 flex flex-col items-center text-center opacity-50">
+                      <PackageIcon className="h-10 w-10 mb-2 stroke-1" />
+                      <p className="text-sm font-medium">No boom showcased yet</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Core Stats Grid */}
+              <div className="w-full grid grid-cols-2 gap-3">
+                <div className="bg-slate-800/80 rounded-xl p-4 flex flex-col items-center border border-white/5 hover:bg-slate-800 transition-colors">
+                  <CoinsIcon className="h-6 w-6 text-yellow-500 mb-2" />
+                  <span className="text-2xl font-black text-white">{selectedProfileUser.tokens.toLocaleString()}</span>
+                  <span className="text-[10px] uppercase font-bold text-slate-400">Tokens</span>
+                </div>
+
+                <div className="bg-slate-800/80 rounded-xl p-4 flex flex-col items-center border border-white/5 hover:bg-slate-800 transition-colors">
+                  <TrophyIcon className="h-6 w-6 text-purple-400 mb-2" />
+                  <span className="text-2xl font-black text-white">{selectedProfileUser.boomScore.toLocaleString()}</span>
+                  <span className="text-[10px] uppercase font-bold text-slate-400">Boom Score</span>
+                </div>
+
+                <div className="bg-slate-800/80 rounded-xl p-4 flex flex-col items-center border border-white/5 hover:bg-slate-800 transition-colors">
+                  <BoxIcon className="h-6 w-6 text-blue-400 mb-2" />
+                  <span className="text-2xl font-black text-white">{selectedProfileUser.packsOpened || 0}</span>
+                  <span className="text-[10px] uppercase font-bold text-slate-400">Packs Opened</span>
+                </div>
+
+                <div className="bg-slate-800/80 rounded-xl p-4 flex flex-col items-center border border-white/5 hover:bg-slate-800 transition-colors">
+                  <MessageCircleIcon className="h-6 w-6 text-green-400 mb-2" />
+                  <span className="text-sm font-black text-slate-200 text-center uppercase truncate w-full">Level {selectedProfileUser.level || 1}</span>
+                  <span className="text-[10px] uppercase font-bold text-slate-400">Player Rank</span>
+                </div>
+              </div>
+
+              {/* Footer Info */}
+              <div className="w-full mt-6 pt-4 border-t border-white/10 flex justify-between items-center text-xs text-slate-500 font-medium">
+                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-slate-600"></span> Joined {new Date(selectedProfileUser.joinDate).toLocaleDateString()}</span>
+                <span>ID: {selectedProfileUser.username.toLowerCase()}</span>
+              </div>
+
             </div>
           </div>
         </div>

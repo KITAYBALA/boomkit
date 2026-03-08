@@ -49,9 +49,10 @@ type Message = {
 
 type Props = {
     currentUser: { id: string; username: string; role?: string } | null
+    onPlayerClick?: (userId: string) => void;
 }
 
-export default function PrivateChat({ currentUser }: Props) {
+export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
     const supabase = useMemo(() => getSupabaseBrowserClient(), [])
 
     const [conversations, setConversations] = useState<Conversation[]>([])
@@ -512,7 +513,10 @@ export default function PrivateChat({ currentUser }: Props) {
                                         return (
                                             <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} animate-in fade-in slide-in-from-bottom-2`}>
                                                 {showName && !isMe && (
-                                                    <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em] mb-2 ml-1">
+                                                    <span
+                                                        className={`text-[10px] font-black text-white/20 uppercase tracking-[0.2em] mb-2 ml-1 ${onPlayerClick ? 'cursor-pointer hover:text-white/40 transition-colors' : ''}`}
+                                                        onClick={() => onPlayerClick && onPlayerClick(msg.sender_id)}
+                                                    >
                                                         {msg.sender_username}
                                                     </span>
                                                 )}

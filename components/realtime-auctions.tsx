@@ -37,6 +37,7 @@ type Props = {
   getRarityColor: (rarity: string) => string
   onAuctionCreated?: () => void
   onClaimComplete?: () => void
+  onPlayerClick?: (userId: string) => void
 }
 
 type DbAuction = {
@@ -68,6 +69,7 @@ export default function RealtimeAuctions({
   getRarityColor,
   onAuctionCreated,
   onClaimComplete,
+  onPlayerClick,
 }: Props) {
   const supabase = useMemo(() => getSupabaseBrowserClient(), [])
   const [items, setItems] = useState<DbAuction[]>([])
@@ -582,7 +584,13 @@ export default function RealtimeAuctions({
                     <div className="grid grid-cols-2 gap-4">
                       <div className="bg-black/30 rounded-2xl p-4 border border-white/5">
                         <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-1">Seller</p>
-                        <div className="flex items-center gap-2">
+                        <div
+                          className={`flex items-center gap-2 ${onPlayerClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (onPlayerClick) onPlayerClick(item.seller); // Note: Seller is a username right now, need a way to look up ID or pass username to modal
+                          }}
+                        >
                           <UserIcon className="h-3.5 w-3.5 text-purple-400" />
                           <span className="text-sm font-bold text-white truncate">{item.seller}</span>
                         </div>
@@ -617,7 +625,13 @@ export default function RealtimeAuctions({
                       {item.top_bidder ? (
                         <div className="flex items-center justify-between pt-3 border-t border-white/5">
                           <span className="text-[10px] font-black text-white/30 uppercase tracking-widest">Top Bidder</span>
-                          <div className="flex items-center gap-2">
+                          <div
+                            className={`flex items-center gap-2 ${onPlayerClick && !isWinner ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (onPlayerClick && !isWinner && item.top_bidder) onPlayerClick(item.top_bidder); // Requires username -> id lookup if modal expects ID
+                            }}
+                          >
                             <TrophyIcon className={`h-3 w-3 ${isWinner ? 'text-yellow-500' : 'text-purple-400'}`} />
                             <span className={`text-[10px] font-black uppercase tracking-wider ${isWinner ? 'text-yellow-500' : 'text-white'}`}>
                               {isWinner ? 'Your Leading!' : item.top_bidder}

@@ -18,7 +18,12 @@ interface LeaderboardUser {
   packs_opened: number
 }
 
-export default function RealtimeLeaderboard() {
+interface RealtimeLeaderboardProps {
+  onPlayerClick?: (userId: string) => void;
+  [key: string]: any; // Catch-all for extra props passed from page.tsx (like users, currentUser, etc) to avoid sweeping type errors right now.
+}
+
+export default function RealtimeLeaderboard({ onPlayerClick, ...props }: RealtimeLeaderboardProps) {
   const [users, setUsers] = useState<LeaderboardUser[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -115,7 +120,8 @@ export default function RealtimeLeaderboard() {
               {users.map((user, index) => (
                 <div
                   key={user.id}
-                  className={`flex items-center gap-4 p-4 rounded-xl border transition-all duration-300 hover:scale-[1.01] hover:shadow-lg group ${getRankStyle(index)}`}
+                  className={`flex items-center gap-4 p-4 rounded-xl border transition-all duration-300 hover:scale-[1.01] hover:shadow-lg group ${getRankStyle(index)} ${onPlayerClick ? 'cursor-pointer' : ''}`}
+                  onClick={() => onPlayerClick && onPlayerClick(user.id)}
                 >
                   <div className="flex flex-col items-center justify-center w-12 shrink-0">
                     <span className={`text-2xl font-black ${index < 3 ? "scale-125 drop-shadow-md" : "text-muted-foreground opacity-50"}`}>
