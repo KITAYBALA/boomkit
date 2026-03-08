@@ -77,9 +77,9 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
     }
     fetchUserRoles()
 
-    // Refresh roles every 30 seconds
-    const interval = setInterval(fetchUserRoles, 30000)
-    return () => clearInterval(interval)
+    // Refresh roles every 30 seconds - REMOVED POLLING for performance
+    // const interval = setInterval(fetchUserRoles, 30000)
+    // return () => clearInterval(interval)
   }, [supabase])
 
   // Load initial data and subscribe to changes

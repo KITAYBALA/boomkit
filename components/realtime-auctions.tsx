@@ -109,6 +109,7 @@ export default function RealtimeAuctions({
         const { data } = await supabase
           .from('auction_items')
           .select('*')
+          .eq('status', 'active')
           .order('ends_at', { ascending: true })
         setItems((data as DbAuction[]) ?? [])
 
@@ -140,6 +141,7 @@ export default function RealtimeAuctions({
       const { data } = await supabase
         .from('auction_items')
         .select('*')
+        .eq('status', 'active')
         .order('ends_at', { ascending: true })
       setItems((data as DbAuction[]) ?? [])
     }

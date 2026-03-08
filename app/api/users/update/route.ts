@@ -78,11 +78,36 @@ export async function POST(request: NextRequest) {
         // 4. Perform Update via Service Role
         const supabase = getSupabaseServerClient()
 
-        // Ensure we don't accidentally update the ID or email if it's in the updates object (rare but safe)
+        // 4. Collision Check for Username/Email
+        if (updates.username || updates.email) {
+            const collisionQuery = supabase.from('users').select('id, username, email')
+
+            if (updates.username && updates.email) {
+                collisionQuery.or(`username.eq."${updates.username}",email.eq."${updates.email}"`)
+            } else if (updates.username) {
+                collisionQuery.eq('username', updates.username)
+            } else {
+                collisionQuery.eq('email', updates.email)
+            }
+
+            const { data: collisions } = await collisionQuery
+
+            if (collisions && collisions.length > 0) {
+                const otherUserCollision = collisions.find(c => c.id !== targetUserId)
+                if (otherUserCollision) {
+                    const field = otherUserCollision.username === updates.username ? 'Username' : 'Email'
+                    return NextResponse.json({
+                        success: false,
+                        message: `${field} is already in use by another account`,
+                        conflict: true
+                    }, { status: 409 })
+                }
+            }
+        }
+
+        // 5. Perform Update via Service Role
         const filteredUpdates = { ...updates }
         delete filteredUpdates.id
-        // If it's not the user themselves, maybe we allow email update by staff? 
-        // Usually email shouldn't be changed here.
 
         const { data, error } = await supabase
             .from('users')

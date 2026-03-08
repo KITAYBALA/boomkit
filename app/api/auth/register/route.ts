@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServerClient } from '@/lib/supabase-server-client'
-import { createHash } from 'crypto'
+import crypto, { createHash } from 'crypto'
 import { createSession } from '@/lib/auth-server'
 
 export const dynamic = 'force-dynamic'
@@ -51,11 +51,11 @@ export async function POST(request: NextRequest) {
     }
 
 
-    // Check if user already exists (case-insensitive like login route)
+    // Check if user already exists (exact match for security/consistency)
     const { data: existingByUsername } = await supabase
       .from('users')
       .select('id')
-      .ilike('username', username)
+      .eq('username', username)
       .maybeSingle()
 
     if (existingByUsername) {
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
       const { data: existingByEmail } = await supabase
         .from('users')
         .select('id')
-        .ilike('email', email)
+        .eq('email', email)
         .maybeSingle()
 
       if (existingByEmail) {

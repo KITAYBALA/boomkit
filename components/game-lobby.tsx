@@ -103,7 +103,8 @@ export default function GameLobby({
         registerSelf()
         syncLobby()
 
-        const interval = setInterval(syncLobby, 2000)
+        // Removed interval polling - Realtime subscription below is sufficient
+        // const interval = setInterval(syncLobby, 2000)
 
         // Setup realtime subscription
         const channel = supabase.channel(`lobby-${pin}`)
@@ -116,23 +117,13 @@ export default function GameLobby({
                 setPlayers(payload.new.players || [])
                 if (payload.new.status && payload.new.status.startsWith("started")) {
                     setIsGameStarted(true)
-                    // If encoded timestamp exists, calculate offset
-                    let startTimeOffset = 0
-                    if (payload.new.status.includes(":")) {
-                        const ts = parseInt(payload.new.status.split(":")[1])
-                        if (!isNaN(ts)) {
-                            // Calculate how many seconds have passed since the game "officially" started
-                            startTimeOffset = Math.floor((Date.now() - ts) / 1000)
-                        }
-                    }
-
                     onStart(payload.new.duration || duration, payload.new.questions)
                 }
             })
             .subscribe()
 
         return () => {
-            clearInterval(interval)
+            // clearInterval(interval)
             supabase.removeChannel(channel)
         }
     }, [pin, mode, currentUser, supabase])

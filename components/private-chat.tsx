@@ -141,15 +141,23 @@ export default function PrivateChat({ currentUser }: Props) {
 
         // Second pass: get all members for these conversations
         if (conversationsMap.size > 0) {
-            const { data: allMembers } = await supabase
-                .from('conversation_members')
-                .select('conversation_id, users(username)')
-                .in('conversation_id', Array.from(conversationsMap.keys()))
+            const conversationIds = Array.from(conversationsMap.keys())
 
-            allMembers?.forEach((m: any) => {
-                const conv = conversationsMap.get(m.conversation_id)
-                if (conv) conv.members.push(m.users.username)
-            })
+            // Batch the member fetch but limit the size to avoid URL length issues
+            // (19 conversations is usually safe, but let's be robust)
+            const CHUNK_SIZE = 15
+            for (let i = 0; i < conversationIds.length; i += CHUNK_SIZE) {
+                const chunk = conversationIds.slice(i, i + CHUNK_SIZE)
+                const { data: allMembers } = await supabase
+                    .from('conversation_members')
+                    .select('conversation_id, users(username)')
+                    .in('conversation_id', chunk)
+
+                allMembers?.forEach((m: any) => {
+                    const conv = conversationsMap.get(m.conversation_id)
+                    if (conv) conv.members.push(m.users.username)
+                })
+            }
         }
 
         setConversations(Array.from(conversationsMap.values())
@@ -169,10 +177,15 @@ export default function PrivateChat({ currentUser }: Props) {
             .from('direct_messages')
             .select('*')
             .eq('conversation_id', convId)
-            .order('inserted_at', { ascending: true })
+            .order('inserted_at', { ascending: false })
+            .limit(50)
 
-        if (error) console.error("Error fetching messages:", error)
-        else setMessages(data || [])
+        if (error) {
+            console.error("Error fetching messages:", error)
+        } else {
+            // Reverse to show in chronological order (oldest -> newest)
+            setMessages((data || []).reverse())
+        }
     }
 
     // 3. Realtime Subscription
@@ -392,7 +405,7 @@ export default function PrivateChat({ currentUser }: Props) {
                                                         (() => {
                                                             const otherUser = conv.members.find(m => m !== currentUser?.username)
                                                             const isBlocked = otherUser ? blockedUsers.includes(otherUser) : false
-                                                            
+
                                                             return (
                                                                 <button
                                                                     onClick={(e) => {
@@ -410,7 +423,7 @@ export default function PrivateChat({ currentUser }: Props) {
                                                                 >
                                                                     {isBlocked ? (
                                                                         <>
-                                                                            <ShieldCheckIcon className="h-3.5 w-3.5 text-green-400" /> 
+                                                                            <ShieldCheckIcon className="h-3.5 w-3.5 text-green-400" />
                                                                             <span className="text-green-400">Unblock User</span>
                                                                         </>
                                                                     ) : (
