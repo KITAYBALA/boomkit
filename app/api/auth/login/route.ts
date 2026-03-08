@@ -63,12 +63,12 @@ export async function POST(request: NextRequest) {
     let userData: any = null
     let userError: any = null
 
-    // Try username first (case-insensitive)
+    // Try username first (exact match for security)
     if (DEBUG_AUTH) console.log('[AUTH DEBUG] Attempting username lookup:', username)
     const { data: userByUsername, error: errorByUsername } = await supabase
       .from('users')
       .select('id, username, email, password_hash, password_reset_required, is_banned, is_owner, role, is_muted, status, badges, name_color, banner_color, profile_picture, tokens, boom_score, total_value, packs, booms, daily_tokens, join_date, is_plus_user, last_daily_spin, mute_expiry, ban_expiry, ban_reason, last_seen, packs_opened, age, reason, last_ip')
-      .ilike('username', username)
+      .eq('username', username)
       .maybeSingle()
 
     if (DEBUG_AUTH) {
@@ -80,12 +80,12 @@ export async function POST(request: NextRequest) {
       userData = userByUsername
       if (DEBUG_AUTH) console.log('[AUTH DEBUG] User found by username')
     } else {
-      // Try email if username didn't match (case-insensitive)
+      // Try email if username didn't match (exact match for security)
       if (DEBUG_AUTH) console.log('[AUTH DEBUG] Username not found, trying email lookup:', username)
       const { data: userByEmail, error: errorByEmail } = await supabase
         .from('users')
         .select('id, username, email, password_hash, password_reset_required, is_banned, is_owner, role, is_muted, status, badges, name_color, banner_color, profile_picture, tokens, boom_score, total_value, packs, booms, daily_tokens, join_date, is_plus_user, last_daily_spin, mute_expiry, ban_expiry, ban_reason, last_seen, packs_opened, age, reason, last_ip')
-        .ilike('email', username)
+        .eq('email', username)
         .maybeSingle()
 
       if (DEBUG_AUTH) {
