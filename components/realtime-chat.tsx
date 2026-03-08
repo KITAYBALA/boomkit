@@ -14,8 +14,8 @@ type Props = {
   onUsernameClick: (username: string) => void
 }
 
-type DbChatRow = { id: string; username: string; message: string; role: string; created_at: string }
-type LocalChatRow = { id: string; username: string; message: string; role: string; timestamp: string }
+type DbChatRow = { id: string; username: string; message: string; role: string; created_at: string; reactions?: Record<string, string[]> }
+type LocalChatRow = { id: string; username: string; message: string; role: string; timestamp: string; reactions?: Record<string, string[]> }
 
 const LS_KEY = "boomkit_chat_messages"
 
@@ -48,6 +48,31 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editText, setEditText] = useState("")
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
+
+  const REACTION_EMOJIS = ["👍", "❤️", "😂", "🔥", "💀", "👀"]
+
+  const toggleReaction = async (msgId: string, emoji: string) => {
+    if (!currentUser || !supabase) return
+    const msg = messages.find(m => m.id === msgId)
+    if (!msg) return
+
+    const reactions = { ...(msg.reactions || {}) }
+    const users = reactions[emoji] || []
+    const hasReacted = users.includes(currentUser.username)
+
+    if (hasReacted) {
+      reactions[emoji] = users.filter(u => u !== currentUser.username)
+      if (reactions[emoji].length === 0) delete reactions[emoji]
+    } else {
+      reactions[emoji] = [...users, currentUser.username]
+    }
+
+    // Optimistic update
+    setMessages(prev => prev.map(m => m.id === msgId ? { ...m, reactions } : m))
+
+    // Persist to DB
+    await supabase.from("chat_messages").update({ reactions }).eq("id", msgId)
+  }
 
   // Update mute status from currentUser prop (reuse existing user state)
   useEffect(() => {
@@ -216,7 +241,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
         try {
           if (!supabase) throw new Error("Supabase client not initialized")
           const { data, error } = await supabase.rpc('transfer_tokens', {
-            p_sender_id: currentUser.id,
+            p_sender_username: currentUser.username,
             p_receiver_username: receiverUsername,
             p_amount: amount
           })
@@ -490,6 +515,41 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
                       ) : (
                         <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.message}</p>
                       )}
+                    </div>
+
+                    {/* Reactions */}
+                    <div className={`flex items-center gap-1 mt-1 px-1 flex-wrap ${isMe ? 'justify-end' : 'justify-start'}`}>
+                      {/* Existing reactions */}
+                      {Object.entries(msg.reactions || {}).map(([emoji, users]) => {
+                        const reacted = (users as string[]).includes(currentUser?.username || '')
+                        return (
+                          <button
+                            key={emoji}
+                            onClick={() => toggleReaction(msg.id, emoji)}
+                            className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs transition-all ${reacted ? 'bg-purple-500/30 border border-purple-500/50' : 'bg-white/5 border border-white/10 hover:bg-white/10'}`}
+                          >
+                            <span>{emoji}</span>
+                            <span className="font-bold text-white/60">{(users as string[]).length}</span>
+                          </button>
+                        )
+                      })}
+                      {/* Add reaction button */}
+                      <div className="relative group/reaction">
+                        <button className="opacity-0 group-hover:opacity-100 px-1.5 py-0.5 rounded-full bg-white/5 hover:bg-white/10 text-white/30 hover:text-white/60 text-xs transition-all border border-transparent hover:border-white/10">
+                          +
+                        </button>
+                        <div className="absolute bottom-full left-0 mb-1 hidden group-hover/reaction:flex bg-slate-900 border border-white/10 rounded-xl p-1 gap-1 shadow-xl z-50">
+                          {REACTION_EMOJIS.map(emoji => (
+                            <button
+                              key={emoji}
+                              onClick={() => toggleReaction(msg.id, emoji)}
+                              className="hover:bg-white/10 rounded-lg px-1.5 py-1 text-base transition-colors"
+                            >
+                              {emoji}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
 
                     <span className="text-[9px] text-white/20 mt-1 px-1 font-bold opacity-0 group-hover:opacity-100 transition-opacity">

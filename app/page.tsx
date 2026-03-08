@@ -18,7 +18,6 @@ import {
   ShieldIcon,
   CrownIcon,
   KeyIcon,
-  CoinsIcon,
   GavelIcon,
   NewspaperIcon,
   CameraIcon,
@@ -40,6 +39,11 @@ import {
   InfoIcon,
   TrophyIcon,
   BoxIcon,
+  FlameIcon,
+  StarIcon,
+  CalendarIcon,
+  CoinsIcon,
+  ShoppingBagIcon,
 } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 
@@ -131,8 +135,8 @@ const generateSystemSignature = (): string => {
     navigator.languages?.join(",") || "",
     scr.width + "x" + scr.height + "x" + scr.colorDepth,
     new Date().getTimezoneOffset().toString(),
-    navigator.hardwareConcurrency?.toString() || "unknown",
-    navigator.deviceMemory?.toString() || "unknown",
+    (navigator as any).hardwareConcurrency?.toString() || "unknown",
+    (navigator as any).deviceMemory?.toString() || "unknown",
     navigator.platform,
     navigator.cookieEnabled.toString(),
     navigator.doNotTrack || "unknown",
@@ -142,7 +146,7 @@ const generateSystemSignature = (): string => {
     getWebGLFingerprint(),
     getAudioFingerprint(),
     // Additional browser-specific features
-    typeof window.chrome !== "undefined" ? "chrome" : "other",
+    typeof (window as any).chrome !== "undefined" ? "chrome" : "other",
     navigator.vendor || "unknown",
     navigator.product || "unknown",
   ]
@@ -204,7 +208,7 @@ interface GameUser {
   isOwner: boolean
   isBanned: boolean
   isMuted: boolean
-  status: "pending" | "approved" | "rejected"
+  status: string
   reason: string
   role: string
   joinDate: string
@@ -225,6 +229,12 @@ interface GameUser {
   xp: number // Added for leveling system
   level: number // Added for leveling system
   pinned_boom?: string // Selected boom to show off
+  season_xp: number
+  has_plus_pass: boolean
+  games_played: number
+  total_tokens_earned: number
+  loginStreak: number
+  lastStreakClaim: string | null
   // password?: string; // Removed password from interface to avoid unintended exposure
 }
 
@@ -244,6 +254,8 @@ interface Pack {
   image: string
   rarity: "uncommon" | "rare" | "epic" | "legendary"
   emoji?: string // Added emoji property
+  series?: number
+  isNew?: boolean
 }
 
 interface BoomItem {
@@ -734,6 +746,11 @@ export default function BoomkitGame() {
     | "trading"
     | "shop"
     | "discover"
+    | "friends"
+    | "rentals"
+    | "tournaments"
+    | "achievements"
+    | "season"
   >("stats")
   const [activeDiscoverGame, setActiveDiscoverGame] = useState<{
     grade: number
@@ -811,6 +828,21 @@ export default function BoomkitGame() {
   // Player Profiles
   const [showPlayerProfile, setShowPlayerProfile] = useState(false)
   const [selectedProfileUser, setSelectedProfileUser] = useState<GameUser | null>(null)
+  const [showCrafting, setShowCrafting] = useState(false)
+  const [craftRecipes, setCraftRecipes] = useState<any[]>([])
+  const [friendsList, setFriendsList] = useState<any[]>([])
+  const [friendRequests, setFriendRequests] = useState<any[]>([])
+  const [rentalListings, setRentalListings] = useState<any[]>([])
+  const [friendSearchQuery, setFriendSearchQuery] = useState("")
+  const [activeTournaments, setActiveTournaments] = useState<any[]>([])
+  const [selectedTournament, setSelectedTournament] = useState<any | null>(null)
+  const [tournamentParticipants, setTournamentParticipants] = useState<any[]>([])
+  const [userActivity, setUserActivity] = useState<any[]>([])
+  const [shopItems, setShopItems] = useState<any[]>([])
+  const [achievements, setAchievements] = useState<any[]>([])
+  const [userAchievements, setUserAchievements] = useState<any[]>([])
+  const [activeSeason, setActiveSeason] = useState<any | null>(null)
+  const [seasonRewards, setSeasonRewards] = useState<any[]>([])
 
   // Admin stats dialog (existing)
   const [showUserStats, setShowUserStats] = useState(false)
@@ -1176,7 +1208,7 @@ export default function BoomkitGame() {
 
     try {
       // Only select safe fields; never expose password_hash, last_ip, or email to clients.
-      const safeColumns = "id, username, age, tokens, daily_tokens, packs, booms, is_owner, is_banned, is_muted, status, reason, role, join_date, boom_score, total_value, profile_picture, is_plus_user, name_color, banner_color, last_daily_spin, badges, mute_expiry, ban_expiry, last_seen, packs_opened, xp, level"
+      const safeColumns = "id, username, age, tokens, daily_tokens, packs, booms, is_owner, is_banned, is_muted, status, reason, role, join_date, boom_score, total_value, profile_picture, is_plus_user, name_color, banner_color, last_daily_spin, badges, mute_expiry, ban_expiry, last_seen, packs_opened, xp, level, login_streak, last_streak_claim, pinned_boom, season_xp, has_plus_pass, games_played, total_tokens_earned"
       const { data, error } = await supabase.from("users").select(safeColumns)
 
       if (error) {
@@ -1219,6 +1251,12 @@ export default function BoomkitGame() {
           xp: u.xp || 0,
           level: u.level || 1,
           pinned_boom: u.pinned_boom || null,
+          loginStreak: u.login_streak || 0,
+          lastStreakClaim: u.last_streak_claim || null,
+          season_xp: u.season_xp || 0,
+          has_plus_pass: u.has_plus_pass || false,
+          games_played: u.games_played || 0,
+          total_tokens_earned: u.total_tokens_earned || 0,
         }))
 
         setUsers(mappedUsers)
@@ -1331,8 +1369,20 @@ export default function BoomkitGame() {
   useEffect(() => {
     if (supabase) {
       fetchUsersFromSupabase(true)
+      fetchCraftRecipes()
     }
   }, [supabase, fetchUsersFromSupabase])
+
+  const fetchCraftRecipes = async () => {
+    if (!supabase) return
+    try {
+      const { data, error } = await supabase.from("craft_recipes").select("*")
+      if (error) throw error
+      if (data) setCraftRecipes(data)
+    } catch (e) {
+      console.error("Failed to fetch craft recipes:", e)
+    }
+  }
 
   // Find the
 
@@ -2535,8 +2585,8 @@ export default function BoomkitGame() {
       if (supabase && questions.length > 0) {
         const questionsToBank = questions.map((q: any) => ({
           grade,
-          subject,
-          topic,
+          subject: (subject as any),
+          topic: (topic as any),
           question: q.question,
           options: q.options,
           correct_index: q.correctIndex
@@ -2691,12 +2741,21 @@ export default function BoomkitGame() {
 
     try {
       const { data, error } = await supabase.rpc('transfer_tokens', {
-        p_sender_id: currentUser.id,
+        p_sender_username: currentUser.username,
         p_receiver_username: receiverUsername,
         p_amount: amount
       })
       if (error) throw error
       alert(`🎉 Successfully gifted ${amount.toLocaleString()} tokens to ${receiverUsername}!`)
+
+      // Log activity
+      await supabase.rpc('log_user_activity', {
+        p_username: currentUser.username,
+        p_type: 'gift_tokens',
+        p_desc: `Gifted ${amount.toLocaleString()} tokens to ${receiverUsername}`,
+        p_details: { amount, receiver: receiverUsername }
+      })
+
       fetchUsersFromSupabase(true) // Refresh user data to see updated balances
     } catch (e: any) {
       alert(e.message || "Gift failed")
@@ -2714,17 +2773,288 @@ export default function BoomkitGame() {
 
     try {
       const { data, error } = await supabase.rpc('transfer_boom', {
-        p_sender_id: currentUser.id,
+        p_sender_username: currentUser.username,
         p_receiver_username: receiverUsername,
         p_boom_name: boomName,
         p_amount: amount
       })
       if (error) throw error
       alert(`🎁 Successfully gifted ${amount}x ${boomName} to ${receiverUsername}!`)
+
+      // Log activity
+      await supabase.rpc('log_user_activity', {
+        p_username: currentUser.username,
+        p_type: 'gift_boom',
+        p_desc: `Gifted ${amount}x ${boomName} to ${receiverUsername}`,
+        p_details: { boom: boomName, amount, receiver: receiverUsername }
+      })
+
       fetchUsersFromSupabase(true)
     } catch (e: any) {
       alert(e.message || "Gift failed")
     }
+  }
+
+  const handleCraftBoom = async (recipe: any) => {
+    if (!currentUser || !supabase) return
+
+    if (!confirm(`Craft ${recipe.output_boom} for ${recipe.token_cost} tokens?`)) return
+
+    try {
+      const { data, error } = await supabase.rpc('craft_boom', {
+        p_player_username: currentUser.username,
+        p_recipe_id: recipe.id
+      })
+      if (error) throw error
+      alert(`✨ Successfully crafted ${recipe.output_boom}!`)
+      fetchUsersFromSupabase(true)
+    } catch (e: any) {
+      alert(e.message || "Crafting failed")
+    }
+  }
+
+  const handleClaimStreak = async () => {
+    if (!currentUser || !supabase) return
+    try {
+      const { data, error } = await supabase.rpc('claim_daily_streak', {
+        p_username: currentUser.username
+      })
+      if (error) throw error
+      const result = data as any
+      alert(`🔥 ${result.message}`)
+      fetchUsersFromSupabase(true)
+    } catch (e: any) {
+      alert(e.message || "Failed to claim streak reward")
+    }
+  }
+
+  const fetchFriends = async () => {
+    if (!currentUser || !supabase) return
+    try {
+      const { data } = await supabase.from("friends")
+        .select("*")
+        .or(`user_username.eq.${currentUser.username},friend_username.eq.${currentUser.username}`)
+
+      const accepted = (data || []).filter(f => f.status === 'accepted')
+      const pending = (data || []).filter(f => f.status === 'pending' && f.friend_username === currentUser.username)
+      setFriendsList(accepted)
+      setFriendRequests(pending)
+    } catch (e) {
+      console.error("Failed to fetch friends:", e)
+    }
+  }
+
+  const fetchRentals = async () => {
+    if (!supabase) return
+    try {
+      const { data } = await supabase.from("boom_rentals")
+        .select("*")
+        .in("status", ["available", "rented"])
+        .order("created_at", { ascending: false })
+      setRentalListings(data || [])
+    } catch (e) {
+      console.error("Failed to fetch rentals:", e)
+    }
+  }
+
+  const handleSendFriendRequest = async (toUsername: string) => {
+    if (!currentUser || !supabase) return
+    try {
+      const { data, error } = await supabase.rpc('send_friend_request', {
+        p_from: currentUser.username, p_to: toUsername
+      })
+      if (error) throw error
+      alert(`✅ Friend request sent to ${toUsername}!`)
+      fetchFriends()
+    } catch (e: any) { alert(e.message || "Failed to send request") }
+  }
+
+  const handleAcceptFriend = async (fromUsername: string) => {
+    if (!currentUser || !supabase) return
+    try {
+      const { data, error } = await supabase.rpc('accept_friend_request', {
+        p_username: currentUser.username, p_from: fromUsername
+      })
+      if (error) throw error
+      alert(`🤝 You are now friends with ${fromUsername}!`)
+      fetchFriends()
+    } catch (e: any) { alert(e.message || "Failed to accept") }
+  }
+
+  const handleRemoveFriend = async (friendUsername: string) => {
+    if (!currentUser || !supabase) return
+    if (!confirm(`Remove ${friendUsername} from friends?`)) return
+    try {
+      const { data, error } = await supabase.rpc('remove_friend', {
+        p_username: currentUser.username, p_friend: friendUsername
+      })
+      if (error) throw error
+      alert(`Removed ${friendUsername}.`)
+      fetchFriends()
+    } catch (e: any) { alert(e.message || "Failed") }
+  }
+
+  const handleListRental = async (boomName: string, price: number, sessions: number) => {
+    if (!currentUser || !supabase) return
+    try {
+      const { data, error } = await supabase.rpc('list_boom_rental', {
+        p_owner: currentUser.username, p_boom_name: boomName, p_price: price, p_sessions: sessions
+      })
+      if (error) throw error
+      alert(`📋 Listed ${boomName} for rent!`)
+      fetchRentals()
+      fetchUsersFromSupabase(true)
+    } catch (e: any) { alert(e.message || "Failed to list rental") }
+  }
+
+  const handleRentBoom = async (rentalId: string) => {
+    if (!currentUser || !supabase) return
+    try {
+      const { data, error } = await supabase.rpc('rent_boom', {
+        p_renter: currentUser.username, p_rental_id: rentalId
+      })
+      if (error) throw error
+      const result = data as any
+      alert(`🎮 ${result.message}`)
+      fetchRentals()
+      fetchUsersFromSupabase(true)
+    } catch (e: any) { alert(e.message || "Failed to rent") }
+  }
+
+  const handleCancelRental = async (rentalId: string) => {
+    if (!currentUser || !supabase) return
+    if (!confirm("Cancel this rental listing?")) return
+    try {
+      const { data, error } = await supabase.rpc('cancel_rental', {
+        p_owner: currentUser.username, p_rental_id: rentalId
+      })
+      if (error) throw error
+      alert("Cancelled and boom returned to your inventory.")
+      fetchRentals()
+      fetchUsersFromSupabase(true)
+    } catch (e: any) { alert(e.message || "Failed to cancel") }
+  }
+
+  const fetchTournaments = async () => {
+    if (!supabase) return
+    try {
+      const { data } = await supabase.from("tournaments")
+        .select("*")
+        .order("start_time", { ascending: false })
+      setActiveTournaments(data || [])
+    } catch (e) { console.error(e) }
+  }
+
+  const fetchTournamentParticipants = async (tournamentId: string) => {
+    if (!supabase) return
+    try {
+      const { data } = await supabase.from("tournament_participants")
+        .select("*")
+        .eq("tournament_id", tournamentId)
+        .order("score", { ascending: false })
+      setTournamentParticipants(data || [])
+    } catch (e) { console.error(e) }
+  }
+
+  const handleJoinTournament = async (tournamentId: string) => {
+    if (!currentUser || !supabase) return
+    try {
+      const { data, error } = await supabase.rpc('join_tournament', {
+        p_tournament_id: tournamentId, p_username: currentUser.username
+      })
+      if (error) throw error
+      alert("🏆 You have joined the tournament!")
+      fetchTournaments()
+    } catch (e: any) { alert(e.message || "Failed to join") }
+  }
+
+  const fetchUserActivity = async (username: string) => {
+    if (!supabase) return
+    try {
+      const { data } = await supabase.from("user_activity")
+        .select("*")
+        .eq("username", username)
+        .order("created_at", { ascending: false })
+        .limit(20)
+      setUserActivity(data || [])
+    } catch (e) { console.error(e) }
+  }
+
+  const fetchShopItems = async () => {
+    if (!supabase) return
+    try {
+      const { data } = await supabase.from("shop_items").select("*").eq("is_active", true)
+      setShopItems(data || [])
+    } catch (e) { console.error(e) }
+  }
+
+  const fetchAchievements = async () => {
+    if (!supabase) return
+    try {
+      const { data: allAch } = await supabase.from("achievements").select("*")
+      setAchievements(allAch || [])
+      if (currentUser) {
+        const { data: userAch } = await supabase.from("user_achievements")
+          .select("achievement_id")
+          .eq("username", currentUser.username)
+        setUserAchievements(userAch?.map(a => a.achievement_id) || [])
+      }
+    } catch (e) { console.error(e) }
+  }
+
+  const fetchActiveSeason = async () => {
+    if (!supabase) return
+    try {
+      const { data: season } = await supabase.from("seasons").select("*").eq("is_active", true).single()
+      if (season) {
+        setActiveSeason(season)
+        const { data: rewards } = await supabase.from("season_rewards")
+          .select("*")
+          .eq("season_id", season.id)
+          .order("tier", { ascending: true })
+        setSeasonRewards(rewards || [])
+      }
+    } catch (e) { console.error(e) }
+  }
+
+  const handleBuyShopItem = async (itemId: string) => {
+    if (!currentUser || !supabase) return
+    try {
+      const { data, error } = await supabase.rpc('buy_shop_item', {
+        p_username: currentUser.username, p_item_id: itemId
+      })
+      if (error) throw error
+      alert(data.message || "Purchase successful!")
+      fetchShopItems()
+      fetchUsersFromSupabase(true)
+      // Check for 'Vault Master' achievement (20 unique booms)
+      const uniqueCount = Object.keys(currentUser.booms).length
+      if (uniqueCount >= 20) {
+        await supabase.rpc('check_achievements', { p_username: currentUser.username, p_type: 'booms_collected', p_value: uniqueCount })
+      }
+    } catch (e: any) { alert(e.message || "Purchase failed") }
+  }
+
+  const handleClaimReward = async (rewardId: string) => {
+    if (!currentUser || !supabase) return
+    try {
+      const { data, error } = await supabase.rpc('claim_season_reward', {
+        p_username: currentUser.username, p_reward_id: rewardId
+      })
+      if (error) throw error
+      alert(data.message || "Reward claimed!")
+      fetchUsersFromSupabase(true)
+    } catch (e: any) { alert(e.message || "Claim failed") }
+  }
+
+  const handleAddSeasonXp = async (amount: number) => {
+    if (!currentUser || !supabase) return
+    try {
+      const newXp = (currentUser.season_xp || 0) + amount
+      const { error } = await supabase.from("users").update({ season_xp: newXp }).eq("username", currentUser.username)
+      if (error) throw error
+      fetchUsersFromSupabase(true)
+    } catch (e) { console.error(e) }
   }
 
   // --- Profile Features ---
@@ -2742,6 +3072,7 @@ export default function BoomkitGame() {
     if (userObj) {
       setSelectedProfileUser(userObj)
       setShowPlayerProfile(true)
+      fetchUserActivity(userObj.username)
     }
   }
 
@@ -3465,6 +3796,84 @@ export default function BoomkitGame() {
             Discover
           </button>
 
+          <button
+            onClick={() => {
+              setCurrentPage("friends")
+              setSidebarOpen(false)
+              fetchFriends()
+            }}
+            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "friends" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
+              }`}
+          >
+            <Users2Icon className="h-5 w-5 mr-3" />
+            Friends
+          </button>
+
+          <button
+            onClick={() => {
+              setCurrentPage("rentals")
+              setSidebarOpen(false)
+              fetchRentals()
+            }}
+            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "rentals" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
+              }`}
+          >
+            <KeyIcon className="h-5 w-5 mr-3" />
+            Rentals
+          </button>
+
+          <button
+            onClick={() => {
+              setCurrentPage("tournaments")
+              setSidebarOpen(false)
+              fetchTournaments()
+            }}
+            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "tournaments" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
+              }`}
+          >
+            <TrophyIcon className="h-5 w-5 mr-3" />
+            Tournaments
+          </button>
+
+          <button
+            onClick={() => {
+              setCurrentPage("shop")
+              setSidebarOpen(false)
+              fetchShopItems()
+            }}
+            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "shop" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
+              }`}
+          >
+            <ShoppingBagIcon className="h-5 w-5 mr-3" />
+            Shop
+          </button>
+
+          <button
+            onClick={() => {
+              setCurrentPage("season")
+              setSidebarOpen(false)
+              fetchActiveSeason()
+            }}
+            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "season" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
+              }`}
+          >
+            <FlameIcon className="h-5 w-5 mr-3" />
+            Season Pass
+          </button>
+
+          <button
+            onClick={() => {
+              setCurrentPage("achievements")
+              setSidebarOpen(false)
+              fetchAchievements()
+            }}
+            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "achievements" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
+              }`}
+          >
+            <StarIcon className="h-5 w-5 mr-3" />
+            Achievements
+          </button>
+
           {(currentUser?.role === "moderator" ||
             currentUser?.role === "senior_moderator" ||
             currentUser?.role === "admin" ||
@@ -3750,6 +4159,66 @@ export default function BoomkitGame() {
                   </div>
                 </div>
 
+                {/* Daily Login Streak */}
+                <div className="bg-gradient-to-br from-orange-900/30 to-red-900/30 backdrop-blur-xl border-2 border-orange-500/20 rounded-3xl p-8 relative overflow-hidden group shadow-2xl">
+                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <FlameIcon className="w-20 h-20 text-orange-400" />
+                  </div>
+                  <div className="relative z-10">
+                    <h3 className="text-2xl font-black text-white mb-2 flex items-center gap-3">
+                      <FlameIcon className="h-7 w-7 text-orange-500" />
+                      Daily Streak
+                    </h3>
+                    <p className="text-white/50 text-sm mb-6">Log in every day to build your streak and earn bonus rewards!</p>
+
+                    <div className="flex items-center gap-6 mb-6">
+                      <div className="bg-black/40 rounded-2xl p-6 flex flex-col items-center border border-orange-500/20">
+                        <span className="text-5xl font-black text-orange-400">{currentUser?.loginStreak || 0}</span>
+                        <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1">Day Streak</span>
+                      </div>
+                      <div className="flex-grow">
+                        <div className="flex gap-1 mb-3">
+                          {[1, 2, 3, 4, 5, 6, 7].map((day) => {
+                            const streakDay = (currentUser?.loginStreak || 0) % 7;
+                            const isClaimed = day <= streakDay || (streakDay === 0 && (currentUser?.loginStreak || 0) > 0);
+                            const isBonus = day === 7;
+                            return (
+                              <div key={day} className={`flex-1 h-3 rounded-full transition-all ${isClaimed ? (isBonus ? "bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.5)]" : "bg-orange-500") : "bg-white/10"}`} />
+                            )
+                          })}
+                        </div>
+                        <div className="flex justify-between text-[10px] text-white/30 font-bold uppercase">
+                          <span>Day 1</span>
+                          <span className="text-yellow-500">Day 7 Bonus</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <Button
+                      onClick={handleClaimStreak}
+                      className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-black py-6 rounded-xl shadow-[0_0_20px_rgba(234,88,12,0.3)] transition-all hover:scale-[1.02]"
+                    >
+                      <FlameIcon className="w-5 h-5 mr-2" />
+                      Claim Daily Streak Reward
+                    </Button>
+
+                    <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+                      <div className="bg-black/20 rounded-lg p-2">
+                        <div className="text-orange-400 font-black text-sm">+50</div>
+                        <div className="text-[9px] text-white/30 font-bold">DAILY</div>
+                      </div>
+                      <div className="bg-black/20 rounded-lg p-2">
+                        <div className="text-yellow-400 font-black text-sm">+500</div>
+                        <div className="text-[9px] text-white/30 font-bold">7-DAY</div>
+                      </div>
+                      <div className="bg-black/20 rounded-lg p-2">
+                        <div className="text-pink-400 font-black text-sm">+5,000</div>
+                        <div className="text-[9px] text-white/30 font-bold">30-DAY</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Enhanced Quick Stats */}
                 <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/10 shadow-2xl relative overflow-hidden">
                   <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500 opacity-50" />
@@ -3797,330 +4266,400 @@ export default function BoomkitGame() {
                     <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/50 mb-2">
                       My Collection
                     </h1>
-                    <p className="text-white/60 text-lg">Manage and view your discovered Booms</p>
-                  </div>
-
-                  {/* Level Rewards Banner */}
-                  <div className="w-full bg-gradient-to-r from-purple-900/50 to-blue-900/50 border border-white/10 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6">
-                    <div className="flex items-center gap-4">
-                      <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center border-2 border-orange-500 shadow-[0_0_20px_rgba(249,115,22,0.3)] text-3xl">
-                        🏆
-                      </div>
-                      <div>
-                        <h3 className="text-xl font-bold text-white">Level Rewards</h3>
-                        <p className="text-white/60 text-sm">Unlock special Booms every 10 levels!</p>
-                        <div className="text-orange-400 font-black text-xs uppercase tracking-widest mt-1">
-                          Next Reward: Level {Math.ceil((currentUser?.level || 1) / 10) * 10}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      {[10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((lvl) => {
-                        const isUnlocked = (currentUser?.level || 1) >= lvl;
-                        return (
-                          <div key={lvl} className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border ${isUnlocked ? "bg-green-500 border-green-400 text-white shadow-[0_0_10px_rgba(34,197,94,0.5)]" : "bg-black/40 border-white/10 text-white/20"}`} title={`Level ${lvl} Reward`}>
-                            {isUnlocked ? "✓" : lvl}
-                          </div>
-                        )
-                      })}
-                    </div>
+                    <p className="text-white/60 text-lg">Manage, view, and craft your discovered Booms</p>
                   </div>
 
                   <div className="flex gap-4">
-                    <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex items-center gap-4 shadow-2xl">
-                      <div className="bg-yellow-500/20 p-3 rounded-xl">
-                        <Star className="h-8 w-8 text-yellow-500 animate-pulse" />
-                      </div>
-                      <div>
-                        <div className="text-white/50 text-xs uppercase tracking-wider font-bold">Boom Score</div>
-                        <div className="text-white text-2xl font-black">{currentUser?.boomScore || 0}</div>
-                      </div>
-                    </div>
-
-                    <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex items-center gap-4 shadow-2xl">
-                      <div className="bg-purple-500/20 p-3 rounded-xl">
-                        <PackageIcon className="h-8 w-8 text-purple-500" />
-                      </div>
-                      <div>
-                        <div className="text-white/50 text-xs uppercase tracking-wider font-bold">Packs</div>
-                        <div className="text-white text-2xl font-black">{currentUser?.packs.length || 0}</div>
-                      </div>
-                    </div>
-
-                    <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex items-center gap-4 shadow-2xl">
-                      <div className="bg-emerald-500/20 p-3 rounded-xl">
-                        <CoinsIcon className="h-8 w-8 text-emerald-500" />
-                      </div>
-                      <div>
-                        <div className="text-white/50 text-xs uppercase tracking-wider font-bold">Value</div>
-                        <div className="text-emerald-400 text-2xl font-black">🪙 {currentUser?.totalValue || 0}</div>
-                      </div>
-                    </div>
+                    <Button
+                      variant={showCrafting ? "default" : "outline"}
+                      onClick={() => setShowCrafting(!showCrafting)}
+                      className={`h-12 px-6 rounded-xl font-black ${showCrafting ? "bg-pink-500 hover:bg-pink-600 text-white" : "border-white/20 text-white hover:bg-white/10"}`}
+                    >
+                      <SparklesIcon className="w-5 h-5 mr-2" />
+                      {showCrafting ? "View Vault" : "Crafting"}
+                    </Button>
                   </div>
                 </div>
 
-                {/* Pack Sections */}
-                <div className="grid grid-cols-1 gap-8">
-                  {PACKS.map((pack) => (
-                    <div
-                      key={pack.id}
-                      className="group bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl overflow-hidden transition-all duration-300 hover:border-white/20 hover:shadow-2xl"
-                    >
-                      <div className={`h-2 w-full bg-gradient-to-r ${pack.color}`} />
-                      <div className="p-6">
-                        <div className="flex justify-between items-center mb-6">
-                          <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-                            <span className="text-4xl filter drop-shadow-md group-hover:scale-110 transition-transform duration-300">
-                              {pack.emoji}
-                            </span>
-                            {pack.name}
-                          </h2>
-                          <Badge className="bg-white/10 text-white/70 border-none px-3 py-1">
-                            {pack.booms.filter(b => (currentUser?.booms[b.name] || 0) > 0).length} / {pack.booms.length} Found
-                          </Badge>
-                        </div>
-
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-4">
-                          {pack.booms.map((boom, index) => {
-                            const quantity = currentUser?.booms[boom.name] || 0
-                            const hasBoom = quantity > 0
-                            const rarityColor = getRarityColor(boom.rarity)
-
-                            return (
-                              <div
-                                key={index}
-                                className="group/item flex flex-col items-center gap-2"
-                              >
-                                <div
-                                  className={`
-                                    w-full aspect-square rounded-2xl border-2 flex items-center justify-center text-3xl 
-                                    transition-all duration-300 relative overflow-hidden
-                                    ${hasBoom
-                                      ? `${rarityColor} border-white/30 shadow-[0_0_20px_rgba(0,0,0,0.3)] cursor-pointer hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]`
-                                      : "bg-black/40 text-white/10 border-white/5 cursor-not-allowed filter grayscale"
-                                    }
-                                  `}
-                                  onClick={() => hasBoom && handleBoomClick(boom.name)}
-                                >
-                                  {/* Rarity Glow Effect */}
-                                  {hasBoom && (
-                                    <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none" />
-                                  )}
-
-                                  {hasBoom ? (
-                                    boom.avatar.startsWith('/') ? (
-                                      <img src={boom.avatar || "/placeholder.svg"} alt={boom.name} className="z-10 relative w-12 h-12 object-contain drop-shadow-lg" />
-                                    ) : (
-                                      <span className="z-10 relative drop-shadow-lg">{boom.avatar}</span>
-                                    )
-                                  ) : (
-                                    <LockIcon className="h-8 w-8 opacity-20" />
-                                  )}
-
-                                  {/* Quantity Badge */}
-                                  {hasBoom && quantity > 1 && (
-                                    <div className="absolute top-2 right-2 bg-white text-black text-[10px] font-black rounded-full w-5 h-5 flex items-center justify-center shadow-lg border border-black/10 z-20">
-                                      {quantity}x
-                                    </div>
-                                  )}
-
-                                  {/* Highlight for rare items */}
-                                  {hasBoom && (boom.rarity === 'legendary' || boom.rarity === 'chroma' || boom.rarity === 'mystical') && (
-                                    <div className="absolute inset-0 animate-pulse bg-white/5" />
-                                  )}
-                                </div>
-
-                                <div className="w-full text-center">
-                                  <div className={`text-[10px] uppercase tracking-tighter font-bold mb-0.5 ${hasBoom ? 'text-white/60' : 'text-white/20'}`}>
-                                    {boom.rarity}
-                                  </div>
-                                  <div className={`text-xs font-semibold truncate w-full ${hasBoom ? 'text-white' : 'text-white/30'}`}>
-                                    {boom.name}
-                                  </div>
-                                </div>
-                              </div>
-                            )
-                          })}
-                        </div>
-                      </div>
+                {showCrafting ? (
+                  <div className="space-y-6">
+                    <div className="bg-gradient-to-r from-pink-900/40 to-purple-900/40 border border-pink-500/20 rounded-2xl p-6">
+                      <h2 className="text-2xl font-black text-white mb-2 flex items-center gap-2">
+                        <SparklesIcon className="h-6 w-6 text-pink-400" />
+                        Mystic Forge
+                      </h2>
+                      <p className="text-white/60">Combine duplicate Booms and tokens to craft legendary rewards.</p>
                     </div>
-                  ))}
-                </div>
 
-                {/* Gamepass Booms Section */}
-                {(currentUser?.level || 1) >= 10 && (
-                  <div className="mt-16">
-                    <div className="flex items-center gap-4 mb-8">
-                      <div className="w-2 h-12 bg-gradient-to-b from-purple-500 via-pink-500 to-yellow-500 rounded-full shadow-[0_0_20px_rgba(168,85,247,0.5)]" />
-                      <div>
-                        <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-600 tracking-tighter">
-                          GAMEPASS BOOMS
-                        </h2>
-                        <p className="text-white/60 text-sm font-medium mt-1">
-                          Exclusive rewards for reaching milestone levels
-                        </p>
-                      </div>
-                      {(currentUser?.level || 1) >= 100 && (
-                        <div className="ml-auto">
-                          <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-full px-6 py-2 border border-white/20">
-                            <span className="text-white font-black text-sm uppercase tracking-wider">⚡ MAX LEVEL ⚡</span>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      {craftRecipes.map((recipe) => (
+                        <div key={recipe.id} className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col md:flex-row items-center gap-6 relative overflow-hidden group">
+                          <div className="absolute inset-0 bg-gradient-to-r from-pink-500/0 via-pink-500/0 to-pink-500/5 group-hover:to-pink-500/10 transition-colors" />
+
+                          {/* Output Preview */}
+                          <div className="flex-shrink-0 flex flex-col items-center justify-center p-4 bg-black/40 rounded-xl border border-white/5 w-32 h-32 relative">
+                            <div className="text-5xl drop-shadow-2xl z-10">{getBoomAvatar(recipe.output_boom)}</div>
+                            <span className="text-xs font-bold text-white mt-2 text-center z-10">{recipe.output_boom}</span>
+                            <div className="absolute inset-0 bg-pink-500/20 blur-2xl rounded-full" />
                           </div>
+
+                          <div className="flex-grow flex flex-col justify-center min-w-0">
+                            <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-3">Required Materials</h3>
+                            <div className="flex flex-wrap gap-2 mb-4">
+                              {Object.entries(recipe.inputs).map(([name, qty]: [string, any]) => {
+                                const playerHas = currentUser?.booms[name] || 0;
+                                const hasEnough = playerHas >= qty;
+                                return (
+                                  <Badge key={name} className={`px-3 py-1.5 flex items-center gap-2 ${hasEnough ? "bg-green-500/20 text-green-400 border-green-500/30" : "bg-red-500/20 text-red-400 border-red-500/30"} border`}>
+                                    <span className="text-lg">{getBoomAvatar(name)}</span>
+                                    {name} <span className="font-black bg-black/40 px-1.5 rounded">{playerHas}/{qty}</span>
+                                  </Badge>
+                                )
+                              })}
+                            </div>
+
+                            <Button
+                              onClick={() => handleCraftBoom(recipe)}
+                              disabled={(currentUser?.tokens || 0) < recipe.token_cost}
+                              className="w-full bg-pink-600 hover:bg-pink-500 text-white font-black py-6 rounded-xl shadow-[0_0_20px_rgba(219,39,119,0.3)] transition-all hover:scale-[1.02]"
+                            >
+                              <CoinsIcon className="w-5 h-5 mr-2" />
+                              Craft ({recipe.token_cost.toLocaleString()})
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                      {craftRecipes.length === 0 && (
+                        <div className="col-span-full p-12 text-center text-white/40 bg-white/5 rounded-2xl border border-white/5 border-dashed">
+                          No recipes discovered yet. Check back later!
                         </div>
                       )}
                     </div>
-
-                    <div className="bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 p-8 shadow-2xl">
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                        {GAMEPASS_BOOMS.map((boom) => {
-                          const quantity = currentUser?.booms[boom.name] || 0
-                          const hasUnlocked = quantity > 0
-                          const rarityColor = getRarityColor(boom.rarity)
-
+                  </div>
+                ) : (
+                  <>
+                    {/* Level Rewards Banner */}
+                    <div className="w-full bg-gradient-to-r from-purple-900/50 to-blue-900/50 border border-white/10 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center border-2 border-orange-500 shadow-[0_0_20px_rgba(249,115,22,0.3)] text-3xl">
+                          🏆
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-bold text-white">Level Rewards</h3>
+                          <p className="text-white/60 text-sm">Unlock special Booms every 10 levels!</p>
+                          <div className="text-orange-400 font-black text-xs uppercase tracking-widest mt-1">
+                            Next Reward: Level {Math.ceil((currentUser?.level || 1) / 10) * 10}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        {[10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((lvl) => {
+                          const isUnlocked = (currentUser?.level || 1) >= lvl;
                           return (
-                            <div key={boom.level} className="group flex flex-col items-center gap-3">
-                              <div
-                                className={`
+                            <div key={lvl} className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border ${isUnlocked ? "bg-green-500 border-green-400 text-white shadow-[0_0_10px_rgba(34,197,94,0.5)]" : "bg-black/40 border-white/10 text-white/20"}`} title={`Level ${lvl} Reward`}>
+                              {isUnlocked ? "✓" : lvl}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="flex gap-4">
+                      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex items-center gap-4 shadow-2xl">
+                        <div className="bg-yellow-500/20 p-3 rounded-xl">
+                          <Star className="h-8 w-8 text-yellow-500 animate-pulse" />
+                        </div>
+                        <div>
+                          <div className="text-white/50 text-xs uppercase tracking-wider font-bold">Boom Score</div>
+                          <div className="text-white text-2xl font-black">{currentUser?.boomScore || 0}</div>
+                        </div>
+                      </div>
+
+                      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex items-center gap-4 shadow-2xl">
+                        <div className="bg-purple-500/20 p-3 rounded-xl">
+                          <PackageIcon className="h-8 w-8 text-purple-500" />
+                        </div>
+                        <div>
+                          <div className="text-white/50 text-xs uppercase tracking-wider font-bold">Packs</div>
+                          <div className="text-white text-2xl font-black">{currentUser?.packs.length || 0}</div>
+                        </div>
+                      </div>
+
+                      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex items-center gap-4 shadow-2xl">
+                        <div className="bg-emerald-500/20 p-3 rounded-xl">
+                          <CoinsIcon className="h-8 w-8 text-emerald-500" />
+                        </div>
+                        <div>
+                          <div className="text-white/50 text-xs uppercase tracking-wider font-bold">Value</div>
+                          <div className="text-emerald-400 text-2xl font-black">🪙 {currentUser?.totalValue || 0}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Pack Sections */}
+                    <div className="grid grid-cols-1 gap-8">
+                      {PACKS.map((pack) => (
+                        <div
+                          key={pack.id}
+                          className="group bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl overflow-hidden transition-all duration-300 hover:border-white/20 hover:shadow-2xl"
+                        >
+                          <div className={`h-2 w-full bg-gradient-to-r ${pack.color}`} />
+                          <div className="p-6">
+                            <div className="flex justify-between items-center mb-6">
+                              <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                                <span className="text-4xl filter drop-shadow-md group-hover:scale-110 transition-transform duration-300">
+                                  {pack.emoji}
+                                </span>
+                                {pack.name}
+                              </h2>
+                              <Badge className="bg-white/10 text-white/70 border-none px-3 py-1">
+                                {pack.booms.filter(b => (currentUser?.booms[b.name] || 0) > 0).length} / {pack.booms.length} Found
+                              </Badge>
+                            </div>
+
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+                              {pack.booms.map((boom, index) => {
+                                const quantity = currentUser?.booms[boom.name] || 0
+                                const hasBoom = quantity > 0
+                                const rarityColor = getRarityColor(boom.rarity)
+
+                                return (
+                                  <div
+                                    key={index}
+                                    className="group/item flex flex-col items-center gap-2"
+                                  >
+                                    <div
+                                      className={`
+                                    w-full aspect-square rounded-2xl border-2 flex items-center justify-center text-3xl 
+                                    transition-all duration-300 relative overflow-hidden
+                                    ${hasBoom
+                                          ? `${rarityColor} border-white/30 shadow-[0_0_20px_rgba(0,0,0,0.3)] cursor-pointer hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]`
+                                          : "bg-black/40 text-white/10 border-white/5 cursor-not-allowed filter grayscale"
+                                        }
+                                  `}
+                                      onClick={() => hasBoom && handleBoomClick(boom.name)}
+                                    >
+                                      {/* Rarity Glow Effect */}
+                                      {hasBoom && (
+                                        <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none" />
+                                      )}
+
+                                      {hasBoom ? (
+                                        boom.avatar.startsWith('/') ? (
+                                          <img src={boom.avatar || "/placeholder.svg"} alt={boom.name} className="z-10 relative w-12 h-12 object-contain drop-shadow-lg" />
+                                        ) : (
+                                          <span className="z-10 relative drop-shadow-lg">{boom.avatar}</span>
+                                        )
+                                      ) : (
+                                        <LockIcon className="h-8 w-8 opacity-20" />
+                                      )}
+
+                                      {/* Quantity Badge */}
+                                      {hasBoom && quantity > 1 && (
+                                        <div className="absolute top-2 right-2 bg-white text-black text-[10px] font-black rounded-full w-5 h-5 flex items-center justify-center shadow-lg border border-black/10 z-20">
+                                          {quantity}x
+                                        </div>
+                                      )}
+
+                                      {/* Highlight for rare items */}
+                                      {hasBoom && (boom.rarity === 'legendary' || boom.rarity === 'chroma' || boom.rarity === 'mystical') && (
+                                        <div className="absolute inset-0 animate-pulse bg-white/5" />
+                                      )}
+                                    </div>
+
+                                    <div className="w-full text-center">
+                                      <div className={`text-[10px] uppercase tracking-tighter font-bold mb-0.5 ${hasBoom ? 'text-white/60' : 'text-white/20'}`}>
+                                        {boom.rarity}
+                                      </div>
+                                      <div className={`text-xs font-semibold truncate w-full ${hasBoom ? 'text-white' : 'text-white/30'}`}>
+                                        {boom.name}
+                                      </div>
+                                    </div>
+                                  </div>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Gamepass Booms Section */}
+                    {(currentUser?.level || 1) >= 10 && (
+                      <div className="mt-16">
+                        <div className="flex items-center gap-4 mb-8">
+                          <div className="w-2 h-12 bg-gradient-to-b from-purple-500 via-pink-500 to-yellow-500 rounded-full shadow-[0_0_20px_rgba(168,85,247,0.5)]" />
+                          <div>
+                            <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-600 tracking-tighter">
+                              GAMEPASS BOOMS
+                            </h2>
+                            <p className="text-white/60 text-sm font-medium mt-1">
+                              Exclusive rewards for reaching milestone levels
+                            </p>
+                          </div>
+                          {(currentUser?.level || 1) >= 100 && (
+                            <div className="ml-auto">
+                              <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-full px-6 py-2 border border-white/20">
+                                <span className="text-white font-black text-sm uppercase tracking-wider">⚡ MAX LEVEL ⚡</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 p-8 shadow-2xl">
+                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                            {GAMEPASS_BOOMS.map((boom) => {
+                              const quantity = currentUser?.booms[boom.name] || 0
+                              const hasUnlocked = quantity > 0
+                              const rarityColor = getRarityColor(boom.rarity)
+
+                              return (
+                                <div key={boom.level} className="group flex flex-col items-center gap-3">
+                                  <div
+                                    className={`
                                   w-full aspect-square rounded-2xl border-2 flex flex-col items-center justify-center text-4xl 
                                   transition-all duration-300 relative overflow-hidden cursor-pointer
                                   ${hasUnlocked
-                                    ? `${rarityColor} border-white/30 shadow-[0_0_20px_rgba(0,0,0,0.3)] hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]`
-                                    : "bg-black/60 text-white/10 border-white/10 grayscale"
-                                  }
+                                        ? `${rarityColor} border-white/30 shadow-[0_0_20px_rgba(0,0,0,0.3)] hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]`
+                                        : "bg-black/60 text-white/10 border-white/10 grayscale"
+                                      }
                                 `}
-                                onClick={() => hasUnlocked && handleBoomClick(boom.name)}
-                              >
-                                {/* Glow Effect */}
-                                {hasUnlocked && (
-                                  <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none" />
-                                )}
-
-                                {/* Avatar/Image */}
-                                {hasUnlocked ? (
-                                  <div className="z-10 flex flex-col items-center gap-1">
-                                    {boom.avatar.startsWith('/') ? (
-                                      <img src={boom.avatar || "/placeholder.svg"} alt={boom.name} className="w-16 h-16 object-contain drop-shadow-lg" />
-                                    ) : (
-                                      <span className="drop-shadow-lg">{boom.avatar}</span>
+                                    onClick={() => hasUnlocked && handleBoomClick(boom.name)}
+                                  >
+                                    {/* Glow Effect */}
+                                    {hasUnlocked && (
+                                      <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none" />
                                     )}
-                                    <span className="text-[10px] font-bold text-white/60 uppercase tracking-wider">LVL {boom.level}</span>
-                                  </div>
-                                ) : (
-                                  <div className="flex flex-col items-center gap-1">
-                                    <LockIcon className="h-8 w-8 opacity-20" />
-                                    <span className="text-xs font-bold text-white/20 uppercase tracking-wider">LVL {boom.level}</span>
-                                  </div>
-                                )}
 
-                                {/* Quantity Badge */}
-                                {hasUnlocked && quantity > 1 && (
-                                  <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded-full border border-white/20">
-                                    ×{quantity}
-                                  </div>
-                                )}
-                              </div>
+                                    {/* Avatar/Image */}
+                                    {hasUnlocked ? (
+                                      <div className="z-10 flex flex-col items-center gap-1">
+                                        {getBoomAvatar(boom.name).startsWith('/') ? (
+                                          <img src={getBoomAvatar(boom.name) || "/placeholder.svg"} alt={boom.name} className="w-16 h-16 object-contain drop-shadow-lg" />
+                                        ) : (
+                                          <span className="drop-shadow-lg">{getBoomAvatar(boom.name)}</span>
+                                        )}
+                                        <span className="text-[10px] font-bold text-white/60 uppercase tracking-wider">LVL {boom.level}</span>
+                                      </div>
+                                    ) : (
+                                      <div className="flex flex-col items-center gap-1">
+                                        <LockIcon className="h-8 w-8 opacity-20" />
+                                        <span className="text-xs font-bold text-white/20 uppercase tracking-wider">LVL {boom.level}</span>
+                                      </div>
+                                    )}
 
-                              {/* Boom Name */}
-                              <div className="text-center">
-                                <p className={`text-sm font-bold ${hasUnlocked ? "text-white" : "text-white/30"} line-clamp-2`}>
-                                  {boom.name}
-                                </p>
-                                {hasUnlocked && (
-                                  <p className="text-xs text-white/50 mt-1 line-clamp-1">{boom.description}</p>
-                                )}
-                              </div>
-                            </div>
-                          )
-                        })}
+                                    {/* Quantity Badge */}
+                                    {hasUnlocked && quantity > 1 && (
+                                      <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded-full border border-white/20">
+                                        ×{quantity}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Boom Name */}
+                                  <div className="text-center">
+                                    <p className={`text-sm font-bold ${hasUnlocked ? "text-white" : "text-white/30"} line-clamp-2`}>
+                                      {boom.name}
+                                    </p>
+                                    {hasUnlocked && (
+                                      <p className="text-xs text-white/50 mt-1 line-clamp-1">{boom.description}</p>
+                                    )}
+                                  </div>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                )}
+                    )}
 
-                {/* Limited Section - Unlocked at Level 70 */}
-                {((currentUser?.level || 1) >= 70 || (currentUser?.booms["The Trophy"] || 0) > 0) && (
-                  <div className="mt-16 animate-in zoom-in duration-1000">
-                    <div className="flex items-center gap-4 mb-8">
-                      <div className="w-2 h-12 bg-gradient-to-b from-red-600 via-pink-600 to-purple-600 rounded-full shadow-[0_0_30px_rgba(220,38,38,0.5)] animate-pulse" />
-                      <div>
-                        <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-purple-500 to-indigo-600 tracking-tighter">
-                          LIMITED SECTION
-                        </h2>
-                        <p className="text-red-400/80 text-sm font-black mt-1 uppercase tracking-widest">
-                          The Vault of the Ancients has opened
-                        </p>
-                      </div>
-                    </div>
+                    {/* Limited Section - Unlocked at Level 70 */}
+                    {((currentUser?.level || 1) >= 70 || (currentUser?.booms["The Trophy"] || 0) > 0) && (
+                      <div className="mt-16 animate-in zoom-in duration-1000">
+                        <div className="flex items-center gap-4 mb-8">
+                          <div className="w-2 h-12 bg-gradient-to-b from-red-600 via-pink-600 to-purple-600 rounded-full shadow-[0_0_30px_rgba(220,38,38,0.5)] animate-pulse" />
+                          <div>
+                            <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-purple-500 to-indigo-600 tracking-tighter">
+                              LIMITED SECTION
+                            </h2>
+                            <p className="text-red-400/80 text-sm font-black mt-1 uppercase tracking-widest">
+                              The Vault of the Ancients has opened
+                            </p>
+                          </div>
+                        </div>
 
-                    <div className="bg-gradient-to-br from-red-950/40 to-purple-950/40 backdrop-blur-xl rounded-[2.5rem] border-2 border-red-500/30 p-10 shadow-[0_0_50px_rgba(220,38,38,0.2)] ring-1 ring-white/10">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                        {LIMITED_BOOMS.map((boom) => {
-                          const hasIt = (currentUser?.booms[boom.name] || 0) > 0
-                          const canAfford = (currentUser?.tokens || 0) >= boom.price
+                        <div className="bg-gradient-to-br from-red-950/40 to-purple-950/40 backdrop-blur-xl rounded-[2.5rem] border-2 border-red-500/30 p-10 shadow-[0_0_50px_rgba(220,38,38,0.2)] ring-1 ring-white/10">
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                            {LIMITED_BOOMS.map((boom) => {
+                              const hasIt = (currentUser?.booms[boom.name] || 0) > 0
+                              const canAfford = (currentUser?.tokens || 0) >= boom.price
 
-                          return (
-                            <div key={boom.name} className="group flex flex-col items-center gap-4 relative">
-                              <div className="absolute -top-4 -right-2 z-20">
-                                <Badge className="bg-red-600 text-white font-black border-none px-3 py-1 animate-bounce">LIMITED</Badge>
-                              </div>
+                              return (
+                                <div key={boom.name} className="group flex flex-col items-center gap-4 relative">
+                                  <div className="absolute -top-4 -right-2 z-20">
+                                    <Badge className="bg-red-600 text-white font-black border-none px-3 py-1 animate-bounce">LIMITED</Badge>
+                                  </div>
 
-                              <div
-                                className={`
+                                  <div
+                                    className={`
                                   w-full aspect-square rounded-[2rem] border-2 flex flex-col items-center justify-center text-6xl 
                                   transition-all duration-500 relative overflow-hidden cursor-pointer
                                   ${hasIt
-                                    ? "text-cyan-400 border-cyan-500/50 shadow-[0_0_40px_rgba(34,211,238,0.3)] bg-cyan-950/40"
-                                    : "bg-black/80 text-white/5 border-white/5 hover:border-red-500/40 hover:shadow-[0_0_30px_rgba(220,38,38,0.2)]"
-                                  }
-                                `}
-                                onClick={() => {
-                                  if (hasIt) {
-                                    handleBoomClick(boom.name)
-                                  } else if (canAfford) {
-                                    if (confirm(`Purchase ${boom.name} for ${boom.price} tokens?`)) {
-                                      const updatedUser = {
-                                        ...currentUser!,
-                                        tokens: currentUser!.tokens - boom.price,
-                                        booms: {
-                                          ...currentUser!.booms,
-                                          [boom.name]: (currentUser!.booms[boom.name] || 0) + 1
-                                        }
+                                        ? "text-cyan-400 border-cyan-500/50 shadow-[0_0_40px_rgba(34,211,238,0.3)] bg-cyan-950/40"
+                                        : "bg-black/80 text-white/5 border-white/5 hover:border-red-500/40 hover:shadow-[0_0_30px_rgba(220,38,38,0.2)]"
                                       }
-                                      updateAndPersistCurrentUser(updatedUser)
-                                    }
-                                  } else {
-                                    alert("You need more tokens for this ancient treasure.")
-                                  }
-                                }}
-                              >
-                                {/* Particle Effect Background */}
-                                <div className="absolute inset-0 opacity-20 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+                                `}
+                                    onClick={() => {
+                                      if (hasIt) {
+                                        handleBoomClick(boom.name)
+                                      } else if (canAfford) {
+                                        if (confirm(`Purchase ${boom.name} for ${boom.price} tokens?`)) {
+                                          const updatedUser = {
+                                            ...currentUser!,
+                                            tokens: currentUser!.tokens - boom.price,
+                                            booms: {
+                                              ...currentUser!.booms,
+                                              [boom.name]: (currentUser!.booms[boom.name] || 0) + 1
+                                            }
+                                          }
+                                          updateAndPersistCurrentUser(updatedUser)
+                                        }
+                                      } else {
+                                        alert("You need more tokens for this ancient treasure.")
+                                      }
+                                    }}
+                                  >
+                                    {/* Particle Effect Background */}
+                                    <div className="absolute inset-0 opacity-20 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
 
-                                <span className={`z-10 drop-shadow-[0_0_20px_rgba(255,255,255,0.4)] transform group-hover:scale-110 transition-transform duration-500 ${!hasIt && 'filter grayscale brightness-50'}`}>
-                                  {boom.avatar}
-                                </span>
+                                    <span className={`z-10 drop-shadow-[0_0_20px_rgba(255,255,255,0.4)] transform group-hover:scale-110 transition-transform duration-500 ${!hasIt && 'filter grayscale brightness-50'}`}>
+                                      {boom.avatar}
+                                    </span>
 
-                                {!hasIt && (
-                                  <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-[2px] z-20 group-hover:bg-black/20 transition-all">
-                                    <div className="flex items-center gap-1 bg-yellow-500 text-black px-3 py-1 rounded-full font-black text-sm shadow-xl">
-                                      <CoinsIcon className="w-4 h-4" />
-                                      {boom.price}
-                                    </div>
+                                    {!hasIt && (
+                                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-[2px] z-20 group-hover:bg-black/20 transition-all">
+                                        <div className="flex items-center gap-1 bg-yellow-500 text-black px-3 py-1 rounded-full font-black text-sm shadow-xl">
+                                          <CoinsIcon className="w-4 h-4" />
+                                          {boom.price}
+                                        </div>
+                                      </div>
+                                    )}
                                   </div>
-                                )}
-                              </div>
 
-                              <div className="text-center space-y-1">
-                                <p className={`text-lg font-black tracking-tight ${hasIt ? "text-cyan-400" : "text-white/40"}`}>
-                                  {boom.name}
-                                </p>
-                                <p className="text-[10px] text-white/30 font-bold uppercase tracking-widest">{boom.description}</p>
-                              </div>
-                            </div>
-                          )
-                        })}
+                                  <div className="text-center space-y-1">
+                                    <p className={`text-lg font-black tracking-tight ${hasIt ? "text-cyan-400" : "text-white/40"}`}>
+                                      {boom.name}
+                                    </p>
+                                    <p className="text-[10px] text-white/30 font-bold uppercase tracking-widest">{boom.description}</p>
+                                  </div>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
+                    )}
+                  </>
                 )}
               </div>
             )}
@@ -4814,6 +5353,481 @@ export default function BoomkitGame() {
               </div>
             )}
 
+            {/* Friends Page */}
+            {currentPage === "friends" && (
+              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="flex justify-between items-end border-b border-white/10 pb-6">
+                  <div>
+                    <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/50 mb-2">
+                      Friends
+                    </h1>
+                    <p className="text-white/60 text-lg">Manage your friends list and requests</p>
+                  </div>
+                </div>
+
+                {/* Add Friend */}
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                  <h3 className="text-lg font-black text-white mb-4 flex items-center gap-2">
+                    <Users2Icon className="h-5 w-5 text-purple-400" />
+                    Add a Friend
+                  </h3>
+                  <div className="flex gap-3">
+                    <Input
+                      value={friendSearchQuery}
+                      onChange={(e) => setFriendSearchQuery(e.target.value)}
+                      placeholder="Enter username..."
+                      className="flex-1 bg-black/40 border-white/10 text-white placeholder:text-white/30 rounded-xl"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" && friendSearchQuery.trim()) {
+                          handleSendFriendRequest(friendSearchQuery.trim())
+                          setFriendSearchQuery("")
+                        }
+                      }}
+                    />
+                    <Button
+                      onClick={() => {
+                        if (friendSearchQuery.trim()) {
+                          handleSendFriendRequest(friendSearchQuery.trim())
+                          setFriendSearchQuery("")
+                        }
+                      }}
+                      className="bg-purple-600 hover:bg-purple-500 text-white font-black rounded-xl px-6"
+                    >
+                      Send Request
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Pending Requests */}
+                {friendRequests.length > 0 && (
+                  <div className="bg-orange-900/20 border border-orange-500/20 rounded-2xl p-6">
+                    <h3 className="text-lg font-black text-orange-400 mb-4">
+                      📬 Pending Requests ({friendRequests.length})
+                    </h3>
+                    <div className="space-y-3">
+                      {friendRequests.map((req) => (
+                        <div key={req.id} className="flex items-center justify-between bg-black/30 rounded-xl p-4 border border-white/5">
+                          <span className="text-white font-bold">{req.user_username}</span>
+                          <div className="flex gap-2">
+                            <Button onClick={() => handleAcceptFriend(req.user_username)} className="bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg px-4 h-9">
+                              <CheckIcon className="w-4 h-4 mr-1" /> Accept
+                            </Button>
+                            <Button onClick={() => handleRemoveFriend(req.user_username)} variant="ghost" className="text-red-400 hover:bg-red-500/20 rounded-lg h-9">
+                              Decline
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Friends List */}
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                  <h3 className="text-lg font-black text-white mb-4">
+                    Your Friends ({friendsList.length})
+                  </h3>
+                  {friendsList.length === 0 ? (
+                    <div className="text-center p-12 text-white/30 border-2 border-dashed border-white/5 rounded-xl">
+                      <Users2Icon className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                      <p className="font-bold">No friends yet</p>
+                      <p className="text-sm">Send a friend request above to get started!</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {friendsList.map((f) => {
+                        const friendName = f.user_username === currentUser?.username ? f.friend_username : f.user_username
+                        const friendUser = users.find(u => u.username === friendName)
+                        return (
+                          <div key={f.id} className="flex items-center justify-between bg-black/30 rounded-xl p-4 border border-white/5 group hover:border-purple-500/30 transition-colors">
+                            <div className="flex items-center gap-3 cursor-pointer" onClick={() => friendUser && openPlayerProfile(friendUser)}>
+                              <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center text-lg border border-purple-500/30">
+                                {friendUser?.profilePicture || friendName[0]?.toUpperCase()}
+                              </div>
+                              <div>
+                                <span className="text-white font-bold">{friendName}</span>
+                                <div className="text-[10px] text-white/30 font-bold uppercase">Level {friendUser?.level || 1}</div>
+                              </div>
+                            </div>
+                            <Button onClick={() => handleRemoveFriend(friendName)} variant="ghost" className="opacity-0 group-hover:opacity-100 text-red-400 hover:bg-red-500/20 rounded-lg h-8 text-xs">
+                              Remove
+                            </Button>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Rentals Page */}
+            {currentPage === "rentals" && (
+              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="flex justify-between items-end border-b border-white/10 pb-6">
+                  <div>
+                    <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/50 mb-2">
+                      Boom Rentals
+                    </h1>
+                    <p className="text-white/60 text-lg">Loan your Booms for tokens or rent from others</p>
+                  </div>
+                </div>
+
+                {/* List a Boom for Rent */}
+                <div className="bg-gradient-to-r from-cyan-900/30 to-blue-900/30 border border-cyan-500/20 rounded-2xl p-6">
+                  <h3 className="text-lg font-black text-cyan-400 mb-4 flex items-center gap-2">
+                    <KeyIcon className="h-5 w-5" />
+                    List a Boom for Rent
+                  </h3>
+                  <p className="text-white/50 text-sm mb-4">Choose a Boom from your inventory to list on the rental market.</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                    {Object.entries(currentUser?.booms || {}).filter(([, qty]) => (qty as number) > 0).map(([name, qty]) => (
+                      <button
+                        key={name}
+                        onClick={() => {
+                          const price = prompt(`Set rental price per session for ${name}:`, "100")
+                          const sessions = prompt("How many sessions?", "5")
+                          if (price && sessions) handleListRental(name, parseInt(price), parseInt(sessions))
+                        }}
+                        className="bg-black/40 border border-white/10 rounded-xl p-3 flex flex-col items-center gap-2 hover:border-cyan-500/30 hover:bg-cyan-500/5 transition-colors group"
+                      >
+                        <span className="text-2xl">{getBoomAvatar(name)}</span>
+                        <span className="text-xs font-bold text-white truncate w-full text-center">{name}</span>
+                        <Badge className="bg-white/10 text-white/50 border-none text-[10px]">x{qty as number}</Badge>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Available Rentals */}
+                <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+                  <h3 className="text-lg font-black text-white mb-4">
+                    Rental Market ({rentalListings.filter(r => r.status === 'available').length} available)
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {rentalListings.filter(r => r.status === 'available').map((rental) => (
+                      <div key={rental.id} className="bg-black/30 border border-white/10 rounded-xl p-5 flex items-center gap-5 group hover:border-cyan-500/20 transition-colors">
+                        <div className="w-16 h-16 bg-black/40 rounded-xl flex items-center justify-center text-3xl border border-white/5 flex-shrink-0">
+                          {getBoomAvatar(rental.boom_name)}
+                        </div>
+                        <div className="flex-grow min-w-0">
+                          <div className="text-white font-black">{rental.boom_name}</div>
+                          <div className="text-white/40 text-xs">Listed by <span className="text-cyan-400">{rental.owner_username}</span></div>
+                          <div className="flex gap-3 mt-2 text-xs">
+                            <span className="text-yellow-400 font-bold">🪙 {rental.price_per_session}/session</span>
+                            <span className="text-white/30">•</span>
+                            <span className="text-white/50">{rental.sessions_total} sessions</span>
+                            <span className="text-white/30">•</span>
+                            <span className="text-emerald-400 font-bold">Total: {rental.price_per_session * rental.sessions_total}</span>
+                          </div>
+                        </div>
+                        {rental.owner_username === currentUser?.username ? (
+                          <Button onClick={() => handleCancelRental(rental.id)} variant="ghost" className="text-red-400 hover:bg-red-500/20 rounded-lg h-10 text-xs font-bold flex-shrink-0">
+                            Cancel
+                          </Button>
+                        ) : (
+                          <Button onClick={() => handleRentBoom(rental.id)} className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-lg h-10 px-4 flex-shrink-0">
+                            Rent
+                          </Button>
+                        )}
+                      </div>
+                    ))}
+                    {rentalListings.filter(r => r.status === 'available').length === 0 && (
+                      <div className="col-span-full text-center p-12 text-white/30 border-2 border-dashed border-white/5 rounded-xl">
+                        <KeyIcon className="w-12 h-12 mx-auto mb-3 opacity-20" />
+                        <p className="font-bold">No rentals available</p>
+                        <p className="text-sm">Be the first to list a Boom for rent!</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+            {/* Tournaments Page */}
+            {currentPage === "tournaments" && (
+              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="flex justify-between items-end border-b border-white/10 pb-6">
+                  <div>
+                    <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/50 mb-2 font-black">
+                      Tournaments
+                    </h1>
+                    <p className="text-white/60 text-lg">Compete with others for massive prizes! 🏆</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  {/* Active Tournaments */}
+                  <div className="lg:col-span-2 space-y-6">
+                    <h3 className="text-xl font-black text-white flex items-center gap-2">
+                      <TrophyIcon className="h-6 w-6 text-yellow-400" />
+                      Ongoing & Upcoming
+                    </h3>
+                    {activeTournaments.length === 0 ? (
+                      <div className="bg-white/5 border border-dashed border-white/10 rounded-2xl p-12 text-center text-white/30">
+                        <TrophyIcon className="w-16 h-16 mx-auto mb-4 opacity-20" />
+                        <p className="font-bold">No tournaments right now</p>
+                        <p className="text-xs">Check back later for seasonal events!</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-4">
+                        {activeTournaments.map((t) => (
+                          <div
+                            key={t.id}
+                            onClick={() => {
+                              setSelectedTournament(t)
+                              fetchTournamentParticipants(t.id)
+                            }}
+                            className={`bg-gradient-to-br from-white/10 to-white/5 border border-white/10 rounded-2xl p-6 cursor-pointer hover:border-yellow-500/50 transition-all group ${selectedTournament?.id === t.id ? 'border-yellow-500 ring-2 ring-yellow-500/20 shadow-lg shadow-yellow-500/10' : ''}`}
+                          >
+                            <div className="flex justify-between items-start mb-4">
+                              <div>
+                                <h4 className="text-2xl font-black text-white group-hover:text-yellow-400 transition-colors">{t.title}</h4>
+                                <div className="text-sm text-white/50">{t.description}</div>
+                              </div>
+                              <Badge className={`${t.status === 'active' ? 'bg-green-500' : 'bg-red-500'} text-white font-black uppercase text-[10px]`}>
+                                {t.status}
+                              </Badge>
+                            </div>
+
+                            <div className="flex flex-wrap gap-4 mt-4">
+                              <div className="flex items-center gap-2 bg-black/40 rounded-xl px-4 py-2 border border-white/5">
+                                <CoinsIcon className="w-4 h-4 text-yellow-400" />
+                                <span className="text-white font-black">{t.prize_tokens?.toLocaleString() || 0}</span>
+                              </div>
+                              {t.prize_boom_name && (
+                                <div className="flex items-center gap-2 bg-black/40 rounded-xl px-4 py-2 border border-white/5">
+                                  <span className="text-lg">{getBoomAvatar(t.prize_boom_name)}</span>
+                                  <span className="text-white font-black uppercase text-xs">{t.prize_boom_name}</span>
+                                </div>
+                              )}
+                              <div className="flex items-center gap-2 bg-black/40 rounded-xl px-4 py-2 border border-white/5 ml-auto">
+                                <CalendarIcon className="w-4 h-4 text-white/40" />
+                                <span className="text-white/40 text-xs font-bold">Ends: {new Date(t.end_time).toLocaleDateString()}</span>
+                              </div>
+                            </div>
+
+                            {!tournamentParticipants.some(p => p.username === currentUser?.username && p.tournament_id === t.id) && t.status === 'active' && (
+                              <Button
+                                onClick={(e) => { e.stopPropagation(); handleJoinTournament(t.id) }}
+                                className="w-full mt-4 bg-yellow-600 hover:bg-yellow-500 text-white font-black rounded-xl h-12 shadow-lg shadow-yellow-600/20"
+                              >
+                                Join Tournament
+                              </Button>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Leaderboard for selected tournament */}
+                  <div className="space-y-6">
+                    <h3 className="text-xl font-black text-white flex items-center gap-2">
+                      <StarIcon className="h-6 w-6 text-purple-400" />
+                      Leaderboard
+                    </h3>
+                    <div className="bg-black/40 border border-white/10 rounded-2xl overflow-hidden min-h-[400px] flex flex-col">
+                      {!selectedTournament ? (
+                        <div className="flex-1 flex items-center justify-center p-8 text-center text-white/20 italic text-sm">
+                          Select a tournament to view its legends
+                        </div>
+                      ) : (
+                        <div className="p-4 space-y-3">
+                          <div className="text-[10px] font-black text-white/30 uppercase tracking-widest px-2 mb-2 flex justify-between">
+                            <span>Participant / Games</span>
+                            <span>Top Score</span>
+                          </div>
+                          {tournamentParticipants.map((p, idx) => (
+                            <div key={p.id} className={`flex items-center gap-3 p-3 rounded-xl border ${p.username === currentUser?.username ? 'bg-purple-500/20 border-purple-500/30' : 'bg-white/5 border-transparent'} hover:bg-white/10 transition-colors`}>
+                              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black ${idx === 0 ? 'bg-yellow-400 text-black' : idx === 1 ? 'bg-slate-300 text-black' : idx === 2 ? 'bg-orange-500 text-white' : 'bg-white/20 text-white'}`}>
+                                {idx + 1}
+                              </div>
+                              <div className="flex-grow">
+                                <div className="text-white font-bold text-sm">{p.username}</div>
+                                <div className="text-[10px] text-white/40 uppercase font-black">{p.games_played} Games Played</div>
+                              </div>
+                              <div className="text-white font-black text-lg">{p.score}</div>
+                            </div>
+                          ))}
+                          {tournamentParticipants.length === 0 && (
+                            <div className="text-center py-12 text-white/20 text-sm">No one has scored yet. Go for it!</div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            {/* Shop Page */}
+            {currentPage === "shop" && (
+              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="flex justify-between items-end border-b border-white/10 pb-6">
+                  <div>
+                    <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-white to-purple-400 mb-2 font-black">
+                      The Vault Shop
+                    </h1>
+                    <p className="text-white/60 text-lg">Direct access to the rarest Booms. No luck required. 💎</p>
+                  </div>
+                  <div className="bg-white/5 rounded-2xl px-6 py-3 border border-white/10 flex items-center gap-3">
+                    <CoinsIcon className="w-6 h-6 text-yellow-500" />
+                    <span className="text-2xl font-black text-white">{currentUser?.tokens.toLocaleString()}</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {shopItems.length === 0 ? (
+                    <div className="col-span-full py-20 text-center text-white/20 italic">
+                      The shop is empty today. Check back soon!
+                    </div>
+                  ) : (
+                    shopItems.map((item) => (
+                      <div key={item.id} className="bg-gradient-to-b from-white/10 to-transparent border border-white/10 rounded-3xl p-6 flex flex-col items-center group hover:border-blue-500/50 transition-all hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-1">
+                        <div className="text-7xl mb-4 group-hover:scale-110 transition-transform drop-shadow-2xl">
+                          {getBoomAvatar(item.boom_name)}
+                        </div>
+                        <Badge className={`${getRarityColor(getBoomRarity(item.boom_name))} mb-2 px-3 uppercase text-[10px] font-black`}>
+                          {getBoomRarity(item.boom_name)}
+                        </Badge>
+                        <h4 className="text-xl font-black text-white mb-1">{item.boom_name}</h4>
+                        <div className="text-sm text-white/40 mb-6 font-bold">
+                          {item.stock === -1 ? 'Unlimited Stock' : `${item.stock} Remaining`}
+                        </div>
+
+                        <Button
+                          onClick={() => handleBuyShopItem(item.id)}
+                          disabled={item.stock === 0 || (currentUser?.tokens || 0) < item.token_cost}
+                          className="w-full bg-blue-600 hover:bg-blue-500 text-white font-black rounded-2xl h-12 shadow-lg shadow-blue-600/20 disabled:opacity-30 flex items-center justify-center gap-2"
+                        >
+                          <CoinsIcon className="w-4 h-4" />
+                          {item.token_cost.toLocaleString()}
+                        </Button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+            {/* Season Pass Page */}
+            {currentPage === "season" && activeSeason && (
+              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="flex justify-between items-end border-b border-white/10 pb-6">
+                  <div>
+                    <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-yellow-200 to-orange-600 mb-2 font-black">
+                      {activeSeason.name}
+                    </h1>
+                    <p className="text-white/60 text-lg">Level up your pass to unlock exclusive rewards! 🔥</p>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-[10px] font-black text-white/40 uppercase tracking-widest mb-1">Ends In</div>
+                    <div className="text-white font-bold">{new Date(activeSeason.end_date).toLocaleDateString()}</div>
+                  </div>
+                </div>
+
+                <div className="bg-black/40 border border-white/10 rounded-3xl p-8 relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-1 bg-white/5">
+                    <div
+                      className="h-full bg-gradient-to-r from-orange-500 to-yellow-400 transition-all duration-1000 shadow-[0_0_20px_rgba(249,115,22,0.5)]"
+                      style={{ width: `${Math.min(100, ((currentUser?.season_xp || 0) / (seasonRewards[seasonRewards.length - 1]?.xp_required || 1000)) * 100)}%` }}
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between mb-8">
+                    <div className="flex items-center gap-6">
+                      <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-orange-500 to-yellow-500 flex items-center justify-center text-3xl font-black text-white shadow-lg">
+                        {Math.floor((currentUser?.season_xp || 0) / 100)}
+                      </div>
+                      <div>
+                        <div className="text-2xl font-black text-white">Season Level</div>
+                        <div className="text-white/40 font-bold">{currentUser?.season_xp || 0} XP Total</div>
+                      </div>
+                    </div>
+                    {!currentUser?.has_plus_pass && (
+                      <Button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-black px-8 py-6 rounded-2xl shadow-xl shadow-purple-600/20">
+                        Upgrade to Plus Pass
+                      </Button>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4">
+                    {seasonRewards.map((r) => {
+                      const isUnlocked = (currentUser?.season_xp || 0) >= r.xp_required;
+                      const isClaimed = userActivity.some(act => act.activity_type === 'season_claim' && act.details?.reward_id === r.id);
+
+                      return (
+                        <div key={r.id} className={`flex items-center gap-6 p-4 rounded-2xl border transition-all ${isUnlocked ? 'bg-white/10 border-white/20' : 'bg-black/20 border-white/5 opacity-50'}`}>
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-black ${isUnlocked ? 'bg-orange-500 text-white' : 'bg-white/10 text-white/40'}`}>
+                            T{r.tier}
+                          </div>
+                          <div className="flex-grow">
+                            <div className="flex items-center gap-2">
+                              {r.reward_type === 'boom' ? (
+                                <span className="text-2xl">{getBoomAvatar(r.reward_value)}</span>
+                              ) : (
+                                <CoinsIcon className="w-5 h-5 text-yellow-500" />
+                              )}
+                              <span className="text-white font-black">{r.reward_value} {r.reward_type}</span>
+                              {r.is_premium && <Badge className="bg-purple-600 text-white text-[8px] font-black uppercase">Plus</Badge>}
+                            </div>
+                            <div className="text-[10px] font-bold text-white/30 uppercase tracking-widest">{r.xp_required} XP Required</div>
+                          </div>
+                          <Button
+                            disabled={!isUnlocked || isClaimed || (r.is_premium && !currentUser?.has_plus_pass)}
+                            onClick={() => handleClaimReward(r.id)}
+                            className={`rounded-xl font-black px-6 ${isClaimed ? 'bg-green-600/20 text-green-500' : 'bg-white/10 hover:bg-white/20 text-white'}`}
+                          >
+                            {isClaimed ? 'Claimed' : isUnlocked ? 'Claim' : 'Locked'}
+                          </Button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Achievements Page */}
+            {currentPage === "achievements" && (
+              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="flex justify-between items-end border-b border-white/10 pb-6">
+                  <div>
+                    <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-white to-yellow-600 mb-2 font-black">
+                      Hall of Legends
+                    </h1>
+                    <p className="text-white/60 text-lg">Your legacy is written in the stars. 🌟</p>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-black text-white">{userAchievements.length} / {achievements.length}</div>
+                    <div className="text-[10px] font-black text-white/40 uppercase tracking-widest">Completed</div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {achievements.map((ach) => {
+                    const isCompleted = userAchievements.includes(ach.id);
+                    return (
+                      <div key={ach.id} className={`relative p-6 rounded-3xl border group transition-all ${isCompleted ? 'bg-gradient-to-br from-yellow-500/20 to-transparent border-yellow-500/50 shadow-xl shadow-yellow-500/10' : 'bg-white/5 border-white/10 grayscale opacity-60'}`}>
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="text-5xl drop-shadow-lg group-hover:scale-110 transition-transform">{ach.icon}</div>
+                          {isCompleted && <div className="bg-yellow-500 text-black rounded-full p-1"><CheckIcon className="w-4 h-4" /></div>}
+                        </div>
+                        <h4 className="text-xl font-black text-white mb-2">{ach.name}</h4>
+                        <p className="text-sm text-white/60 mb-6 font-medium leading-relaxed">{ach.description}</p>
+
+                        <div className="flex items-center justify-between pt-4 border-t border-white/5">
+                          <div className="flex items-center gap-2">
+                            <CoinsIcon className="w-4 h-4 text-yellow-500" />
+                            <span className="text-white font-black text-sm">{ach.reward_tokens.toLocaleString()}</span>
+                          </div>
+                          <Badge className="bg-white/10 text-white/40 text-[8px] font-black uppercase">{ach.requirement_type.replace('_', ' ')}</Badge>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {/* Discover Page */}
             {currentPage === "discover" && !isMergingGameActive && !lobbyActive && (
               <DiscoverPage
@@ -4915,7 +5929,6 @@ export default function BoomkitGame() {
                     questions={activeDiscoverGame.questions}
                     durationSeconds={activeDiscoverGame.duration || 600}
                     startTimeOffset={gameStartOffset}
-                    onScoreUpdate={handleScoreUpdate}
                     onEnd={(score) => {
                       // Final unthrottled sync
                       handleScoreUpdate(score, true)
@@ -5028,7 +6041,7 @@ export default function BoomkitGame() {
             )}
           </div>
         </div>
-      </div>
+      </div >
 
       {/* MODALS */}
       {
@@ -5145,263 +6158,264 @@ export default function BoomkitGame() {
       }
 
       {/* Solo Game Mode Selection Flow */}
-      {soloFlow === "mode-select" && soloSubject && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 animate-in zoom-in-95 duration-500">
-          <div className="absolute inset-0 bg-black/90 backdrop-blur-3xl" onClick={() => setSoloFlow(null)} />
-          <div className="relative z-10 w-full max-w-5xl h-[85vh] flex flex-col">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-4xl font-black text-white tracking-tighter">Choose Your Solo Challenge</h2>
-                <p className="text-purple-300/60 font-medium">
-                  Playing: {soloSubject.subject} (Grade {soloSubject.grade})
-                </p>
+      {
+        soloFlow === "mode-select" && soloSubject && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 animate-in zoom-in-95 duration-500">
+            <div className="absolute inset-0 bg-black/90 backdrop-blur-3xl" onClick={() => setSoloFlow(null)} />
+            <div className="relative z-10 w-full max-w-5xl h-[85vh] flex flex-col">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-4xl font-black text-white tracking-tighter">Choose Your Solo Challenge</h2>
+                  <p className="text-purple-300/60 font-medium">
+                    Playing: {soloSubject.subject} (Grade {soloSubject.grade})
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setSoloFlow(null)}
+                  className="rounded-full bg-white/5 hover:bg-white/10 text-white/50 hover:text-white"
+                >
+                  <XIcon className="w-6 h-6" />
+                </Button>
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setSoloFlow(null)}
-                className="rounded-full bg-white/5 hover:bg-white/10 text-white/50 hover:text-white"
-              >
-                <XIcon className="w-6 h-6" />
-              </Button>
-            </div>
 
-            <div className="flex-1 overflow-hidden">
-              <GameModeSelector
-                subjectName={soloSubject.subject}
-                onBack={() => setSoloFlow(null)}
-                initialDuration={selectedDuration}
-                isSolo={true}
-                onSelect={(mode, duration) => {
-                  console.log("Selected solo mode:", mode.id, "duration:", duration)
-                  setSelectedDuration(duration) // Update shared duration state
+              <div className="flex-1 overflow-hidden">
+                <GameModeSelector
+                  subjectName={soloSubject.subject}
+                  onBack={() => setSoloFlow(null)}
+                  initialDuration={selectedDuration}
+                  isSolo={true}
+                  onSelect={(mode, duration) => {
+                    console.log("Selected solo mode:", mode.id, "duration:", duration)
+                    setSelectedDuration(duration) // Update shared duration state
 
-                  // Wrap the async part
-                  const startSoloGame = async () => {
-                    setIsGeneratingSet(true)
-                    setSoloFlow(null)
+                    // Wrap the async part
+                    const startSoloGame = async () => {
+                      setIsGeneratingSet(true)
+                      setSoloFlow(null)
 
-                    // Use pre-existing questions if they were passed via the subject state
-                    let questions = (soloSubject as any)?.questions
-                    if (!questions) {
-                      questions = await fetchQuestionsWithAi(soloSubject.grade, soloSubject.subject, 30)
+                      // Use pre-existing questions if they were passed via the subject state
+                      let questions = (soloSubject as any)?.questions
+                      if (!questions) {
+                        questions = await fetchQuestionsWithAi(soloSubject.grade, soloSubject.subject, 30)
+                      }
+
+                      setIsGeneratingSet(false)
+
+                      if (questions && questions.length > 0) {
+                        setActiveDiscoverGame({
+                          grade: soloSubject.grade,
+                          subject: soloSubject.subject,
+                          mode: "solo",
+                          gameMode: mode.id,
+                          questions,
+                          duration,
+                        })
+                        setIsMergingGameActive(true)
+                      }
                     }
-
-                    setIsGeneratingSet(false)
-
-                    if (questions && questions.length > 0) {
-                      setActiveDiscoverGame({
-                        grade: soloSubject.grade,
-                        subject: soloSubject.subject,
-                        mode: "solo",
-                        gameMode: mode.id,
-                        questions,
-                        duration,
-                        onPlayAgain: () => {
-                          setShowGameResults(false)
-                          setLobbyActive(true)
-                          // Just keep activeGamePin and mode the same
-                        }
-                      })
-                      setIsMergingGameActive(true)
-                    }
-                  }
-                  startSoloGame()
-                }}
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* PUBLIC PLAYER PROFILE MODAL */}
-      {showPlayerProfile && selectedProfileUser && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-slate-900 border border-slate-700/50 rounded-2xl w-full max-w-md my-8 relative overflow-hidden shadow-2xl flex flex-col">
-
-            {/* Banner & Close Button */}
-            <div className={`h-32 w-full bg-gradient-to-r ${selectedProfileUser.bannerColor || "from-slate-700 to-slate-800"} relative`}>
-              <div className="absolute inset-0 bg-black/20" />
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute top-4 right-4 text-white/70 hover:text-white bg-black/20 hover:bg-black/40 rounded-full"
-                onClick={() => setShowPlayerProfile(false)}
-              >
-                <XIcon className="h-5 w-5" />
-              </Button>
-            </div>
-
-            {/* Profile Content Body */}
-            <div className="px-6 pb-6 relative flex flex-col items-center -mt-16">
-
-              {/* Avatar Outline */}
-              <div className="rounded-full p-1.5 bg-slate-900 relative">
-                <Avatar className="h-28 w-28 border-4 border-slate-800 shadow-xl" style={{ backgroundColor: '#1a1d27' }}>
-                  <AvatarFallback className="text-5xl">{selectedProfileUser.profilePicture || "🎮"}</AvatarFallback>
-                </Avatar>
-
-                {/* Status Indicator */}
-                <div
-                  className={`absolute bottom-3 right-3 h-5 w-5 rounded-full border-4 border-slate-900 ${Date.now() - (selectedProfileUser.lastSeen || 0) < 5 * 60 * 1000 ? "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]" : "bg-slate-500"
-                    }`}
-                  title={Date.now() - (selectedProfileUser.lastSeen || 0) < 5 * 60 * 1000 ? "Online" : "Offline"}
+                    startSoloGame()
+                  }}
                 />
               </div>
-
-              {/* Name & Role */}
-              <div className="text-center mt-3 mb-6">
-                <h2 className={`text-2xl font-black ${selectedProfileUser.nameColor || "text-white"} flex items-center justify-center gap-2`}>
-                  {selectedProfileUser.username}
-                  {selectedProfileUser.isPlusUser && <SparklesIcon className="text-yellow-400 h-5 w-5 fill-yellow-400/20" />}
-                </h2>
-
-                <div className="flex flex-wrap justify-center gap-2 mt-2">
-                  <Badge className={`${getRoleColor(selectedProfileUser.role)} border-none px-3 py-1 text-xs uppercase font-extrabold tracking-wider`}>
-                    {getUserRoleName(selectedProfileUser)}
-                  </Badge>
-
-                  {selectedProfileUser.badges?.map(badgeId => {
-                    const b = AVAILABLE_BADGES.find(x => x.id === badgeId)
-                    return b ? (
-                      <Badge key={b.id} className={`${b.color} border-none font-bold`} title={b.name}>
-                        {b.emoji} {b.name}
-                      </Badge>
-                    ) : null;
-                  })}
-                </div>
-              </div>
-
-              {/* Boom Showcase Area */}
-              <div className="w-full bg-slate-800/50 rounded-xl p-4 mb-6 border border-white/5 relative overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40" />
-                <h3 className="text-xs uppercase font-black tracking-widest text-slate-400 mb-3 relative z-10 flex items-center gap-2">
-                  <Star className="h-4 w-4 text-yellow-500" />
-                  Showcase Boom
-                </h3>
-
-                <div className="relative z-10 flex flex-col items-center justify-center p-2 min-h-[120px]">
-                  {selectedProfileUser.pinned_boom ? (
-                    <div className={`p-4 rounded-xl border-2 flex flex-col items-center bg-black/40 backdrop-blur-md shadow-xl ${getAnimationClass(getBoomRarity(selectedProfileUser.pinned_boom))} ${getBoomRarity(selectedProfileUser.pinned_boom) === "legendary" ? "border-orange-500/50" :
-                      getBoomRarity(selectedProfileUser.pinned_boom) === "mystical" ? "border-purple-500/50" : "border-slate-700"
-                      }`}>
-                      <div className="text-6xl mb-2 drop-shadow-2xl">{getBoomAvatar(selectedProfileUser.pinned_boom)}</div>
-                      <Badge className={`${getRarityColor(getBoomRarity(selectedProfileUser.pinned_boom))} px-3 uppercase text-[10px] font-black`}>
-                        {selectedProfileUser.pinned_boom}
-                      </Badge>
-                    </div>
-                  ) : (
-                    <div className="text-slate-500 flex flex-col items-center text-center opacity-50">
-                      <PackageIcon className="h-10 w-10 mb-2 stroke-1" />
-                      <p className="text-sm font-medium">No boom showcased yet</p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Core Stats Grid */}
-              <div className="w-full grid grid-cols-2 gap-3">
-                <div className="bg-slate-800/80 rounded-xl p-4 flex flex-col items-center border border-white/5 hover:bg-slate-800 transition-colors">
-                  <CoinsIcon className="h-6 w-6 text-yellow-500 mb-2" />
-                  <span className="text-2xl font-black text-white">{selectedProfileUser.tokens.toLocaleString()}</span>
-                  <span className="text-[10px] uppercase font-bold text-slate-400">Tokens</span>
-                </div>
-
-                <div className="bg-slate-800/80 rounded-xl p-4 flex flex-col items-center border border-white/5 hover:bg-slate-800 transition-colors">
-                  <TrophyIcon className="h-6 w-6 text-purple-400 mb-2" />
-                  <span className="text-2xl font-black text-white">{selectedProfileUser.boomScore.toLocaleString()}</span>
-                  <span className="text-[10px] uppercase font-bold text-slate-400">Boom Score</span>
-                </div>
-
-                <div className="bg-slate-800/80 rounded-xl p-4 flex flex-col items-center border border-white/5 hover:bg-slate-800 transition-colors">
-                  <BoxIcon className="h-6 w-6 text-blue-400 mb-2" />
-                  <span className="text-2xl font-black text-white">{selectedProfileUser.packsOpened || 0}</span>
-                  <span className="text-[10px] uppercase font-bold text-slate-400">Packs Opened</span>
-                </div>
-
-                <div className="bg-slate-800/80 rounded-xl p-4 flex flex-col items-center border border-white/5 hover:bg-slate-800 transition-colors">
-                  <MessageCircleIcon className="h-6 w-6 text-green-400 mb-2" />
-                  <span className="text-sm font-black text-slate-200 text-center uppercase truncate w-full">Level {selectedProfileUser.level || 1}</span>
-                  <span className="text-[10px] uppercase font-bold text-slate-400">Player Rank</span>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              {currentUser && selectedProfileUser.id !== currentUser.id && (
-                <div className="w-full mt-6 grid grid-cols-2 gap-3">
-                  <Button
-                    variant="outline"
-                    className="w-full bg-white/5 border-white/10 hover:bg-white/10 text-white font-black h-12 rounded-xl transition-colors"
-                    onClick={() => {
-                      const amountStr = prompt(`How many tokens do you want to safely gift to ${selectedProfileUser.username}?`);
-                      if (!amountStr) return;
-                      const amount = parseInt(amountStr, 10);
-                      if (isNaN(amount) || amount <= 0) {
-                        alert("Invalid amount.");
-                        return;
-                      }
-                      handleGiftTokens(selectedProfileUser.username, amount);
-                    }}
-                  >
-                    <CoinsIcon className="w-4 h-4 mr-2" />
-                    Gift Tokens
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="w-full bg-white/5 border-white/10 hover:bg-white/10 text-white font-black h-12 rounded-xl transition-colors"
-                    onClick={() => {
-                      const allBooms = Object.keys(currentUser?.booms || {}).filter(b => currentUser?.booms[b] > 0);
-                      if (allBooms.length === 0) {
-                        alert("You have no Booms to gift!");
-                        return;
-                      }
-                      const boomName = prompt(`Which Boom would you like to gift to ${selectedProfileUser.username}?\n\nAvailable: ${allBooms.join(", ")}`);
-                      if (!boomName || !allBooms.includes(boomName)) {
-                        if (boomName) alert(`Invalid Boom or you don't own any ${boomName}!`);
-                        return;
-                      }
-                      const amountStr = prompt(`How many ${boomName} would you like to gift? (You have ${currentUser.booms[boomName]})`);
-                      if (!amountStr) return;
-                      const amount = parseInt(amountStr, 10);
-                      if (isNaN(amount) || amount <= 0) {
-                        alert("Invalid amount.");
-                        return;
-                      }
-                      handleGiftBoom(selectedProfileUser.username, boomName, amount);
-                    }}
-                  >
-                    <PackageIcon className="w-4 h-4 mr-2" />
-                    Gift Boom
-                  </Button>
-                </div>
-              )}
-
-              {/* Footer Info */}
-              <div className="w-full mt-6 pt-4 border-t border-white/10 flex justify-between items-center text-xs text-slate-500 font-medium">
-                <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-slate-600"></span> Joined {new Date(selectedProfileUser.joinDate).toLocaleDateString()}</span>
-                <span>ID: {selectedProfileUser.username.toLowerCase()}</span>
-              </div>
-
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
+
+      {/* PUBLIC PLAYER PROFILE MODAL */}
+      {
+        showPlayerProfile && selectedProfileUser && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
+            <div className="bg-slate-900 border border-slate-700/50 rounded-2xl w-full max-w-md my-8 relative overflow-hidden shadow-2xl flex flex-col">
+
+              {/* Banner & Close Button */}
+              <div className={`h-32 w-full bg-gradient-to-r ${selectedProfileUser.bannerColor || "from-slate-700 to-slate-800"} relative`}>
+                <div className="absolute inset-0 bg-black/20" />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-4 right-4 text-white/70 hover:text-white bg-black/20 hover:bg-black/40 rounded-full"
+                  onClick={() => setShowPlayerProfile(false)}
+                >
+                  <XIcon className="h-5 w-5" />
+                </Button>
+              </div>
+
+              {/* Profile Content Body */}
+              <div className="px-6 pb-6 relative flex flex-col items-center -mt-16">
+
+                {/* Avatar Outline */}
+                <div className="rounded-full p-1.5 bg-slate-900 relative">
+                  <Avatar className="h-28 w-28 border-4 border-slate-800 shadow-xl" style={{ backgroundColor: '#1a1d27' }}>
+                    <AvatarFallback className="text-5xl">{selectedProfileUser.profilePicture || "🎮"}</AvatarFallback>
+                  </Avatar>
+
+                  {/* Status Indicator */}
+                  <div
+                    className={`absolute bottom-3 right-3 h-5 w-5 rounded-full border-4 border-slate-900 ${Date.now() - (selectedProfileUser.lastSeen || 0) < 5 * 60 * 1000 ? "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]" : "bg-slate-500"
+                      }`}
+                    title={Date.now() - (selectedProfileUser.lastSeen || 0) < 5 * 60 * 1000 ? "Online" : "Offline"}
+                  />
+                </div>
+
+                {/* Name & Role */}
+                <div className="text-center mt-3 mb-6">
+                  <h2 className={`text-2xl font-black ${selectedProfileUser.nameColor || "text-white"} flex items-center justify-center gap-2`}>
+                    {selectedProfileUser.username}
+                    {selectedProfileUser.isPlusUser && <SparklesIcon className="text-yellow-400 h-5 w-5 fill-yellow-400/20" />}
+                  </h2>
+
+                  <div className="flex flex-wrap justify-center gap-2 mt-2">
+                    <Badge className={`${getRoleColor(selectedProfileUser.role)} border-none px-3 py-1 text-xs uppercase font-extrabold tracking-wider`}>
+                      {getUserRoleName(selectedProfileUser)}
+                    </Badge>
+
+                    {selectedProfileUser.badges?.map(badgeId => {
+                      const b = AVAILABLE_BADGES.find(x => x.id === badgeId)
+                      return b ? (
+                        <Badge key={b.id} className={`${b.color} border-none font-bold`} title={b.name}>
+                          {b.emoji} {b.name}
+                        </Badge>
+                      ) : null;
+                    })}
+                  </div>
+                </div>
+
+                {/* Boom Showcase Area */}
+                <div className="w-full bg-slate-800/50 rounded-xl p-4 mb-6 border border-white/5 relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40" />
+                  <h3 className="text-xs uppercase font-black tracking-widest text-slate-400 mb-3 relative z-10 flex items-center gap-2">
+                    <Star className="h-4 w-4 text-yellow-500" />
+                    Showcase Boom
+                  </h3>
+
+                  <div className="relative z-10 flex flex-col items-center justify-center p-2 min-h-[120px]">
+                    {selectedProfileUser.pinned_boom ? (
+                      <div className={`p-4 rounded-xl border-2 flex flex-col items-center bg-black/40 backdrop-blur-md shadow-xl ${getAnimationClass(getBoomRarity(selectedProfileUser.pinned_boom))} ${getBoomRarity(selectedProfileUser.pinned_boom) === "legendary" ? "border-orange-500/50" :
+                        getBoomRarity(selectedProfileUser.pinned_boom) === "mystical" ? "border-purple-500/50" : "border-slate-700"
+                        }`}>
+                        <div className="text-6xl mb-2 drop-shadow-2xl">{getBoomAvatar(selectedProfileUser.pinned_boom)}</div>
+                        <Badge className={`${getRarityColor(getBoomRarity(selectedProfileUser.pinned_boom))} px-3 uppercase text-[10px] font-black`}>
+                          {selectedProfileUser.pinned_boom}
+                        </Badge>
+                      </div>
+                    ) : (
+                      <div className="text-slate-500 flex flex-col items-center text-center opacity-50">
+                        <PackageIcon className="h-10 w-10 mb-2 stroke-1" />
+                        <p className="text-sm font-medium">No boom showcased yet</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Core Stats Grid */}
+                <div className="w-full grid grid-cols-2 gap-3">
+                  <div className="bg-slate-800/80 rounded-xl p-4 flex flex-col items-center border border-white/5 hover:bg-slate-800 transition-colors">
+                    <CoinsIcon className="h-6 w-6 text-yellow-500 mb-2" />
+                    <span className="text-2xl font-black text-white">{selectedProfileUser.tokens.toLocaleString()}</span>
+                    <span className="text-[10px] uppercase font-bold text-slate-400">Tokens</span>
+                  </div>
+
+                  <div className="bg-slate-800/80 rounded-xl p-4 flex flex-col items-center border border-white/5 hover:bg-slate-800 transition-colors">
+                    <TrophyIcon className="h-6 w-6 text-purple-400 mb-2" />
+                    <span className="text-2xl font-black text-white">{selectedProfileUser.boomScore.toLocaleString()}</span>
+                    <span className="text-[10px] uppercase font-bold text-slate-400">Boom Score</span>
+                  </div>
+
+                  <div className="bg-slate-800/80 rounded-xl p-4 flex flex-col items-center border border-white/5 hover:bg-slate-800 transition-colors">
+                    <BoxIcon className="h-6 w-6 text-blue-400 mb-2" />
+                    <span className="text-2xl font-black text-white">{selectedProfileUser.packsOpened || 0}</span>
+                    <span className="text-[10px] uppercase font-bold text-slate-400">Packs Opened</span>
+                  </div>
+
+                  <div className="bg-slate-800/80 rounded-xl p-4 flex flex-col items-center border border-white/5 hover:bg-slate-800 transition-colors">
+                    <MessageCircleIcon className="h-6 w-6 text-green-400 mb-2" />
+                    <span className="text-sm font-black text-slate-200 text-center uppercase truncate w-full">Level {selectedProfileUser.level || 1}</span>
+                    <span className="text-[10px] uppercase font-bold text-slate-400">Player Rank</span>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                {currentUser && selectedProfileUser.id !== currentUser.id && (
+                  <div className="w-full mt-6 grid grid-cols-2 gap-3">
+                    <Button
+                      variant="outline"
+                      className="w-full bg-white/5 border-white/10 hover:bg-white/10 text-white font-black h-12 rounded-xl transition-colors"
+                      onClick={() => {
+                        const amountStr = prompt(`How many tokens do you want to safely gift to ${selectedProfileUser.username}?`);
+                        if (!amountStr) return;
+                        const amount = parseInt(amountStr, 10);
+                        if (isNaN(amount) || amount <= 0) {
+                          alert("Invalid amount.");
+                          return;
+                        }
+                        handleGiftTokens(selectedProfileUser.username, amount);
+                      }}
+                    >
+                      <CoinsIcon className="w-4 h-4 mr-2" />
+                      Gift Tokens
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full bg-white/5 border-white/10 hover:bg-white/10 text-white font-black h-12 rounded-xl transition-colors"
+                      onClick={() => {
+                        const allBooms = Object.keys(currentUser?.booms || {}).filter(b => currentUser?.booms[b] > 0);
+                        if (allBooms.length === 0) {
+                          alert("You have no Booms to gift!");
+                          return;
+                        }
+                        const boomName = prompt(`Which Boom would you like to gift to ${selectedProfileUser.username}?\n\nAvailable: ${allBooms.join(", ")}`);
+                        if (!boomName || !allBooms.includes(boomName)) {
+                          if (boomName) alert(`Invalid Boom or you don't own any ${boomName}!`);
+                          return;
+                        }
+                        const amountStr = prompt(`How many ${boomName} would you like to gift? (You have ${currentUser.booms[boomName]})`);
+                        if (!amountStr) return;
+                        const amount = parseInt(amountStr, 10);
+                        if (isNaN(amount) || amount <= 0) {
+                          alert("Invalid amount.");
+                          return;
+                        }
+                        handleGiftBoom(selectedProfileUser.username, boomName, amount);
+                      }}
+                    >
+                      <PackageIcon className="w-4 h-4 mr-2" />
+                      Gift Boom
+                    </Button>
+                  </div>
+                )}
+
+                {/* Footer Info */}
+                <div className="w-full mt-6 pt-4 border-t border-white/10 flex justify-between items-center text-xs text-slate-500 font-medium">
+                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-slate-600"></span> Joined {new Date(selectedProfileUser.joinDate).toLocaleDateString()}</span>
+                  <span>ID: {selectedProfileUser.username.toLowerCase()}</span>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        )
+      }
 
       {/* Global Loading Overlay */}
-      {isGeneratingSet && (
-        <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center flex-col gap-6 animate-in fade-in duration-300">
-          <div className="relative">
-            <div className="w-24 h-24 rounded-full border-t-4 border-b-4 border-purple-500 animate-spin"></div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <SparklesIcon className="w-8 h-8 text-purple-400 animate-pulse" />
+      {
+        isGeneratingSet && (
+          <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center flex-col gap-6 animate-in fade-in duration-300">
+            <div className="relative">
+              <div className="w-24 h-24 rounded-full border-t-4 border-b-4 border-purple-500 animate-spin"></div>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <SparklesIcon className="w-8 h-8 text-purple-400 animate-pulse" />
+              </div>
+            </div>
+            <div className="text-center space-y-2">
+              <h2 className="text-3xl font-black text-white tracking-tight animate-pulse">GENERATING ARENA</h2>
+              <p className="text-white/60 font-medium">Using AI to craft unique questions...</p>
             </div>
           </div>
-          <div className="text-center space-y-2">
-            <h2 className="text-3xl font-black text-white tracking-tight animate-pulse">GENERATING ARENA</h2>
-            <p className="text-white/60 font-medium">Using AI to craft unique questions...</p>
-          </div>
-        </div>
-      )}
+        )
+      }
 
       {
         packAnimation.show && (
@@ -6364,155 +7378,202 @@ export default function BoomkitGame() {
       }
 
       {/* Hosting Flow UI */}
-      {hostingFlow === 'mode-select' && hostingSubject && (
-        <GameModeSelector
-          subjectName={`${gradingGroups.find(g => g.grade === hostingSubject.grade)?.label || 'Grade ' + hostingSubject.grade} ${hostingSubject.subject}`}
-          onBack={() => setHostingFlow(null)}
-          onSelect={(mode) => {
-            setSelectedGameMode(mode)
-            setHostingFlow('settings')
-          }}
-        />
-      )}
+      {
+        hostingFlow === 'mode-select' && hostingSubject && (
+          <GameModeSelector
+            subjectName={`${gradingGroups.find(g => g.grade === hostingSubject.grade)?.label || 'Grade ' + hostingSubject.grade} ${hostingSubject.subject}`}
+            onBack={() => setHostingFlow(null)}
+            onSelect={(mode) => {
+              setSelectedGameMode(mode)
+              setHostingFlow('settings')
+            }}
+          />
+        )
+      }
 
-      {hostingFlow === 'settings' && hostingSubject && selectedGameMode && (
-        <HostSettingsModal
-          modeName={selectedGameMode.name}
-          modeIcon={selectedGameMode.icon}
-          modeColor={selectedGameMode.color}
-          subject={hostingSubject.subject}
-          onBack={() => setHostingFlow('mode-select')}
-          onHost={async (settings) => {
-            setGameSettings(settings)
+      {
+        hostingFlow === 'settings' && hostingSubject && selectedGameMode && (
+          <HostSettingsModal
+            modeName={selectedGameMode.name}
+            modeIcon={selectedGameMode.icon}
+            modeColor={selectedGameMode.color}
+            subject={hostingSubject.subject}
+            onBack={() => setHostingFlow('mode-select')}
+            onHost={async (settings) => {
+              setGameSettings(settings)
 
-            // Now create the actual session
-            setIsGeneratingSet(true)
+              // Now create the actual session
+              setIsGeneratingSet(true)
 
-            // Use pre-existing questions if available
-            let questions = (hostingSubject as any)?.questions
-            if (!questions) {
-              questions = await fetchQuestionsWithAi(hostingSubject.grade, hostingSubject.subject, 30)
-            }
-
-            setIsGeneratingSet(false)
-
-            if (!questions || questions.length === 0) {
-              alert("Failed to generate questions. Please try again.")
-              return
-            }
-
-            const pin = Math.floor(100000 + Math.random() * 900000).toString()
-
-            if (supabase) {
-              // Robust Hosting logic: Try new columns, fall back to old if schema cache is stale
-              const lobbyData: any = {
-                pin,
-                host_id: currentUser?.id,
-                host_username: currentUser?.username,
-                grade: hostingSubject.grade,
-                subject: hostingSubject.subject,
-                questions,
-                status: "waiting",
-                duration: settings.duration * 60,
-                players: []
+              // Use pre-existing questions if available
+              let questions = (hostingSubject as any)?.questions
+              if (!questions) {
+                questions = await fetchQuestionsWithAi(hostingSubject.grade, hostingSubject.subject, 30)
               }
 
-              // Try with new columns first
-              let { error } = await supabase.from("game_sessions").insert({
-                ...lobbyData,
-                mode: selectedGameMode.id,
-                settings: settings,
-              })
+              setIsGeneratingSet(false)
 
-              // If missing column error (42703), retry with basic data
-              if (error && error.code === '42703') {
-                console.warn("Schema cache mismatch: Retrying without 'mode' and 'settings' columns.")
-                const retry = await supabase.from("game_sessions").insert(lobbyData)
-                error = retry.error
-
-                if (!error) {
-                  alert("⚠️ Database Schema Alert: Your game started, but 'Game Modes' and 'Custom Settings' were lost because the database columns are missing. Please run the SQL migration in the implementation plan to fix this permamently.")
-                }
-              }
-
-              if (error) {
-                console.error("Host Session Error:", error)
-                alert(`Error creating lobby: ${error.message}`)
+              if (!questions || questions.length === 0) {
+                alert("Failed to generate questions. Please try again.")
                 return
               }
 
-              setActiveGamePin(pin)
-              setActiveDiscoverGame({
-                grade: hostingSubject.grade,
-                subject: hostingSubject.subject,
-                mode: "host",
-                gameMode: selectedGameMode.id,
-                questions
-              })
-              setLobbyActive(true)
-              setHostingFlow(null)
-            }
-          }}
-        />
-      )}
+              const pin = Math.floor(100000 + Math.random() * 900000).toString()
+
+              if (supabase) {
+                // Robust Hosting logic: Try new columns, fall back to old if schema cache is stale
+                const lobbyData: any = {
+                  pin,
+                  host_id: currentUser?.id,
+                  host_username: currentUser?.username,
+                  grade: hostingSubject.grade,
+                  subject: hostingSubject.subject,
+                  questions,
+                  status: "waiting",
+                  duration: settings.duration * 60,
+                  players: []
+                }
+
+                // Try with new columns first
+                let { error } = await supabase.from("game_sessions").insert({
+                  ...lobbyData,
+                  mode: selectedGameMode.id,
+                  settings: settings,
+                })
+
+                // If missing column error (42703), retry with basic data
+                if (error && error.code === '42703') {
+                  console.warn("Schema cache mismatch: Retrying without 'mode' and 'settings' columns.")
+                  const retry = await supabase.from("game_sessions").insert(lobbyData)
+                  error = retry.error
+
+                  if (!error) {
+                    alert("⚠️ Database Schema Alert: Your game started, but 'Game Modes' and 'Custom Settings' were lost because the database columns are missing. Please run the SQL migration in the implementation plan to fix this permamently.")
+                  }
+                }
+
+                if (error) {
+                  console.error("Host Session Error:", error)
+                  alert(`Error creating lobby: ${error.message}`)
+                  return
+                }
+
+                setActiveGamePin(pin)
+                setActiveDiscoverGame({
+                  grade: hostingSubject.grade,
+                  subject: hostingSubject.subject,
+                  mode: "host",
+                  gameMode: selectedGameMode.id,
+                  questions
+                })
+                setLobbyActive(true)
+                setHostingFlow(null)
+              }
+            }}
+          />
+        )
+      }
 
       {/* Host Dashboard Overlay - ONLY SHOW WHEN GAME IS ACTIVE */}
-      {isMergingGameActive && currentUser && activeDiscoverGame?.mode === "host" && (
-        <div className="fixed inset-0 z-[100] pointer-events-none">
-          <div className="pointer-events-auto w-full h-full">
-            <HostDashboard
-              pin={activeGamePin || ""}
-              gameMode={activeDiscoverGame.gameMode || "classic"}
-              subject={activeDiscoverGame.subject}
-              duration={selectedDuration || activeDiscoverGame.duration || 120}
-              onEndGame={async () => {
-                if (supabase && activeGamePin) {
-                  await supabase.from("game_sessions").update({ status: "finished" }).eq("pin", activeGamePin)
-                }
-                setIsMergingGameActive(false)
-                setShowGameResults(true)
-              }}
-              players={livePlayers.map(p => ({
-                id: p.id,
-                username: p.username,
-                score: p.score || 0,
-                profilePicture: p.profile_picture || p.profilePicture // Pass both to be safe
-              }))}
-            />
+      {
+        isMergingGameActive && currentUser && activeDiscoverGame?.mode === "host" && (
+          <div className="fixed inset-0 z-[100] pointer-events-none">
+            <div className="pointer-events-auto w-full h-full">
+              <HostDashboard
+                pin={activeGamePin || ""}
+                gameMode={activeDiscoverGame.gameMode || "classic"}
+                subject={activeDiscoverGame.subject}
+                duration={selectedDuration || activeDiscoverGame.duration || 120}
+                onEndGame={async () => {
+                  if (supabase && activeGamePin) {
+                    await supabase.from("game_sessions").update({ status: "finished" }).eq("pin", activeGamePin)
+                  }
+                  setIsMergingGameActive(false)
+                  setShowGameResults(true)
+                }}
+                players={livePlayers.map(p => ({
+                  id: p.id,
+                  username: p.username,
+                  score: p.score || 0,
+                  profilePicture: p.profile_picture || p.profilePicture // Pass both to be safe
+                }))}
+              />
+            </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Game Results Screen */}
-      {showGameResults && (
-        <GameResults
-          score={gameScore}
-          totalQuestions={activeDiscoverGame?.questions?.length || 0}
-          highScore={currentUser?.boomScore || 0}
-          leaderboard={livePlayers.length > 0 ? [...livePlayers].filter(Boolean).sort((a, b) => (b.score || 0) - (a.score || 0)).map(p => ({
-            id: p.id,
-            username: p.username,
-            score: p.score || 0,
-            avatar: p.profilePicture || p.profile_picture || "👤"
-          })) : (currentUser ? [{
-            id: currentUser.id,
-            username: currentUser.username,
-            score: gameScore,
-            avatar: currentUser.profilePicture
-          }] : [])}
-          onExit={() => {
-            setShowGameResults(false)
-            setActiveDiscoverGame(null)
-            setActiveGamePin("")
-            setLobbyActive(false)
-          }}
-          onPlayAgain={() => {
-            setShowGameResults(false)
-            // Logic to restart would go here, for now just close
-            setActiveDiscoverGame(null)
-          }}
-        />
-      )}
-    </div>
+      {
+        showGameResults && (
+          <GameResults
+            score={gameScore}
+            totalQuestions={activeDiscoverGame?.questions?.length || 0}
+            highScore={currentUser?.boomScore || 0}
+            leaderboard={livePlayers.length > 0 ? [...livePlayers].filter(Boolean).sort((a, b) => (b.score || 0) - (a.score || 0)).map(p => ({
+              id: p.id,
+              username: p.username,
+              score: p.score || 0,
+              avatar: p.profilePicture || p.profile_picture || "👤"
+            })) : (currentUser ? [{
+              id: currentUser.id,
+              username: currentUser.username,
+              score: gameScore,
+              avatar: currentUser.profilePicture
+            }] : [])}
+            onExit={async () => {
+              if (currentUser && gameScore > 0) {
+                // Log activity
+                await supabase?.rpc('log_user_activity', {
+                  p_username: currentUser.username,
+                  p_type: 'game_win',
+                  p_desc: `Finished a game with score: ${gameScore}`,
+                  p_details: { score: gameScore, pin: activeGamePin }
+                })
+
+                // Phase 5: Update stats and check achievements
+                const newGamesPlayed = (currentUser.games_played || 0) + 1
+                await supabase?.from("users").update({
+                  games_played: newGamesPlayed
+                }).eq("username", currentUser.username)
+
+                // Add Season XP (50 per game)
+                await handleAddSeasonXp(50)
+
+                // Check achievements
+                await supabase?.rpc('check_achievements', {
+                  p_username: currentUser.username,
+                  p_type: 'games_played',
+                  p_value: newGamesPlayed
+                })
+
+                // Submit to tournaments
+                if (activeTournaments.length > 0) {
+                  for (const t of activeTournaments) {
+                    if (t.status === 'active') {
+                      await supabase?.rpc('submit_tournament_score', {
+                        p_tournament_id: t.id,
+                        p_username: currentUser.username,
+                        p_score: gameScore
+                      })
+                    }
+                  }
+                }
+              }
+              setShowGameResults(false)
+              setActiveDiscoverGame(null)
+              setActiveGamePin("")
+              setLobbyActive(false)
+              fetchUsersFromSupabase(true)
+            }}
+            onPlayAgain={() => {
+              setShowGameResults(false)
+              // Logic to restart would go here, for now just close
+              setActiveDiscoverGame(null)
+            }}
+          />
+        )
+      }
+    </div >
   )
 }
