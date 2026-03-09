@@ -24,20 +24,59 @@ CREATE TABLE IF NOT EXISTS public.user_achievements (
 ALTER TABLE public.achievements ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_achievements ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Anyone can view achievements" ON public.achievements;
 CREATE POLICY "Anyone can view achievements" ON public.achievements FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Anyone can view user achievements" ON public.user_achievements;
 CREATE POLICY "Anyone can view user achievements" ON public.user_achievements FOR SELECT USING (true);
 
 -- Insert some default achievements
 INSERT INTO public.achievements (name, description, icon, requirement_type, requirement_value, reward_tokens) VALUES
 ('Beginner Boomist', 'Play your first game!', '🎮', 'games_played', 1, 500),
 ('Token Collector', 'Earn 10,000 tokens total!', '💰', 'tokens_earned', 10000, 1000),
+('Market Mogul', 'Earn 50,000 tokens total!', '🏛️', 'tokens_earned', 50000, 5000),
 ('Boom Veteran', 'Play 50 games!', '🎖️', 'games_played', 50, 5000),
-('Vault Master', 'Collect 20 unique Booms!', '📂', 'booms_collected', 20, 10000)
+('Vault Master', 'Collect 20 unique Booms!', '📂', 'booms_collected', 20, 10000),
+('Socialite', 'Add 5 friends!', '🤝', 'friends_count', 5, 2000),
+('World Traveler', 'Play 100 games!', '🌎', 'games_played', 100, 10000),
+('Evolutionist', 'Evolve 1 Boom!', '🧬', 'evolved_count', 1, 3000),
+('Master Crafter', 'Craft 5 items!', '🛠️', 'crafted_count', 5, 4000),
+('Rental Landlord', 'Rent out a boom 1 time!', '🏠', 'rentals_count', 1, 1500),
+('Auction King', 'Win your first auction!', '🔨', 'auctions_won', 1, 2000),
+('Legendary Status', 'Reach Level 100!', '👑', 'level', 100, 50000),
+('Rich Student', 'Hold 1,000,000 tokens at once!', '🏦', 'tokens_held', 1000000, 25000),
+('Boom Chemist', 'Fuse 10 Booms in the Lab!', '🧪', 'fusions_performed', 10, 5000),
+('Wall Street', 'Make 50 trades in the Marketplace!', '📈', 'market_trades', 50, 7500),
+('Unstoppable', 'Get a 30-day login streak!', '🔥', 'login_streak', 30, 20000)
 ON CONFLICT (name) DO UPDATE SET 
     description = EXCLUDED.description,
     requirement_type = EXCLUDED.requirement_type,
     requirement_value = EXCLUDED.requirement_value,
     reward_tokens = EXCLUDED.reward_tokens;
+
+-- ============================================
+-- BOOM EVOLUTION (Phase 6)
+-- ============================================
+
+-- Track individual boom progression
+-- We use a separate table for evolved booms because the main 'booms' column is just a count JSON
+CREATE TABLE IF NOT EXISTS public.user_boom_evolution (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    username TEXT NOT NULL,
+    boom_name TEXT NOT NULL,
+    xp INTEGER DEFAULT 0,
+    level INTEGER DEFAULT 1,
+    is_fully_evolved BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(username, boom_name)
+);
+
+ALTER TABLE public.user_boom_evolution ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can view boom evolution" ON public.user_boom_evolution;
+CREATE POLICY "Anyone can view boom evolution" ON public.user_boom_evolution FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Users can update their own boom evolution" ON public.user_boom_evolution;
+CREATE POLICY "Users can update their own boom evolution" ON public.user_boom_evolution FOR UPDATE USING (username = auth.uid()::text);
 
 -- ============================================
 -- SEASON PASS
@@ -83,7 +122,10 @@ CREATE TABLE IF NOT EXISTS public.season_rewards (
 ALTER TABLE public.seasons ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.season_rewards ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Anyone can view seasons" ON public.seasons;
 CREATE POLICY "Anyone can view seasons" ON public.seasons FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "Anyone can view rewards" ON public.season_rewards;
 CREATE POLICY "Anyone can view rewards" ON public.season_rewards FOR SELECT USING (true);
 
 -- Insert a default season
@@ -122,6 +164,7 @@ CREATE TABLE IF NOT EXISTS public.shop_items (
 );
 
 ALTER TABLE public.shop_items ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Anyone can view shop items" ON public.shop_items;
 CREATE POLICY "Anyone can view shop items" ON public.shop_items FOR SELECT USING (true);
 
 INSERT INTO public.shop_items (boom_name, token_cost, stock) VALUES

@@ -44,6 +44,7 @@ import {
   CalendarIcon,
   CoinsIcon,
   ShoppingBagIcon,
+  BeakerIcon,
 } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 
@@ -751,6 +752,7 @@ export default function BoomkitGame() {
     | "tournaments"
     | "achievements"
     | "season"
+    | "fusion"
   >("stats")
   const [activeDiscoverGame, setActiveDiscoverGame] = useState<{
     grade: number
@@ -828,6 +830,10 @@ export default function BoomkitGame() {
   // Player Profiles
   const [showPlayerProfile, setShowPlayerProfile] = useState(false)
   const [selectedProfileUser, setSelectedProfileUser] = useState<GameUser | null>(null)
+  const [selectedProfileEvolution, setSelectedProfileEvolution] = useState<any | null>(null)
+  const [fusionSlot1, setFusionSlot1] = useState<string | null>(null)
+  const [fusionSlot2, setFusionSlot2] = useState<string | null>(null)
+  const [isFusing, setIsFusing] = useState(false)
   const [showCrafting, setShowCrafting] = useState(false)
   const [craftRecipes, setCraftRecipes] = useState<any[]>([])
   const [friendsList, setFriendsList] = useState<any[]>([])
@@ -2525,6 +2531,70 @@ export default function BoomkitGame() {
     }
   }
 
+  const awardBoomXP = async (amount: number) => {
+    if (!currentUser?.pinned_boom || !supabase) return
+
+    try {
+      const boomName = currentUser.pinned_boom
+      // 1. Fetch or initialize the evolution record
+      const { data: evolution, error: fetchError } = await supabase
+        .from('user_boom_evolution')
+        .select('*')
+        .eq('username', currentUser.username)
+        .eq('boom_name', boomName)
+        .single()
+
+      if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is 'no rows found'
+        console.error('Error fetching boom evolution:', fetchError)
+        return
+      }
+
+      let newXP = amount
+      let newLevel = 1
+      let isFullyEvolved = false
+
+      if (evolution) {
+        newXP = evolution.xp + amount
+        newLevel = evolution.level
+        isFullyEvolved = evolution.is_fully_evolved
+
+        // Level up logic (Example: 500 XP per level)
+        const xpRequired = newLevel * 500
+        if (newXP >= xpRequired && !isFullyEvolved) {
+          newXP -= xpRequired
+          newLevel += 1
+          if (newLevel >= 10) isFullyEvolved = true // Max evolution at level 10
+        }
+      }
+
+      // 2. Upsert the record
+      const { error: upsertError } = await supabase
+        .from('user_boom_evolution')
+        .upsert({
+          username: currentUser.username,
+          boom_name: boomName,
+          xp: newXP,
+          level: newLevel,
+          is_fully_evolved: isFullyEvolved
+        }, { onConflict: 'username,boom_name' })
+
+      if (upsertError) {
+        console.error('Error updating boom evolution:', upsertError)
+      } else {
+        // Achievement check for Evolution
+        if (newLevel > 1) {
+          supabase.rpc('check_achievements', {
+            p_username: currentUser.username,
+            p_type: 'evolved_count',
+            p_value: 1
+          })
+        }
+      }
+    } catch (err) {
+      console.error('Failed to award boom XP:', err)
+    }
+  }
+
   const fetchQuestionsWithAi = async (grade: number, subjectStr: string, count: number = 30) => {
     try {
       // Split "Subject: Topic" if present
@@ -3072,7 +3142,49 @@ export default function BoomkitGame() {
     if (userObj) {
       setSelectedProfileUser(userObj)
       setShowPlayerProfile(true)
+
+      // Fetch evolution data for pinned boom if it exists
+      if (userObj.pinned_boom) {
+        supabase
+          .from('user_boom_evolution')
+          .select('*')
+          .eq('username', userObj.username)
+          .eq('boom_name', userObj.pinned_boom)
+          .single()
+          .then(({ data }) => setSelectedProfileEvolution(data))
+      } else {
+        setSelectedProfileEvolution(null)
+      }
       fetchUserActivity(userObj.username)
+    }
+  }
+
+  const handleFusion = async () => {
+    if (!fusionSlot1 || !fusionSlot2 || !currentUser || !supabase) return
+
+    setIsFusing(true)
+    try {
+      const { data, error } = await supabase.rpc('fuse_booms', {
+        p_username: currentUser.username,
+        p_boom1: fusionSlot1,
+        p_boom2: fusionSlot2
+      })
+
+      if (error) throw error
+
+      if (data.success) {
+        toast.success(data.message)
+      } else {
+        toast.error(data.message)
+      }
+
+      setFusionSlot1(null)
+      setFusionSlot2(null)
+      fetchUserData() // Refresh inventory
+    } catch (err: any) {
+      toast.error(err.message || 'Fusion failed')
+    } finally {
+      setIsFusing(false)
     }
   }
 
@@ -3824,6 +3936,18 @@ export default function BoomkitGame() {
 
           <button
             onClick={() => {
+              setCurrentPage("fusion")
+              setSidebarOpen(false)
+            }}
+            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "fusion" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
+              }`}
+          >
+            <BeakerIcon className="h-5 w-5 mr-3" />
+            Fusion Lab
+          </button>
+
+          <button
+            onClick={() => {
               setCurrentPage("tournaments")
               setSidebarOpen(false)
               fetchTournaments()
@@ -3904,17 +4028,7 @@ export default function BoomkitGame() {
             Settings
           </button>
 
-          <button
-            onClick={() => {
-              setCurrentPage("shop")
-              setSidebarOpen(false)
-            }}
-            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "shop" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
-              }`}
-          >
-            <CreditCardIcon className="h-5 w-5 mr-3" />
-            Shop
-          </button>
+
         </nav>
       </div>
 
@@ -5326,32 +5440,7 @@ export default function BoomkitGame() {
               </div>
             )}
 
-            {/* Shop Page */}
-            {currentPage === "shop" && (
-              <div className="space-y-6">
-                <h1 className="text-4xl font-bold text-white">Shop</h1>
-                <div className="bg-white/10 backdrop-blur-md rounded-lg p-6">
-                  <h3 className="text-white font-bold text-xl mb-4 flex items-center gap-2">
-                    💳 Buy Tokens with Real Money
-                  </h3>
-                  <p className="text-purple-200 text-sm mb-4">
-                    Purchase tokens instantly with secure Stripe payment. Tokens will be added to your account
-                    immediately.
-                  </p>
-                  {currentUser && (
-                    <StripeCheckout
-                      userId={currentUser.id}
-                      onSuccess={(tokens) => {
-                        if (currentUser) {
-                          const updatedUser = { ...currentUser, tokens: currentUser.tokens + tokens }
-                          setCurrentUser(updatedUser)
-                        }
-                      }}
-                    />
-                  )}
-                </div>
-              </div>
-            )}
+
 
             {/* Friends Page */}
             {currentPage === "friends" && (
@@ -5659,15 +5748,160 @@ export default function BoomkitGame() {
                 </div>
               </div>
             )}
+            {/* Fusion Lab Page */}
+            {currentPage === "fusion" && (
+              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                <div className="flex justify-between items-end border-b border-white/10 pb-6">
+                  <div>
+                    <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 mb-2 font-black">
+                      Fusion Lab
+                    </h1>
+                    <p className="text-white/60 text-lg">Combine two Booms to create something legendary. High risk, high reward. 🧪</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  {/* Fusion Slots */}
+                  <div className="lg:col-span-2 space-y-8">
+                    <div className="bg-black/40 border border-white/10 rounded-3xl p-12 flex flex-col items-center justify-center relative overflow-hidden group">
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                      <div className="flex items-center gap-12 relative z-10">
+                        {/* Slot 1 */}
+                        <div
+                          onClick={() => setFusionSlot1(null)}
+                          className={`w-32 h-32 rounded-3xl border-2 border-dashed flex items-center justify-center cursor-pointer transition-all ${fusionSlot1 ? 'border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/20' : 'border-white/10 bg-white/5 hover:border-white/20'}`}
+                        >
+                          {fusionSlot1 ? (
+                            <div className="flex flex-col items-center">
+                              <span className="text-5xl">{getBoomAvatar(fusionSlot1)}</span>
+                              <span className="text-[10px] font-black text-white mt-1 uppercase">{fusionSlot1}</span>
+                            </div>
+                          ) : (
+                            <div className="flex flex-col items-center text-white/20">
+                              <BeakerIcon className="w-8 h-8 mb-2" />
+                              <span className="text-[10px] font-black uppercase">Slot 1</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Plus Icon */}
+                        <div className="text-white/20 text-4xl font-black">+</div>
+
+                        {/* Slot 2 */}
+                        <div
+                          onClick={() => setFusionSlot2(null)}
+                          className={`w-32 h-32 rounded-3xl border-2 border-dashed flex items-center justify-center cursor-pointer transition-all ${fusionSlot2 ? 'border-purple-500 bg-purple-500/10 shadow-lg shadow-purple-500/20' : 'border-white/10 bg-white/5 hover:border-white/20'}`}
+                        >
+                          {fusionSlot2 ? (
+                            <div className="flex flex-col items-center">
+                              <span className="text-5xl">{getBoomAvatar(fusionSlot2)}</span>
+                              <span className="text-[10px] font-black text-white mt-1 uppercase">{fusionSlot2}</span>
+                            </div>
+                          ) : (
+                            <div className="flex flex-col items-center text-white/20">
+                              <BeakerIcon className="w-8 h-8 mb-2" />
+                              <span className="text-[10px] font-black uppercase">Slot 2</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <Button
+                        onClick={handleFusion}
+                        disabled={!fusionSlot1 || !fusionSlot2 || isFusing}
+                        className={`mt-12 px-12 py-8 rounded-2xl font-black text-xl transition-all ${!fusionSlot1 || !fusionSlot2 ? 'bg-white/5 text-white/20 cursor-not-allowed' : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white shadow-2xl shadow-blue-600/30 hover:scale-105 active:scale-95'}`}
+                      >
+                        {isFusing ? (
+                          <div className="flex items-center gap-3">
+                            <div className="w-6 h-6 border-4 border-white/20 border-t-white rounded-full animate-spin" />
+                            FUSING...
+                          </div>
+                        ) : (
+                          'START FUSION'
+                        )}
+                      </Button>
+
+                      {/* Warning */}
+                      <p className="mt-6 text-white/20 text-[10px] font-black uppercase tracking-widest text-center">
+                        Warning: Fusion carries a 30% chance of total loss.<br />Results are random within the tier.
+                      </p>
+                    </div>
+
+                    {/* Inventory Helper for Fusion */}
+                    <div className="bg-white/5 border border-white/10 rounded-3xl p-8">
+                      <h3 className="text-xl font-black text-white mb-6 uppercase tracking-tight">Select Materials</h3>
+                      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        {Object.entries(currentUser?.booms || {}).map(([name, count]) => (
+                          (count as number) > 0 && (
+                            <div
+                              key={name}
+                              onClick={() => {
+                                if (!fusionSlot1) setFusionSlot1(name)
+                                else if (!fusionSlot2) setFusionSlot2(name)
+                              }}
+                              className={`p-4 rounded-xl border transition-all cursor-pointer flex flex-col items-center ${fusionSlot1 === name || fusionSlot2 === name ? 'bg-blue-600/20 border-blue-500' : 'bg-black/20 border-white/10 hover:border-white/30'}`}
+                            >
+                              <div className="text-3xl mb-2">{getBoomAvatar(name)}</div>
+                              <div className="text-[10px] font-black text-white text-center uppercase truncate w-full">{name}</div>
+                              <div className="text-[10px] font-black text-white/40 mt-1">x{count as number}</div>
+                            </div>
+                          )
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Fusion History / Info Case */}
+                  <div className="space-y-6">
+                    <div className="bg-gradient-to-br from-indigo-600/20 to-purple-600/20 border border-white/10 rounded-3xl p-6">
+                      <h3 className="text-lg font-black text-blue-400 mb-4 uppercase">Lab Records</h3>
+                      <div className="space-y-4">
+                        {userActivity.filter(a => a.activity_type === 'fusion').slice(0, 5).map(a => (
+                          <div key={a.id} className="flex gap-3 text-xs">
+                            <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 bg-blue-500" />
+                            <div>
+                              <p className="text-white/80 font-bold">{a.description}</p>
+                              <p className="text-white/20 font-black uppercase text-[10px]">{new Date(a.created_at).toLocaleTimeString()}</p>
+                            </div>
+                          </div>
+                        ))}
+                        {userActivity.filter(a => a.activity_type === 'fusion').length === 0 && (
+                          <p className="text-white/20 italic text-sm">No recent fusion attempts.</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="bg-white/5 border border-white/10 rounded-3xl p-6">
+                      <h4 className="text-xs font-black text-white/60 mb-2 uppercase">Probability Matrix</h4>
+                      <ul className="space-y-3">
+                        <li className="flex justify-between text-xs">
+                          <span className="text-white/40">Item Upgrade</span>
+                          <span className="text-green-400 font-black">30%</span>
+                        </li>
+                        <li className="flex justify-between text-xs">
+                          <span className="text-white/40">Random Same Tier</span>
+                          <span className="text-blue-400 font-black">40%</span>
+                        </li>
+                        <li className="flex justify-between text-xs">
+                          <span className="text-white/40">Fusion Failure</span>
+                          <span className="text-red-400 font-black">30%</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
             {/* Shop Page */}
             {currentPage === "shop" && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="flex justify-between items-end border-b border-white/10 pb-6">
                   <div>
                     <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-white to-purple-400 mb-2 font-black">
-                      The Vault Shop
+                      The Marketplace
                     </h1>
-                    <p className="text-white/60 text-lg">Direct access to the rarest Booms. No luck required. 💎</p>
+                    <p className="text-white/60 text-lg">Direct access to Booms & Packs. The economy starts here. 💎</p>
                   </div>
                   <div className="bg-white/5 rounded-2xl px-6 py-3 border border-white/10 flex items-center gap-3">
                     <CoinsIcon className="w-6 h-6 text-yellow-500" />
@@ -5690,9 +5924,20 @@ export default function BoomkitGame() {
                           {getBoomRarity(item.boom_name)}
                         </Badge>
                         <h4 className="text-xl font-black text-white mb-1">{item.boom_name}</h4>
-                        <div className="text-sm text-white/40 mb-6 font-bold">
+                        <div className="text-sm text-white/40 mb-4 font-bold">
                           {item.stock === -1 ? 'Unlimited Stock' : `${item.stock} Remaining`}
                         </div>
+
+                        {/* Market Trend */}
+                        {item.base_price && item.current_price && (
+                          <div className="flex items-center gap-1 mb-4">
+                            <div className={`text-[10px] font-black uppercase px-2 py-0.5 rounded ${item.current_price >= item.base_price ? 'bg-green-500/10 text-green-400' : 'bg-red-500/10 text-red-400'}`}>
+                              {item.current_price >= item.base_price ? '▲' : '▼'}
+                              {Math.abs(Math.round(((item.current_price - item.base_price) / item.base_price) * 100))}%
+                            </div>
+                            <span className="text-[10px] font-black text-white/20 uppercase">Trend</span>
+                          </div>
+                        )}
 
                         <Button
                           onClick={() => handleBuyShopItem(item.id)}
@@ -5705,6 +5950,33 @@ export default function BoomkitGame() {
                       </div>
                     ))
                   )}
+                </div>
+
+                {/* Token Store Section */}
+                <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-8 mt-12">
+                  <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div>
+                      <h3 className="text-2xl font-black text-white mb-2 flex items-center gap-2">
+                        💳 Get More Tokens
+                      </h3>
+                      <p className="text-purple-200/60 font-bold max-w-md">
+                        Need a boost? Purchase tokens instantly with secure Stripe checkout to unlock the rarest Booms.
+                      </p>
+                    </div>
+                    <div className="w-full md:w-auto">
+                      {currentUser && (
+                        <StripeCheckout
+                          userId={currentUser.id}
+                          onSuccess={(tokens) => {
+                            if (currentUser) {
+                              const updatedUser = { ...currentUser, tokens: currentUser.tokens + tokens }
+                              setCurrentUser(updatedUser)
+                            }
+                          }}
+                        />
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
@@ -5949,6 +6221,7 @@ export default function BoomkitGame() {
                         // Leveling is handled inside awardXP but we can just update state here and let the next sync handle it
                         // Or better yet, use awardXP logic
                         awardXP(xpReward)
+                        awardBoomXP(Math.floor(score / 4)) // Bonus XP for the pinned boom
                         updateAndPersistCurrentUser({
                           ...updatedUser,
                           // awardXP might have incremented level, let's just make sure we are consistent
@@ -5992,6 +6265,7 @@ export default function BoomkitGame() {
 
                     if (currentUser) {
                       awardXP(xpReward)
+                      awardBoomXP(Math.floor(score / 4)) // Bonus XP for the pinned boom
                       updateAndPersistCurrentUser({
                         ...currentUser,
                         tokens: (currentUser.tokens || 0) + tokenReward
@@ -6297,9 +6571,29 @@ export default function BoomkitGame() {
                         getBoomRarity(selectedProfileUser.pinned_boom) === "mystical" ? "border-purple-500/50" : "border-slate-700"
                         }`}>
                         <div className="text-6xl mb-2 drop-shadow-2xl">{getBoomAvatar(selectedProfileUser.pinned_boom)}</div>
-                        <Badge className={`${getRarityColor(getBoomRarity(selectedProfileUser.pinned_boom))} px-3 uppercase text-[10px] font-black`}>
+                        <Badge className={`${getRarityColor(getBoomRarity(selectedProfileUser.pinned_boom))} px-3 uppercase text-[10px] font-black mb-2`}>
                           {selectedProfileUser.pinned_boom}
                         </Badge>
+
+                        {selectedProfileEvolution && (
+                          <div className="w-full mt-2 space-y-1">
+                            <div className="flex justify-between items-center text-[10px] font-black uppercase">
+                              <span className="text-blue-400">Level {selectedProfileEvolution.level}</span>
+                              <span className="text-white/40">{selectedProfileEvolution.xp} / {(selectedProfileEvolution.level || 1) * 500} XP</span>
+                            </div>
+                            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                              <div
+                                className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-1000 shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+                                style={{ width: `${Math.min(100, (selectedProfileEvolution.xp / ((selectedProfileEvolution.level || 1) * 500)) * 100)}%` }}
+                              />
+                            </div>
+                            {selectedProfileEvolution.is_fully_evolved && (
+                              <div className="text-[9px] font-black text-center text-yellow-400 uppercase mt-1 animate-pulse">
+                                ✨ Fully Evolved ✨
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <div className="text-slate-500 flex flex-col items-center text-center opacity-50">
