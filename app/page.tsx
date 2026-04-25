@@ -1781,6 +1781,16 @@ export default function BoomkitGame() {
       return
     }
 
+    if (registerForm.password.length < 8) {
+      alert("Password must be at least 8 characters")
+      return
+    }
+
+    if (Number.parseInt(registerForm.age) < 10) {
+      alert("You must be at least 10 years old to register")
+      return
+    }
+
 
 
     try {
@@ -3496,19 +3506,20 @@ export default function BoomkitGame() {
                     value={registerForm.password}
                     onChange={(e) => setRegisterForm((prev) => ({ ...prev, password: e.target.value }))}
                     required
+                    minLength={8}
                     className="bg-black/40 border-white/10 text-white placeholder:text-white/30 rounded-xl relative h-12"
-                    placeholder="Keep it secret..."
+                    placeholder="At least 8 characters..."
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="age" className="text-white font-bold tracking-wide ml-1">Age (Minimum 6)</Label>
+                <Label htmlFor="age" className="text-white font-bold tracking-wide ml-1">Age (Minimum 10)</Label>
                 <div className="relative group">
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl blur opacity-30 group-focus-within:opacity-100 transition duration-500" />
                   <Input
                     id="age"
                     type="number"
-                    min="6"
+                    min="10"
                     value={registerForm.age}
                     onChange={(e) => setRegisterForm((prev) => ({ ...prev, age: e.target.value }))}
                     required
