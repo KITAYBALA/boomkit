@@ -4,13 +4,13 @@ import { cookies } from 'next/headers'
 const SESSION_COOKIE = 'session_token'
 
 function getJwtSecret() {
-    const secret = process.env.JWT_SECRET
+    const secret = process.env.JWT_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY
 
-    if (!secret && process.env.NODE_ENV === 'production') {
-        throw new Error('JWT_SECRET must be set in production')
+    if (!secret) {
+        throw new Error('JWT_SECRET or SUPABASE_SERVICE_ROLE_KEY must be set for session signing')
     }
 
-    return new TextEncoder().encode(secret || 'default-dev-secret-do-not-use-in-prod')
+    return new TextEncoder().encode(secret)
 }
 
 export async function createSession(userId: string, role: string, isOwner: boolean) {
