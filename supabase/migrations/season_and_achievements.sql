@@ -76,7 +76,9 @@ DROP POLICY IF EXISTS "Anyone can view boom evolution" ON public.user_boom_evolu
 CREATE POLICY "Anyone can view boom evolution" ON public.user_boom_evolution FOR SELECT USING (true);
 
 DROP POLICY IF EXISTS "Users can update their own boom evolution" ON public.user_boom_evolution;
-CREATE POLICY "Users can update their own boom evolution" ON public.user_boom_evolution FOR UPDATE USING (username = auth.uid()::text);
+CREATE POLICY "Users can update their own boom evolution" ON public.user_boom_evolution FOR UPDATE USING (
+  username = (SELECT username FROM public.users WHERE id = auth.uid()::text)
+);
 
 -- ============================================
 -- SEASON PASS

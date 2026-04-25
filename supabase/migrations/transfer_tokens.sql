@@ -44,6 +44,22 @@ BEGIN
   -- 6. Add to receiver
   UPDATE public.users SET tokens = tokens + p_amount WHERE username = p_receiver_username;
 
+  -- 7. Log activity for sender
+  PERFORM log_user_activity(
+    p_sender_username,
+    'transfer',
+    'Sent ' || p_amount || ' tokens to ' || p_receiver_username,
+    jsonb_build_object('receiver', p_receiver_username, 'amount', p_amount)
+  );
+
+  -- 8. Log activity for receiver
+  PERFORM log_user_activity(
+    p_receiver_username,
+    'transfer',
+    'Received ' || p_amount || ' tokens from ' || p_sender_username,
+    jsonb_build_object('sender', p_sender_username, 'amount', p_amount)
+  );
+
   RETURN jsonb_build_object(
     'success', true, 
     'message', 'Successfully transferred ' || p_amount || ' tokens to ' || p_receiver_username

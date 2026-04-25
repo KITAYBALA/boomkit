@@ -9,9 +9,11 @@ export const metadata = {
   title: "Blob Uploads | Boomkit",
 }
 
+export const dynamic = "force-dynamic"
+
 export default async function BlobPage() {
   // List existing blobs under our 'boomkit/' prefix. This runs on the server.
-  const { blobs } = await list({ prefix: "boomkit/" })
+  const blobs = await getStoredBlobs()
 
   return (
     <main className="mx-auto w-full max-w-5xl p-6">
@@ -101,4 +103,18 @@ export default async function BlobPage() {
       </section>
     </main>
   )
+}
+
+async function getStoredBlobs() {
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    return []
+  }
+
+  try {
+    const { blobs } = await list({ prefix: "boomkit/" })
+    return blobs
+  } catch (error) {
+    console.error("Failed to list Vercel Blob files:", error)
+    return []
+  }
 }

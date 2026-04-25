@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useActionState } from "react"
-import { uploadBlob } from "@/app/blob/actions"
+import { uploadBlob, type UploadResult } from "@/app/blob/actions"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -14,7 +14,7 @@ type UploadState =
   | { status: "error"; message: string }
 
 export function BlobUploader() {
-  const [state, action, isPending] = useActionState(uploadBlob as unknown as any, null)
+  const [state, action, isPending] = useActionState<UploadResult | null, FormData>(uploadBlob, null)
   const [ui, setUI] = React.useState<UploadState>({ status: "idle" })
 
   React.useEffect(() => {

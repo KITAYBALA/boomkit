@@ -28,7 +28,10 @@ BEGIN
         GROUP BY (details->>'boom')
     ) sub;
 
-    IF v_avg_sales IS NULL THEN v_avg_sales := 1; END IF;
+    IF v_avg_sales IS NULL OR v_avg_sales = 0 THEN
+        -- If there are no sales at all, don't crash the market. Just exit.
+        RETURN;
+    END IF;
 
     -- 2. Loop through each shop item and adjust price
     FOR v_item IN SELECT * FROM public.shop_items WHERE is_active = TRUE LOOP

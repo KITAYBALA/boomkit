@@ -36,8 +36,8 @@ function ResetPasswordForm() {
       return
     }
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters")
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters")
       setLoading(false)
       return
     }
@@ -120,7 +120,7 @@ function ResetPasswordForm() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  minLength={6}
+                  minLength={8}
                 />
               </div>
               <div>
@@ -131,7 +131,7 @@ function ResetPasswordForm() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  minLength={6}
+                  minLength={8}
                 />
               </div>
               {error && <p className="text-red-600 text-sm">{error}</p>}

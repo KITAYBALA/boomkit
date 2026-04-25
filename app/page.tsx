@@ -66,6 +66,7 @@ import GameLobby from "@/components/game-lobby"
 import { createBrowserClient } from "@supabase/ssr"
 import GameResults from "@/components/game-results"
 import DailySpinWheel from "@/components/daily-spin-wheel"
+import { toast } from "sonner"
 
 // Advanced computer identification system
 const generateSystemSignature = (): string => {
@@ -792,7 +793,6 @@ export default function BoomkitGame() {
   const [users, setUsers] = useState<GameUser[]>([])
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
   const [newMessage, setNewMessage] = useState("")
-  const [ownerAccessCode, setOwnerAccessCode] = useState("")
   const [auctionItems, setAuctionItems] = useState<AuctionItem[]>([])
   const [showNews, setShowNews] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false) // <-- Added mobile sidebar state
@@ -1342,9 +1342,15 @@ export default function BoomkitGame() {
                 banReason: data.user.ban_reason || "",
                 lastSeen: data.user.last_seen || Date.now(),
                 packsOpened: data.user.packs_opened || 0,
-                lastIp: data.user.last_ip || "",
                 xp: data.user.xp || 0,
                 level: data.user.level || 1,
+                pinned_boom: data.user.pinned_boom || null,
+                season_xp: data.user.season_xp || 0,
+                has_plus_pass: data.user.has_plus_pass || false,
+                games_played: data.user.games_played || 0,
+                total_tokens_earned: data.user.total_tokens_earned || 0,
+                loginStreak: data.user.login_streak || 0,
+                lastStreakClaim: data.user.last_streak_claim || null,
               }
 
               if (authoritativeUser.isBanned) {
@@ -1506,7 +1512,7 @@ export default function BoomkitGame() {
     // Removed the 15-second polling fallback to fix battery and DB drain.
 
     return () => {
-      if (channel) supabase.removeChannel(channel)
+      if (channel) supabase?.removeChannel(channel)
     }
   }, [syncCurrentUserRole, currentUser?.id, supabase])
 
@@ -1766,20 +1772,6 @@ export default function BoomkitGame() {
   // Handle daily spin
   // handleDailySpin removed - logic moved to DailySpinWheel component and its onWin callback
 
-  // Handle owner access - redirects to login (master key removed for security)
-  const handleOwnerAccess = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (ownerAccessCode === "OKTAY_MASTER_2024_BOOMKIT_SECURE") {
-      authorizeCurrentSystem()
-      // Create a flashy success effect or just alert?
-      // Let's keep it simple but professional
-      setCurrentView("login")
-    } else {
-      alert("ACCESS DENIED: Invalid Security Clearance Code")
-    }
-  }
-
-
   // Handle registration - SERVER-SIDE AUTHENTICATION
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -1849,6 +1841,13 @@ export default function BoomkitGame() {
         packsOpened: user.packs_opened || 0,
         xp: user.xp || 0,
         level: user.level || 1,
+        pinned_boom: user.pinned_boom || null,
+        season_xp: user.season_xp || 0,
+        has_plus_pass: user.has_plus_pass || false,
+        games_played: user.games_played || 0,
+        total_tokens_earned: user.total_tokens_earned || 0,
+        loginStreak: user.login_streak || 0,
+        lastStreakClaim: user.last_streak_claim || null,
       }
 
       if (newUser.status === "pending") {
@@ -1929,6 +1928,13 @@ export default function BoomkitGame() {
         packsOpened: user.packs_opened || 0,
         xp: user.xp || 0,
         level: user.level || 1,
+        pinned_boom: user.pinned_boom || null,
+        season_xp: user.season_xp || 0,
+        has_plus_pass: user.has_plus_pass || false,
+        games_played: user.games_played || 0,
+        total_tokens_earned: user.total_tokens_earned || 0,
+        loginStreak: user.login_streak || 0,
+        lastStreakClaim: user.last_streak_claim || null,
       }
 
       // Check if user is banned (double-check from server response)
@@ -2539,7 +2545,7 @@ export default function BoomkitGame() {
       // 1. Fetch or initialize the evolution record
       const { data: evolution, error: fetchError } = await supabase
         .from('user_boom_evolution')
-        .select('*')
+        .select('id, username, boom_name, xp, level, is_fully_evolved, created_at')
         .eq('username', currentUser.username)
         .eq('boom_name', boomName)
         .single()
@@ -2596,10 +2602,11 @@ export default function BoomkitGame() {
   }
 
   const fetchQuestionsWithAi = async (grade: number, subjectStr: string, count: number = 30) => {
+    let subject = subjectStr
+    let topic = "General"
+
     try {
       // Split "Subject: Topic" if present
-      let subject = subjectStr
-      let topic = "General"
       if (subjectStr.includes(": ")) {
         const parts = subjectStr.split(": ")
         subject = parts[0]
@@ -2801,7 +2808,7 @@ export default function BoomkitGame() {
 
   // -- Transfer Actions --
   const handleGiftTokens = async (receiverUsername: string, amount: number) => {
-    if (!currentUser || amount <= 0) return
+    if (!currentUser || !supabase || amount <= 0) return
 
     // Optimistic UI checks but actual check on server
     if (currentUser.tokens < amount) {
@@ -2833,7 +2840,7 @@ export default function BoomkitGame() {
   }
 
   const handleGiftBoom = async (receiverUsername: string, boomName: string, amount: number) => {
-    if (!currentUser || amount <= 0) return
+    if (!currentUser || !supabase || amount <= 0) return
 
     const qty = currentUser.booms[boomName] || 0
     if (qty < amount) {
@@ -3146,8 +3153,8 @@ export default function BoomkitGame() {
       // Fetch evolution data for pinned boom if it exists
       if (userObj.pinned_boom) {
         supabase
-          .from('user_boom_evolution')
-          .select('*')
+          ?.from('user_boom_evolution')
+          .select('id, username, boom_name, xp, level, is_fully_evolved, created_at')
           .eq('username', userObj.username)
           .eq('boom_name', userObj.pinned_boom)
           .single()
@@ -3180,7 +3187,7 @@ export default function BoomkitGame() {
 
       setFusionSlot1(null)
       setFusionSlot2(null)
-      fetchUserData() // Refresh inventory
+      fetchUsersFromSupabase(true) // Refresh inventory
     } catch (err: any) {
       toast.error(err.message || 'Fusion failed')
     } finally {
@@ -3447,101 +3454,7 @@ export default function BoomkitGame() {
         {/* Footer / Secret Access */}
         <footer className="p-4 text-center text-slate-600 text-sm">
           <p>&copy; 2026 Boomkit. All rights reserved.</p>
-          {/* Secret Owner Access Link - subtly placed */}
-          <button
-            onClick={() => {
-              // For now, let's just use a prompt or a hidden way to show the old form if needed.
-              // Actually, user asked to REPLACE the page. But they might still need owner access.
-              // Let's add a tiny link.
-              const code = prompt("Enter Owner Code:")
-              if (code === "OKTAY_MASTER_2024_BOOMKIT_SECURE") { // Quick hack to let owner in without UI clutter
-                setOwnerAccessCode(code)
-                // Trigger login simulation or just set view? 
-                // Since handleOwnerAccess isn't exposed here easily without rewriting, 
-                // let's just simulate the state change manually if valid
-                localStorage.setItem("boomkit_authorized_system", generateSystemSignature())
-                // We still need them to Login as a user, so we just authorize the system.
-                alert("System Authorized. Please Login.")
-                setCurrentView("login")
-              }
-            }}
-            className="mt-2 opacity-10 hover:opacity-50 transition-opacity"
-          >
-            Admin
-          </button>
         </footer>
-      </div>
-    )
-  }
-
-  if (currentView === "owner-access") {
-    return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4 relative overflow-hidden">
-        {/* Matrix-style background effect */}
-        <div className="absolute inset-0 bg-[url('https://media.giphy.com/media/U3qYN8S0j3bpK/giphy.gif')] opacity-10 bg-cover bg-center pointer-events-none"></div>
-
-        <Card className="w-full max-w-md bg-black/80 border-purple-500/50 backdrop-blur-xl relative z-10 shadow-[0_0_50px_rgba(168,85,247,0.4)]">
-          <CardHeader className="text-center pb-2">
-            <div className="mx-auto w-20 h-20 mb-4 bg-black rounded-full flex items-center justify-center border-2 border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.6)] animate-pulse">
-              <CrownIcon className="h-10 w-10 text-purple-400" />
-            </div>
-            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 bg-clip-text text-transparent tracking-widest uppercase">
-              Restricted Access
-            </CardTitle>
-            <CardDescription className="text-purple-300/70 font-mono mt-2">
-              System Authorization Required
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleOwnerAccess} className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="accessCode" className="text-purple-400 font-mono text-xs uppercase tracking-wider">
-                  Security Clearance Code
-                </Label>
-                <div className="relative">
-                  <KeyIcon className="absolute left-3 top-3 h-4 w-4 text-purple-500/50" />
-                  <Input
-                    id="accessCode"
-                    type="password"
-                    value={ownerAccessCode}
-                    onChange={(e) => setOwnerAccessCode(e.target.value)}
-                    className="pl-10 bg-black/50 border-purple-500/30 text-white placeholder:text-purple-500/20 focus:border-purple-500 focus:ring-purple-500/20 font-mono tracking-widest"
-                    placeholder="ENTER-CODE"
-                    autoComplete="off"
-                    autoFocus
-                  />
-                </div>
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full bg-gradient-to-r from-purple-900 via-purple-800 to-purple-900 border border-purple-500/50 hover:border-purple-400 text-white font-mono uppercase tracking-widest transition-all hover:shadow-[0_0_30px_rgba(168,85,247,0.4)] group overflow-hidden relative"
-              >
-                <span className="relative z-10 flex items-center justify-center gap-2">
-                  <ShieldIcon className="h-4 w-4" />
-                  Authenticate
-                </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 opacity-0 group-hover:opacity-20 transition-opacity"></div>
-              </Button>
-            </form>
-
-            <div className="mt-8 pt-6 border-t border-purple-500/10 text-center">
-              <p className="text-[10px] text-purple-500/30 font-mono uppercase tracking-[0.2em]">
-                Secure Connection Established
-                <span className="block mt-1 text-red-500/50">Unauthorized access is prohibited</span>
-              </p>
-
-              <div className="mt-4 flex justify-center gap-4">
-                <Button variant="link" className="text-purple-400/50 hover:text-purple-400 text-xs" onClick={() => setCurrentView("login")}>
-                  Game Login
-                </Button>
-                <Button variant="link" className="text-purple-400/50 hover:text-purple-400 text-xs" onClick={() => setCurrentView("register")}>
-                  Register
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     )
   }
@@ -3658,7 +3571,7 @@ export default function BoomkitGame() {
                 Already have an account? Login
               </Button>
               <div className="w-full h-px bg-white/10" />
-              <Button variant="link" className="text-white/40 hover:text-white/80 text-xs" onClick={() => setCurrentView("intro")}>
+              <Button variant="link" className="text-white/40 hover:text-white/80 text-xs" onClick={() => setCurrentView("owner-access")}>
                 Back to Main Menu
               </Button>
             </div>
@@ -3752,7 +3665,7 @@ export default function BoomkitGame() {
                 Need an account? Register
               </Button>
               <div className="w-full h-px bg-white/10" />
-              <Button variant="link" className="text-white/40 hover:text-white/80 text-xs" onClick={() => setCurrentView("intro")}>
+              <Button variant="link" className="text-white/40 hover:text-white/80 text-xs" onClick={() => setCurrentView("owner-access")}>
                 Back to Main Menu
               </Button>
             </div>
@@ -4676,7 +4589,9 @@ export default function BoomkitGame() {
                                       {boom.name}
                                     </p>
                                     {hasUnlocked && (
-                                      <p className="text-xs text-white/50 mt-1 line-clamp-1">{boom.description}</p>
+                                      <p className="text-xs text-white/50 mt-1 line-clamp-1">
+                                        {String((boom as { description?: string }).description ?? "")}
+                                      </p>
                                     )}
                                   </div>
                                 </div>
@@ -6109,14 +6024,14 @@ export default function BoomkitGame() {
                   if (mode === "host") {
                     setHostingSubject({ grade, subject })
                     // Pass questions in a way that the hosting flow can use them
-                    if (questions) (setHostingSubject as any)(prev => ({ ...prev, questions }))
+                    if (questions) (setHostingSubject as any)((prev: any) => ({ ...prev, questions }))
                     setHostingFlow("mode-select")
                     return
                   }
 
                   // Solo game flow - Switch to mode selection first
                   setSoloSubject({ grade, subject })
-                  if (questions) (setSoloSubject as any)(prev => ({ ...prev, questions }))
+                  if (questions) (setSoloSubject as any)((prev: any) => ({ ...prev, questions }))
                   setSoloFlow("mode-select")
                 }}
                 onJoinGame={async (pin) => {

@@ -6,7 +6,7 @@ export async function GET() {
   try {
     const { data, error } = await supabaseServerClient()
       .from('auction_items')
-      .select('*');
+      .select('id, boom_name, seller, current_bid, time_left, bidders');
 
     if (error) {
       console.error("Error fetching auction items:", error);
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     const { data, error } = await supabaseServerClient()
       .from('auction_items')
       .insert([{ boom_name, seller: userData.username, current_bid, time_left, bidders }])
-      .select()
+      .select('id, boom_name, seller, current_bid, time_left, bidders')
 
     if (error) {
       console.error("Error posting auction item:", error);

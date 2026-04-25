@@ -1,27 +1,42 @@
-import { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServerClient } from '@/lib/supabase-server-client'
+import { verifySession } from '@/lib/auth-server'
 
 export async function POST(req: NextRequest) {
   try {
-    const { user_id, username, message } = await req.json()
+    const session = await verifySession()
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-    if (!user_id || !username || !message) {
-      return Response.json({ error: 'Missing fields' }, { status: 400 })
+    const { message } = await req.json()
+    if (typeof message !== 'string' || !message.trim()) {
+      return NextResponse.json({ error: 'Message is required' }, { status: 400 })
     }
 
     const supabase = getSupabaseServerClient()
+    const { data: actor, error: actorError } = await supabase
+      .from('users')
+      .select('id, username, role')
+      .eq('id', session.userId)
+      .single()
+
+    if (actorError || !actor) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    }
+
     const { data, error } = await supabase
       .from('chat_messages')
-      .insert([{ user_id, username, message }])
-      .select('*')
+      .insert([{ username: actor.username, role: actor.role || 'player', message: message.trim().slice(0, 500) }])
+      .select('id, username, role, message, inserted_at, created_at, timestamp')
       .single()
 
     if (error) {
-      return Response.json({ error: error.message }, { status: 400 })
+      return NextResponse.json({ error: error.message }, { status: 400 })
     }
 
-    return Response.json({ ok: true, message: data })
+    return NextResponse.json({ ok: true, message: data })
   } catch (err: any) {
-    return Response.json({ error: err.message ?? 'Unknown error' }, { status: 500 })
+    return NextResponse.json({ error: err.message ?? 'Unknown error' }, { status: 500 })
   }
 }

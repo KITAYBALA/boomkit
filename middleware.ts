@@ -1,88 +1,55 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-    // 1. Skip static files and images to improve performance
     if (
         request.nextUrl.pathname.startsWith('/_next') ||
         request.nextUrl.pathname.startsWith('/static') ||
         request.nextUrl.pathname.startsWith('/images') ||
-        request.nextUrl.pathname.includes('.') // file extensions
+        request.nextUrl.pathname.includes('.')
     ) {
         return NextResponse.next()
     }
 
-    // 2. Already on the banned page? Allow access to avoid redirect loop
     if (request.nextUrl.pathname === '/banned') {
         return NextResponse.next()
     }
 
-    // 3. Initialize Response
-    let response = NextResponse.next({
+    const response = NextResponse.next({
         request: {
             headers: request.headers,
         },
     })
 
-    // 4. Get User IP
-    // X-Forwarded-For is usually the best bet in Vercel/proxied environments
-    let ip = request.headers.get('x-forwarded-for')?.split(',')[0]
-    if (!ip) {
-        ip = request.headers.get('x-real-ip') || undefined
+    const forwarded = request.headers.get('x-forwarded-for')
+    const ip = forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || undefined
+
+    if (!ip) return response
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+        return response
     }
 
-    // 5. Create Supabase Client (if IP is present)
-    // We strictly need this for auth management and IP checking
-    if (ip) {
-        const supabase = createServerClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-            {
-                cookies: {
-                    get(name: string) {
-                        return request.cookies.get(name)?.value
-                    },
-                    set(name: string, value: string, options: CookieOptions) {
-                        request.cookies.set({
-                            name,
-                            value,
-                            ...options,
-                        })
-                        response.cookies.set({
-                            name,
-                            value,
-                            ...options,
-                        })
-                    },
-                    remove(name: string, options: CookieOptions) {
-                        request.cookies.set({
-                            name,
-                            value: '',
-                            ...options,
-                        })
-                        response.cookies.set({
-                            name,
-                            value: '',
-                            ...options,
-                        })
-                    },
-                },
-            }
-        )
+    try {
+        const rpcResponse = await fetch(`${supabaseUrl.replace(/\/$/, '')}/rest/v1/rpc/is_ip_blacklisted`, {
+            method: 'POST',
+            headers: {
+                apikey: supabaseAnonKey,
+                authorization: `Bearer ${supabaseAnonKey}`,
+                'content-type': 'application/json',
+            },
+            body: JSON.stringify({ check_ip: ip }),
+        })
 
-        // 6. Check Blacklist via RPC
-        try {
-            const { data: isBanned, error } = await supabase.rpc('is_ip_blacklisted', { check_ip: ip })
-
-            if (isBanned === true) {
-                const url = request.nextUrl.clone()
-                url.pathname = '/banned'
-                // Return redirect immediately 
-                return NextResponse.redirect(url)
-            }
-        } catch (e) {
-            console.error("Middleware blacklist check error:", e)
+        if (rpcResponse.ok && (await rpcResponse.json()) === true) {
+            const url = request.nextUrl.clone()
+            url.pathname = '/banned'
+            return NextResponse.redirect(url)
         }
+    } catch (error) {
+        console.error('Middleware blacklist check error:', error)
     }
 
     return response
@@ -90,12 +57,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
     matcher: [
-        /*
-         * Match all request paths except for the ones starting with:
-         * - _next/static (static files)
-         * - _next/image (image optimization files)
-         * - favicon.ico (favicon file)
-         */
         '/((?!_next/static|_next/image|favicon.ico).*)',
     ],
 }

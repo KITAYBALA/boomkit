@@ -1,54 +1,74 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServerClient } from '@/lib/supabase-server-client'
-import { createHash } from 'crypto'
+import { verifySession } from '@/lib/auth-server'
+import { hashPassword, validatePassword } from '@/lib/password'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 /**
- * Helper route to set/reset password hash for existing users
- * Use this to fix users with NULL password_hash
- * SECURITY: Server-side only, requires username and new password
+ * Sets a user's password after a verified login/session.
+ * Owners and admins can set another user's password; normal users can only set their own.
  */
 export async function POST(request: NextRequest) {
   try {
-    const { username, password } = await request.json()
+    const session = await verifySession()
+    if (!session) {
+      return NextResponse.json(
+        { success: false, message: 'You must be signed in before setting a password.' },
+        { status: 401 }
+      )
+    }
 
-    if (!username || !password) {
-      return NextResponse.json({ success: false, message: 'Username and password are required' }, { status: 400 })
+    const { username, password } = await request.json()
+    const passwordError = validatePassword(password)
+    if (passwordError) {
+      return NextResponse.json({ success: false, message: passwordError }, { status: 400 })
     }
 
     const supabase = getSupabaseServerClient()
+    const { data: actor, error: actorError } = await supabase
+      .from('users')
+      .select('id, username, role, is_owner')
+      .eq('id', session.userId)
+      .single()
 
-    // Find user (case-insensitive like login route)
-    const { data: user, error: userError } = await supabase
+    if (actorError || !actor) {
+      return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
+    }
+
+    const isPrivileged = actor.is_owner || actor.role === 'owner' || actor.role === 'admin'
+    const targetUsername = typeof username === 'string' && username.trim() ? username.trim() : actor.username
+
+    const { data: targetUser, error: userError } = await supabase
       .from('users')
       .select('id, username')
-      .ilike('username', username)
+      .eq('username', targetUsername)
       .maybeSingle()
 
-    if (userError || !user) {
+    if (userError || !targetUser) {
       return NextResponse.json({ success: false, message: 'User not found' }, { status: 404 })
     }
 
-    // Hash password using SHA-256 (same algorithm as registration/login)
-    const passwordHash = createHash('sha256').update(password).digest('hex')
+    if (targetUser.id !== actor.id && !isPrivileged) {
+      return NextResponse.json({ success: false, message: 'Insufficient permission to set this password' }, { status: 403 })
+    }
 
-    // Update password_hash and clear password_reset_required flag
-    // Use user.id to ensure we update the correct user (not the input username)
+    const passwordHash = await hashPassword(password)
     const { error: updateError } = await supabase
       .from('users')
       .update({
         password_hash: passwordHash,
         password_reset_required: false,
       })
-      .eq('id', user.id)
+      .eq('id', targetUser.id)
 
     if (updateError) {
       console.error('[AUTH] Error setting password:', updateError)
       return NextResponse.json({ success: false, message: 'Failed to set password' }, { status: 500 })
     }
 
-    console.log(`[AUTH] Password set for user: ${username}`)
+    console.log(`[AUTH] Password set for user: ${targetUser.username} by ${actor.username}`)
 
     return NextResponse.json({ success: true, message: 'Password set successfully' })
   } catch (error) {

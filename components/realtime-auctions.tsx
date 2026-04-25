@@ -110,7 +110,7 @@ export default function RealtimeAuctions({
       if (supabase) {
         const { data } = await supabase
           .from('auction_items')
-          .select('*')
+          .select('id, boom_name, seller, current_bid, ends_at, top_bidder, status, created_at')
           .eq('status', 'active')
           .order('ends_at', { ascending: true })
         setItems((data as DbAuction[]) ?? [])
@@ -142,7 +142,7 @@ export default function RealtimeAuctions({
       if (!supabase) return
       const { data } = await supabase
         .from('auction_items')
-        .select('*')
+        .select('id, boom_name, seller, current_bid, ends_at, top_bidder, status, created_at')
         .eq('status', 'active')
         .order('ends_at', { ascending: true })
       setItems((data as DbAuction[]) ?? [])
@@ -273,7 +273,7 @@ export default function RealtimeAuctions({
         // Force refresh items
         const { data: newItems } = await supabase
           .from('auction_items')
-          .select('*')
+          .select('id, boom_name, seller, current_bid, ends_at, top_bidder, status, created_at')
           .order('ends_at', { ascending: true })
         setItems((newItems as DbAuction[]) ?? [])
       }
@@ -306,7 +306,11 @@ export default function RealtimeAuctions({
 
     try {
       // Double check auction status
-      const { data: auctionData } = await supabase.from('auction_items').select('*').eq('id', item.id).single()
+      const { data: auctionData } = await supabase
+        .from('auction_items')
+        .select('id, status')
+        .eq('id', item.id)
+        .single()
       if (!auctionData || auctionData.status === 'processed') {
         setStatusModal({
           show: true,

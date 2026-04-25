@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServerClient } from '@/lib/supabase-server-client'
-import crypto, { createHash } from 'crypto'
+import crypto from 'crypto'
 import { createSession } from '@/lib/auth-server'
+import { hashPassword, validatePassword } from '@/lib/password'
 
 export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
 
 /**
  * Server-side registration with password hashing
- * SECURITY: Passwords are hashed server-side using SHA-256 (matching login)
+ * SECURITY: Passwords are hashed server-side using scrypt.
  */
 import { checkRateLimiter } from '@/lib/rate-limiter'
 
@@ -46,6 +48,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Username, password, and age are required' }, { status: 400 })
     }
 
+    const passwordError = validatePassword(password)
+    if (passwordError) {
+      return NextResponse.json({ success: false, message: passwordError }, { status: 400 })
+    }
+
     if (Number.parseInt(age) < 10) {
       return NextResponse.json({ success: false, message: 'You must be at least 10 years old to register' }, { status: 400 })
     }
@@ -75,17 +82,14 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Hash password using SHA-256 (same algorithm as login)
-    const passwordHash = createHash('sha256').update(password).digest('hex')
+    const passwordHash = await hashPassword(password)
     const DEBUG_AUTH = process.env.DEBUG_AUTH === 'true' || process.env.NODE_ENV !== 'production'
 
     if (DEBUG_AUTH) {
       console.log('[AUTH DEBUG] ===== REGISTRATION START =====')
       console.log('[AUTH DEBUG] Username:', username)
       console.log('[AUTH DEBUG] Password length:', password.length)
-      console.log('[AUTH DEBUG] Hashing algorithm: sha256')
-      console.log('[AUTH DEBUG] Computed hash length:', passwordHash.length)
-      console.log('[AUTH DEBUG] Computed hash first 16 chars:', passwordHash.substring(0, 16))
+      console.log('[AUTH DEBUG] Hashing algorithm: scrypt')
       console.log('[AUTH DEBUG] Storing in table: users')
       console.log('[AUTH DEBUG] Storing in column: password_hash')
     }
@@ -169,7 +173,6 @@ export async function POST(request: NextRequest) {
       console.log('[AUTH DEBUG] User inserted successfully')
       console.log('[AUTH DEBUG] Inserted user ID:', insertedUser?.id)
       console.log('[AUTH DEBUG] Inserted password_hash exists:', !!insertedUser?.password_hash)
-      console.log('[AUTH DEBUG] Inserted password_hash length:', insertedUser?.password_hash?.length ?? 0)
       console.log('[AUTH DEBUG] ===== REGISTRATION SUCCESS =====')
     }
 

@@ -2,15 +2,15 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js"
 
 /**
  * Server-side Supabase client.
- * Uses SUPABASE_SERVICE_ROLE_KEY when available; falls back to anon for non-admin tasks.
+ * Uses SUPABASE_SERVICE_ROLE_KEY for trusted server routes.
  * Exported name must be "supabaseServerClient".
  */
 export function supabaseServerClient(): SupabaseClient {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
 
   if (!url || !key) {
-    throw new Error("Supabase server env vars missing. Ensure NEXT_PUBLIC_SUPABASE_URL and a server key are set.")
+    throw new Error("Supabase server env vars missing. Ensure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set.")
   }
 
   return createClient(url, key, {
