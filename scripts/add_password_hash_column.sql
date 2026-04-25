@@ -5,4 +5,4 @@
 ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash TEXT;
 
 -- Add comment for documentation
-COMMENT ON COLUMN users.password_hash IS 'SHA-256 hash of user password for authentication';
+COMMENT ON COLUMN users.password_hash IS 'Server-managed password hash for authentication';

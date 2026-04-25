@@ -16,8 +16,14 @@ ALTER TABLE public.friends ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Anyone can view friends" ON public.friends FOR SELECT USING (true);
 CREATE POLICY "Anyone can insert friend requests" ON public.friends FOR INSERT WITH CHECK (true);
-CREATE POLICY "Anyone can update friend status" ON public.friends FOR UPDATE USING (true);
-CREATE POLICY "Anyone can delete friends" ON public.friends FOR DELETE USING (true);
+CREATE POLICY "Users can update their own friend status" ON public.friends FOR UPDATE USING (
+  user_username = (SELECT username FROM public.users WHERE id = auth.uid()::text) OR
+  friend_username = (SELECT username FROM public.users WHERE id = auth.uid()::text)
+);
+CREATE POLICY "Users can delete their own friends" ON public.friends FOR DELETE USING (
+  user_username = (SELECT username FROM public.users WHERE id = auth.uid()::text) OR
+  friend_username = (SELECT username FROM public.users WHERE id = auth.uid()::text)
+);
 
 -- Send a friend request
 DROP FUNCTION IF EXISTS public.send_friend_request(TEXT, TEXT);
@@ -113,7 +119,9 @@ ALTER TABLE public.boom_rentals ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Anyone can view rentals" ON public.boom_rentals FOR SELECT USING (true);
 CREATE POLICY "Anyone can insert rentals" ON public.boom_rentals FOR INSERT WITH CHECK (true);
-CREATE POLICY "Anyone can update rentals" ON public.boom_rentals FOR UPDATE USING (true);
+CREATE POLICY "Owners can update their rentals" ON public.boom_rentals FOR UPDATE USING (
+  owner_username = (SELECT username FROM public.users WHERE id = auth.uid()::text)
+);
 
 -- List a boom for rent
 DROP FUNCTION IF EXISTS public.list_boom_rental(TEXT, TEXT, NUMERIC, INTEGER);

@@ -5,7 +5,7 @@ export async function GET() {
   try {
     const { data, error } = await supabaseServerClient()
       .from('packs')
-      .select('*');
+      .select('id, name, price, booms, color, image, rarity');
 
     if (error) {
       console.error("Error fetching packs:", error);

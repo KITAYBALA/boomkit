@@ -17,7 +17,7 @@ export async function GET() {
                 id, username, email, role, tokens, daily_tokens, booms, packs, xp, level,
                 is_banned, is_muted, is_owner, status, reason, join_date, boom_score,
                 total_value, profile_picture, name_color, banner_color, last_daily_spin,
-                badges, mute_expiry, ban_expiry, ban_reason, last_seen, packs_opened, last_ip
+                badges, mute_expiry, ban_expiry, ban_reason, last_seen, packs_opened
             `)
             .eq('id', session.userId)
             .single()

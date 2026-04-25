@@ -176,7 +176,7 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
         if (!supabase) return
         const { data, error } = await supabase
             .from('direct_messages')
-            .select('*')
+            .select('id, conversation_id, sender_id, sender_username, message, inserted_at')
             .eq('conversation_id', convId)
             .order('inserted_at', { ascending: false })
             .limit(50)

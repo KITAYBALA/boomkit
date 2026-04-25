@@ -1,19 +1,27 @@
 import { SignJWT, jwtVerify } from 'jose'
 import { cookies } from 'next/headers'
 
-const JWT_SECRET = new TextEncoder().encode(
-    process.env.JWT_SECRET || 'default-dev-secret-do-not-use-in-prod'
-)
+const SESSION_COOKIE = 'session_token'
+
+function getJwtSecret() {
+    const secret = process.env.JWT_SECRET
+
+    if (!secret && process.env.NODE_ENV === 'production') {
+        throw new Error('JWT_SECRET must be set in production')
+    }
+
+    return new TextEncoder().encode(secret || 'default-dev-secret-do-not-use-in-prod')
+}
 
 export async function createSession(userId: string, role: string, isOwner: boolean) {
     const token = await new SignJWT({ userId, role, isOwner })
         .setProtectedHeader({ alg: 'HS256' })
         .setIssuedAt()
         .setExpirationTime('24h')
-        .sign(JWT_SECRET)
+        .sign(getJwtSecret())
 
     const cookieStore = await cookies()
-    cookieStore.set('session_token', token, {
+    cookieStore.set(SESSION_COOKIE, token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
@@ -24,12 +32,12 @@ export async function createSession(userId: string, role: string, isOwner: boole
 
 export async function verifySession() {
     const cookieStore = await cookies()
-    const token = cookieStore.get('session_token')?.value
+    const token = cookieStore.get(SESSION_COOKIE)?.value
 
     if (!token) return null
 
     try {
-        const { payload } = await jwtVerify(token, JWT_SECRET)
+        const { payload } = await jwtVerify(token, getJwtSecret())
         return payload as { userId: string; role: string; isOwner: boolean }
     } catch (error) {
         return null
@@ -38,5 +46,11 @@ export async function verifySession() {
 
 export async function clearSession() {
     const cookieStore = await cookies()
-    cookieStore.delete('session_token')
+    cookieStore.set(SESSION_COOKIE, '', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: 0,
+    })
 }

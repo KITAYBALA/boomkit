@@ -22,7 +22,7 @@ export default function RealtimeChatDemo() {
     // initial load
     supabase
       .from('chat_messages')
-      .select('*')
+      .select('id, username, role, message, created_at')
       .order('created_at', { ascending: true })
       .limit(100)
       .then(({ data }) => {

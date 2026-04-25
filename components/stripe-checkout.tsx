@@ -20,9 +20,11 @@ export default function StripeCheckout({ userId, onSuccess }: StripeCheckoutProp
   const [selectedProduct, setSelectedProduct] = useState<string | null>(null)
   const [showCheckout, setShowCheckout] = useState(false)
 
-  const startCheckoutSessionForProduct = useCallback(() => {
+  const startCheckoutSessionForProduct = useCallback(async () => {
     if (!selectedProduct) return Promise.reject("No product selected")
-    return startCheckoutSession(selectedProduct, userId)
+    const clientSecret = await startCheckoutSession(selectedProduct, userId)
+    if (!clientSecret) throw new Error("Stripe did not return a client secret")
+    return clientSecret
   }, [selectedProduct, userId])
 
   const handleSelectProduct = (productId: string) => {
@@ -140,7 +142,7 @@ export default function StripeCheckout({ userId, onSuccess }: StripeCheckoutProp
             {selectedProduct && (
               <EmbeddedCheckoutProvider
                 stripe={stripePromise}
-                options={{ clientSecret: startCheckoutSessionForProduct }}
+                options={{ fetchClientSecret: startCheckoutSessionForProduct }}
               >
                 <EmbeddedCheckout />
               </EmbeddedCheckoutProvider>

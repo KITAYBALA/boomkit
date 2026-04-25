@@ -56,6 +56,22 @@ BEGIN
 
   UPDATE public.users SET booms = v_receiver_booms WHERE username = p_receiver_username;
 
+  -- Log activity for sender
+  PERFORM log_user_activity(
+    p_sender_username,
+    'gift',
+    'Sent ' || p_amount || 'x ' || p_boom_name || ' to ' || p_receiver_username,
+    jsonb_build_object('receiver', p_receiver_username, 'boom_name', p_boom_name, 'amount', p_amount)
+  );
+
+  -- Log activity for receiver
+  PERFORM log_user_activity(
+    p_receiver_username,
+    'gift',
+    'Received ' || p_amount || 'x ' || p_boom_name || ' from ' || p_sender_username,
+    jsonb_build_object('sender', p_sender_username, 'boom_name', p_boom_name, 'amount', p_amount)
+  );
+
   RETURN jsonb_build_object(
     'success', true, 
     'message', 'Successfully transferred ' || p_amount || 'x ' || p_boom_name || ' to ' || p_receiver_username

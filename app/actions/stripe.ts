@@ -21,15 +21,16 @@ export async function startCheckoutSession(productId: string, userId: string) {
             description: product.description,
           },
           unit_amount: product.priceInCents,
+          ...(product.type === "subscription" ? { recurring: { interval: "month" as const } } : {}),
         },
         quantity: 1,
       },
     ],
-    mode: "payment",
+    mode: product.type === "subscription" ? "subscription" : "payment",
     metadata: {
       userId,
       productId,
-      tokens: product.tokens.toString(),
+      tokens: String(product.tokens ?? 0),
     },
   })
 

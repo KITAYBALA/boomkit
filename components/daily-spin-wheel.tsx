@@ -77,8 +77,8 @@ export default function DailySpinWheel({ onWin, isSpinning, setIsSpinning, canSp
 
                 {/* The Wheel */}
                 <div
-                    className="w-full h-full rounded-full border-8 border-slate-800 shadow-2xl relative transition-transform duration-[8000ms] cubic-bezier(0.15, 0, 0.15, 1)"
-                    style={{ transform: `rotate(${rotation}deg)` }}
+                    className="w-full h-full rounded-full border-8 border-slate-800 shadow-2xl relative transition-transform"
+                    style={{ transform: `rotate(${rotation}deg)`, transitionDuration: "8000ms", transitionTimingFunction: "cubic-bezier(0.15, 0, 0.15, 1)" }}
                 >
                     <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
                         {SECTORS.map((sector, i) => {
