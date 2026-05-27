@@ -28,7 +28,13 @@ async function generate(grade, subject, topic, n) {
 
     try {
         const result = await model.generateContent(prompt);
-        const data = JSON.parse(result.response.text().match(/\{[\s\S]*\}/)[0]);
+        const text = result.response.text();
+        const match = text.match(/\{[\s\S]*\}/);
+        if (!match) {
+            console.error("Gemini response did not contain JSON:", text);
+            return [];
+        }
+        const data = JSON.parse(match[0]);
         return (data.qs || []).map(q => ({
             grade, subject, topic, question: q.q, options: q.opts, correct_index: q.ans
         }));

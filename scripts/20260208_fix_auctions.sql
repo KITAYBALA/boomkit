@@ -68,4 +68,4 @@ BEGIN
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION public.create_auction(text, int, int) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.create_auction(text, int, int, text) TO authenticated;
