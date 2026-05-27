@@ -8,9 +8,13 @@ function getJwtSecret() {
 
     if (!secret) {
         if (process.env.NODE_ENV === 'production') {
-            throw new Error('JWT_SECRET must be set in production environments for session signing')
+            console.warn('[SECURITY WARNING] JWT_SECRET is not set. Falling back to SUPABASE_SERVICE_ROLE_KEY. Please set JWT_SECRET in production environment variables!')
         }
-        return new TextEncoder().encode(process.env.SUPABASE_SERVICE_ROLE_KEY || 'default-dev-secret-do-not-use-in-prod')
+        const fallback = process.env.SUPABASE_SERVICE_ROLE_KEY
+        if (!fallback) {
+            throw new Error('JWT_SECRET or SUPABASE_SERVICE_ROLE_KEY must be set for session signing')
+        }
+        return new TextEncoder().encode(fallback)
     }
 
     return new TextEncoder().encode(secret)
