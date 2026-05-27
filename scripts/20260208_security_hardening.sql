@@ -25,6 +25,7 @@ ALTER TABLE public.blacklisted_ips ENABLE ROW LEVEL SECURITY;
 
 -- 5. Policies for Blacklist
 -- Staff can view blacklist
+DROP POLICY IF EXISTS "Staff can view blacklist" ON public.blacklisted_ips;
 CREATE POLICY "Staff can view blacklist" ON public.blacklisted_ips
     FOR SELECT
     USING (
@@ -36,6 +37,7 @@ CREATE POLICY "Staff can view blacklist" ON public.blacklisted_ips
     );
 
 -- Staff can insert into blacklist
+DROP POLICY IF EXISTS "Staff can insert blacklist" ON public.blacklisted_ips;
 CREATE POLICY "Staff can insert blacklist" ON public.blacklisted_ips
     FOR INSERT
     WITH CHECK (
@@ -47,6 +49,7 @@ CREATE POLICY "Staff can insert blacklist" ON public.blacklisted_ips
     );
 
 -- Owner/Admin can delete from blacklist
+DROP POLICY IF EXISTS "Admins can delete blacklist" ON public.blacklisted_ips;
 CREATE POLICY "Admins can delete blacklist" ON public.blacklisted_ips
     FOR DELETE
     USING (
