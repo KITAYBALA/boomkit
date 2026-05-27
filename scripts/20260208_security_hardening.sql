@@ -8,6 +8,7 @@ ALTER TABLE public.users ADD COLUMN IF NOT EXISTS reason TEXT; -- Using reason t
 -- 2. Backfill existing users and Validate status values
 UPDATE public.users SET status = 'approved' WHERE status IS NULL OR status NOT IN ('pending', 'approved', 'rejected');
 
+ALTER TABLE public.users DROP CONSTRAINT IF EXISTS check_status;
 ALTER TABLE public.users ADD CONSTRAINT check_status CHECK (status IN ('pending', 'approved', 'rejected'));
 
 -- 3. Create Blacklisted IPs table
