@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS public.blacklisted_ips (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     ip TEXT UNIQUE NOT NULL,
     reason TEXT,
-    banned_by UUID REFERENCES auth.users(id),
+    banned_by TEXT,
     banned_at TIMESTAMPTZ DEFAULT NOW()
 );
 

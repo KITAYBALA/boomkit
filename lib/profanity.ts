@@ -75,13 +75,30 @@ const PROFANITY_LIST = [
 
 // Normalizes text to handle Leetspeak and repeated characters
 // e.g. "Hxllo" -> "hello", "baaad" -> "bad"
-function normalizeText(text: string): string {
-    if (!text) return "";
+function buildProfanityRegex(word: string): RegExp {
+    const chars = word.split('');
+    const pattern = chars.map((char, index) => {
+        const escaped = char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        // Allow repeats of the character
+        const part = `${escaped}+`;
+        if (index < chars.length - 1) {
+            // Allow spaces, punctuation, underscores, and letters matching the next char or repeat
+            return `${part}[\\s\\W_]*`;
+        }
+        return part;
+    }).join('');
 
-    let normalized = text.toLowerCase();
+    if (word.length <= 3) {
+        return new RegExp(`\\b${pattern}\\b`, 'i');
+    }
+    return new RegExp(pattern, 'i');
+}
 
-    // 1. Convert Leetspeak
-    normalized = normalized
+export function containsProfanity(message: string): boolean {
+    if (!message) return false;
+
+    // Normalize leetspeak characters in the input message for better match matching
+    const lowerMessage = message.toLowerCase()
         .replace(/0/g, 'o')
         .replace(/1/g, 'i')
         .replace(/3/g, 'e')
@@ -95,81 +112,13 @@ function normalizeText(text: string): string {
         .replace(/\+/g, 't')
         .replace(/\|/g, 'i');
 
-    // 2. Remove non-alphabetic characters (allows for "f.u.c.k" to become "fuck")
-    normalized = normalized.replace(/[^a-z]/g, '');
-
-    // 3. Remove repeated characters (e.g. "fuuuck" -> "fugk" -> will fail word match but helps substring match)
-    // Actually, simply removing 3+ repeats handles "fuuuck" -> "fuck"
-    normalized = normalized.replace(/(.)\1{2,}/g, '$1');
-
-    return normalized;
-}
-
-export function containsProfanity(message: string): boolean {
-    if (!message) return false
-
-    const lowerMessage = message.toLowerCase()
-
-    // 1. Direct Word Match (with word boundaries)
-    // Catches "fuck" but avoids "scunthorpe"
     for (const word of PROFANITY_LIST) {
-        // Escape special regex characters in the bad word
-        const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-
-        // Look for whole words
-        const regex = new RegExp(`\\b${escapedWord}\\b`, 'i')
+        const regex = buildProfanityRegex(word);
         if (regex.test(lowerMessage)) {
-            return true
-        }
-    }
-
-    // 2. Normalized Text Check
-    // "f.u.c.k" -> "fuck"
-    // "sh1t" -> "shit"
-    // "niiigggeeerrr" -> "niger" (imperfect but catches many)
-    const normalized = normalizeText(message);
-
-    for (const word of PROFANITY_LIST) {
-        // Only check really bad words here to avoid false positives like "pass" or "class"
-        // For example if "ass" is in list, "classic" normalized is "classic" -> contains "ass" -> FALSE POSITIVE
-        // So we need strict checking even in normalized mode.
-
-        // This part is tricky. Let's do a substring check ONLY for words longer than 3 chars to avoid "ass" matching "bass"
-        if (word.length > 3 && normalized.includes(word)) {
             return true;
         }
-
-        // Start/End checks for short words
-        if (word.length <= 3) {
-            if (normalized === word ||
-                normalized.startsWith(word + " ") ||
-                normalized.endsWith(" " + word) ||
-                normalized.includes(" " + word + " ")) {
-                return true;
-            }
-        }
     }
 
-    // 3. Specific Variation Patterns (Regex for spaced out words)
-    // "f u c k" -> /f\s*u\s*c\s*k/
-    for (const word of PROFANITY_LIST) {
-        if (word.length < 3) continue; // Skip too short
-
-        // Escape existing special chars in the word first to avoid double quantifiers like `\s**`
-        // e.g. "f*ck" -> "f\*ck" -> split -> f, \*, c, k -> join \s* -> f\s*\* \s*c\s*k
-        const escapedWordChars = word.split('').map(c => c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-        const spreadRegexPattern = escapedWordChars.join('\\s*');
-
-        try {
-            const spreadRegex = new RegExp(spreadRegexPattern, 'i');
-            if (spreadRegex.test(message)) {
-                return true;
-            }
-        } catch (e) {
-            console.error("Invalid regex generated for word:", word, spreadRegexPattern);
-            continue;
-        }
-    }
-
-    return false
+    return false;
 }
+

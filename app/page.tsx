@@ -1772,6 +1772,19 @@ export default function BoomkitGame() {
   // Handle daily spin
   // handleDailySpin removed - logic moved to DailySpinWheel component and its onWin callback
 
+  const parseApiResponse = async (response: Response) => {
+    const contentType = response.headers.get("content-type") || ""
+    if (contentType.includes("application/json")) {
+      return response.json()
+    }
+
+    const text = await response.text()
+    return {
+      success: false,
+      message: text || `Request failed with status ${response.status}`,
+    }
+  }
+
   // Handle registration - SERVER-SIDE AUTHENTICATION
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -1806,7 +1819,7 @@ export default function BoomkitGame() {
         }),
       })
 
-      const data = await response.json()
+      const data = await parseApiResponse(response)
 
       if (!response.ok || !data.success) {
         alert(data.message || "Registration failed. Please try again.")
@@ -1893,7 +1906,7 @@ export default function BoomkitGame() {
         }),
       })
 
-      const data = await response.json()
+      const data = await parseApiResponse(response)
 
       if (!response.ok || !data.success) {
         // Check if password reset is required

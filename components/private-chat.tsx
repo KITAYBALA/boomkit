@@ -206,12 +206,10 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
                     const newMsg = payload.new as Message
                     if (activeConversation?.id === newMsg.conversation_id) {
                         // Check blocked
-                        const senderBlocked = blockedUsers.includes(newMsg.sender_id)
-                        // Note: We might need sender_id in blockedUsers.
-                        // Current block implementation might be username or ID based. Let's assume ID.
-                        // IMPORTANT: blockedUsers logic needs to be consistent. 
-                        // For now, let's just filter message list render.
-                        setMessages(prev => [...prev, newMsg])
+                        const senderBlocked = blockedUsers.includes(newMsg.sender_username)
+                        if (!senderBlocked) {
+                            setMessages(prev => [...prev, newMsg])
+                        }
                     }
                     // Refresh list to update "last message" or order
                     fetchConversations()
@@ -222,7 +220,7 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
         return () => {
             supabase.removeChannel(channel)
         }
-    }, [supabase, currentUser?.id, activeConversation?.id])
+    }, [supabase, currentUser?.id, activeConversation?.id, blockedUsers])
 
     // Scroll to bottom when messages change
     useEffect(() => {

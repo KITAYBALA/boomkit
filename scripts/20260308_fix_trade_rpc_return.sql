@@ -45,6 +45,7 @@ BEGIN
   IF v_receiver_booms IS NULL THEN v_receiver_booms := '{}'::jsonb; END IF;
 
   -- 3. Verification: Items & Tokens
+  -- Sender verification
   FOR v_boom_key, v_boom_qty IN SELECT * FROM jsonb_each_text(v_trade.sender_booms) LOOP
     IF COALESCE((v_sender_booms->>v_boom_key)::int, 0) < v_boom_qty THEN
       RAISE EXCEPTION 'Verification failed: % no longer has enough %', v_trade.sender_username, v_boom_key;
@@ -53,6 +54,17 @@ BEGIN
 
   IF (SELECT tokens FROM public.users WHERE id = v_sender_id) < v_trade.sender_tokens THEN
       RAISE EXCEPTION 'Sender has insufficient tokens';
+  END IF;
+
+  -- Receiver verification
+  FOR v_boom_key, v_boom_qty IN SELECT * FROM jsonb_each_text(v_trade.receiver_booms) LOOP
+    IF COALESCE((v_receiver_booms->>v_boom_key)::int, 0) < v_boom_qty THEN
+      RAISE EXCEPTION 'Verification failed: % no longer has enough %', v_trade.receiver_username, v_boom_key;
+    END IF;
+  END LOOP;
+
+  IF (SELECT tokens FROM public.users WHERE id = v_receiver_id) < v_trade.receiver_tokens THEN
+      RAISE EXCEPTION 'Receiver has insufficient tokens';
   END IF;
 
   -- 4. Calculate Final Inventories

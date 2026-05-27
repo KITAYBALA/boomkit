@@ -39,30 +39,66 @@ export interface Database {
         }
         Relationships: []
       }
-      auction_items: {
+      blacklisted_ips: {
         Row: {
-          boom_name: string
-          current_bid: number
-          id: string
-          seller: string
-          time_left: number
-          bidders: string[] | null
+          ip: string
+          reason: string | null
+          banned_at: string
+          banned_by: string | null
         }
         Insert: {
-          boom_name: string
-          current_bid: number
-          id: string
-          seller: string
-          time_left: number
-          bidders?: string[] | null
+          ip: string
+          reason?: string | null
+          banned_at?: string
+          banned_by?: string | null
         }
         Update: {
-          boom_name?: string
-          current_bid?: number
+          ip?: string
+          reason?: string | null
+          banned_at?: string
+          banned_by?: string | null
+        }
+        Relationships: []
+      }
+      auction_items: {
+        Row: {
+          id: string
+          boom_name: string
+          seller: string
+          current_bid: number
+          top_bidder: string | null
+          top_bidder_id: string | null
+          ends_at: string
+          created_at: string
+          bidders: Json | null
+          status: string | null
+          time_left: number | null
+        }
+        Insert: {
           id?: string
+          boom_name: string
+          seller: string
+          current_bid: number
+          top_bidder?: string | null
+          top_bidder_id?: string | null
+          ends_at: string
+          created_at?: string
+          bidders?: Json | null
+          status?: string | null
+          time_left?: number | null
+        }
+        Update: {
+          id?: string
+          boom_name?: string
           seller?: string
-          time_left?: number
-          bidders?: string[] | null
+          current_bid?: number
+          top_bidder?: string | null
+          top_bidder_id?: string | null
+          ends_at?: string
+          created_at?: string
+          bidders?: Json | null
+          status?: string | null
+          time_left?: number | null
         }
         Relationships: []
       }
@@ -71,22 +107,28 @@ export interface Database {
           id: string
           message: string
           role: string
-          timestamp: number
+          timestamp: number | null
           username: string
+          inserted_at: string
+          reactions: Json | null
         }
         Insert: {
           id: string
           message: string
           role: string
-          timestamp: number
+          timestamp?: number | null
           username: string
+          inserted_at?: string
+          reactions?: Json | null
         }
         Update: {
           id?: string
           message?: string
           role?: string
-          timestamp?: number
+          timestamp?: number | null
           username?: string
+          inserted_at?: string
+          reactions?: Json | null
         }
         Relationships: []
       }
@@ -222,6 +264,16 @@ export interface Database {
           badges: string[] | null
           xp: number
           level: number
+          boom_score: number | null
+          password_hash: string | null
+          password_reset_required: boolean | null
+          last_ip: string | null
+          login_streak: number | null
+          last_streak_claim: string | null
+          season_xp: number | null
+          has_plus_pass: boolean | null
+          games_played: number | null
+          total_tokens_earned: number | null
         }
         Insert: {
           age: number
@@ -252,6 +304,16 @@ export interface Database {
           badges?: string[] | null
           xp?: number
           level?: number
+          boom_score?: number | null
+          password_hash?: string | null
+          password_reset_required?: boolean | null
+          last_ip?: string | null
+          login_streak?: number | null
+          last_streak_claim?: string | null
+          season_xp?: number | null
+          has_plus_pass?: boolean | null
+          games_played?: number | null
+          total_tokens_earned?: number | null
         }
         Update: {
           age?: number
@@ -282,6 +344,139 @@ export interface Database {
           badges?: string[] | null
           xp?: number
           level?: number
+          boom_score?: number | null
+          password_hash?: string | null
+          password_reset_required?: boolean | null
+          last_ip?: string | null
+          login_streak?: number | null
+          last_streak_claim?: string | null
+          season_xp?: number | null
+          has_plus_pass?: boolean | null
+          games_played?: number | null
+          total_tokens_earned?: number | null
+        }
+        Relationships: []
+      }
+      conversations: {
+        Row: {
+          id: string
+          name: string | null
+          is_group: boolean
+          created_at: string
+          updated_at: string
+          created_by: string | null
+        }
+        Insert: {
+          id?: string
+          name?: string | null
+          is_group?: boolean
+          created_at?: string
+          updated_at?: string
+          created_by?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string | null
+          is_group?: boolean
+          created_at?: string
+          updated_at?: string
+          created_by?: string | null
+        }
+        Relationships: []
+      }
+      conversation_members: {
+        Row: {
+          id: string
+          conversation_id: string
+          user_id: string
+          joined_at: string
+        }
+        Insert: {
+          id?: string
+          conversation_id: string
+          user_id: string
+          joined_at?: string
+        }
+        Update: {
+          id?: string
+          conversation_id?: string
+          user_id?: string
+          joined_at?: string
+        }
+        Relationships: []
+      }
+      direct_messages: {
+        Row: {
+          id: string
+          conversation_id: string
+          sender_id: string
+          sender_username: string
+          message: string
+          inserted_at: string
+        }
+        Insert: {
+          id?: string
+          conversation_id: string
+          sender_id: string
+          sender_username: string
+          message: string
+          inserted_at?: string
+        }
+        Update: {
+          id?: string
+          conversation_id?: string
+          sender_id?: string
+          sender_username?: string
+          message?: string
+          inserted_at?: string
+        }
+        Relationships: []
+      }
+      trades: {
+        Row: {
+          id: string
+          sender_id: string
+          sender_username: string
+          receiver_id: string
+          receiver_username: string
+          sender_booms: Json
+          receiver_booms: Json
+          sender_tokens: number
+          receiver_tokens: number
+          status: string
+          message: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          sender_id: string
+          sender_username: string
+          receiver_id: string
+          receiver_username: string
+          sender_booms?: Json
+          receiver_booms?: Json
+          sender_tokens?: number
+          receiver_tokens?: number
+          status?: string
+          message?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          sender_id?: string
+          sender_username?: string
+          receiver_id?: string
+          receiver_username?: string
+          sender_booms?: Json
+          receiver_booms?: Json
+          sender_tokens?: number
+          receiver_tokens?: number
+          status?: string
+          message?: string | null
+          created_at?: string
+          updated_at?: string
         }
         Relationships: []
       }

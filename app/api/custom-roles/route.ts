@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseServerClient } from '@/lib/supabase-server-client'
 import { verifySession } from '@/lib/auth-server'
+import crypto from 'crypto'
 
 export async function GET() {
   try {
@@ -46,6 +47,7 @@ export async function POST(request: NextRequest) {
     const { data, error } = await supabase
       .from('custom_roles')
       .insert([{
+        id: crypto.randomUUID(),
         name: name.trim().slice(0, 64),
         color: color.trim().slice(0, 64),
         assigned_by: actor.username,

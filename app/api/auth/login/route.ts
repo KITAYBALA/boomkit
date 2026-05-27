@@ -43,6 +43,8 @@ const AUTH_USER_COLUMNS = [
   'level',
 ].join(', ')
 
+const DEBUG_AUTH = process.env.DEBUG_AUTH === 'true' || process.env.NODE_ENV !== 'production'
+
 export async function POST(request: NextRequest) {
   try {
     const ip = getClientIp(request)
@@ -62,6 +64,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Username and password are required' }, { status: 400 })
     }
 
+    if (DEBUG_AUTH) {
+      console.log('[AUTH DEBUG] ===== LOGIN START =====')
+      console.log('[AUTH DEBUG] Input username/email:', identifier)
+      console.log('[AUTH DEBUG] Input password length:', password.length)
+    }
+
     const supabase = getSupabaseServerClient()
 
     const { data: blacklisted } = await supabase
@@ -71,6 +79,7 @@ export async function POST(request: NextRequest) {
       .maybeSingle()
 
     if (blacklisted) {
+      if (DEBUG_AUTH) console.log('[AUTH DEBUG] IP is blacklisted:', ip)
       return NextResponse.json(
         { success: false, message: 'Your IP address is blacklisted. Access denied.' },
         { status: 403 }
@@ -79,7 +88,15 @@ export async function POST(request: NextRequest) {
 
     const userData = await findUserByUsernameOrEmail(supabase, identifier)
     if (!userData) {
+      if (DEBUG_AUTH) console.log('[AUTH DEBUG] User not found by username or email')
       return invalidCredentials()
+    }
+
+    if (DEBUG_AUTH) {
+      console.log('[AUTH DEBUG] User found:', userData.username)
+      console.log('[AUTH DEBUG] User ID:', userData.id)
+      console.log('[AUTH DEBUG] User is_banned:', userData.is_banned)
+      console.log('[AUTH DEBUG] Stored password_hash exists:', !!userData.password_hash)
     }
 
     if (userData.is_banned) {
@@ -99,6 +116,10 @@ export async function POST(request: NextRequest) {
     }
 
     const passwordResult = await verifyPassword(password, userData.password_hash)
+    if (DEBUG_AUTH) {
+      console.log('[AUTH DEBUG] Password verification result:', passwordResult)
+    }
+
     if (!passwordResult.valid) {
       return invalidCredentials()
     }
@@ -118,10 +139,17 @@ export async function POST(request: NextRequest) {
 
     const updatePayload: Record<string, string> = { last_ip: ip }
     if (passwordResult.needsRehash) {
-      updatePayload.password_hash = await hashPassword(password)
+      try {
+        updatePayload.password_hash = await hashPassword(password)
+        if (DEBUG_AUTH) console.log('[AUTH DEBUG] Password successfully rehashed to scrypt')
+      } catch (rehashError) {
+        console.warn('[AUTH] Failed to rehash password during login:', rehashError)
+      }
     }
 
     await supabase.from('users').update(updatePayload).eq('id', userData.id)
+
+    if (DEBUG_AUTH) console.log('[AUTH DEBUG] ===== LOGIN SUCCESS =====')
 
     return NextResponse.json({
       success: true,
@@ -142,10 +170,11 @@ async function findUserByUsernameOrEmail(
   supabase: ReturnType<typeof getSupabaseServerClient>,
   identifier: string
 ): Promise<any | null> {
+  if (DEBUG_AUTH) console.log('[AUTH DEBUG] Querying username:', identifier)
   const { data: userByUsername, error: usernameError } = await supabase
     .from('users')
     .select(AUTH_USER_COLUMNS)
-    .eq('username', identifier)
+    .ilike('username', identifier)
     .maybeSingle()
 
   if (usernameError) {
@@ -153,17 +182,25 @@ async function findUserByUsernameOrEmail(
     return null
   }
 
-  if (userByUsername) return userByUsername
+  if (userByUsername) {
+    if (DEBUG_AUTH) console.log('[AUTH DEBUG] User found by username lookup')
+    return userByUsername
+  }
 
+  if (DEBUG_AUTH) console.log('[AUTH DEBUG] Username not found, querying email:', identifier)
   const { data: userByEmail, error: emailError } = await supabase
     .from('users')
     .select(AUTH_USER_COLUMNS)
-    .eq('email', identifier)
+    .ilike('email', identifier)
     .maybeSingle()
 
   if (emailError) {
     console.error('[AUTH] Email lookup failed:', emailError)
     return null
+  }
+
+  if (userByEmail) {
+    if (DEBUG_AUTH) console.log('[AUTH DEBUG] User found by email lookup')
   }
 
   return userByEmail

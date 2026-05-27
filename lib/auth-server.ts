@@ -4,10 +4,13 @@ import { cookies } from 'next/headers'
 const SESSION_COOKIE = 'session_token'
 
 function getJwtSecret() {
-    const secret = process.env.JWT_SECRET || process.env.SUPABASE_SERVICE_ROLE_KEY
+    const secret = process.env.JWT_SECRET
 
     if (!secret) {
-        throw new Error('JWT_SECRET or SUPABASE_SERVICE_ROLE_KEY must be set for session signing')
+        if (process.env.NODE_ENV === 'production') {
+            throw new Error('JWT_SECRET must be set in production environments for session signing')
+        }
+        return new TextEncoder().encode(process.env.SUPABASE_SERVICE_ROLE_KEY || 'default-dev-secret-do-not-use-in-prod')
     }
 
     return new TextEncoder().encode(secret)

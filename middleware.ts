@@ -1,5 +1,8 @@
 import { NextResponse, type NextRequest } from 'next/server'
 
+const ipCache = new Map<string, { blacklisted: boolean; expires: number }>()
+const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
+
 export async function middleware(request: NextRequest) {
     if (
         request.nextUrl.pathname.startsWith('/_next') ||
@@ -25,6 +28,17 @@ export async function middleware(request: NextRequest) {
 
     if (!ip) return response
 
+    // Check edge cache first
+    const cached = ipCache.get(ip)
+    if (cached && cached.expires > Date.now()) {
+        if (cached.blacklisted) {
+            const url = request.nextUrl.clone()
+            url.pathname = '/banned'
+            return NextResponse.redirect(url)
+        }
+        return response
+    }
+
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
@@ -43,7 +57,10 @@ export async function middleware(request: NextRequest) {
             body: JSON.stringify({ check_ip: ip }),
         })
 
-        if (rpcResponse.ok && (await rpcResponse.json()) === true) {
+        const isBlacklisted = rpcResponse.ok && (await rpcResponse.json()) === true
+        ipCache.set(ip, { blacklisted: isBlacklisted, expires: Date.now() + CACHE_TTL })
+
+        if (isBlacklisted) {
             const url = request.nextUrl.clone()
             url.pathname = '/banned'
             return NextResponse.redirect(url)

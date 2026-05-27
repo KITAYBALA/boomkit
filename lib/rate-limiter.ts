@@ -41,17 +41,17 @@ export function checkRateLimiter(ip: string): { allowed: boolean; retryAfter?: n
         };
     }
 
+    // On-demand randomized cleanup (5% chance per request) to prevent memory leak in serverless context
+    if (Math.random() < 0.05) {
+        for (const [key, val] of rateLimitMap.entries()) {
+            if (now > val.resetTime) {
+                rateLimitMap.delete(key);
+            }
+        }
+    }
+
     // Increment count
     entry.count += 1;
     return { allowed: true };
 }
 
-// Memory cleanup utility to prevent Map growing infinitely
-setInterval(() => {
-    const now = Date.now();
-    for (const [ip, entry] of rateLimitMap.entries()) {
-        if (now > entry.resetTime) {
-            rateLimitMap.delete(ip);
-        }
-    }
-}, 5 * 60 * 1000); // Cleanup every 5 minutes
