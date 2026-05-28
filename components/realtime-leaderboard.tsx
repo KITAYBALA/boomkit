@@ -16,6 +16,8 @@ interface LeaderboardUser {
   role: string
   badges: string[]
   packs_opened: number
+  clan_tag?: string | null
+  clan_tag_color?: string | null
 }
 
 interface RealtimeLeaderboardProps {
@@ -34,7 +36,7 @@ export default function RealtimeLeaderboard({ onPlayerClick, ...props }: Realtim
       if (!supabase) return
       const { data, error } = await supabase
         .from("users")
-        .select("id, username, tokens, boom_score, profile_picture, role, badges, packs_opened")
+        .select("id, username, tokens, boom_score, profile_picture, role, badges, packs_opened, clan_tag, clan_tag_color")
         .eq("is_banned", false)
         .order("tokens", { ascending: false })
         .limit(10)
@@ -143,6 +145,11 @@ export default function RealtimeLeaderboard({ onPlayerClick, ...props }: Realtim
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       <p className={`font-bold truncate text-lg ${index < 3 ? "text-primary" : "text-foreground"}`}>
+                        {user.clan_tag && (
+                          <span className={`text-xs font-black tracking-tight ${user.clan_tag_color || 'text-purple-400'} mr-1`}>
+                            [{user.clan_tag}]
+                          </span>
+                        )}
                         {user.username}
                       </p>
                       <Badge className={`${getRoleColor(user.role)} text-white text-[10px] font-bold uppercase tracking-wider h-5 flex items-center border-none`}>

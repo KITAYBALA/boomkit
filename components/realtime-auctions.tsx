@@ -28,6 +28,8 @@ interface GameUser {
   username: string
   tokens: number
   booms: Record<string, number>
+  clan_tag?: string | null
+  clan_tag_color?: string | null
 }
 
 type Props = {
@@ -38,6 +40,7 @@ type Props = {
   onAuctionCreated?: () => void
   onClaimComplete?: () => void
   onPlayerClick?: (userId: string) => void
+  users?: GameUser[]
 }
 
 type DbAuction = {
@@ -70,6 +73,7 @@ export default function RealtimeAuctions({
   onAuctionCreated,
   onClaimComplete,
   onPlayerClick,
+  users,
 }: Props) {
   const supabase = useMemo(() => getSupabaseBrowserClient(), [])
   const [items, setItems] = useState<DbAuction[]>([])
@@ -596,7 +600,17 @@ export default function RealtimeAuctions({
                           }}
                         >
                           <UserIcon className="h-3.5 w-3.5 text-purple-400" />
-                          <span className="text-sm font-bold text-white truncate">{item.seller}</span>
+                          <span className="text-sm font-bold text-white truncate flex items-center gap-1">
+                             {(() => {
+                               const u = users?.find((usr) => usr.username === item.seller)
+                               return u?.clan_tag ? (
+                                 <span className={`text-[10px] font-black tracking-tight ${u.clan_tag_color || 'text-purple-400'}`}>
+                                   [{u.clan_tag}]
+                                 </span>
+                               ) : null
+                             })()}
+                             {item.seller}
+                           </span>
                         </div>
                       </div>
                       <div className="bg-black/30 rounded-2xl p-4 border border-white/5">
@@ -637,8 +651,20 @@ export default function RealtimeAuctions({
                             }}
                           >
                             <TrophyIcon className={`h-3 w-3 ${isWinner ? 'text-yellow-500' : 'text-purple-400'}`} />
-                            <span className={`text-[10px] font-black uppercase tracking-wider ${isWinner ? 'text-yellow-500' : 'text-white'}`}>
-                              {isWinner ? 'Your Leading!' : item.top_bidder}
+                            <span className={`text-[10px] font-black uppercase tracking-wider ${isWinner ? 'text-yellow-500' : 'text-white'} flex items-center gap-1`}>
+                              {isWinner ? 'Your Leading!' : (
+                                <>
+                                  {(() => {
+                                    const u = users?.find((usr) => usr.username === item.top_bidder)
+                                    return u?.clan_tag ? (
+                                      <span className={`text-[9px] font-black tracking-tight ${u.clan_tag_color || 'text-purple-400'} mr-0.5`}>
+                                        [{u.clan_tag}]
+                                      </span>
+                                    ) : null
+                                  })()}
+                                  {item.top_bidder}
+                                </>
+                              )}
                             </span>
                           </div>
                         </div>

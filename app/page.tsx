@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import {
   BarChart3Icon,
   PackageIcon,
@@ -238,6 +239,10 @@ interface GameUser {
   loginStreak: number
   lastStreakClaim: string | null
   // password?: string; // Removed password from interface to avoid unintended exposure
+  clan_id?: string | null
+  clan_role?: "leader" | "co_leader" | "member" | null
+  clan_tag?: string | null
+  clan_tag_color?: string | null
 }
 
 interface UserRole {
@@ -759,7 +764,7 @@ export default function BoomkitGame() {
     | "shop"
     | "discover"
     | "friends"
-    | "rentals"
+    | "clans"
     | "tournaments"
     | "achievements"
     | "season"
@@ -915,6 +920,25 @@ export default function BoomkitGame() {
 
   // News Popup state for V2 release
   const [showV2NewsModal, setShowV2NewsModal] = useState(false)
+
+  // Clans States
+  const [clanDetails, setClanDetails] = useState<any | null>(null)
+  const [clansList, setClansList] = useState<any[]>([])
+  const [clanChat, setClanChat] = useState<any[]>([])
+  const [newClanMessage, setNewClanMessage] = useState("")
+  const [searchClanQuery, setSearchClanQuery] = useState("")
+  const [showClanProfileModal, setShowClanProfileModal] = useState<any | null>(null)
+  const [isCreatingClan, setIsCreatingClan] = useState(false)
+  const [createClanForm, setCreateClanForm] = useState({
+    name: "",
+    tag: "",
+    description: "",
+    logo: "🛡️",
+    tagColor: "text-purple-400",
+    minTokens: 0,
+    minRarity: "uncommon",
+    minRarityCount: 0
+  })
 
   // Secret owner access code
 
@@ -1251,7 +1275,7 @@ export default function BoomkitGame() {
       }
 
       // Only select safe fields; never expose password_hash, last_ip, or email to clients.
-      const safeColumns = "id, username, age, tokens, daily_tokens, packs, booms, is_owner, is_banned, is_muted, status, reason, role, join_date, boom_score, total_value, profile_picture, is_plus_user, name_color, banner_color, last_daily_spin, badges, mute_expiry, ban_expiry, last_seen, packs_opened, xp, level, login_streak, last_streak_claim, pinned_boom, season_xp, has_plus_pass, games_played, total_tokens_earned"
+      const safeColumns = "id, username, age, tokens, daily_tokens, packs, booms, is_owner, is_banned, is_muted, status, reason, role, join_date, boom_score, total_value, profile_picture, is_plus_user, name_color, banner_color, last_daily_spin, badges, mute_expiry, ban_expiry, last_seen, packs_opened, xp, level, login_streak, last_streak_claim, pinned_boom, season_xp, has_plus_pass, games_played, total_tokens_earned, clan_id, clan_role, clan_tag, clan_tag_color"
       const { data, error } = await supabase.from("users").select(safeColumns)
 
       if (error) {
@@ -1300,6 +1324,10 @@ export default function BoomkitGame() {
           has_plus_pass: u.has_plus_pass || false,
           games_played: u.games_played || 0,
           total_tokens_earned: u.total_tokens_earned || 0,
+          clan_id: u.clan_id || null,
+          clan_role: u.clan_role || null,
+          clan_tag: u.clan_tag || null,
+          clan_tag_color: u.clan_tag_color || null,
         }))
 
         setUsers(mappedUsers)
@@ -1401,6 +1429,10 @@ export default function BoomkitGame() {
                 total_tokens_earned: data.user.total_tokens_earned || 0,
                 loginStreak: data.user.login_streak || 0,
                 lastStreakClaim: data.user.last_streak_claim || null,
+                clan_id: data.user.clan_id || null,
+                clan_role: data.user.clan_role || null,
+                clan_tag: data.user.clan_tag || null,
+                clan_tag_color: data.user.clan_tag_color || null,
               }
 
               if (authoritativeUser.isBanned) {
@@ -1550,6 +1582,10 @@ export default function BoomkitGame() {
               status: u.status ?? currentUser.status,
               xp: u.xp ?? currentUser.xp,
               level: u.level ?? currentUser.level,
+              clan_id: u.clan_id ?? currentUser.clan_id,
+              clan_role: u.clan_role ?? currentUser.clan_role,
+              clan_tag: u.clan_tag ?? currentUser.clan_tag,
+              clan_tag_color: u.clan_tag_color ?? currentUser.clan_tag_color,
             }
             setCurrentUser(updatedUser)
             localStorage.setItem("boomkit_current_user", JSON.stringify(updatedUser))
@@ -1565,6 +1601,41 @@ export default function BoomkitGame() {
       if (channel) supabase?.removeChannel(channel)
     }
   }, [syncCurrentUserRole, currentUser?.id, supabase])
+
+  // Real-time listener for clan chat messages
+  useEffect(() => {
+    if (!supabase || !currentUser?.clan_id) {
+      setClanChat([])
+      return
+    }
+
+    // Fetch initial chat
+    fetchClanChat(currentUser.clan_id)
+
+    // Subscribe to new chat messages
+    const channel = supabase
+      .channel(`clan_chat_${currentUser.clan_id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'clan_chat_messages',
+          filter: `clan_id=eq.${currentUser.clan_id}`
+        },
+        (payload: any) => {
+          setClanChat((prev) => {
+            if (prev.some(msg => msg.id === payload.new.id)) return prev
+            return [...prev, payload.new]
+          })
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [currentUser?.clan_id, supabase])
 
   // Custom roles feature removed for security - no longer loading from Supabase
 
@@ -1921,6 +1992,10 @@ export default function BoomkitGame() {
         total_tokens_earned: user.total_tokens_earned || 0,
         loginStreak: user.login_streak || 0,
         lastStreakClaim: user.last_streak_claim || null,
+        clan_id: user.clan_id || null,
+        clan_role: user.clan_role || null,
+        clan_tag: user.clan_tag || null,
+        clan_tag_color: user.clan_tag_color || null,
       }
 
       if (newUser.status === "pending") {
@@ -2009,6 +2084,10 @@ export default function BoomkitGame() {
         total_tokens_earned: user.total_tokens_earned || 0,
         loginStreak: user.login_streak || 0,
         lastStreakClaim: user.last_streak_claim || null,
+        clan_id: user.clan_id || null,
+        clan_role: user.clan_role || null,
+        clan_tag: user.clan_tag || null,
+        clan_tag_color: user.clan_tag_color || null,
       }
 
       // Check if user is banned (double-check from server response)
@@ -2998,16 +3077,348 @@ export default function BoomkitGame() {
     }
   }
 
-  const fetchRentals = async () => {
+  const fetchClanDetails = async (clanId: string) => {
     if (!supabase) return
     try {
-      const { data } = await supabase.from("boom_rentals")
+      // 1. Fetch clan info
+      const { data: clanInfo, error: clanError } = await supabase
+        .from("clans")
         .select("*")
-        .in("status", ["available", "rented"])
-        .order("created_at", { ascending: false })
-      setRentalListings(data || [])
+        .eq("id", clanId)
+        .single()
+      
+      if (clanError) throw clanError
+
+      // 2. Fetch clan members
+      const { data: membersList, error: membersError } = await supabase
+        .from("users")
+        .select("id, username, tokens, role, join_date, boom_score, total_value, profile_picture, is_plus_user, name_color, banner_color, clan_role, xp, level")
+        .eq("clan_id", clanId)
+        .order("clan_role", { ascending: false })
+
+      if (membersError) throw membersError
+
+      setClanDetails({
+        ...clanInfo,
+        members: membersList || []
+      })
     } catch (e) {
-      console.error("Failed to fetch rentals:", e)
+      console.error("Failed to fetch clan details:", e)
+    }
+  }
+
+  const fetchClansList = async () => {
+    if (!supabase) return
+    try {
+      // Fetch all clans, along with member counts
+      const { data: clans, error: clansError } = await supabase
+        .from("clans")
+        .select("*")
+        .order("xp", { ascending: false })
+
+      if (clansError) throw clansError
+
+      // Fetch user counts per clan
+      const { data: memberCounts, error: countError } = await supabase
+        .from("users")
+        .select("clan_id")
+        .not("clan_id", "is", null)
+
+      const countsMap: { [key: string]: number } = {}
+      memberCounts?.forEach((u: any) => {
+        countsMap[u.clan_id] = (countsMap[u.clan_id] || 0) + 1
+      })
+
+      const formattedClans = (clans || []).map((c: any) => ({
+        ...c,
+        memberCount: countsMap[c.id] || 0
+      }))
+
+      setClansList(formattedClans)
+    } catch (e) {
+      console.error("Failed to fetch clans list:", e)
+    }
+  }
+
+  const fetchClanChat = async (clanId: string) => {
+    if (!supabase) return
+    try {
+      const { data, error } = await supabase
+        .from("clan_chat_messages")
+        .select("*")
+        .eq("clan_id", clanId)
+        .order("created_at", { ascending: true })
+        .limit(50)
+
+      if (error) throw error
+      setClanChat(data || [])
+    } catch (e) {
+      console.error("Failed to fetch clan chat:", e)
+    }
+  }
+
+  const sendClanChatMessage = async () => {
+    if (!newClanMessage.trim() || !currentUser?.clan_id || !supabase) return
+    try {
+      const { error } = await supabase
+        .from("clan_chat_messages")
+        .insert({
+          clan_id: currentUser.clan_id,
+          username: currentUser.username,
+          message: newClanMessage.trim()
+        })
+
+      if (error) throw error
+      setNewClanMessage("")
+    } catch (e: any) {
+      toast.error(e.message || "Failed to send chat message")
+    }
+  }
+
+  const handleCreateClan = async () => {
+    if (!currentUser || !supabase) return
+    const name = createClanForm.name.trim()
+    const tag = createClanForm.tag.trim().toUpperCase()
+    const desc = createClanForm.description.trim()
+    
+    if (!name || !tag) {
+      toast.error("Clan Name and Tag are required.")
+      return
+    }
+
+    if (tag.length < 3 || tag.length > 6) {
+      toast.error("Clan Tag must be between 3 and 6 characters.")
+      return
+    }
+
+    if (currentUser.tokens < 5000) {
+      toast.error("You need at least 5,000 tokens to create a clan.")
+      return
+    }
+
+    setIsCreatingClan(true)
+    try {
+      const { data, error } = await supabase.rpc("create_clan", {
+        p_username: currentUser.username,
+        p_clan_name: name,
+        p_tag: tag,
+        p_description: desc,
+        p_logo: createClanForm.logo,
+        p_tag_color: createClanForm.tagColor
+      })
+
+      if (error) throw error
+
+      if (data.success) {
+        toast.success(data.message)
+        // Refresh local user stats
+        fetchUsersFromSupabase(true)
+        // Reset form
+        setCreateClanForm({
+          name: "",
+          tag: "",
+          description: "",
+          logo: "🛡️",
+          tagColor: "text-purple-400",
+          minTokens: 0,
+          minRarity: "uncommon",
+          minRarityCount: 0
+        })
+      } else {
+        toast.error(data.message)
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Failed to create clan")
+    } finally {
+      setIsCreatingClan(false)
+    }
+  }
+
+  const handleJoinClan = async (clanId: string) => {
+    if (!currentUser || !supabase) return
+    try {
+      const { data, error } = await supabase.rpc("join_clan", {
+        p_username: currentUser.username,
+        p_clan_id: clanId
+      })
+
+      if (error) throw error
+
+      if (data.success) {
+        toast.success(data.message)
+        fetchUsersFromSupabase(true)
+      } else {
+        toast.error(data.message)
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Failed to join clan")
+    }
+  }
+
+  const handleLeaveClan = async () => {
+    if (!currentUser || !supabase) return
+    if (!confirm("Are you sure you want to leave your clan?")) return
+    try {
+      const { data, error } = await supabase.rpc("leave_clan", {
+        p_username: currentUser.username
+      })
+
+      if (error) throw error
+
+      if (data.success) {
+        toast.success(data.message)
+        setClanDetails(null)
+        setClanChat([])
+        fetchUsersFromSupabase(true)
+      } else {
+        toast.error(data.message)
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Failed to leave clan")
+    }
+  }
+
+  const handleDonateToClan = async (amount: number) => {
+    if (!currentUser || !supabase || amount <= 0) return
+    try {
+      const { data, error } = await supabase.rpc("donate_to_clan", {
+        p_username: currentUser.username,
+        p_amount: amount
+      })
+
+      if (error) throw error
+
+      if (data.success) {
+        toast.success(data.message)
+        fetchUsersFromSupabase(true)
+        if (currentUser.clan_id) fetchClanDetails(currentUser.clan_id)
+      } else {
+        toast.error(data.message)
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Failed to donate")
+    }
+  }
+
+  const handleKickMember = async (targetUsername: string) => {
+    if (!currentUser || !supabase) return
+    if (!confirm(`Are you sure you want to kick ${targetUsername} from the clan?`)) return
+    try {
+      const { data, error } = await supabase.rpc("kick_from_clan", {
+        p_username: currentUser.username,
+        p_target_username: targetUsername
+      })
+
+      if (error) throw error
+
+      if (data.success) {
+        toast.success(data.message)
+        if (currentUser.clan_id) fetchClanDetails(currentUser.clan_id)
+      } else {
+        toast.error(data.message)
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Failed to kick member")
+    }
+  }
+
+  const handleUpdateClanInfo = async (description: string, logo: string, tagColor: string, minTokens: number, minRarity: string, minRarityCount: number) => {
+    if (!currentUser || !supabase) return
+    try {
+      const { data, error } = await supabase.rpc("update_clan_info", {
+        p_username: currentUser.username,
+        p_description: description,
+        p_logo: logo,
+        p_tag_color: tagColor,
+        p_min_tokens: minTokens,
+        p_min_rarity: minRarity,
+        p_min_rarity_count: minRarityCount
+      })
+
+      if (error) throw error
+
+      if (data.success) {
+        toast.success(data.message)
+        if (currentUser.clan_id) fetchClanDetails(currentUser.clan_id)
+      } else {
+        toast.error(data.message)
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Failed to update clan settings")
+    }
+  }
+
+  const handlePromoteMember = async (targetUsername: string, newRole: "co_leader" | "member") => {
+    if (!currentUser || !supabase) return
+    const roleText = newRole === "co_leader" ? "Promote" : "Demote"
+    if (!confirm(`Are you sure you want to ${roleText.toLowerCase()} ${targetUsername}?`)) return
+    try {
+      const { data, error } = await supabase.rpc("update_clan_member_role", {
+        p_username: currentUser.username,
+        p_target_username: targetUsername,
+        p_new_role: newRole
+      })
+
+      if (error) throw error
+
+      if (data.success) {
+        toast.success(data.message)
+        if (currentUser.clan_id) fetchClanDetails(currentUser.clan_id)
+      } else {
+        toast.error(data.message)
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Failed to update role")
+    }
+  }
+
+  const handleTransferLeadership = async (targetUsername: string) => {
+    if (!currentUser || !supabase) return
+    if (!confirm(`⚠️ WARNING: Are you sure you want to transfer clan leadership to ${targetUsername}? You will be demoted to a regular member.`)) return
+    try {
+      const { data, error } = await supabase.rpc("transfer_clan_leadership", {
+        p_username: currentUser.username,
+        p_target_username: targetUsername
+      })
+
+      if (error) throw error
+
+      if (data.success) {
+        toast.success(data.message)
+        if (currentUser.clan_id) fetchClanDetails(currentUser.clan_id)
+      } else {
+        toast.error(data.message)
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Failed to transfer leadership")
+    }
+  }
+
+  const fetchSingleClanProfile = async (clanId: string) => {
+    if (!supabase) return
+    try {
+      const { data: clanInfo, error: clanError } = await supabase
+        .from("clans")
+        .select("*")
+        .eq("id", clanId)
+        .single()
+      
+      if (clanError) throw clanError
+
+      const { data: membersList, error: membersError } = await supabase
+        .from("users")
+        .select("username, clan_role, xp, level, profile_picture")
+        .eq("clan_id", clanId)
+        .order("clan_role", { ascending: false })
+
+      if (membersError) throw membersError
+
+      setShowClanProfileModal({
+        ...clanInfo,
+        members: membersList || []
+      })
+    } catch (e: any) {
+      toast.error("Failed to load clan profile")
     }
   }
 
@@ -3048,46 +3459,7 @@ export default function BoomkitGame() {
     } catch (e: any) { alert(e.message || "Failed") }
   }
 
-  const handleListRental = async (boomName: string, price: number, sessions: number) => {
-    if (!currentUser || !supabase) return
-    try {
-      const { data, error } = await supabase.rpc('list_boom_rental', {
-        p_owner: currentUser.username, p_boom_name: boomName, p_price: price, p_sessions: sessions
-      })
-      if (error) throw error
-      alert(`📋 Listed ${boomName} for rent!`)
-      fetchRentals()
-      fetchUsersFromSupabase(true)
-    } catch (e: any) { alert(e.message || "Failed to list rental") }
-  }
 
-  const handleRentBoom = async (rentalId: string) => {
-    if (!currentUser || !supabase) return
-    try {
-      const { data, error } = await supabase.rpc('rent_boom', {
-        p_renter: currentUser.username, p_rental_id: rentalId
-      })
-      if (error) throw error
-      const result = data as any
-      alert(`🎮 ${result.message}`)
-      fetchRentals()
-      fetchUsersFromSupabase(true)
-    } catch (e: any) { alert(e.message || "Failed to rent") }
-  }
-
-  const handleCancelRental = async (rentalId: string) => {
-    if (!currentUser || !supabase) return
-    if (!confirm("Cancel this rental listing?")) return
-    try {
-      const { data, error } = await supabase.rpc('cancel_rental', {
-        p_owner: currentUser.username, p_rental_id: rentalId
-      })
-      if (error) throw error
-      alert("Cancelled and boom returned to your inventory.")
-      fetchRentals()
-      fetchUsersFromSupabase(true)
-    } catch (e: any) { alert(e.message || "Failed to cancel") }
-  }
 
   const [tourneyTitle, setTourneyTitle] = useState("")
   const [tourneyDesc, setTourneyDesc] = useState("")
@@ -3986,15 +4358,19 @@ export default function BoomkitGame() {
 
           <button
             onClick={() => {
-              setCurrentPage("rentals")
+              setCurrentPage("clans")
               setSidebarOpen(false)
-              fetchRentals()
+              if (currentUser?.clan_id) {
+                fetchClanDetails(currentUser.clan_id)
+              } else {
+                fetchClansList()
+              }
             }}
-            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "rentals" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
+            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "clans" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
               }`}
           >
-            <KeyIcon className="h-5 w-5 mr-3" />
-            Rentals
+            <ShieldIcon className="h-5 w-5 mr-3" />
+            Clans Hub
           </button>
 
           <button
@@ -5012,6 +5388,7 @@ export default function BoomkitGame() {
                   currentUser={currentUser}
                   roleName={currentUser ? getUserRoleName(currentUser) : "Player"}
                   onUsernameClick={handleUsernameClick}
+                  onClanTagClick={fetchSingleClanProfile}
                 />
               </div>
             )}
@@ -5037,6 +5414,7 @@ export default function BoomkitGame() {
                 onAuctionCreated={() => fetchUsersFromSupabase(true)}
                 onClaimComplete={() => fetchUsersFromSupabase(true)}
                 onPlayerClick={openPlayerProfile}
+                users={users}
               />
             )}
 
@@ -5815,86 +6193,583 @@ export default function BoomkitGame() {
               </div>
             )}
 
-            {/* Rentals Page */}
-            {currentPage === "rentals" && (
+            {/* Clans Page */}
+            {currentPage === "clans" && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="flex justify-between items-end border-b border-white/10 pb-6">
-                  <div>
-                    <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/50 mb-2">
-                      Boom Rentals
-                    </h1>
-                    <p className="text-white/60 text-lg">Loan your Booms for tokens or rent from others</p>
-                  </div>
-                </div>
+                {currentUser?.clan_id ? (
+                  // IN A CLAN VIEW
+                  !clanDetails ? (
+                    <div className="flex flex-col items-center justify-center p-20 min-h-[400px]">
+                      <div className="relative w-16 h-16">
+                        <div className="absolute inset-0 border-4 border-purple-500/20 rounded-full animate-pulse" />
+                        <div className="absolute inset-0 border-4 border-t-purple-500 rounded-full animate-spin" />
+                      </div>
+                      <p className="mt-4 text-purple-400 font-bold animate-pulse text-lg">Gathering Clan Intelligence...</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-8">
+                      {/* Clan Banner Card */}
+                      <div className="bg-gradient-to-r from-purple-900/30 via-indigo-900/20 to-black/40 backdrop-blur-xl border border-purple-500/20 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-80 h-80 bg-purple-500/10 rounded-full blur-[80px] pointer-events-none" />
+                        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                          <div className="flex items-center gap-6">
+                            <div className="w-24 h-24 bg-purple-500/10 rounded-full flex items-center justify-center text-6xl border border-purple-500/30 shadow-inner">
+                              {clanDetails.logo}
+                            </div>
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-3">
+                                <h1 className="text-4xl font-black text-white tracking-tight">{clanDetails.name}</h1>
+                                <span className={`text-xl font-black px-3 py-1 rounded-xl bg-black/40 border border-white/5 ${clanDetails.tag_color}`}>
+                                  [{clanDetails.tag}]
+                                </span>
+                              </div>
+                              <p className="text-white/60 font-medium text-sm md:text-base max-w-xl">
+                                {clanDetails.description || "This clan has no description yet."}
+                              </p>
+                              <div className="flex flex-wrap items-center gap-4 text-xs font-semibold text-white/50 pt-1">
+                                <span className="flex items-center gap-1.5 bg-white/5 px-2.5 py-1 rounded-full border border-white/5">
+                                  <CrownIcon className="w-3.5 h-3.5 text-yellow-500" />
+                                  Leader: <span className="text-yellow-400 font-bold">{clanDetails.leader}</span>
+                                </span>
+                                <span className="flex items-center gap-1.5 bg-white/5 px-2.5 py-1 rounded-full border border-white/5">
+                                  <CoinsIcon className="w-3.5 h-3.5 text-yellow-500" />
+                                  Clan Bank: <span className="text-white font-bold">{clanDetails.bank_tokens.toLocaleString()} tokens</span>
+                                </span>
+                                <span className="flex items-center gap-1.5 bg-white/5 px-2.5 py-1 rounded-full border border-white/5">
+                                  <Users2Icon className="w-3.5 h-3.5 text-purple-400" />
+                                  Members: <span className="text-white font-bold">{clanDetails.members?.length || 0}</span>
+                                </span>
+                              </div>
+                            </div>
+                          </div>
 
-                {/* List a Boom for Rent */}
-                <div className="bg-gradient-to-r from-cyan-900/30 to-blue-900/30 border border-cyan-500/20 rounded-2xl p-6">
-                  <h3 className="text-lg font-black text-cyan-400 mb-4 flex items-center gap-2">
-                    <KeyIcon className="h-5 w-5" />
-                    List a Boom for Rent
-                  </h3>
-                  <p className="text-white/50 text-sm mb-4">Choose a Boom from your inventory to list on the rental market.</p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                    {Object.entries(currentUser?.booms || {}).filter(([, qty]) => (qty as number) > 0).map(([name, qty]) => (
-                      <button
-                        key={name}
-                        onClick={() => {
-                          const price = prompt(`Set rental price per session for ${name}:`, "100")
-                          const sessions = prompt("How many sessions?", "5")
-                          if (price && sessions) handleListRental(name, parseInt(price), parseInt(sessions))
-                        }}
-                        className="bg-black/40 border border-white/10 rounded-xl p-3 flex flex-col items-center gap-2 hover:border-cyan-500/30 hover:bg-cyan-500/5 transition-colors group"
-                      >
-                        <span className="text-2xl">{getBoomAvatar(name)}</span>
-                        <span className="text-xs font-bold text-white truncate w-full text-center">{name}</span>
-                        <Badge className="bg-white/10 text-white/50 border-none text-[10px]">x{qty as number}</Badge>
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                          <div className="flex flex-col items-end gap-3 shrink-0">
+                            {/* Clan Level & XP */}
+                            <div className="bg-black/40 border border-white/5 rounded-2xl p-4 w-full md:w-56 space-y-2">
+                              <div className="flex justify-between items-end">
+                                <span className="text-xs font-black uppercase text-purple-400 tracking-wider">Level {clanDetails.level}</span>
+                                <span className="text-[10px] text-white/40 tabular-nums">
+                                  {clanDetails.xp % 10000} / 10000 XP
+                                </span>
+                              </div>
+                              <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
+                                <div 
+                                  className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 transition-all duration-500"
+                                  style={{ width: `${(clanDetails.xp % 10000) / 100}%` }}
+                                />
+                              </div>
+                              <div className="text-[10px] text-white/30 italic text-right">
+                                {10000 - (clanDetails.xp % 10000)} XP to Next Level
+                              </div>
+                            </div>
 
-                {/* Available Rentals */}
-                <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-                  <h3 className="text-lg font-black text-white mb-4">
-                    Rental Market ({rentalListings.filter(r => r.status === 'available').length} available)
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {rentalListings.filter(r => r.status === 'available').map((rental) => (
-                      <div key={rental.id} className="bg-black/30 border border-white/10 rounded-xl p-5 flex items-center gap-5 group hover:border-cyan-500/20 transition-colors">
-                        <div className="w-16 h-16 bg-black/40 rounded-xl flex items-center justify-center text-3xl border border-white/5 flex-shrink-0">
-                          {getBoomAvatar(rental.boom_name)}
-                        </div>
-                        <div className="flex-grow min-w-0">
-                          <div className="text-white font-black">{rental.boom_name}</div>
-                          <div className="text-white/40 text-xs">Listed by <span className="text-cyan-400">{rental.owner_username}</span></div>
-                          <div className="flex gap-3 mt-2 text-xs">
-                            <span className="text-yellow-400 font-bold">🪙 {rental.price_per_session}/session</span>
-                            <span className="text-white/30">•</span>
-                            <span className="text-white/50">{rental.sessions_total} sessions</span>
-                            <span className="text-white/30">•</span>
-                            <span className="text-emerald-400 font-bold">Total: {rental.price_per_session * rental.sessions_total}</span>
+                            <Button 
+                              onClick={handleLeaveClan}
+                              variant="ghost" 
+                              className="text-red-400 hover:bg-red-500/10 rounded-2xl w-full text-xs font-bold"
+                            >
+                              Leave Clan
+                            </Button>
                           </div>
                         </div>
-                        {rental.owner_username === currentUser?.username ? (
-                          <Button onClick={() => handleCancelRental(rental.id)} variant="ghost" className="text-red-400 hover:bg-red-500/20 rounded-lg h-10 text-xs font-bold flex-shrink-0">
-                            Cancel
-                          </Button>
-                        ) : (
-                          <Button onClick={() => handleRentBoom(rental.id)} className="bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-lg h-10 px-4 flex-shrink-0">
-                            Rent
-                          </Button>
-                        )}
                       </div>
-                    ))}
-                    {rentalListings.filter(r => r.status === 'available').length === 0 && (
-                      <div className="col-span-full text-center p-12 text-white/30 border-2 border-dashed border-white/5 rounded-xl">
-                        <KeyIcon className="w-12 h-12 mx-auto mb-3 opacity-20" />
-                        <p className="font-bold">No rentals available</p>
-                        <p className="text-sm">Be the first to list a Boom for rent!</p>
+
+                      {/* Main Dashboard Content */}
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {/* Member Roster & Settings (Col Span 2) */}
+                        <div className="lg:col-span-2 space-y-8">
+                          {/* Member Roster Card */}
+                          <div className="bg-white/5 border border-white/10 rounded-[2rem] p-6 shadow-xl space-y-6">
+                            <div className="flex items-center gap-3">
+                              <Users2Icon className="w-5 h-5 text-purple-400" />
+                              <h2 className="text-xl font-black text-white">Clan Roster</h2>
+                            </div>
+
+                            <div className="overflow-x-auto">
+                              <table className="w-full text-left border-collapse">
+                                <thead>
+                                  <tr className="border-b border-white/5 text-xs text-white/30 font-black uppercase tracking-wider">
+                                    <th className="pb-3 pl-2">Member</th>
+                                    <th className="pb-3">Clan Role</th>
+                                    <th className="pb-3 text-right">Balance</th>
+                                    {(currentUser.clan_role === 'leader' || currentUser.clan_role === 'co_leader') && (
+                                      <th className="pb-3 text-right pr-2">Actions</th>
+                                    )}
+                                  </tr>
+                                </thead>
+                                <tbody className="divide-y divide-white/5 text-sm">
+                                  {clanDetails.members?.map((member: any) => {
+                                    const isSelf = member.username === currentUser.username;
+                                    const canManage = !isSelf && (
+                                      currentUser.clan_role === 'leader' ||
+                                      (currentUser.clan_role === 'co_leader' && member.clan_role === 'member')
+                                    );
+                                    
+                                    return (
+                                      <tr key={member.id} className="hover:bg-white/5 transition-colors group">
+                                        <td className="py-4 pl-2 flex items-center gap-3">
+                                          <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-xl border border-white/5">
+                                            {member.profile_picture || "🎮"}
+                                          </div>
+                                          <div>
+                                            <span 
+                                              className={`font-bold cursor-pointer hover:underline ${member.name_color || 'text-white'}`}
+                                              onClick={() => openPlayerProfile(member.id)}
+                                            >
+                                              {member.username}
+                                            </span>
+                                            {isSelf && <span className="text-[10px] text-purple-400 font-bold ml-2 bg-purple-500/10 px-1.5 py-0.5 rounded-md border border-purple-500/20">YOU</span>}
+                                          </div>
+                                        </td>
+                                        <td className="py-4">
+                                          <span className={`text-xs font-black uppercase px-2.5 py-1 rounded-full border ${
+                                            member.clan_role === 'leader' ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500' :
+                                            member.clan_role === 'co_leader' ? 'bg-purple-500/10 border-purple-500/20 text-purple-400' :
+                                            'bg-white/5 border-white/5 text-white/50'
+                                          }`}>
+                                            {member.clan_role === 'leader' ? 'Leader' :
+                                             member.clan_role === 'co_leader' ? 'Co-Leader' : 'Member'}
+                                          </span>
+                                        </td>
+                                        <td className="py-4 text-right font-semibold tabular-nums text-white/80">
+                                          🪙 {member.tokens?.toLocaleString()}
+                                        </td>
+                                        {(currentUser.clan_role === 'leader' || currentUser.clan_role === 'co_leader') && (
+                                          <td className="py-4 text-right pr-2">
+                                            {canManage ? (
+                                              <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                {currentUser.clan_role === 'leader' && (
+                                                  <>
+                                                    {member.clan_role === 'member' ? (
+                                                      <button 
+                                                        onClick={() => handlePromoteMember(member.username, 'co_leader')}
+                                                        className="text-xs bg-purple-600 hover:bg-purple-500 text-white px-2.5 py-1 rounded-lg font-bold"
+                                                        title="Promote to Co-Leader"
+                                                      >
+                                                        Promote
+                                                      </button>
+                                                    ) : (
+                                                      <button 
+                                                        onClick={() => handlePromoteMember(member.username, 'member')}
+                                                        className="text-xs bg-slate-700 hover:bg-slate-600 text-white px-2.5 py-1 rounded-lg font-bold"
+                                                        title="Demote to Member"
+                                                      >
+                                                        Demote
+                                                      </button>
+                                                    )}
+                                                    <button 
+                                                      onClick={() => handleTransferLeadership(member.username)}
+                                                      className="text-xs bg-yellow-600 hover:bg-yellow-500 text-white px-2.5 py-1 rounded-lg font-bold"
+                                                      title="Transfer Clan Leadership"
+                                                    >
+                                                      Leader
+                                                    </button>
+                                                  </>
+                                                )}
+                                                <button 
+                                                  onClick={() => handleKickMember(member.username)}
+                                                  className="text-xs bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white px-2.5 py-1 rounded-lg font-bold border border-red-500/20 hover:border-transparent transition-colors"
+                                                  title="Kick from Clan"
+                                                >
+                                                  Kick
+                                                </button>
+                                              </div>
+                                            ) : (
+                                              <span className="text-xs text-white/20">-</span>
+                                            )}
+                                          </td>
+                                        )}
+                                      </tr>
+                                    );
+                                  })}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+
+                          {/* Clan Requirements & Settings */}
+                          {(currentUser.clan_role === 'leader' || currentUser.clan_role === 'co_leader') && (
+                            <div className="bg-white/5 border border-white/10 rounded-[2rem] p-6 shadow-xl space-y-6">
+                              <div className="flex items-center gap-3">
+                                <Settings2Icon className="w-5 h-5 text-purple-400" />
+                                <h2 className="text-xl font-black text-white">Clan Settings</h2>
+                              </div>
+                              
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-1.5">
+                                  <label className="text-[10px] font-black uppercase text-white/30 tracking-wider">Logo Emblem</label>
+                                  <select 
+                                    id="clanEditLogo"
+                                    defaultValue={clanDetails.logo}
+                                    className="bg-black border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs w-full focus:outline-none focus:border-purple-500/50"
+                                  >
+                                    {["🛡️", "⚔️", "👑", "🔥", "🌀", "☠️", "🦊", "🐉", "🦄", "🐼", "🌟"].map(emoji => (
+                                      <option key={emoji} value={emoji}>{emoji} Emblem</option>
+                                    ))}
+                                  </select>
+                                </div>
+                                <div className="space-y-1.5">
+                                  <label className="text-[10px] font-black uppercase text-white/30 tracking-wider">Tag Color</label>
+                                  <select 
+                                    id="clanEditTagColor"
+                                    defaultValue={clanDetails.tag_color}
+                                    className="bg-black border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs w-full focus:outline-none focus:border-purple-500/50"
+                                  >
+                                    <option value="text-purple-400">Purple</option>
+                                    <option value="text-red-400">Red</option>
+                                    <option value="text-blue-400">Blue</option>
+                                    <option value="text-green-400">Green</option>
+                                    <option value="text-yellow-400">Yellow</option>
+                                    <option value="text-pink-400">Pink</option>
+                                    <option value="text-cyan-400">Cyan</option>
+                                    <option value="text-orange-400">Orange</option>
+                                  </select>
+                                </div>
+                              </div>
+
+                              <div className="space-y-1.5">
+                                <label className="text-[10px] font-black uppercase text-white/30 tracking-wider">Clan Description</label>
+                                <textarea
+                                  id="clanEditDescription"
+                                  defaultValue={clanDetails.description || ""}
+                                  rows={2}
+                                  placeholder="Recruiting active players..."
+                                  className="bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs w-full focus:outline-none focus:border-purple-500/50 resize-none"
+                                />
+                              </div>
+
+                              <div className="border-t border-white/5 pt-4 space-y-4">
+                                <h3 className="text-xs font-black uppercase text-purple-400 tracking-wider">Recruitment Requirements</h3>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                  <div className="space-y-1.5">
+                                    <label className="text-[10px] font-black uppercase text-white/30 tracking-wider">Min Tokens</label>
+                                    <input 
+                                      type="number"
+                                      id="clanEditMinTokens"
+                                      defaultValue={clanDetails.min_tokens || 0}
+                                      className="bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs w-full focus:outline-none focus:border-purple-500/50"
+                                    />
+                                  </div>
+                                  <div className="space-y-1.5">
+                                    <label className="text-[10px] font-black uppercase text-white/30 tracking-wider">Min Boom Rarity</label>
+                                    <select 
+                                      id="clanEditMinRarity"
+                                      defaultValue={clanDetails.min_rarity || "uncommon"}
+                                      className="bg-black border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs w-full focus:outline-none focus:border-purple-500/50"
+                                    >
+                                      {["uncommon", "rare", "epic", "legendary", "chroma", "mystical"].map(rarity => (
+                                        <option key={rarity} value={rarity}>{rarity.toUpperCase()}</option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                  <div className="space-y-1.5">
+                                    <label className="text-[10px] font-black uppercase text-white/30 tracking-wider">Required Count</label>
+                                    <input 
+                                      type="number"
+                                      id="clanEditMinRarityCount"
+                                      defaultValue={clanDetails.min_rarity_count || 0}
+                                      className="bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs w-full focus:outline-none focus:border-purple-500/50"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+
+                              <Button 
+                                onClick={() => {
+                                  const logo = (document.getElementById('clanEditLogo') as HTMLSelectElement).value;
+                                  const tagColor = (document.getElementById('clanEditTagColor') as HTMLSelectElement).value;
+                                  const desc = (document.getElementById('clanEditDescription') as HTMLTextAreaElement).value;
+                                  const minTokens = parseInt((document.getElementById('clanEditMinTokens') as HTMLInputElement).value || '0');
+                                  const minRarity = (document.getElementById('clanEditMinRarity') as HTMLSelectElement).value;
+                                  const minRarityCount = parseInt((document.getElementById('clanEditMinRarityCount') as HTMLInputElement).value || '0');
+                                  
+                                  handleUpdateClanInfo(desc, logo, tagColor, minTokens, minRarity, minRarityCount);
+                                }}
+                                className="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl h-11 border-none text-xs"
+                              >
+                                Save Clan Settings
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Clan Bank & Chat (Col Span 1) */}
+                        <div className="space-y-8">
+                          {/* Donate Box */}
+                          <div className="bg-gradient-to-r from-yellow-950/20 to-amber-950/15 border border-yellow-500/20 rounded-[2rem] p-6 shadow-xl space-y-4">
+                            <div className="flex items-center gap-3">
+                              <CoinsIcon className="w-5 h-5 text-yellow-500" />
+                              <h2 className="text-xl font-black text-white">Clan Bank Donation</h2>
+                            </div>
+                            <p className="text-white/50 text-xs leading-relaxed">
+                              Donate tokens to the clan treasury. 1 token = 1 Clan XP. Helping the clan level up unlocks prestige and future bonuses.
+                            </p>
+                            <div className="flex gap-2">
+                              <input 
+                                type="number" 
+                                id="clanDonateAmount"
+                                placeholder="Amount..."
+                                className="bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-white font-bold w-full focus:outline-none focus:border-yellow-500/50"
+                                min={1}
+                              />
+                              <Button 
+                                onClick={() => {
+                                  const input = document.getElementById('clanDonateAmount') as HTMLInputElement;
+                                  const val = parseInt(input?.value || '0');
+                                  if (val > 0) {
+                                    handleDonateToClan(val);
+                                    if (input) input.value = '';
+                                  } else {
+                                    toast.error("Please enter a valid donation amount.");
+                                  }
+                                }}
+                                className="bg-yellow-600 hover:bg-yellow-500 text-white font-bold rounded-xl px-4 h-10 border-none animate-pulse"
+                              >
+                                Donate
+                              </Button>
+                            </div>
+                          </div>
+
+                          {/* Real-time Clan Chat Box */}
+                          <div className="bg-white/5 border border-white/10 rounded-[2rem] p-6 shadow-xl flex flex-col h-[450px]">
+                            <div className="flex items-center gap-3 mb-4">
+                              <div className="h-2.5 w-2.5 rounded-full bg-green-500 shadow-[0_0_10px_green]" />
+                              <h2 className="text-xl font-black text-white">Clan Chat</h2>
+                            </div>
+                            
+                            {/* Messages area */}
+                            <ScrollArea className="flex-1 pr-2 mb-4 scrollbar-hide">
+                              <div className="space-y-3">
+                                {clanChat.map((msg, idx) => (
+                                  <div key={msg.id || idx} className="text-xs bg-black/20 border border-white/5 rounded-xl p-2.5 space-y-1">
+                                    <div className="flex items-center justify-between">
+                                      <span className="font-black text-purple-400">{msg.username}</span>
+                                      <span className="text-[9px] text-white/30">
+                                        {msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Just now"}
+                                      </span>
+                                    </div>
+                                    <p className="text-white/80 leading-relaxed break-words">{msg.message}</p>
+                                  </div>
+                                ))}
+                                {clanChat.length === 0 && (
+                                  <div className="text-center py-12 text-white/20 italic">
+                                    No chat activity. Send a message to get started!
+                                  </div>
+                                )}
+                              </div>
+                            </ScrollArea>
+
+                            {/* Message Input */}
+                            <div className="flex gap-2">
+                              <input 
+                                type="text"
+                                value={newClanMessage}
+                                onChange={(e) => setNewClanMessage(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') sendClanChatMessage();
+                                }}
+                                placeholder="Message clan..."
+                                className="bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-white text-xs w-full focus:outline-none focus:border-purple-500/50"
+                              />
+                              <Button 
+                                onClick={sendClanChatMessage}
+                                className="bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl px-4 h-9 text-xs border-none"
+                              >
+                                Send
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
                       </div>
-                    )}
+                    </div>
+                  )
+                ) : (
+                  // BROWSE & JOIN / CREATE VIEW
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Browse Clans Column (Col Span 2) */}
+                    <div className="lg:col-span-2 bg-white/5 border border-white/10 rounded-[2.5rem] p-8 shadow-xl space-y-6">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/5">
+                        <div>
+                          <h2 className="text-3xl font-black text-white tracking-tight">Active Clans</h2>
+                          <p className="text-white/40 text-xs">Join an existing squad and play together.</p>
+                        </div>
+                        <input 
+                          type="text"
+                          value={searchClanQuery}
+                          onChange={(e) => setSearchClanQuery(e.target.value)}
+                          placeholder="Search name or tag..."
+                          className="bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-white text-xs w-full sm:w-64 focus:outline-none focus:border-purple-500/50"
+                        />
+                      </div>
+
+                      <ScrollArea className="h-[600px] pr-2 scrollbar-hide">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {clansList
+                            .filter(c => 
+                              c.name.toLowerCase().includes(searchClanQuery.toLowerCase()) ||
+                              c.tag.toLowerCase().includes(searchClanQuery.toLowerCase())
+                            )
+                            .map((clan) => (
+                              <div key={clan.id} className="bg-black/30 border border-white/10 rounded-2xl p-5 space-y-4 hover:border-purple-500/30 transition-all flex flex-col justify-between">
+                                <div className="space-y-3">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center text-2xl border border-white/5">
+                                      {clan.logo}
+                                    </div>
+                                    <div>
+                                      <div className="flex items-center gap-2">
+                                        <h3 className="font-bold text-white leading-tight">{clan.name}</h3>
+                                        <span className={`text-[10px] font-black tracking-tight ${clan.tag_color}`}>
+                                          [{clan.tag}]
+                                        </span>
+                                      </div>
+                                      <p className="text-[10px] text-white/40 font-semibold mt-0.5">
+                                        Level {clan.level} • {clan.memberCount} members
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  <p className="text-xs text-white/60 line-clamp-2 min-h-[2rem]">
+                                    {clan.description || "No description provided."}
+                                  </p>
+
+                                  {/* Requirements badges */}
+                                  <div className="flex flex-wrap gap-1.5 pt-1">
+                                    {clan.min_tokens > 0 && (
+                                      <Badge className="bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 text-[9px] font-bold">
+                                        🪙 {clan.min_tokens.toLocaleString()}
+                                      </Badge>
+                                    )}
+                                    {clan.min_rarity_count > 0 && (
+                                      <Badge className="bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[9px] font-bold">
+                                        📦 {clan.min_rarity_count}x {clan.min_rarity.toUpperCase()}+
+                                      </Badge>
+                                    )}
+                                    {clan.min_tokens === 0 && clan.min_rarity_count === 0 && (
+                                      <Badge className="bg-green-500/10 text-green-400 border border-green-500/20 text-[9px] font-bold">
+                                        Open Join
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <Button 
+                                  onClick={() => handleJoinClan(clan.id)}
+                                  className="w-full mt-4 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-xl h-10 border-none text-xs"
+                                >
+                                  Request to Join
+                                </Button>
+                              </div>
+                            ))}
+                          {clansList.filter(c => 
+                            c.name.toLowerCase().includes(searchClanQuery.toLowerCase()) ||
+                            c.tag.toLowerCase().includes(searchClanQuery.toLowerCase())
+                          ).length === 0 && (
+                            <div className="col-span-full text-center py-20 text-white/20 italic">
+                              No clans matching your search.
+                            </div>
+                          )}
+                        </div>
+                      </ScrollArea>
+                    </div>
+
+                    {/* Create Clan Column */}
+                    <div className="bg-[#0a0a0c]/60 border border-white/10 rounded-[2.5rem] p-8 shadow-xl space-y-6 h-fit">
+                      <div>
+                        <h2 className="text-2xl font-black text-white tracking-tight">Create a Clan</h2>
+                        <p className="text-white/40 text-xs">Establish your dynasty and gather followers.</p>
+                      </div>
+
+                      <div className="space-y-4">
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-black uppercase text-white/30 tracking-wider">Clan Name</label>
+                          <input 
+                            type="text"
+                            value={createClanForm.name}
+                            onChange={(e) => setCreateClanForm(prev => ({ ...prev, name: e.target.value }))}
+                            placeholder="Legendary Squad..."
+                            className="bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs w-full focus:outline-none focus:border-purple-500/50"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-black uppercase text-white/30 tracking-wider">Clan Tag (3-6 chars)</label>
+                          <input 
+                            type="text"
+                            value={createClanForm.tag}
+                            onChange={(e) => setCreateClanForm(prev => ({ ...prev, tag: e.target.value.toUpperCase() }))}
+                            placeholder="LEGEND"
+                            maxLength={6}
+                            className="bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs w-full focus:outline-none focus:border-purple-500/50"
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <label className="text-[10px] font-black uppercase text-white/30 tracking-wider">Description</label>
+                          <textarea
+                            value={createClanForm.description}
+                            onChange={(e) => setCreateClanForm(prev => ({ ...prev, description: e.target.value }))}
+                            placeholder="Describe your clan mission..."
+                            rows={3}
+                            className="bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs w-full focus:outline-none focus:border-purple-500/50 resize-none"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-black uppercase text-white/30 tracking-wider">Clan Emblem</label>
+                            <select 
+                              value={createClanForm.logo}
+                              onChange={(e) => setCreateClanForm(prev => ({ ...prev, logo: e.target.value }))}
+                              className="bg-black border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs w-full focus:outline-none focus:border-purple-500/50"
+                            >
+                              {["🛡️", "⚔️", "👑", "🔥", "🌀", "☠️", "🦊", "🐉", "🦄", "🐼", "🌟"].map(emoji => (
+                                <option key={emoji} value={emoji}>{emoji} Emblem</option>
+                              ))}
+                            </select>
+                          </div>
+                          
+                          <div className="space-y-1.5">
+                            <label className="text-[10px] font-black uppercase text-white/30 tracking-wider">Tag Color</label>
+                            <select 
+                              value={createClanForm.tagColor}
+                              onChange={(e) => setCreateClanForm(prev => ({ ...prev, tagColor: e.target.value }))}
+                              className="bg-black border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs w-full focus:outline-none focus:border-purple-500/50"
+                            >
+                              <option value="text-purple-400">Purple</option>
+                              <option value="text-red-400">Red</option>
+                              <option value="text-blue-400">Blue</option>
+                              <option value="text-green-400">Green</option>
+                              <option value="text-yellow-400">Yellow</option>
+                              <option value="text-pink-400">Pink</option>
+                              <option value="text-cyan-400">Cyan</option>
+                              <option value="text-orange-400">Orange</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div className="p-4 bg-purple-500/10 border border-purple-500/20 rounded-2xl flex items-center justify-between text-xs pt-3">
+                          <span className="font-semibold text-white/60">Creation Price:</span>
+                          <span className="font-bold text-yellow-400 flex items-center gap-1">🪙 5,000 tokens</span>
+                        </div>
+
+                        <Button 
+                          onClick={handleCreateClan}
+                          disabled={isCreatingClan}
+                          className="w-full h-12 bg-purple-600 hover:bg-purple-500 text-white font-black rounded-xl border-none text-xs flex items-center justify-center gap-2"
+                        >
+                          {isCreatingClan ? (
+                            <span className="flex items-center gap-2">
+                              <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              Creating Clan...
+                            </span>
+                          ) : 'Create Clan'}
+                        </Button>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
             {/* Tournaments Page */}
@@ -6656,11 +7531,11 @@ export default function BoomkitGame() {
                   <div className="grid gap-4">
                     <div className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-purple-500/20 transition-all">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-lg">🔄</span>
-                        <h5 className="font-bold text-white text-sm md:text-base">Virtual Boom Rentals</h5>
+                        <span className="text-lg">🛡️</span>
+                        <h5 className="font-bold text-white text-sm md:text-base">Clans Hub & Teams</h5>
                       </div>
                       <p className="text-xs md:text-sm text-slate-400 leading-relaxed pl-7">
-                        Share the power of your collection! You can now rent out Epic and Legendary Booms for a set number of game sessions. Rented Booms track remaining sessions dynamically in your Vault and cannot be sold.
+                        Create or join a Clan, set custom tag colors, manage recruitment requirements, chat in real-time with clan mates, and donate tokens to the shared bank to level up your clan!
                       </p>
                     </div>
 
@@ -7093,6 +7968,93 @@ export default function BoomkitGame() {
           </div>
         )
       }
+
+      {/* CLAN PROFILE OVERLAY POPUP */}
+      {showClanProfileModal && (
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[120] flex items-center justify-center p-4">
+          <div className="bg-[#0c0c0e]/95 border border-purple-500/20 rounded-[2.5rem] w-full max-w-lg relative overflow-hidden shadow-2xl p-8 space-y-6">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute top-6 right-6 text-white/40 hover:text-white bg-white/5 hover:bg-white/10 rounded-full"
+              onClick={() => setShowClanProfileModal(null)}
+            >
+              <XIcon className="h-5 w-5" />
+            </Button>
+
+            <div className="flex items-center gap-5">
+              <div className="w-20 h-20 bg-purple-500/10 rounded-2xl flex items-center justify-center text-5xl border border-purple-500/20">
+                {showClanProfileModal.logo}
+              </div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-3xl font-black text-white tracking-tight">{showClanProfileModal.name}</h2>
+                  <span className={`text-sm font-black px-2 py-0.5 rounded-lg bg-black/40 border border-white/5 ${showClanProfileModal.tag_color}`}>
+                    [{showClanProfileModal.tag}]
+                  </span>
+                </div>
+                <p className="text-[10px] text-white/40 font-bold uppercase tracking-wider">
+                  Level {showClanProfileModal.level} Clan • {showClanProfileModal.members?.length || 0} members
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white/5 rounded-2xl p-5 border border-white/5 space-y-2">
+              <span className="text-[10px] font-black uppercase text-purple-400 tracking-wider">Description</span>
+              <p className="text-white/70 text-xs leading-relaxed">
+                {showClanProfileModal.description || "This clan has no description yet."}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 text-xs">
+              <div className="bg-black/30 border border-white/5 rounded-xl p-3.5 flex flex-col justify-center">
+                <span className="text-[10px] font-black uppercase text-white/30 tracking-wider mb-1">Leader</span>
+                <span className="font-bold text-yellow-400">{showClanProfileModal.leader}</span>
+              </div>
+              <div className="bg-black/30 border border-white/5 rounded-xl p-3.5 flex flex-col justify-center">
+                <span className="text-[10px] font-black uppercase text-white/30 tracking-wider mb-1">XP Progression</span>
+                <span className="font-bold text-purple-400">{showClanProfileModal.xp?.toLocaleString()} Total XP</span>
+              </div>
+            </div>
+
+            {/* Roster Preview */}
+            <div className="space-y-3">
+              <span className="text-[10px] font-black uppercase text-purple-400 tracking-wider ml-1">Members List</span>
+              <ScrollArea className="h-44 pr-2 bg-black/20 rounded-2xl border border-white/5 p-4 scrollbar-hide">
+                <div className="space-y-2">
+                  {showClanProfileModal.members?.map((member: any) => (
+                    <div key={member.id} className="flex items-center justify-between text-xs py-1.5 border-b border-white/5 last:border-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-base">{member.profile_picture || "🎮"}</span>
+                        <span className={`font-bold ${member.name_color || 'text-white'}`}>{member.username}</span>
+                      </div>
+                      <span className={`text-[9px] font-black uppercase tracking-wider ${
+                        member.clan_role === 'leader' ? 'text-yellow-500' :
+                        member.clan_role === 'co_leader' ? 'text-purple-400' : 'text-white/40'
+                      }`}>
+                        {member.clan_role}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+
+            {/* Actions / Join button if not in a clan */}
+            {!currentUser?.clan_id && (
+              <Button
+                onClick={() => {
+                  handleJoinClan(showClanProfileModal.id);
+                  setShowClanProfileModal(null);
+                }}
+                className="w-full h-12 bg-purple-600 hover:bg-purple-500 text-white font-black rounded-xl border-none text-xs"
+              >
+                Join Clan
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Global Loading Overlay */}
       {

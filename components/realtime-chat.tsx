@@ -12,7 +12,9 @@ type Props = {
   currentUser: { id: string; username: string; isMuted?: boolean; role?: string } | null
   roleName: string
   onUsernameClick: (username: string) => void
+  onClanTagClick?: (clanId: string) => void
 }
+
 
 type DbChatRow = { id: string; username: string; message: string; role: string; created_at: string; reactions?: Record<string, string[]> }
 type LocalChatRow = { id: string; username: string; message: string; role: string; timestamp: string; reactions?: Record<string, string[]> }
@@ -38,12 +40,13 @@ const getRoleColor = (role: string) => {
   }
 }
 
-export default function RealtimeChat({ currentUser, roleName, onUsernameClick }: Props) {
+export default function RealtimeChat({ currentUser, roleName, onUsernameClick, onClanTagClick }: Props) {
   const supabase = useMemo(() => getSupabaseBrowserClient(), [])
   const [messages, setMessages] = useState<LocalChatRow[]>([])
   const [text, setText] = useState("")
   const bottomRef = useRef<HTMLDivElement>(null)
   const [userRoles, setUserRoles] = useState<Record<string, string>>({})
+  const [userClanData, setUserClanData] = useState<Record<string, { tag: string | null; color: string | null; clan_id: string | null }>>({})
   const [isMuted, setIsMuted] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editText, setEditText] = useState("")
@@ -88,19 +91,22 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
   }, [messages])
 
   useEffect(() => {
-    const fetchUserRoles = async () => {
+    const fetchUserRolesAndClans = async () => {
       if (supabase) {
-        const { data } = await supabase.from("users").select("username, role")
+        const { data } = await supabase.from("users").select("username, role, clan_id, clan_tag, clan_tag_color")
         if (data) {
           const roles: Record<string, string> = {}
-          data.forEach((u: { username: string; role: string }) => {
-            roles[u.username] = u.role
+          const clans: Record<string, { tag: string | null; color: string | null; clan_id: string | null }> = {}
+          data.forEach((u: any) => {
+            roles[u.username] = u.role || "player"
+            clans[u.username] = { tag: u.clan_tag, color: u.clan_tag_color, clan_id: u.clan_id }
           })
           setUserRoles(roles)
+          setUserClanData(clans)
         }
       }
     }
-    fetchUserRoles()
+    fetchUserRolesAndClans()
 
     // Refresh roles every 30 seconds - REMOVED POLLING for performance
     // const interval = setInterval(fetchUserRoles, 30000)
@@ -443,6 +449,18 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick }:
                             </button>
                           )}
                         </>
+                      )}
+                      {userClanData[msg.username]?.tag && (
+                        <span 
+                          onClick={() => {
+                            if (userClanData[msg.username]?.clan_id && onClanTagClick) {
+                              onClanTagClick(userClanData[msg.username].clan_id!)
+                            }
+                          }}
+                          className={`text-xs font-black tracking-tight ${userClanData[msg.username]?.color || 'text-purple-400'} mr-1 ${userClanData[msg.username]?.clan_id ? 'cursor-pointer hover:underline' : ''}`}
+                        >
+                          [{userClanData[msg.username]?.tag}]
+                        </span>
                       )}
                       <span
                         className={`text-xs font-black tracking-tight cursor-pointer hover:underline transition-all ${isMe ? "text-purple-400" : "text-white/60"

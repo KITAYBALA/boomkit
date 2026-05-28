@@ -425,6 +425,7 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
                   onDecline={() => declineTrade(trade)}
                   loading={loading}
                   senderIsBanned={senderIsBanned}
+                  users={users}
                 />
               )
             })
@@ -447,6 +448,7 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
                   onCancel={() => cancelTrade(trade)}
                   loading={loading}
                   receiverIsBanned={receiverIsBanned}
+                  users={users}
                 />
               )
             })
@@ -471,6 +473,7 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
                     loading={loading}
                     senderIsBanned={(sender?.isBanned || sender?.status === "rejected") || false}
                     receiverIsBanned={(receiver?.isBanned || receiver?.status === "rejected") || false}
+                    users={users}
                   />
                 )
               })
@@ -525,7 +528,14 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
                             <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center mr-3">
                               <UserIcon className="h-4 w-4 text-white/60" />
                             </div>
-                            <span className="font-medium text-white">{user.username}</span>
+                            <span className="font-medium text-white flex items-center">
+                              {user.clan_tag && (
+                                <span className={`text-xs font-black tracking-tight ${user.clan_tag_color || 'text-purple-400'} mr-1`}>
+                                  [{user.clan_tag}]
+                                </span>
+                              )}
+                              {user.username}
+                            </span>
                           </Button>
                         ))}
                     </div>
@@ -539,7 +549,14 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
                         </div>
                         <div>
                           <p className="text-xs text-purple-300/60 uppercase font-bold tracking-widest">Trading Session</p>
-                          <p className="text-lg font-bold text-white">{selectedUser.username}</p>
+                          <p className="text-lg font-bold text-white flex items-center gap-1">
+                            {selectedUser.clan_tag && (
+                              <span className={`text-xs font-black tracking-tight ${selectedUser.clan_tag_color || 'text-purple-400'}`}>
+                                [{selectedUser.clan_tag}]
+                              </span>
+                            )}
+                            {selectedUser.username}
+                          </p>
                         </div>
                       </div>
                       <Button variant="outline" size="sm" onClick={() => setSelectedUser(null)} className="rounded-xl bg-transparent border-white/10 text-white/60 hover:text-white">
@@ -784,6 +801,7 @@ function TradeCard({
   loading,
   senderIsBanned = false,
   receiverIsBanned = false,
+  users,
 }: {
   trade: Trade
   currentUserId: string
@@ -793,6 +811,7 @@ function TradeCard({
   loading: boolean
   senderIsBanned?: boolean
   receiverIsBanned?: boolean
+  users?: GameUser[]
 }) {
   const isIncoming = trade.receiver_id === currentUserId
   const isPending = trade.status === "pending"
@@ -877,7 +896,15 @@ function TradeCard({
                   <div className="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center border border-purple-500/30">
                     <UserIcon className="h-4 w-4 text-purple-400" />
                   </div>
-                  <span className={`font-bold ${isIncoming ? "text-purple-400" : "text-white"}`}>
+                  <span className={`font-bold ${isIncoming ? "text-purple-400" : "text-white"} flex items-center`}>
+                    {(() => {
+                      const sender = users?.find(u => u.username === trade.sender_username);
+                      return sender?.clan_tag ? (
+                        <span className={`text-[10px] font-black tracking-tight ${sender.clan_tag_color || 'text-purple-400'} mr-1`}>
+                          [{sender.clan_tag}]
+                        </span>
+                      ) : null;
+                    })()}
                     {trade.sender_username}
                   </span>
                   <span className="text-xs text-purple-200 ml-auto font-bold tracking-tighter">GIVES</span>
@@ -914,7 +941,15 @@ function TradeCard({
                   <div className="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
                     <UserIcon className="h-4 w-4 text-blue-400" />
                   </div>
-                  <span className={`font-bold ${!isIncoming ? "text-purple-400" : "text-white"}`}>
+                  <span className={`font-bold ${!isIncoming ? "text-purple-400" : "text-white"} flex items-center md:flex-row-reverse`}>
+                    {(() => {
+                      const receiver = users?.find(u => u.username === trade.receiver_username);
+                      return receiver?.clan_tag ? (
+                        <span className={`text-[10px] font-black tracking-tight ${receiver.clan_tag_color || 'text-purple-400'} ml-1 md:mr-1`}>
+                          [{receiver.clan_tag}]
+                        </span>
+                      ) : null;
+                    })()}
                     {trade.receiver_username}
                   </span>
                   <span className="text-xs text-blue-200 mr-auto md:ml-auto md:mr-0 font-bold tracking-tighter">RECEIVES</span>

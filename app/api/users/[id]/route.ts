@@ -33,6 +33,10 @@ const SAFE_USER_COLUMNS = [
   'packs_opened',
   'xp',
   'level',
+  'clan_id',
+  'clan_role',
+  'clan_tag',
+  'clan_tag_color',
 ].join(', ')
 
 export async function GET(_request: Request, { params }: { params: Promise<Params> }) {

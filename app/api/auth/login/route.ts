@@ -41,6 +41,10 @@ const AUTH_USER_COLUMNS = [
   'last_ip',
   'xp',
   'level',
+  'clan_id',
+  'clan_role',
+  'clan_tag',
+  'clan_tag_color',
 ].join(', ')
 
 const DEBUG_AUTH = process.env.DEBUG_AUTH === 'true' || process.env.NODE_ENV !== 'production'

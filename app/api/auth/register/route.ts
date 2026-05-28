@@ -214,7 +214,11 @@ export async function POST(request: NextRequest) {
       last_seen: insertedUser.last_seen,
       packs_opened: insertedUser.packs_opened,
       xp: insertedUser.xp,
-      level: insertedUser.level
+      level: insertedUser.level,
+      clan_id: insertedUser.clan_id,
+      clan_role: insertedUser.clan_role,
+      clan_tag: insertedUser.clan_tag,
+      clan_tag_color: insertedUser.clan_tag_color
     }
 
     return NextResponse.json({
