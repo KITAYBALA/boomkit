@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
 
     const { data: targetUser, error: targetError } = await supabase
       .from('users')
-      .select('id, role, is_owner')
+      .select('id, role, is_owner, last_ip')
       .eq('id', targetUserId)
       .single()
 
@@ -148,6 +148,18 @@ export async function POST(request: NextRequest) {
     if (error) {
       console.error('[API/users/update] DB Error:', error)
       return NextResponse.json({ success: false, message: 'Failed to update user' }, { status: 500 })
+    }
+
+    if (filteredUpdates.is_banned === false && targetUser && targetUser.last_ip) {
+      const { error: blacklistDeleteErr } = await supabase
+        .from('blacklisted_ips')
+        .delete()
+        .eq('ip', targetUser.last_ip)
+      if (blacklistDeleteErr) {
+        console.error('[API/users/update] Blacklist delete error:', blacklistDeleteErr)
+      } else {
+        console.log(`[API/users/update] Automatically unblacklisted IP ${targetUser.last_ip} for user ${targetUser.id}`)
+      }
     }
 
     console.log(`[API/users/update] User ${targetUserId} updated by ${actor.id}`)

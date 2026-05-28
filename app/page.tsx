@@ -817,7 +817,7 @@ export default function BoomkitGame() {
   const [showPasswordEdit, setShowPasswordEdit] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [staffSearchQuery, setStaffSearchQuery] = useState("") // Added for Staff search
-  const [staffTab, setStaffTab] = useState<"all" | "active" | "muted" | "banned" | "applications">("all")
+  const [staffTab, setStaffTab] = useState<"all" | "active" | "muted" | "banned" | "applications" | "tournaments" | "seasons">("all")
   const [showPrivacyPolicy, setShowPrivacyPolicy] = useState(false) // Fixed typo from setShowShowPrivacyPolicy
   const [showTermsOfService, setShowTermsOfService] = useState(false)
   const [newName, setNewName] = useState("")
@@ -839,6 +839,18 @@ export default function BoomkitGame() {
   const [friendsList, setFriendsList] = useState<any[]>([])
   const [friendRequests, setFriendRequests] = useState<any[]>([])
   const [rentalListings, setRentalListings] = useState<any[]>([])
+
+  const getVirtualBooms = useCallback((user: GameUser | null) => {
+    if (!user) return {}
+    const virtual = { ...(user.booms || {}) }
+    const myActiveRentals = rentalListings.filter(
+      (r) => r.renter_username === user.username && r.status === "rented"
+    )
+    for (const rental of myActiveRentals) {
+      virtual[rental.boom_name] = (virtual[rental.boom_name] || 0) + 1
+    }
+    return virtual
+  }, [rentalListings])
   const [friendSearchQuery, setFriendSearchQuery] = useState("")
   const [activeTournaments, setActiveTournaments] = useState<any[]>([])
   const [selectedTournament, setSelectedTournament] = useState<any | null>(null)
@@ -1213,6 +1225,20 @@ export default function BoomkitGame() {
     if (!supabase) return
 
     try {
+      // 1. Fetch rentals first so we have them for virtual inventory
+      const { data: rentalsData, error: rentalsErr } = await supabase
+        .from("boom_rentals")
+        .select("*")
+        .in("status", ["available", "rented"])
+        .order("created_at", { ascending: false })
+      
+      const currentRentals = rentalsData || []
+      setRentalListings(currentRentals)
+
+      if (rentalsErr) {
+        console.error("[v0] Error fetching rentals:", rentalsErr.message)
+      }
+
       // Only select safe fields; never expose password_hash, last_ip, or email to clients.
       const safeColumns = "id, username, age, tokens, daily_tokens, packs, booms, is_owner, is_banned, is_muted, status, reason, role, join_date, boom_score, total_value, profile_picture, is_plus_user, name_color, banner_color, last_daily_spin, badges, mute_expiry, ban_expiry, last_seen, packs_opened, xp, level, login_streak, last_streak_claim, pinned_boom, season_xp, has_plus_pass, games_played, total_tokens_earned"
       const { data, error } = await supabase.from("users").select(safeColumns)
@@ -1272,6 +1298,19 @@ export default function BoomkitGame() {
         if (refreshCurrentUser && currentUser) {
           const self = mappedUsers.find(u => u.id === currentUser.id)
           if (self) {
+            // Clean up pinned_boom if no longer owned or rented
+            if (self.pinned_boom) {
+              const myActiveRentals = currentRentals.filter(
+                (r: any) => r.renter_username === self.username && r.status === "rented"
+              )
+              const hasPinnedBoom = (self.booms[self.pinned_boom] || 0) > 0 || myActiveRentals.some((r: any) => r.boom_name === self.pinned_boom)
+              
+              if (!hasPinnedBoom) {
+                console.log(`[v0] Pinned boom ${self.pinned_boom} is no longer owned or rented. Unpinning.`)
+                self.pinned_boom = undefined
+                await supabase.from("users").update({ pinned_boom: null }).eq("id", self.id)
+              }
+            }
             setCurrentUser(self)
             localStorage.setItem("boomkit_current_user", JSON.stringify(self))
           }
@@ -3035,6 +3074,97 @@ export default function BoomkitGame() {
     } catch (e: any) { alert(e.message || "Failed to cancel") }
   }
 
+  const [tourneyTitle, setTourneyTitle] = useState("")
+  const [tourneyDesc, setTourneyDesc] = useState("")
+  const [tourneyEndTime, setTourneyEndTime] = useState("")
+  const [tourneyPrizeTokens, setTourneyPrizeTokens] = useState(0)
+  const [tourneyPrizeBoom, setTourneyPrizeBoom] = useState("")
+  const [newSeasonName, setNewSeasonName] = useState("")
+
+  const handleCreateTournament = async () => {
+    if (!tourneyTitle || !tourneyEndTime || !supabase) {
+      alert("Title and End Time are required!")
+      return
+    }
+
+    try {
+      const { error } = await supabase.from("tournaments").insert({
+        title: tourneyTitle,
+        description: tourneyDesc || null,
+        end_time: new Date(tourneyEndTime).toISOString(),
+        prize_tokens: tourneyPrizeTokens || 0,
+        prize_boom_name: tourneyPrizeBoom || null,
+        status: "active"
+      })
+
+      if (error) throw error
+
+      alert("🏆 Tournament created successfully!")
+      setTourneyTitle("")
+      setTourneyDesc("")
+      setTourneyEndTime("")
+      setTourneyPrizeTokens(0)
+      setTourneyPrizeBoom("")
+      fetchTournaments()
+    } catch (e: any) {
+      alert(e.message || "Failed to create tournament")
+    }
+  }
+
+  const handleFinalizeTournament = async (id: string) => {
+    if (!supabase || !confirm("Are you sure you want to finalize this tournament and award prizes?")) return
+    try {
+      const { data, error } = await supabase.rpc("finalize_tournament", { p_tournament_id: id })
+      if (error) throw error
+      alert(`🎉 Tournament finalized! Result: ${data.message}`)
+      fetchTournaments()
+      fetchUsersFromSupabase(true)
+    } catch (e: any) {
+      alert(e.message || "Failed to finalize tournament")
+    }
+  }
+
+  const handleStartNewSeason = async () => {
+    if (!newSeasonName || !supabase) {
+      alert("Season Name is required!")
+      return
+    }
+
+    try {
+      // 1. Deactivate any currently active seasons
+      await supabase.from("seasons").update({ is_active: false }).eq("is_active", true)
+
+      // 2. Insert new active season
+      const { data: newSeason, error: seasonErr } = await supabase.from("seasons").insert({
+        name: newSeasonName,
+        start_date: new Date().toISOString(),
+        end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
+        is_active: true
+      }).select("id").single()
+
+      if (seasonErr) throw seasonErr
+
+      // 3. Insert default rewards for this season
+      const rewards = [
+        { season_id: newSeason.id, tier: 1, xp_required: 100, reward_type: 'tokens', reward_value: '1000', is_premium: false },
+        { season_id: newSeason.id, tier: 1, xp_required: 100, reward_type: 'tokens', reward_value: '5000', is_premium: true },
+        { season_id: newSeason.id, tier: 2, xp_required: 250, reward_type: 'boom', reward_value: 'Rare Box', is_premium: false },
+        { season_id: newSeason.id, tier: 2, xp_required: 250, reward_type: 'boom', reward_value: 'Epic Box', is_premium: true },
+        { season_id: newSeason.id, tier: 3, xp_required: 500, reward_type: 'tokens', reward_value: '2500', is_premium: false },
+        { season_id: newSeason.id, tier: 3, xp_required: 500, reward_type: 'plus_days', reward_value: '7', is_premium: true }
+      ]
+
+      const { error: rewardsErr } = await supabase.from("season_rewards").insert(rewards)
+      if (rewardsErr) throw rewardsErr
+
+      alert(`🔥 Season "${newSeasonName}" started successfully with standard rewards!`)
+      setNewSeasonName("")
+      fetchActiveSeason()
+    } catch (e: any) {
+      alert(e.message || "Failed to start new season")
+    }
+  }
+
   const fetchTournaments = async () => {
     if (!supabase) return
     try {
@@ -4298,7 +4428,7 @@ export default function BoomkitGame() {
                       <div className="flex flex-col">
                         <span className="text-pink-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Collection Size</span>
                         <div className="text-white text-3xl font-black drop-shadow-md flex items-baseline gap-2">
-                          {Object.keys(currentUser?.booms || {}).length || 0}
+                          {Object.keys(getVirtualBooms(currentUser)).length || 0}
                           <span className="text-pink-500 text-lg">✨</span>
                         </div>
                         <div className="mt-4 h-1 w-12 bg-pink-500 rounded-full" />
@@ -4317,18 +4447,7 @@ export default function BoomkitGame() {
                     <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/50 mb-2">
                       My Collection
                     </h1>
-                    <p className="text-white/60 text-lg">Manage, view, and craft your discovered Booms</p>
-                  </div>
-
-                  <div className="flex gap-4">
-                    <Button
-                      variant={showCrafting ? "default" : "outline"}
-                      onClick={() => setShowCrafting(!showCrafting)}
-                      className={`h-12 px-6 rounded-xl font-black ${showCrafting ? "bg-pink-500 hover:bg-pink-600 text-white" : "border-white/20 text-white hover:bg-white/10"}`}
-                    >
-                      <SparklesIcon className="w-5 h-5 mr-2" />
-                      {showCrafting ? "View Vault" : "Crafting"}
-                    </Button>
+                    <p className="text-white/60 text-lg">Manage and view your discovered Booms</p>
                   </div>
                 </div>
 
@@ -4447,7 +4566,7 @@ export default function BoomkitGame() {
                       </div>
                     </div>
 
-                    {/* Pack Sections */}
+{/* Pack Sections */}
                     <div className="grid grid-cols-1 gap-8">
                       {PACKS.map((pack) => (
                         <div
@@ -4464,14 +4583,21 @@ export default function BoomkitGame() {
                                 {pack.name}
                               </h2>
                               <Badge className="bg-white/10 text-white/70 border-none px-3 py-1">
-                                {pack.booms.filter(b => (currentUser?.booms[b.name] || 0) > 0).length} / {pack.booms.length} Found
+                                {pack.booms.filter(b => (getVirtualBooms(currentUser)[b.name] || 0) > 0).length} / {pack.booms.length} Found
                               </Badge>
                             </div>
 
                             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-4">
                               {pack.booms.map((boom, index) => {
-                                const quantity = currentUser?.booms[boom.name] || 0
+                                const quantity = getVirtualBooms(currentUser)[boom.name] || 0
                                 const hasBoom = quantity > 0
+                                const activeRental = rentalListings.find(
+                                  (r) =>
+                                    r.renter_username === currentUser?.username &&
+                                    r.boom_name === boom.name &&
+                                    r.status === "rented"
+                                )
+                                const isRented = !!activeRental
                                 const rarityColor = getRarityColor(boom.rarity)
 
                                 return (
@@ -4496,20 +4622,29 @@ export default function BoomkitGame() {
                                       )}
 
                                       {hasBoom ? (
-                                        boom.avatar.startsWith('/') ? (
-                                          <img src={boom.avatar || "/placeholder.svg"} alt={boom.name} className="z-10 relative w-12 h-12 object-contain drop-shadow-lg" />
-                                        ) : (
-                                          <span className="z-10 relative drop-shadow-lg">{boom.avatar}</span>
-                                        )
+                                        <>
+                                          {/* Quantity Badge */}
+                                          {hasBoom && quantity > 1 && (
+                                            <div className="absolute top-2 right-2 bg-white text-black text-[10px] font-black rounded-full w-5 h-5 flex items-center justify-center shadow-lg border border-black/10 z-20">
+                                              {quantity}x
+                                            </div>
+                                          )}
+
+                                          {/* Rented Session Badge */}
+                                          {isRented && activeRental && (
+                                            <div className="absolute top-2 left-2 bg-blue-600 text-white text-[8px] font-black rounded-xl px-1.5 py-0.5 flex items-center justify-center shadow-lg border border-blue-500/30 z-20 uppercase tracking-widest animate-pulse">
+                                              Rent ({activeRental.sessions_remaining})
+                                            </div>
+                                          )}
+
+                                          {boom.avatar.startsWith('/') ? (
+                                            <img src={boom.avatar || "/placeholder.svg"} alt={boom.name} className="z-10 relative w-12 h-12 object-contain drop-shadow-lg" />
+                                          ) : (
+                                            <span className="z-10 relative drop-shadow-lg">{boom.avatar}</span>
+                                          )}
+                                        </>
                                       ) : (
                                         <LockIcon className="h-8 w-8 opacity-20" />
-                                      )}
-
-                                      {/* Quantity Badge */}
-                                      {hasBoom && quantity > 1 && (
-                                        <div className="absolute top-2 right-2 bg-white text-black text-[10px] font-black rounded-full w-5 h-5 flex items-center justify-center shadow-lg border border-black/10 z-20">
-                                          {quantity}x
-                                        </div>
                                       )}
 
                                       {/* Highlight for rare items */}
@@ -5013,10 +5148,27 @@ export default function BoomkitGame() {
                         {(users || []).filter(u => u && u.status === "pending").length}
                       </Badge>
                     </button>
+                    <button
+                      onClick={() => setStaffTab("tournaments")}
+                      className={`px-6 py-2 rounded-xl text-sm font-black transition-all duration-300 flex items-center gap-2 ${staffTab === "tournaments" ? "bg-yellow-600 text-white shadow-lg shadow-yellow-900/40" : "text-white/40 hover:text-white hover:bg-white/5"
+                        }`}
+                    >
+                      <TrophyIcon className="w-4 h-4" />
+                      Tournaments
+                    </button>
+                    <button
+                      onClick={() => setStaffTab("seasons")}
+                      className={`px-6 py-2 rounded-xl text-sm font-black transition-all duration-300 flex items-center gap-2 ${staffTab === "seasons" ? "bg-emerald-600 text-white shadow-lg shadow-emerald-900/40" : "text-white/40 hover:text-white hover:bg-white/5"
+                        }`}
+                    >
+                      <FlameIcon className="w-4 h-4" />
+                      Seasons
+                    </button>
                   </div>
 
                   {/* Search and Filters Strip */}
-                  <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 gap-4">
+                  {staffTab !== "tournaments" && staffTab !== "seasons" && (
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 gap-4">
                     <div className="relative w-full md:w-80">
                       <Input
                         placeholder="Search players..."
@@ -5026,10 +5178,12 @@ export default function BoomkitGame() {
                       />
                     </div>
                   </div>
+                  )}
 
-                  <div className="space-y-3">
-                    {(users || [])
-                      .filter((u) => {
+                  {staffTab !== "tournaments" && staffTab !== "seasons" && (
+                    <div className="space-y-3">
+                      {(users || [])
+                        .filter((u) => {
                         if (!u) return false
                         const matchesSearch = u.username.toLowerCase().includes(staffSearchQuery.toLowerCase())
                         const matchesTab =
@@ -5207,6 +5361,182 @@ export default function BoomkitGame() {
                         </div>
                       )}
                   </div>
+                  )}
+
+                  {/* Tournaments Management Tab */}
+                  {staffTab === "tournaments" && (
+                    <div className="space-y-8 animate-in fade-in duration-300">
+                      {/* Create Tournament Form */}
+                      <Card className="bg-white/5 border-white/10 backdrop-blur-md rounded-3xl">
+                        <CardHeader>
+                          <CardTitle className="text-2xl font-black text-white flex items-center gap-2">
+                            <TrophyIcon className="h-6 w-6 text-yellow-500" />
+                            Create New Tournament
+                          </CardTitle>
+                          <CardDescription className="text-slate-400">Host an arena competition with custom rewards.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label className="text-white font-bold text-sm">Tournament Title</Label>
+                              <Input
+                                placeholder="e.g. Weekly Trivia Clash #1"
+                                value={tourneyTitle}
+                                onChange={(e) => setTourneyTitle(e.target.value)}
+                                className="bg-black/20 border-white/10 text-white rounded-xl"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-white font-bold text-sm">End Date & Time</Label>
+                              <Input
+                                type="datetime-local"
+                                value={tourneyEndTime}
+                                onChange={(e) => setTourneyEndTime(e.target.value)}
+                                className="bg-black/20 border-white/10 text-white rounded-xl"
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label className="text-white font-bold text-sm">Description</Label>
+                            <Input
+                              placeholder="e.g. Compete for the top score in history trivia!"
+                              value={tourneyDesc}
+                              onChange={(e) => setTourneyDesc(e.target.value)}
+                              className="bg-black/20 border-white/10 text-white rounded-xl"
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label className="text-white font-bold text-sm">Prize Tokens</Label>
+                              <Input
+                                type="number"
+                                placeholder="10000"
+                                value={tourneyPrizeTokens || ""}
+                                onChange={(e) => setTourneyPrizeTokens(parseInt(e.target.value) || 0)}
+                                className="bg-black/20 border-white/10 text-white rounded-xl"
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <Label className="text-white font-bold text-sm">Prize Boom Name (Optional)</Label>
+                              <select
+                                value={tourneyPrizeBoom}
+                                onChange={(e) => setTourneyPrizeBoom(e.target.value)}
+                                className="w-full bg-black/20 border border-white/10 text-white rounded-xl h-10 px-3 outline-none"
+                              >
+                                <option value="">No Boom Reward</option>
+                                <option value="Basic Box">Basic Box 📦</option>
+                                <option value="Rare Box">Rare Box 📦</option>
+                                <option value="Epic Box">Epic Box 📦</option>
+                                <option value="King Box">King Box 📦</option>
+                              </select>
+                            </div>
+                          </div>
+
+                          <Button
+                            onClick={handleCreateTournament}
+                            className="bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white font-black w-full py-6 rounded-2xl shadow-lg transition-transform hover:scale-[1.01]"
+                          >
+                            Launch Tournament
+                          </Button>
+                        </CardContent>
+                      </Card>
+
+                      {/* Tournament List */}
+                      <div className="space-y-4">
+                        <h3 className="text-xl font-black text-white flex items-center gap-2">
+                          <TrophyIcon className="h-5 w-5 text-yellow-500" />
+                          Tournaments Arena
+                        </h3>
+                        <div className="grid grid-cols-1 gap-4">
+                          {activeTournaments.map((t) => (
+                            <div key={t.id} className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                              <div>
+                                <div className="flex items-center gap-3 mb-1">
+                                  <h4 className="text-xl font-bold text-white">{t.title}</h4>
+                                  <Badge className={`${t.status === 'active' ? 'bg-green-500' : 'bg-red-500'} text-white font-black uppercase text-[8px]`}>
+                                    {t.status}
+                                  </Badge>
+                                </div>
+                                <p className="text-slate-400 text-sm mb-3">{t.description}</p>
+                                <div className="flex flex-wrap gap-3 text-xs text-slate-400">
+                                  <span className="flex items-center gap-1 font-bold text-white"><CoinsIcon className="w-3 h-3 text-yellow-400" /> {t.prize_tokens?.toLocaleString() || 0}</span>
+                                  {t.prize_boom_name && <span className="font-bold text-white">🎁 {t.prize_boom_name}</span>}
+                                  <span>Ends: {new Date(t.end_time).toLocaleString()}</span>
+                                </div>
+                              </div>
+                              {t.status === 'active' && (
+                                <Button
+                                  onClick={() => handleFinalizeTournament(t.id)}
+                                  className="bg-red-600 hover:bg-red-500 text-white font-black px-6 rounded-xl transition-all"
+                                >
+                                  Finalize & Award Prizes
+                                </Button>
+                              )}
+                            </div>
+                          ))}
+                          {activeTournaments.length === 0 && (
+                            <div className="p-12 text-center text-white/30 border border-dashed border-white/10 rounded-2xl">
+                              No tournaments have been hosted yet.
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Seasons Management Tab */}
+                  {staffTab === "seasons" && (
+                    <div className="space-y-8 animate-in fade-in duration-300">
+                      {/* Active Season Info */}
+                      <Card className="bg-white/5 border-white/10 backdrop-blur-md rounded-3xl">
+                        <CardHeader>
+                          <CardTitle className="text-2xl font-black text-white flex items-center gap-2">
+                            <FlameIcon className="h-6 w-6 text-orange-500 animate-pulse" />
+                            Season Management
+                          </CardTitle>
+                          <CardDescription className="text-slate-400">Start new seasons and manage active passes.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                          {activeSeason ? (
+                            <div className="bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-500/20 rounded-2xl p-6">
+                              <span className="text-[10px] font-black text-orange-400 uppercase tracking-widest block mb-1">Currently Active Season</span>
+                              <h4 className="text-2xl font-black text-white mb-2">{activeSeason.name}</h4>
+                              <p className="text-xs text-slate-400">
+                                Started: {new Date(activeSeason.start_date).toLocaleDateString()} | Ends: {new Date(activeSeason.end_date).toLocaleDateString()}
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="bg-red-950/20 border border-red-500/20 rounded-2xl p-6 text-center">
+                              <p className="text-red-300 font-bold">No active season pass currently running.</p>
+                            </div>
+                          )}
+
+                          <div className="space-y-3">
+                            <Label className="text-white font-bold text-sm">Start Next Season</Label>
+                            <div className="flex flex-col sm:flex-row gap-3">
+                              <Input
+                                placeholder="e.g. Season 2: Legends Ascend"
+                                value={newSeasonName}
+                                onChange={(e) => setNewSeasonName(e.target.value)}
+                                className="bg-black/20 border-white/10 text-white rounded-xl flex-grow h-12"
+                              />
+                              <Button
+                                onClick={handleStartNewSeason}
+                                className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white font-black px-8 h-12 rounded-xl"
+                              >
+                                Activate Season
+                              </Button>
+                            </div>
+                            <p className="text-[10px] text-slate-400">
+                              Activating a new season deactivates the current one and creates standard reward tiers (100 XP, 250 XP, 500 XP).
+                            </p>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  )}
                 </div>
               )) : null}
 
@@ -5920,7 +6250,8 @@ export default function BoomkitGame() {
               </div>
             )}
             {/* Season Pass Page */}
-            {currentPage === "season" && activeSeason && (
+            {currentPage === "season" && (
+              activeSeason ? (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="flex justify-between items-end border-b border-white/10 pb-6">
                   <div>
@@ -5995,7 +6326,18 @@ export default function BoomkitGame() {
                   </div>
                 </div>
               </div>
-            )}
+            ) : (
+              <div className="py-20 flex flex-col items-center justify-center bg-white/5 rounded-3xl border border-dashed border-white/10 max-w-xl mx-auto text-center animate-in fade-in duration-300">
+                <div className="w-20 h-20 bg-orange-500/10 rounded-full flex items-center justify-center mb-6 animate-pulse">
+                  <FlameIcon className="w-10 h-10 text-orange-500" />
+                </div>
+                <h3 className="text-2xl font-black text-white mb-2 uppercase tracking-widest">No Active Season Pass</h3>
+                <p className="text-slate-400 font-medium max-w-md mb-6">
+                  Keep earning XP in the arena and look out for the next season starting soon! 🔥
+                </p>
+              </div>
+            )
+          )}
 
             {/* Achievements Page */}
             {currentPage === "achievements" && (
@@ -7491,8 +7833,25 @@ export default function BoomkitGame() {
                   </p>
                 </div>
 
-                <Button onClick={() => handleConfirmSell()} className="w-full bg-blue-600 hover:bg-blue-700">
-                  Sell {sellQuantity} for {getBoomSellPrice(selectedBoom) * sellQuantity} tokens
+                {/* Prevent selling rented booms */}
+                {rentalListings.some(r => r.renter_username === currentUser?.username && r.boom_name === selectedBoom && r.status === "rented") ? (
+                  <div className="bg-blue-950/40 border border-blue-500/30 rounded-xl p-3 text-center text-xs text-blue-300 font-medium">
+                    This is a rented Boom and cannot be sold.
+                  </div>
+                ) : (
+                  <Button onClick={() => handleConfirmSell()} className="w-full bg-blue-600 hover:bg-blue-700">
+                    Sell {sellQuantity} for {getBoomSellPrice(selectedBoom) * sellQuantity} tokens
+                  </Button>
+                )}
+
+                <Button 
+                  onClick={async () => {
+                    setShowBoomAction(false)
+                    await pinBoomToProfile(selectedBoom)
+                  }} 
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white font-black"
+                >
+                  📌 Pin to Profile Showcase
                 </Button>
 
                 <Button onClick={() => setShowBoomAction(false)} className="w-full bg-gray-600 hover:bg-gray-700">
@@ -7790,6 +8149,19 @@ export default function BoomkitGame() {
                         p_score: gameScore
                       })
                     }
+                  }
+                }
+
+                // Decrement rental session if playing with a rented boom
+                if (currentUser.pinned_boom) {
+                  const { data: rentRes, error: rentErr } = await supabase!.rpc('decrement_rental_session', {
+                    p_renter: currentUser.username,
+                    p_boom_name: currentUser.pinned_boom
+                  })
+                  if (rentErr) {
+                    console.error("[v0] Error decrementing rental session:", rentErr.message)
+                  } else if (rentRes?.success) {
+                    console.log("[v0] Rental session used:", rentRes.message)
                   }
                 }
               }

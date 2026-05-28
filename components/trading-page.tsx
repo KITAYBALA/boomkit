@@ -206,6 +206,16 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
       return
     }
 
+    if (selectedUser.isBanned) {
+      setStatusModal({
+        show: true,
+        title: "Trade Blocked",
+        message: `${selectedUser.username} is banned and cannot participate in trading.`,
+        type: "error"
+      })
+      return
+    }
+
     if (
       Object.keys(myOfferedBooms).length === 0 &&
       myOfferedTokens === 0 &&
@@ -263,6 +273,11 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
     try {
       if (currentUser.isBanned) {
         throw new Error("You are banned and cannot participate in trading.")
+      }
+
+      const sender = users.find((u) => u.id === trade.sender_id)
+      if (sender?.isBanned) {
+        throw new Error("This trade cannot be accepted because the sender is banned.")
       }
 
       const { error } = await supabase.rpc('accept_trade', { trade_uuid: trade.id })
@@ -398,16 +413,21 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
               <CardContent className="py-8 text-center text-purple-200">No incoming trades</CardContent>
             </Card>
           ) : (
-            incomingTrades.map((trade) => (
-              <TradeCard
-                key={trade.id}
-                trade={trade}
-                currentUserId={currentUser.id}
-                onAccept={() => acceptTrade(trade)}
-                onDecline={() => declineTrade(trade)}
-                loading={loading}
-              />
-            ))
+            incomingTrades.map((trade) => {
+              const sender = users.find((u) => u.id === trade.sender_id)
+              const senderIsBanned = sender?.isBanned || false
+              return (
+                <TradeCard
+                  key={trade.id}
+                  trade={trade}
+                  currentUserId={currentUser.id}
+                  onAccept={() => acceptTrade(trade)}
+                  onDecline={() => declineTrade(trade)}
+                  loading={loading}
+                  senderIsBanned={senderIsBanned}
+                />
+              )
+            })
           ))}
 
         {activeTab === "outgoing" &&
@@ -416,15 +436,20 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
               <CardContent className="py-8 text-center text-purple-200">No outgoing trades</CardContent>
             </Card>
           ) : (
-            outgoingTrades.map((trade) => (
-              <TradeCard
-                key={trade.id}
-                trade={trade}
-                currentUserId={currentUser.id}
-                onCancel={() => cancelTrade(trade)}
-                loading={loading}
-              />
-            ))
+            outgoingTrades.map((trade) => {
+              const receiver = users.find((u) => u.id === trade.receiver_id)
+              const receiverIsBanned = receiver?.isBanned || false
+              return (
+                <TradeCard
+                  key={trade.id}
+                  trade={trade}
+                  currentUserId={currentUser.id}
+                  onCancel={() => cancelTrade(trade)}
+                  loading={loading}
+                  receiverIsBanned={receiverIsBanned}
+                />
+              )
+            })
           ))}
 
         {activeTab === "history" &&
@@ -435,9 +460,20 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
           ) : (
             historyTrades
               .slice(0, 20)
-              .map((trade) => (
-                <TradeCard key={trade.id} trade={trade} currentUserId={currentUser.id} loading={loading} />
-              ))
+              .map((trade) => {
+                const sender = users.find((u) => u.id === trade.sender_id)
+                const receiver = users.find((u) => u.id === trade.receiver_id)
+                return (
+                  <TradeCard
+                    key={trade.id}
+                    trade={trade}
+                    currentUserId={currentUser.id}
+                    loading={loading}
+                    senderIsBanned={sender?.isBanned || false}
+                    receiverIsBanned={receiver?.isBanned || false}
+                  />
+                )
+              })
           ))}
       </div>
 
@@ -746,6 +782,8 @@ function TradeCard({
   onDecline,
   onCancel,
   loading,
+  senderIsBanned = false,
+  receiverIsBanned = false,
 }: {
   trade: Trade
   currentUserId: string
@@ -753,6 +791,8 @@ function TradeCard({
   onDecline?: () => void
   onCancel?: () => void
   loading: boolean
+  senderIsBanned?: boolean
+  receiverIsBanned?: boolean
 }) {
   const isIncoming = trade.receiver_id === currentUserId
   const isPending = trade.status === "pending"
@@ -775,6 +815,16 @@ function TradeCard({
                 <Badge className={`${statusColors[trade.status]} shadow-lg shadow-current/20 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider`}>
                   {trade.status}
                 </Badge>
+                {senderIsBanned && (
+                  <Badge className="bg-red-600 text-white shadow-lg shadow-red-600/20 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider">
+                    🚫 Sender Banned
+                  </Badge>
+                )}
+                {receiverIsBanned && !isIncoming && (
+                  <Badge className="bg-red-600 text-white shadow-lg shadow-red-600/20 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider">
+                    🚫 Receiver Banned
+                  </Badge>
+                )}
                 <div className="flex items-center text-purple-300/60 text-xs font-medium">
                   <ClockIcon className="h-3.5 w-3.5 mr-1" />
                   {new Date(trade.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
@@ -788,7 +838,7 @@ function TradeCard({
                       <Button
                         size="sm"
                         onClick={onAccept}
-                        disabled={loading}
+                        disabled={loading || senderIsBanned}
                         className="bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/30 px-4 h-9 rounded-full transition-all active:scale-95"
                       >
                         <CheckIcon className="h-4 w-4 mr-1.5" />
