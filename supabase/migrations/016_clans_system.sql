@@ -529,6 +529,6 @@ BEGIN
       jsonb_build_object('clan_id', v_clan_id, 'target', p_target_username, 'role', p_new_role)
     );
 
-    RETURN jsonb_build_object('success', true, 'message', p_target_username || ''s role updated to ' || INITCAP(REPLACE(p_new_role, '_', ' ')) || '.');
+    RETURN jsonb_build_object('success', true, 'message', format('%s''s role updated to %s.', p_target_username, INITCAP(REPLACE(p_new_role, '_', ' '))));
 END;
 $$;
