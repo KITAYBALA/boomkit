@@ -191,7 +191,7 @@ BEGIN
 
     -- Check token requirement
     IF v_user_tokens < v_min_tokens THEN
-      RAISE EXCEPTION 'You do not meet the token requirement of ' || v_min_tokens || ' tokens.';
+      RAISE EXCEPTION 'You do not meet the token requirement of % tokens.', v_min_tokens;
     END IF;
 
     -- Check Boom rarity requirement
@@ -204,7 +204,7 @@ BEGIN
       END LOOP;
 
       IF v_eligible_count < v_min_rarity_count THEN
-        RAISE EXCEPTION 'Requirements not met: You must own at least ' || v_min_rarity_count || ' ' || INITCAP(v_min_rarity) || ' or higher Booms (You have ' || v_eligible_count || ').';
+        RAISE EXCEPTION 'Requirements not met: You must own at least % % or higher Booms (You have %).', v_min_rarity_count, INITCAP(v_min_rarity), v_eligible_count;
       END IF;
     END IF;
 
