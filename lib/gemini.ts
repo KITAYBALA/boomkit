@@ -15,7 +15,7 @@ export async function generateGeminiResponse(prompt: string): Promise<string> {
     const genAI = new GoogleGenerativeAI(apiKey)
 
     // Use multiple models for robustness, same as in generate-set/route.ts
-    const modelsToTry = ["gemini-2.0-flash", "gemini-1.5-flash", "gemini-pro-latest"]
+    const modelsToTry = ["gemini-2.5-flash-lite", "gemini-3.1-flash-lite", "gemini-2.0-flash", "gemini-1.5-flash", "gemini-pro-latest"]
     let lastError: any = null
 
     for (const modelName of modelsToTry) {

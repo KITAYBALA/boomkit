@@ -21,7 +21,7 @@ const curriculumMap = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../lib
 
 async function generate(grade, subject, topic, n) {
     if (n <= 0) return [];
-    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" });
     const prompt = `Generate ${n} educational MCQs for Grade ${grade}, Subject ${subject}, Topic ${topic}. 
     RANDOMIZE the answer position: The "ans" value must be randomly 0, 1, 2, or 3.
     Return ONLY JSON: { "qs": [{ "q": "text", "opts": ["A","B","C","D"], "ans": 0 }] }`;
