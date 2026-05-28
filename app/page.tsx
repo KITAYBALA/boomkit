@@ -2862,6 +2862,9 @@ export default function BoomkitGame() {
       return u
     })
 
+    // Optimistic update
+    setUsers(updatedUsers)
+
     await updateAndPersistUsers(updatedUsers, userId)
     alert("User application rejected.")
   }

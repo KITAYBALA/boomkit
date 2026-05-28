@@ -180,39 +180,54 @@ async function normalizeAndValidateUpdates(
   targetUserId: string,
   updates: Record<string, unknown>
 ) {
+  // Fetch current user details to see if fields actually changed
+  const { data: currentUser } = await supabase
+    .from('users')
+    .select('username, email')
+    .eq('id', targetUserId)
+    .single()
+
   if (typeof updates.username === 'string') {
     const username = updates.username.trim()
     updates.username = username
-    if (!/^[a-zA-Z0-9_]{3,32}$/.test(username)) {
-      return 'Username must be 3-32 characters and only contain letters, numbers, or underscores'
+    
+    // Only validate if the username has actually changed
+    if (!currentUser || username !== currentUser.username) {
+      if (!/^[a-zA-Z0-9_ ]{3,32}$/.test(username)) {
+        return 'Username must be 3-32 characters and only contain letters, numbers, spaces, or underscores'
+      }
+
+      const { data: collision } = await supabase
+        .from('users')
+        .select('id')
+        .eq('username', username)
+        .neq('id', targetUserId)
+        .maybeSingle()
+
+      if (collision) return 'Username is already in use by another account'
     }
-
-    const { data: collision } = await supabase
-      .from('users')
-      .select('id')
-      .eq('username', username)
-      .neq('id', targetUserId)
-      .maybeSingle()
-
-    if (collision) return 'Username is already in use by another account'
   }
 
   if (typeof updates.email === 'string') {
     const email = updates.email.trim()
     updates.email = email
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return 'Email is invalid'
-    }
+    
+    // Only validate if the email has actually changed
+    if (!currentUser || email !== currentUser.email) {
+      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        return 'Email is invalid'
+      }
 
-    if (email) {
-      const { data: collision } = await supabase
-        .from('users')
-        .select('id')
-        .eq('email', email)
-        .neq('id', targetUserId)
-        .maybeSingle()
+      if (email) {
+        const { data: collision } = await supabase
+          .from('users')
+          .select('id')
+          .eq('email', email)
+          .neq('id', targetUserId)
+          .maybeSingle()
 
-      if (collision) return 'Email is already in use by another account'
+        if (collision) return 'Email is already in use by another account'
+      }
     }
   }
 
