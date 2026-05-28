@@ -969,9 +969,7 @@ export default function BoomkitGame() {
         if (user.email && user.email.trim() !== "") {
           updates.email = user.email;
         }
-        if (user.lastIp && user.lastIp.trim() !== "") {
-          updates.last_ip = user.lastIp;
-        }
+
 
         const response = await fetch("/api/users/update", {
           method: "POST",
@@ -3088,13 +3086,13 @@ export default function BoomkitGame() {
     }
 
     try {
-      const { error } = await supabase.from("tournaments").insert({
-        title: tourneyTitle,
-        description: tourneyDesc || null,
-        end_time: new Date(tourneyEndTime).toISOString(),
-        prize_tokens: tourneyPrizeTokens || 0,
-        prize_boom_name: tourneyPrizeBoom || null,
-        status: "active"
+      const { error } = await supabase.rpc("create_tournament", {
+        p_creator_id: currentUser!.id,
+        p_title: tourneyTitle,
+        p_description: tourneyDesc || null,
+        p_end_time: new Date(tourneyEndTime).toISOString(),
+        p_prize_tokens: tourneyPrizeTokens || 0,
+        p_prize_boom_name: tourneyPrizeBoom || null
       })
 
       if (error) throw error
@@ -3131,31 +3129,12 @@ export default function BoomkitGame() {
     }
 
     try {
-      // 1. Deactivate any currently active seasons
-      await supabase.from("seasons").update({ is_active: false }).eq("is_active", true)
+      const { error } = await supabase.rpc("start_new_season", {
+        p_creator_id: currentUser!.id,
+        p_season_name: newSeasonName
+      })
 
-      // 2. Insert new active season
-      const { data: newSeason, error: seasonErr } = await supabase.from("seasons").insert({
-        name: newSeasonName,
-        start_date: new Date().toISOString(),
-        end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
-        is_active: true
-      }).select("id").single()
-
-      if (seasonErr) throw seasonErr
-
-      // 3. Insert default rewards for this season
-      const rewards = [
-        { season_id: newSeason.id, tier: 1, xp_required: 100, reward_type: 'tokens', reward_value: '1000', is_premium: false },
-        { season_id: newSeason.id, tier: 1, xp_required: 100, reward_type: 'tokens', reward_value: '5000', is_premium: true },
-        { season_id: newSeason.id, tier: 2, xp_required: 250, reward_type: 'boom', reward_value: 'Rare Box', is_premium: false },
-        { season_id: newSeason.id, tier: 2, xp_required: 250, reward_type: 'boom', reward_value: 'Epic Box', is_premium: true },
-        { season_id: newSeason.id, tier: 3, xp_required: 500, reward_type: 'tokens', reward_value: '2500', is_premium: false },
-        { season_id: newSeason.id, tier: 3, xp_required: 500, reward_type: 'plus_days', reward_value: '7', is_premium: true }
-      ]
-
-      const { error: rewardsErr } = await supabase.from("season_rewards").insert(rewards)
-      if (rewardsErr) throw rewardsErr
+      if (error) throw error
 
       alert(`🔥 Season "${newSeasonName}" started successfully with standard rewards!`)
       setNewSeasonName("")

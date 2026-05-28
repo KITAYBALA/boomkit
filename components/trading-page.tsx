@@ -196,21 +196,21 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
 
   const sendTrade = async () => {
     if (!selectedUser) return
-    if (currentUser.isBanned) {
+    if (currentUser.isBanned || currentUser.status === "rejected") {
       setStatusModal({
         show: true,
         title: "Trade Blocked",
-        message: "You are banned and cannot participate in trading.",
+        message: "You are banned or rejected and cannot participate in trading.",
         type: "error"
       })
       return
     }
 
-    if (selectedUser.isBanned) {
+    if (selectedUser.isBanned || selectedUser.status === "rejected") {
       setStatusModal({
         show: true,
         title: "Trade Blocked",
-        message: `${selectedUser.username} is banned and cannot participate in trading.`,
+        message: `${selectedUser.username} is banned or rejected and cannot participate in trading.`,
         type: "error"
       })
       return
@@ -271,13 +271,13 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
     setLoading(true)
 
     try {
-      if (currentUser.isBanned) {
-        throw new Error("You are banned and cannot participate in trading.")
+      if (currentUser.isBanned || currentUser.status === "rejected") {
+        throw new Error("You are banned or rejected and cannot participate in trading.")
       }
 
       const sender = users.find((u) => u.id === trade.sender_id)
-      if (sender?.isBanned) {
-        throw new Error("This trade cannot be accepted because the sender is banned.")
+      if (sender?.isBanned || sender?.status === "rejected") {
+        throw new Error("This trade cannot be accepted because the sender is banned or rejected.")
       }
 
       const { error } = await supabase.rpc('accept_trade', { trade_uuid: trade.id })
@@ -327,7 +327,7 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
     setTradeMessage("")
   }
 
-  const otherUsers = users.filter((u) => u.id !== currentUser.id && !u.isBanned)
+  const otherUsers = users.filter((u) => u.id !== currentUser.id && !u.isBanned && u.status !== "rejected")
 
   return (
     <div className="space-y-6">
@@ -415,7 +415,7 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
           ) : (
             incomingTrades.map((trade) => {
               const sender = users.find((u) => u.id === trade.sender_id)
-              const senderIsBanned = sender?.isBanned || false
+              const senderIsBanned = (sender?.isBanned || sender?.status === "rejected") || false
               return (
                 <TradeCard
                   key={trade.id}
@@ -438,7 +438,7 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
           ) : (
             outgoingTrades.map((trade) => {
               const receiver = users.find((u) => u.id === trade.receiver_id)
-              const receiverIsBanned = receiver?.isBanned || false
+              const receiverIsBanned = (receiver?.isBanned || receiver?.status === "rejected") || false
               return (
                 <TradeCard
                   key={trade.id}
@@ -469,8 +469,8 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
                     trade={trade}
                     currentUserId={currentUser.id}
                     loading={loading}
-                    senderIsBanned={sender?.isBanned || false}
-                    receiverIsBanned={receiver?.isBanned || false}
+                    senderIsBanned={(sender?.isBanned || sender?.status === "rejected") || false}
+                    receiverIsBanned={(receiver?.isBanned || receiver?.status === "rejected") || false}
                   />
                 )
               })
