@@ -6029,7 +6029,7 @@ export default function BoomkitGame() {
                   {/* Fusion Slots */}
                   <div className="lg:col-span-2 space-y-8">
                     <div className="bg-black/40 border border-white/10 rounded-3xl p-12 flex flex-col items-center justify-center relative overflow-hidden group">
-                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
                       <div className="flex items-center gap-12 relative z-10">
                         {/* Slot 1 */}
@@ -6075,7 +6075,7 @@ export default function BoomkitGame() {
                       <Button
                         onClick={handleFusion}
                         disabled={!fusionSlot1 || !fusionSlot2 || isFusing}
-                        className={`mt-12 px-12 py-8 rounded-2xl font-black text-xl transition-all ${!fusionSlot1 || !fusionSlot2 ? 'bg-white/5 text-white/20 cursor-not-allowed' : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white shadow-2xl shadow-blue-600/30 hover:scale-105 active:scale-95'}`}
+                        className={`mt-12 px-12 py-8 rounded-2xl font-black text-xl transition-all relative z-10 ${!fusionSlot1 || !fusionSlot2 ? 'bg-white/5 text-white/20 cursor-not-allowed' : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white shadow-2xl shadow-blue-600/30 hover:scale-105 active:scale-95'}`}
                       >
                         {isFusing ? (
                           <div className="flex items-center gap-3">
