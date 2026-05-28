@@ -700,6 +700,16 @@ const PROFILE_PICTURES = [
 
 const NEWS_ITEMS: NewsItem[] = [
   {
+    id: "4",
+    title: "BOOMKIT V2 IS HERE!",
+    content: "Boomkit V2.0 is officially out! We have integrated a new virtual Boom Rental system, upgraded the Fusion Lab with full item mapping, secured trading against banned/rejected accounts, enabled staff to run custom Tournaments and Seasons, and upgraded quiz generation with Gemini 2.5 Flash Lite. Click around the dashboard to explore all V2 features!",
+    date: "2026-05-28",
+    image: "🚀",
+    imageUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&q=80",
+    badge: "V2 Release",
+    badgeColor: "bg-gradient-to-r from-purple-500 to-pink-500"
+  },
+  {
     id: "3",
     title: "Introducing 30+ Game Modes!",
     content: "Take your learning to the next level with our massive new update. From 'Gold Quest' to 'Cyberpunk', discover 30 unique ways to play and earn rewards. Each mode features custom mechanics and premium 3D visuals.",
@@ -902,6 +912,9 @@ export default function BoomkitGame() {
   const [showEditUserDialog, setShowEditUserDialog] = useState(false)
   const [editTokenValue, setEditTokenValue] = useState("")
   const [userToEdit, setUserToEdit] = useState<GameUser | null>(null)
+
+  // News Popup state for V2 release
+  const [showV2NewsModal, setShowV2NewsModal] = useState(false)
 
   // Secret owner access code
 
@@ -1918,6 +1931,7 @@ export default function BoomkitGame() {
 
       updateAndPersistCurrentUser(newUser)
       setCurrentView("game")
+      setShowV2NewsModal(true)
     } catch (error) {
       console.error("Registration error:", error)
       alert("Registration failed. Please try again.")
@@ -6581,6 +6595,118 @@ export default function BoomkitGame() {
       </div >
 
       {/* MODALS */}
+      {
+        showV2NewsModal && (
+          <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 md:p-8 animate-in fade-in zoom-in-95 duration-300">
+            {/* Backdrop with blur and dark tint */}
+            <div
+              className="absolute inset-0 bg-black/85 backdrop-blur-md"
+              onClick={() => setShowV2NewsModal(false)}
+            />
+
+            <Card className="w-full max-w-2xl bg-slate-900 border border-purple-500/30 shadow-[0_0_50px_rgba(168,85,247,0.2)] relative z-10 overflow-hidden flex flex-col max-h-[85vh] rounded-3xl">
+              <CardHeader className="border-b border-white/5 pb-4 bg-gradient-to-r from-purple-900/50 via-slate-900 to-indigo-900/50">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full mb-1">
+                      Major Release
+                    </Badge>
+                    <CardTitle className="text-2xl md:text-3xl font-black text-white tracking-tight flex items-center gap-3">
+                      🚀 BOOMKIT V2 IS OUT!
+                    </CardTitle>
+                    <CardDescription className="text-purple-300/80 font-semibold tracking-wide text-xs">
+                      The Ultimate Gamified Learning Adventure Upgrade
+                    </CardDescription>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowV2NewsModal(false)}
+                    className="rounded-full bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-all"
+                  >
+                    <XIcon className="w-5 h-5" />
+                  </Button>
+                </div>
+              </CardHeader>
+
+              <CardContent className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide text-slate-200">
+                <div className="space-y-3">
+                  <p className="text-sm md:text-base font-medium leading-relaxed">
+                    Welcome to **Boomkit V2**! We have completely overhauled the platform to bring you a premium, secure, and feature-rich educational arena. Here are the major additions and changes you can explore starting today:
+                  </p>
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="text-sm font-black uppercase tracking-widest text-purple-400">
+                    🛠️ v2.0.0 Patch Notes & Features
+                  </h4>
+                  
+                  <div className="grid gap-4">
+                    <div className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-purple-500/20 transition-all">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="text-lg">🔄</span>
+                        <h5 className="font-bold text-white text-sm md:text-base">Virtual Boom Rentals</h5>
+                      </div>
+                      <p className="text-xs md:text-sm text-slate-400 leading-relaxed pl-7">
+                        Share the power of your collection! You can now rent out Epic and Legendary Booms for a set number of game sessions. Rented Booms track remaining sessions dynamically in your Vault and cannot be sold.
+                      </p>
+                    </div>
+
+                    <div className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-purple-500/20 transition-all">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="text-lg">🧪</span>
+                        <h5 className="font-bold text-white text-sm md:text-base">High-Tier Fusion Lab</h5>
+                      </div>
+                      <p className="text-xs md:text-sm text-slate-400 leading-relaxed pl-7">
+                        Combine duplicate Booms (like *DeepSeek*, *Parrot*, or *Kraken*) in the upgraded Fusion Lab to roll for higher rarity tiers and clone rare items.
+                      </p>
+                    </div>
+
+                    <div className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-purple-500/20 transition-all">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="text-lg">🤝</span>
+                        <h5 className="font-bold text-white text-sm md:text-base">Secure Peer-to-Peer Trading</h5>
+                      </div>
+                      <p className="text-xs md:text-sm text-slate-400 leading-relaxed pl-7">
+                        Trade Booms safely with friends. Secure database RPC functions and UI blocks prevent trades with banned or rejected users.
+                      </p>
+                    </div>
+
+                    <div className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-purple-500/20 transition-all">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="text-lg">🏆</span>
+                        <h5 className="font-bold text-white text-sm md:text-base">Staff Live Tournaments & Seasons</h5>
+                      </div>
+                      <p className="text-xs md:text-sm text-slate-400 leading-relaxed pl-7">
+                        Staff members can now host live competitions and start new seasons complete with a custom Season Pass, powered by secure bypass-RLS operations.
+                      </p>
+                    </div>
+
+                    <div className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-purple-500/20 transition-all">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="text-lg">🤖</span>
+                        <h5 className="font-bold text-white text-sm md:text-base">Gemini 2.5 Quiz Generation</h5>
+                      </div>
+                      <p className="text-xs md:text-sm text-slate-400 leading-relaxed pl-7">
+                        Quizzes are now generated with Google's fast and smart `gemini-2.5-flash-lite` AI model for maximum topic relevance and progression.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+
+              <div className="p-6 bg-slate-950 border-t border-white/5">
+                <Button
+                  onClick={() => setShowV2NewsModal(false)}
+                  className="w-full h-12 bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-black text-base rounded-xl shadow-[0_5px_15px_rgba(168,85,247,0.3)] transition-all hover:-translate-y-0.5 active:translate-y-0"
+                >
+                  LET'S PLAY BOOMKIT V2!
+                </Button>
+              </div>
+            </Card>
+          </div>
+        )
+      }
       {
         showNews && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-500">
