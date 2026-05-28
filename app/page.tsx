@@ -6102,8 +6102,20 @@ export default function BoomkitGame() {
                             <div
                               key={name}
                               onClick={() => {
-                                if (!fusionSlot1) setFusionSlot1(name)
-                                else if (!fusionSlot2) setFusionSlot2(name)
+                                if (fusionSlot1 === name) {
+                                  setFusionSlot1(null)
+                                } else if (fusionSlot2 === name) {
+                                  setFusionSlot2(null)
+                                } else if (!fusionSlot1) {
+                                  setFusionSlot1(name)
+                                } else if (!fusionSlot2) {
+                                  const currentCount = (count as number) || 0
+                                  if (fusionSlot1 === name && currentCount < 2) {
+                                    toast.error(`You only have 1 copy of ${name}. Fusing requires 2 copies of the same Boom or two different Booms.`)
+                                    return
+                                  }
+                                  setFusionSlot2(name)
+                                }
                               }}
                               className={`p-4 rounded-xl border transition-all cursor-pointer flex flex-col items-center ${fusionSlot1 === name || fusionSlot2 === name ? 'bg-blue-600/20 border-blue-500' : 'bg-black/20 border-white/10 hover:border-white/30'}`}
                             >
