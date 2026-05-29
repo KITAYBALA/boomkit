@@ -7016,6 +7016,57 @@ export default function BoomkitGame() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                  {/* Leaderboard for selected tournament */}
+                  <div className="space-y-6">
+                    <h3 className="text-xl font-black text-white flex items-center gap-2">
+                      <StarIcon className="h-6 w-6 text-purple-400" />
+                      Leaderboard
+                    </h3>
+                    <div className="bg-black/40 border border-white/10 rounded-2xl overflow-hidden min-h-[400px] flex flex-col">
+                      {!selectedTournament ? (
+                        <div className="flex-1 flex items-center justify-center p-8 text-center text-white/20 italic text-sm">
+                          Select a tournament to view its legends
+                        </div>
+                      ) : (
+                        <div className="p-4 space-y-3">
+                          <div className="text-[10px] font-black text-white/30 uppercase tracking-widest px-2 mb-2 flex justify-between">
+                            <span>Clan / Games</span>
+                            <span>Total Score</span>
+                          </div>
+                          {tournamentParticipants.map((p, idx) => {
+                            const isMyClan = p.clan_id === currentUser?.clan_id;
+                            const clan = p.clans;
+                            return (
+                              <div key={p.id} className={`flex items-center gap-3 p-3 rounded-xl border ${isMyClan ? 'bg-purple-500/20 border-purple-500/30' : 'bg-white/5 border-transparent'} hover:bg-white/10 transition-colors`}>
+                                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black ${idx === 0 ? 'bg-yellow-400 text-black' : idx === 1 ? 'bg-slate-300 text-black' : idx === 2 ? 'bg-orange-500 text-white' : 'bg-white/20 text-white'}`}>
+                                  {idx + 1}
+                                </div>
+                                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-sm border border-white/10">
+                                  {clan?.logo || "🛡️"}
+                                </div>
+                                <div className="flex-grow flex flex-col font-medium">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-white font-bold text-sm truncate max-w-[120px]">{clan?.name || "Unknown Clan"}</span>
+                                    <span className="inline-block text-[10px] font-black px-1.5 py-0.5 rounded bg-black/40 border border-white/5">
+                                      <span className={clan?.tag_color || "text-purple-400"}>
+                                        [{clan?.tag || "???"}]
+                                      </span>
+                                    </span>
+                                  </div>
+                                  <div className="text-[10px] text-white/40 uppercase font-black">{p.games_played} Games Played</div>
+                                </div>
+                                <div className="text-white font-black text-lg">{p.score}</div>
+                              </div>
+                            );
+                          })}
+                          {tournamentParticipants.length === 0 && (
+                            <div className="text-center py-12 text-white/20 text-sm">No clans have scored yet. Go for it!</div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
                   {/* Active Tournaments */}
                   <div className="lg:col-span-2 space-y-6">
                     <h3 className="text-xl font-black text-white flex items-center gap-2">
@@ -7167,57 +7218,6 @@ export default function BoomkitGame() {
                         ))}
                       </div>
                     )}
-                  </div>
-
-                  {/* Leaderboard for selected tournament */}
-                  <div className="space-y-6">
-                    <h3 className="text-xl font-black text-white flex items-center gap-2">
-                      <StarIcon className="h-6 w-6 text-purple-400" />
-                      Leaderboard
-                    </h3>
-                    <div className="bg-black/40 border border-white/10 rounded-2xl overflow-hidden min-h-[400px] flex flex-col">
-                      {!selectedTournament ? (
-                        <div className="flex-1 flex items-center justify-center p-8 text-center text-white/20 italic text-sm">
-                          Select a tournament to view its legends
-                        </div>
-                      ) : (
-                        <div className="p-4 space-y-3">
-                          <div className="text-[10px] font-black text-white/30 uppercase tracking-widest px-2 mb-2 flex justify-between">
-                            <span>Clan / Games</span>
-                            <span>Total Score</span>
-                          </div>
-                          {tournamentParticipants.map((p, idx) => {
-                            const isMyClan = p.clan_id === currentUser?.clan_id;
-                            const clan = p.clans;
-                            return (
-                              <div key={p.id} className={`flex items-center gap-3 p-3 rounded-xl border ${isMyClan ? 'bg-purple-500/20 border-purple-500/30' : 'bg-white/5 border-transparent'} hover:bg-white/10 transition-colors`}>
-                                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black ${idx === 0 ? 'bg-yellow-400 text-black' : idx === 1 ? 'bg-slate-300 text-black' : idx === 2 ? 'bg-orange-500 text-white' : 'bg-white/20 text-white'}`}>
-                                  {idx + 1}
-                                </div>
-                                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-sm border border-white/10">
-                                  {clan?.logo || "🛡️"}
-                                </div>
-                                <div className="flex-grow flex flex-col font-medium">
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-white font-bold text-sm truncate max-w-[120px]">{clan?.name || "Unknown Clan"}</span>
-                                    <span className="inline-block text-[10px] font-black px-1.5 py-0.5 rounded bg-black/40 border border-white/5">
-                                      <span className={clan?.tag_color || "text-purple-400"}>
-                                        [{clan?.tag || "???"}]
-                                      </span>
-                                    </span>
-                                  </div>
-                                  <div className="text-[10px] text-white/40 uppercase font-black">{p.games_played} Games Played</div>
-                                </div>
-                                <div className="text-white font-black text-lg">{p.score}</div>
-                              </div>
-                            );
-                          })}
-                          {tournamentParticipants.length === 0 && (
-                            <div className="text-center py-12 text-white/20 text-sm">No clans have scored yet. Go for it!</div>
-                          )}
-                        </div>
-                      )}
-                    </div>
                   </div>
                 </div>
               </div>
