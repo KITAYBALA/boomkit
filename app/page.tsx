@@ -1602,32 +1602,38 @@ export default function BoomkitGame() {
     }
   }, [syncCurrentUserRole, currentUser?.id, supabase])
 
-  // Real-time listener for clan chat messages
+  // Real-time listener for clan chat messages & auto-details loading
   useEffect(() => {
     if (!supabase || !currentUser?.clan_id) {
       setClanChat([])
+      setClanDetails(null)
       return
     }
 
-    // Fetch initial chat
-    fetchClanChat(currentUser.clan_id)
+    const clanId = currentUser.clan_id
+
+    // Fetch initial chat and clan details
+    fetchClanChat(clanId)
+    fetchClanDetails(clanId)
 
     // Subscribe to new chat messages
     const channel = supabase
-      .channel(`clan_chat_${currentUser.clan_id}`)
+      .channel(`clan_chat_${clanId}`)
       .on(
         'postgres_changes',
         {
           event: 'INSERT',
           schema: 'public',
           table: 'clan_chat_messages',
-          filter: `clan_id=eq.${currentUser.clan_id}`
+          filter: `clan_id=eq.${clanId}`
         },
         (payload: any) => {
           setClanChat((prev) => {
             if (prev.some(msg => msg.id === payload.new.id)) return prev
             return [...prev, payload.new]
           })
+          // Auto-refresh clan details on new message to sync XP/balances/etc in real time
+          fetchClanDetails(clanId)
         }
       )
       .subscribe()
@@ -3255,6 +3261,28 @@ export default function BoomkitGame() {
     }
   }
 
+  const handleBuyClanUpgrade = async (type: string, color?: string) => {
+    if (!currentUser || !supabase || !currentUser.clan_id) return
+    try {
+      const { data, error } = await supabase.rpc("buy_clan_upgrade", {
+        p_username: currentUser.username,
+        p_upgrade_type: type,
+        p_color_value: color
+      })
+
+      if (error) throw error
+      if (data.success) {
+        toast.success(data.message)
+        fetchClanDetails(currentUser.clan_id)
+        fetchUsersFromSupabase(true)
+      } else {
+        toast.error(data.message)
+      }
+    } catch (e: any) {
+      toast.error(e.message || "Upgrade purchase failed")
+    }
+  }
+
   const handleLeaveClan = async () => {
     if (!currentUser || !supabase) return
     if (!confirm("Are you sure you want to leave your clan?")) return
@@ -3546,24 +3574,55 @@ export default function BoomkitGame() {
   const fetchTournamentParticipants = async (tournamentId: string) => {
     if (!supabase) return
     try {
-      const { data } = await supabase.from("tournament_participants")
-        .select("*")
+      const { data, error } = await supabase.from("tournament_clans")
+        .select(`
+          id,
+          tournament_id,
+          clan_id,
+          score,
+          games_played,
+          last_played,
+          clans (
+            name,
+            tag,
+            tag_color,
+            logo,
+            level
+          )
+        `)
         .eq("tournament_id", tournamentId)
         .order("score", { ascending: false })
+
+      if (error) throw error
       setTournamentParticipants(data || [])
-    } catch (e) { console.error(e) }
+    } catch (e) { 
+      console.error("Failed to fetch tournament participants:", e) 
+    }
   }
 
   const handleJoinTournament = async (tournamentId: string) => {
     if (!currentUser || !supabase) return
+    if (!currentUser.clan_id) {
+      toast.error("You must join or create a Clan first to participate in tournaments!")
+      return
+    }
     try {
-      const { data, error } = await supabase.rpc('join_tournament', {
+      const { data, error } = await supabase.rpc('join_tournament_clan', {
         p_tournament_id: tournamentId, p_username: currentUser.username
       })
       if (error) throw error
-      alert("🏆 You have joined the tournament!")
-      fetchTournaments()
-    } catch (e: any) { alert(e.message || "Failed to join") }
+      if (data.success) {
+        toast.success(data.message)
+        fetchTournaments()
+        if (selectedTournament) {
+          fetchTournamentParticipants(selectedTournament.id)
+        }
+      } else {
+        toast.error(data.message)
+      }
+    } catch (e: any) { 
+      toast.error(e.message || "Failed to join tournament") 
+    }
   }
 
   const fetchUserActivity = async (username: string) => {
@@ -4370,7 +4429,7 @@ export default function BoomkitGame() {
               }`}
           >
             <ShieldIcon className="h-5 w-5 mr-3" />
-            Clans Hub
+            Clans
           </button>
 
           <button
@@ -6199,12 +6258,9 @@ export default function BoomkitGame() {
                 {currentUser?.clan_id ? (
                   // IN A CLAN VIEW
                   !clanDetails ? (
-                    <div className="flex flex-col items-center justify-center p-20 min-h-[400px]">
-                      <div className="relative w-16 h-16">
-                        <div className="absolute inset-0 border-4 border-purple-500/20 rounded-full animate-pulse" />
-                        <div className="absolute inset-0 border-4 border-t-purple-500 rounded-full animate-spin" />
-                      </div>
-                      <p className="mt-4 text-purple-400 font-bold animate-pulse text-lg">Gathering Clan Intelligence...</p>
+                    <div className="flex flex-col items-center justify-center p-20 min-h-[400px] bg-white/5 border border-white/10 rounded-[2.5rem]">
+                      <div className="w-10 h-10 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin" />
+                      <p className="mt-4 text-purple-400 font-bold text-xs uppercase tracking-widest animate-pulse">Loading Clan Details...</p>
                     </div>
                   ) : (
                     <div className="space-y-8">
@@ -6415,14 +6471,27 @@ export default function BoomkitGame() {
                                     defaultValue={clanDetails.tag_color}
                                     className="bg-black border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs w-full focus:outline-none focus:border-purple-500/50"
                                   >
-                                    <option value="text-purple-400">Purple</option>
-                                    <option value="text-red-400">Red</option>
-                                    <option value="text-blue-400">Blue</option>
-                                    <option value="text-green-400">Green</option>
-                                    <option value="text-yellow-400">Yellow</option>
-                                    <option value="text-pink-400">Pink</option>
-                                    <option value="text-cyan-400">Cyan</option>
-                                    <option value="text-orange-400">Orange</option>
+                                    {Array.from(new Set([
+                                      'text-purple-400', 'text-red-400', 'text-blue-400', 'text-green-400', 'text-yellow-400',
+                                      ...(clanDetails.unlocked_colors || [])
+                                    ])).map(color => {
+                                      let label = "Color Option";
+                                      if (color === 'text-purple-400') label = "Purple";
+                                      else if (color === 'text-red-400') label = "Red";
+                                      else if (color === 'text-blue-400') label = "Blue";
+                                      else if (color === 'text-green-400') label = "Green";
+                                      else if (color === 'text-yellow-400') label = "Yellow";
+                                      else if (color === 'text-pink-500') label = "Neon Pink";
+                                      else if (color === 'text-emerald-400') label = "Neon Emerald";
+                                      else if (color === 'text-cyan-400') label = "Neon Cyan";
+                                      else if (color.includes('yellow-400')) label = "✨ Gold Gradient";
+                                      else if (color.includes('pink-500')) label = "🌈 Chroma Gradient";
+                                      else if (color === 'text-pink-400') label = "Pink";
+                                      else if (color === 'text-orange-400') label = "Orange";
+                                      return (
+                                        <option key={color} value={color}>{label}</option>
+                                      );
+                                    })}
                                   </select>
                                 </div>
                               </div>
@@ -6492,6 +6561,105 @@ export default function BoomkitGame() {
                               </Button>
                             </div>
                           )}
+
+                          {/* Clan Upgrades Shop Card */}
+                          <div className="bg-gradient-to-br from-indigo-950/20 via-purple-950/20 to-black/30 border border-purple-500/20 rounded-[2rem] p-6 shadow-xl space-y-6">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <SparklesIcon className="w-5 h-5 text-yellow-400" />
+                                <h2 className="text-xl font-black text-white">Clan Perks & Upgrades</h2>
+                              </div>
+                              <span className="text-xs bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 px-3 py-1 rounded-xl font-bold flex items-center gap-1.5">
+                                <CoinsIcon className="w-3.5 h-3.5" />
+                                {clanDetails.bank_tokens.toLocaleString()} Bank Tokens
+                              </span>
+                            </div>
+                            
+                            <p className="text-white/50 text-xs">
+                              Spend tokens from the Clan Bank to unlock passive capacity bonuses and cosmetics. Only Leaders and Co-Leaders can purchase upgrades.
+                            </p>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {/* Member Limit Upgrade */}
+                              <div className="bg-black/30 border border-white/5 rounded-2xl p-4 flex flex-col justify-between gap-4">
+                                <div className="space-y-1">
+                                  <h4 className="font-bold text-white text-sm">Clan Capacity</h4>
+                                  <p className="text-xs text-white/40 font-medium">Increase max member limit. Current: <span className="text-white font-bold">{clanDetails.member_limit || 15}</span></p>
+                                </div>
+                                <div>
+                                  {clanDetails.member_limit >= 30 ? (
+                                    <Badge className="bg-green-500/10 border-green-500/20 text-green-400 font-bold w-full justify-center">MAX LEVEL REACHED</Badge>
+                                  ) : (
+                                    <Button
+                                      onClick={() => handleBuyClanUpgrade('member_limit')}
+                                      disabled={currentUser.clan_role !== 'leader' && currentUser.clan_role !== 'co_leader'}
+                                      className="w-full bg-purple-600 hover:bg-purple-500 text-white border-none text-xs font-bold rounded-xl h-10 transition-all disabled:opacity-50"
+                                    >
+                                      Upgrade to {clanDetails.member_limit === 20 ? 25 : clanDetails.member_limit === 25 ? 30 : 20} (🪙 {clanDetails.member_limit === 20 ? "25,000" : clanDetails.member_limit === 25 ? "50,000" : "10,000"})
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* XP Multiplier Upgrade */}
+                              <div className="bg-black/30 border border-white/5 rounded-2xl p-4 flex flex-col justify-between gap-4">
+                                <div className="space-y-1">
+                                  <h4 className="font-bold text-white text-sm">Discover XP Boost</h4>
+                                  <p className="text-xs text-white/40 font-medium">Passive multiplier to Clan XP. Current: <span className="text-yellow-400 font-bold">{clanDetails.xp_multiplier || "1.0"}x</span></p>
+                                </div>
+                                <div>
+                                  {clanDetails.xp_multiplier >= 2.0 ? (
+                                    <Badge className="bg-green-500/10 border-green-500/20 text-green-400 font-bold w-full justify-center">MAX LEVEL REACHED</Badge>
+                                  ) : (
+                                    <Button
+                                      onClick={() => handleBuyClanUpgrade('xp_multiplier')}
+                                      disabled={currentUser.clan_role !== 'leader' && currentUser.clan_role !== 'co_leader'}
+                                      className="w-full bg-purple-600 hover:bg-purple-500 text-white border-none text-xs font-bold rounded-xl h-10 transition-all disabled:opacity-50"
+                                    >
+                                      Upgrade to {clanDetails.xp_multiplier >= 1.5 ? "2.0" : clanDetails.xp_multiplier >= 1.2 ? "1.5" : "1.2"}x (🪙 {clanDetails.xp_multiplier >= 1.5 ? "75,000" : clanDetails.xp_multiplier >= 1.2 ? "35,000" : "15,000"})
+                                    </Button>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Premium Colors Shop Section */}
+                            <div className="border-t border-white/5 pt-4 space-y-3">
+                              <h3 className="text-xs font-black uppercase text-purple-400 tracking-wider">Unlock Custom Tag Colors</h3>
+                              
+                              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                                {[
+                                  { code: 'text-pink-500', name: 'Neon Pink', cost: 5000 },
+                                  { code: 'text-emerald-400', name: 'Neon Emerald', cost: 5000 },
+                                  { code: 'text-cyan-400', name: 'Neon Cyan', cost: 5000 },
+                                  { code: 'bg-gradient-to-r from-yellow-400 to-amber-500 text-transparent bg-clip-text font-black', name: 'Gold Gradient', cost: 20000 },
+                                  { code: 'bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-transparent bg-clip-text font-black animate-pulse', name: 'Chroma Gradient', cost: 35000 },
+                                ].map(color => {
+                                  const isUnlocked = (clanDetails.unlocked_colors || []).includes(color.code);
+                                  return (
+                                    <div key={color.code} className="bg-black/30 border border-white/5 rounded-xl p-3 flex flex-col justify-between items-center text-center gap-3">
+                                      <span className={`text-xs font-black px-2 py-0.5 rounded bg-black/40 border border-white/5 ${color.code}`}>
+                                        [{clanDetails.tag}]
+                                      </span>
+                                      <div className="text-[10px] text-white/50">{color.name}</div>
+                                      
+                                      {isUnlocked ? (
+                                        <Badge className="bg-green-500/10 border-green-500/20 text-green-400 text-[10px] font-bold py-0.5">Unlocked</Badge>
+                                      ) : (
+                                        <Button
+                                          onClick={() => handleBuyClanUpgrade('unlock_color', color.code)}
+                                          disabled={currentUser.clan_role !== 'leader' && currentUser.clan_role !== 'co_leader'}
+                                          className="w-full bg-yellow-600 hover:bg-yellow-500 text-white border-none text-[9px] font-bold rounded-lg h-7 disabled:opacity-50"
+                                        >
+                                          🪙 {color.cost.toLocaleString()}
+                                        </Button>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          </div>
                         </div>
 
                         {/* Clan Bank & Chat (Col Span 1) */}
@@ -6835,13 +7003,28 @@ export default function BoomkitGame() {
                               </div>
                             </div>
 
-                            {!tournamentParticipants.some(p => p.username === currentUser?.username && p.tournament_id === t.id) && t.status === 'active' && (
-                              <Button
-                                onClick={(e) => { e.stopPropagation(); handleJoinTournament(t.id) }}
-                                className="w-full mt-4 bg-yellow-600 hover:bg-yellow-500 text-white font-black rounded-xl h-12 shadow-lg shadow-yellow-600/20"
-                              >
-                                Join Tournament
-                              </Button>
+                            {t.status === 'active' && (
+                              !currentUser?.clan_id ? (
+                                <Button
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    toast.error("You must join or create a Clan first to participate in tournaments!")
+                                    setCurrentPage("clans")
+                                  }}
+                                  className="w-full mt-4 bg-white/10 hover:bg-white/20 text-white font-black rounded-xl h-12 border border-white/10"
+                                >
+                                  Join a Clan to Participate
+                                </Button>
+                              ) : (
+                                !tournamentParticipants.some(p => p.clan_id === currentUser.clan_id && p.tournament_id === t.id) && (
+                                  <Button
+                                    onClick={(e) => { e.stopPropagation(); handleJoinTournament(t.id) }}
+                                    className="w-full mt-4 bg-yellow-600 hover:bg-yellow-500 text-white font-black rounded-xl h-12 shadow-lg shadow-yellow-600/20"
+                                  >
+                                    Register Clan for Tournament
+                                  </Button>
+                                )
+                              )
                             )}
                           </div>
                         ))}
@@ -6863,23 +7046,35 @@ export default function BoomkitGame() {
                       ) : (
                         <div className="p-4 space-y-3">
                           <div className="text-[10px] font-black text-white/30 uppercase tracking-widest px-2 mb-2 flex justify-between">
-                            <span>Participant / Games</span>
-                            <span>Top Score</span>
+                            <span>Clan / Games</span>
+                            <span>Total Score</span>
                           </div>
-                          {tournamentParticipants.map((p, idx) => (
-                            <div key={p.id} className={`flex items-center gap-3 p-3 rounded-xl border ${p.username === currentUser?.username ? 'bg-purple-500/20 border-purple-500/30' : 'bg-white/5 border-transparent'} hover:bg-white/10 transition-colors`}>
-                              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black ${idx === 0 ? 'bg-yellow-400 text-black' : idx === 1 ? 'bg-slate-300 text-black' : idx === 2 ? 'bg-orange-500 text-white' : 'bg-white/20 text-white'}`}>
-                                {idx + 1}
+                          {tournamentParticipants.map((p, idx) => {
+                            const isMyClan = p.clan_id === currentUser?.clan_id;
+                            const clan = p.clans;
+                            return (
+                              <div key={p.id} className={`flex items-center gap-3 p-3 rounded-xl border ${isMyClan ? 'bg-purple-500/20 border-purple-500/30' : 'bg-white/5 border-transparent'} hover:bg-white/10 transition-colors`}>
+                                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black ${idx === 0 ? 'bg-yellow-400 text-black' : idx === 1 ? 'bg-slate-300 text-black' : idx === 2 ? 'bg-orange-500 text-white' : 'bg-white/20 text-white'}`}>
+                                  {idx + 1}
+                                </div>
+                                <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-sm border border-white/10">
+                                  {clan?.logo || "🛡️"}
+                                </div>
+                                <div className="flex-grow flex flex-col font-medium">
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-white font-bold text-sm truncate max-w-[120px]">{clan?.name || "Unknown Clan"}</span>
+                                    <span className={`text-[10px] font-black px-1.5 py-0.5 rounded bg-black/40 border border-white/5 ${clan?.tag_color || "text-purple-400"}`}>
+                                      [{clan?.tag || "???"}]
+                                    </span>
+                                  </div>
+                                  <div className="text-[10px] text-white/40 uppercase font-black">{p.games_played} Games Played</div>
+                                </div>
+                                <div className="text-white font-black text-lg">{p.score}</div>
                               </div>
-                              <div className="flex-grow">
-                                <div className="text-white font-bold text-sm">{p.username}</div>
-                                <div className="text-[10px] text-white/40 uppercase font-black">{p.games_played} Games Played</div>
-                              </div>
-                              <div className="text-white font-black text-lg">{p.score}</div>
-                            </div>
-                          ))}
+                            );
+                          })}
                           {tournamentParticipants.length === 0 && (
-                            <div className="text-center py-12 text-white/20 text-sm">No one has scored yet. Go for it!</div>
+                            <div className="text-center py-12 text-white/20 text-sm">No clans have scored yet. Go for it!</div>
                           )}
                         </div>
                       )}
@@ -6969,38 +7164,90 @@ export default function BoomkitGame() {
                     </div>
 
                     {/* Inventory Helper for Fusion */}
-                    <div className="bg-white/5 border border-white/10 rounded-3xl p-8">
-                      <h3 className="text-xl font-black text-white mb-6 uppercase tracking-tight">Select Materials</h3>
-                      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                        {Object.entries(currentUser?.booms || {}).map(([name, count]) => (
-                          (count as number) > 0 && (
-                            <div
-                              key={name}
-                              onClick={() => {
-                                if (fusionSlot1 === name) {
-                                  setFusionSlot1(null)
-                                } else if (fusionSlot2 === name) {
-                                  setFusionSlot2(null)
-                                } else if (!fusionSlot1) {
-                                  setFusionSlot1(name)
-                                } else if (!fusionSlot2) {
-                                  const currentCount = (count as number) || 0
-                                  if (fusionSlot1 === name && currentCount < 2) {
-                                    toast.error(`You only have 1 copy of ${name}. Fusing requires 2 copies of the same Boom or two different Booms.`)
-                                    return
-                                  }
-                                  setFusionSlot2(name)
-                                }
-                              }}
-                              className={`p-4 rounded-xl border transition-all cursor-pointer flex flex-col items-center ${fusionSlot1 === name || fusionSlot2 === name ? 'bg-blue-600/20 border-blue-500' : 'bg-black/20 border-white/10 hover:border-white/30'}`}
-                            >
-                              <div className="text-3xl mb-2">{getBoomAvatar(name)}</div>
-                              <div className="text-[10px] font-black text-white text-center uppercase truncate w-full">{name}</div>
-                              <div className="text-[10px] font-black text-white/40 mt-1">x{count as number}</div>
+                    <div className="bg-white/5 border border-white/10 rounded-3xl p-8 space-y-6">
+                      <h3 className="text-xl font-black text-white uppercase tracking-tight">Select Materials</h3>
+                      
+                      {(() => {
+                        const boomsByRarity: Record<string, { name: string; count: number }[]> = {
+                          uncommon: [],
+                          rare: [],
+                          epic: [],
+                          legendary: [],
+                          chroma: [],
+                          mystical: [],
+                        };
+
+                        Object.entries(currentUser?.booms || {}).forEach(([name, count]) => {
+                          if ((count as number) > 0) {
+                            const rarity = getBoomRarity(name);
+                            if (boomsByRarity[rarity]) {
+                              boomsByRarity[rarity].push({ name, count: count as number });
+                            } else {
+                              boomsByRarity["uncommon"].push({ name, count: count as number });
+                            }
+                          }
+                        });
+
+                        const rarityTiers = [
+                          { key: "uncommon", label: "Uncommon", color: "text-green-400 border-green-500/20 bg-green-500/5" },
+                          { key: "rare", label: "Rare", color: "text-blue-400 border-blue-500/20 bg-blue-500/5" },
+                          { key: "epic", label: "Epic", color: "text-purple-400 border-purple-500/20 bg-purple-500/5" },
+                          { key: "legendary", label: "Legendary", color: "text-orange-400 border-orange-500/20 bg-orange-500/5" },
+                          { key: "chroma", label: "Chroma", color: "text-pink-400 border-pink-500/20 bg-pink-500/5" },
+                          { key: "mystical", label: "Mystical", color: "text-cyan-400 border-cyan-500/20 bg-cyan-500/5" },
+                        ];
+
+                        const hasAnyBooms = Object.values(boomsByRarity).some(arr => arr.length > 0);
+
+                        if (!hasAnyBooms) {
+                          return (
+                            <div className="text-center py-12 text-white/20 italic">
+                              You do not own any Booms to fuse.
                             </div>
-                          )
-                        ))}
-                      </div>
+                          );
+                        }
+
+                        return rarityTiers.map(tier => {
+                          const booms = boomsByRarity[tier.key];
+                          if (booms.length === 0) return null;
+                          
+                          return (
+                            <div key={tier.key} className="space-y-3">
+                              <div className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-md border w-fit ${tier.color}`}>
+                                {tier.label}
+                              </div>
+                              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                                {booms.map(({ name, count }) => (
+                                  <div
+                                    key={name}
+                                    onClick={() => {
+                                      if (fusionSlot1 === name) {
+                                        setFusionSlot1(null)
+                                      } else if (fusionSlot2 === name) {
+                                        setFusionSlot2(null)
+                                      } else if (!fusionSlot1) {
+                                        setFusionSlot1(name)
+                                      } else if (!fusionSlot2) {
+                                        const currentCount = count || 0
+                                        if (fusionSlot1 === name && currentCount < 2) {
+                                          toast.error(`You only have 1 copy of ${name}. Fusing requires 2 copies of the same Boom or two different Booms.`)
+                                          return
+                                        }
+                                        setFusionSlot2(name)
+                                      }
+                                    }}
+                                    className={`p-4 rounded-xl border transition-all cursor-pointer flex flex-col items-center ${fusionSlot1 === name || fusionSlot2 === name ? 'bg-blue-600/20 border-blue-500' : 'bg-black/20 border-white/10 hover:border-white/30'}`}
+                                  >
+                                    <div className="text-3xl mb-2">{getBoomAvatar(name)}</div>
+                                    <div className="text-[10px] font-black text-white text-center uppercase truncate w-full">{name}</div>
+                                    <div className="text-[10px] font-black text-white/40 mt-1">x{count}</div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        });
+                      })()}
                     </div>
                   </div>
 
@@ -7532,7 +7779,7 @@ export default function BoomkitGame() {
                     <div className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-purple-500/20 transition-all">
                       <div className="flex items-center gap-2 mb-1.5">
                         <span className="text-lg">🛡️</span>
-                        <h5 className="font-bold text-white text-sm md:text-base">Clans Hub & Teams</h5>
+                        <h5 className="font-bold text-white text-sm md:text-base">Clans & Teams</h5>
                       </div>
                       <p className="text-xs md:text-sm text-slate-400 leading-relaxed pl-7">
                         Create or join a Clan, set custom tag colors, manage recruitment requirements, chat in real-time with clan mates, and donate tokens to the shared bank to level up your clan!
@@ -9211,8 +9458,9 @@ export default function BoomkitGame() {
                   games_played: newGamesPlayed
                 }).eq("username", currentUser.username)
 
-                // Add Season XP (50 per game)
-                await handleAddSeasonXp(50)
+                // Add Season XP (50 per game + dynamic score bonus!)
+                const seasonXpEarned = 50 + Math.floor(gameScore / 10)
+                await handleAddSeasonXp(seasonXpEarned)
 
                 // Check achievements
                 await supabase?.rpc('check_achievements', {
@@ -9221,17 +9469,26 @@ export default function BoomkitGame() {
                   p_value: newGamesPlayed
                 })
 
-                // Submit to tournaments
-                if (activeTournaments.length > 0) {
+                // Submit to clan-based tournaments
+                if (activeTournaments.length > 0 && currentUser.clan_id) {
                   for (const t of activeTournaments) {
                     if (t.status === 'active') {
-                      await supabase?.rpc('submit_tournament_score', {
+                      await supabase?.rpc('submit_clan_tournament_score', {
                         p_tournament_id: t.id,
                         p_username: currentUser.username,
                         p_score: gameScore
                       })
                     }
                   }
+                }
+
+                // Award Clan XP (50 per game + dynamic score bonus!)
+                if (currentUser.clan_id) {
+                  const clanXpEarned = 50 + Math.floor(gameScore / 10)
+                  await supabase?.rpc('add_clan_xp', {
+                    p_username: currentUser.username,
+                    p_amount: clanXpEarned
+                  })
                 }
 
                 // Decrement rental session if playing with a rented boom
