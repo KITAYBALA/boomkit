@@ -4977,7 +4977,22 @@ export default function BoomkitGame() {
                             <Button
                               onClick={() => handleCraftBoom(recipe)}
                               disabled={(currentUser?.tokens || 0) < recipe.token_cost}
-                              className="w-full bg-pink-600 hover:bg-pink-500 text-white font-black py-6 rounded-xl shadow-[0_0_20px_rgba(219,39,119                ) : (
+                              className="w-full bg-pink-600 hover:bg-pink-500 text-white font-black py-6 rounded-xl shadow-[0_0_20px_rgba(219,39,119,0.3)] transition-all hover:scale-[1.02]"
+                            >
+                              <CoinsIcon className="w-5 h-5 mr-2" />
+                              Craft ({recipe.token_cost.toLocaleString()})
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                      {craftRecipes.length === 0 && (
+                        <div className="col-span-full p-12 text-center text-white/40 bg-white/5 rounded-2xl border border-white/5 border-dashed">
+                          No recipes discovered yet. Check back later!
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ) : (
                   <>
                     {/* Level Rewards Banner */}
                     <div className="w-full bg-gradient-to-r from-slate-900/80 via-purple-950/40 to-slate-900/80 border border-white/10 rounded-[2rem] p-8 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-2xl relative overflow-hidden group">
