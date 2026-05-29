@@ -4671,34 +4671,35 @@ export default function BoomkitGame() {
           <div className="flex-1 p-3 md:p-6 overflow-y-auto">
             {/* Stats Page */}
             {currentPage === "stats" && (
-              <div className="space-y-6">
+              <div className="space-y-8">
                 {/* User Profile Section */}
                 <div
-                  className={`backdrop-blur-xl rounded-2xl p-8 border border-white/10 shadow-2xl relative overflow-hidden transition-all duration-500 hover:shadow-orange-500/10 ${currentUser?.bannerColor === "rainbow"
+                  className={`backdrop-blur-2xl rounded-[2.5rem] p-8 border border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.5)] relative overflow-hidden transition-all duration-500 hover:shadow-orange-500/5 ${currentUser?.bannerColor === "rainbow"
                     ? "bg-gradient-to-br from-red-500/10 via-yellow-500/10 via-green-500/10 via-blue-500/10 to-purple-500/10 animate-pulse"
-                    : "bg-white/5"
+                    : "bg-slate-900/40"
                     }`}
                 >
                   {/* Decorative background element */}
-                  <div className="absolute -top-24 -right-24 w-48 h-48 bg-orange-500/10 rounded-full blur-3xl pointer-events-none" />
+                  <div className="absolute -top-24 -right-24 w-56 h-56 bg-orange-500/5 rounded-full blur-3xl pointer-events-none" />
+                  <div className="absolute -bottom-24 -left-24 w-56 h-56 bg-yellow-500/5 rounded-full blur-3xl pointer-events-none" />
 
-                  <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6 mb-8 relative z-10">
+                  <div className="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-8 mb-8 relative z-10">
                     <div className="relative group">
-                      <div className="w-24 h-24 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center text-4xl shadow-lg transform transition-transform group-hover:scale-105 group-hover:rotate-3">
+                      <div className="w-28 h-28 bg-gradient-to-br from-yellow-400 via-amber-500 to-orange-500 rounded-3xl flex items-center justify-center text-5xl shadow-[0_8px_25px_rgba(245,158,11,0.3)] transform transition-all duration-500 group-hover:scale-105 group-hover:rotate-3 group-hover:shadow-[0_12px_35px_rgba(245,158,11,0.5)]">
                         {currentUser?.profilePicture || "🎯"}
                       </div>
                       <Button
                         size="sm"
                         onClick={() => setShowProfilePicker(true)}
-                        className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-blue-600 hover:bg-blue-700 p-0 shadow-lg border-2 border-slate-900"
+                        className="absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-blue-600 hover:bg-blue-500 p-0 shadow-lg border-2 border-slate-950 transition-transform duration-300 hover:scale-110 active:scale-95"
                       >
-                        <CameraIcon className="h-4 w-4" />
+                        <CameraIcon className="h-4 w-4 text-white" />
                       </Button>
                     </div>
 
-                    <div className="text-center md:text-left flex-1">
+                    <div className="text-center md:text-left flex-1 space-y-3">
                       <h2
-                        className={`text-4xl font-black tracking-tight mb-2 ${currentUser?.nameColor === "rainbow"
+                        className={`text-5xl font-black tracking-tight drop-shadow-md ${currentUser?.nameColor === "rainbow"
                           ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent animate-pulse"
                           : "text-white"
                           }`}
@@ -4708,17 +4709,17 @@ export default function BoomkitGame() {
 
                       <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
                         <Badge
-                          className={`px-3 py-1 text-xs font-bold uppercase tracking-wider ${currentUser?.role === "owner"
-                            ? "bg-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.4)]"
+                          className={`px-4 py-1.5 text-xs font-black uppercase tracking-wider rounded-xl ${currentUser?.role === "owner"
+                            ? "bg-yellow-500 shadow-[0_0_20px_rgba(234,179,8,0.4)]"
                             : currentUser?.role === "admin"
-                              ? "bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.4)]"
+                              ? "bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.4)]"
                               : currentUser?.role === "senior_moderator"
-                                ? "bg-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.4)]"
+                                ? "bg-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.4)]"
                                 : currentUser?.role === "moderator"
-                                  ? "bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.4)]"
+                                  ? "bg-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.4)]"
                                   : currentUser?.role === "tester"
-                                    ? "bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.4)]"
-                                    : "bg-slate-600"
+                                    ? "bg-green-500 shadow-[0_0_20px_rgba(34,197,94,0.4)]"
+                                    : "bg-slate-700"
                             } text-white border-none`}
                         >
                           {currentUser ? getUserRoleName(currentUser) : "Player"}
@@ -4729,7 +4730,7 @@ export default function BoomkitGame() {
                           currentUser?.role === "admin" ||
                           currentUser?.role === "tester" ||
                           currentUser?.isOwner) && (
-                            <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1 text-xs font-bold uppercase tracking-wider">
+                            <Badge className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-4 py-1.5 text-xs font-black uppercase tracking-wider rounded-xl shadow-sm">
                               Staff Member
                             </Badge>
                           )}
@@ -4739,12 +4740,9 @@ export default function BoomkitGame() {
                             const badge = AVAILABLE_BADGES.find((b) => b.id === badgeId)
                             return badge ? (
                               <div key={badgeId} className="group relative">
-                                <Badge className={`${badge.color} text-white text-[10px] px-2 py-0.5 shadow-sm hover:scale-110 transition-transform cursor-help`}>
-                                  {badge.emoji}
+                                <Badge className={`${badge.color} text-white text-[10px] px-3 py-1 rounded-xl shadow-md hover:scale-110 hover:-translate-y-0.5 transition-all cursor-help border-none`}>
+                                  {badge.emoji} {badge.name}
                                 </Badge>
-                                <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-black text-white text-[10px] rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity">
-                                  {badge.name}
-                                </div>
                               </div>
                             ) : null
                           })}
@@ -4753,18 +4751,18 @@ export default function BoomkitGame() {
                     </div>
                   </div>
 
-                  <div className="space-y-3 relative z-10">
-                    <div className="flex justify-between items-end">
-                      <span className="text-white/50 text-xs font-bold uppercase tracking-widest">
+                  <div className="space-y-3.5 relative z-10">
+                    <div className="flex justify-between items-end px-1">
+                      <span className="text-white/40 text-xs font-black uppercase tracking-[0.2em]">
                         Level {currentUser?.level || 1}
                       </span>
-                      <span className="text-orange-500 font-black text-sm">
-                        {(currentUser?.level || 1) >= 100 ? "MAX LEVEL" : `${currentUser?.xp || 0} / 100 XP`}
+                      <span className="text-orange-400 font-black text-xs uppercase tracking-wider bg-orange-500/10 px-3 py-1 rounded-full border border-orange-500/20 shadow-inner">
+                        {(currentUser?.level || 1) >= 100 ? "⚡ MAX LEVEL ⚡" : `${currentUser?.xp || 0} / 100 XP`}
                       </span>
                     </div>
-                    <div className="w-full bg-white/5 rounded-full h-4 p-1 border border-white/5 overflow-hidden">
+                    <div className="w-full bg-black/40 rounded-full h-5 p-1 border border-white/5 overflow-hidden shadow-inner relative">
                       <div
-                        className="bg-gradient-to-r from-orange-600 to-yellow-500 h-full rounded-full shadow-[0_0_10px_rgba(249,115,22,0.5)] transition-all duration-500"
+                        className="bg-gradient-to-r from-orange-600 via-amber-500 to-yellow-400 h-full rounded-full shadow-[0_0_15px_rgba(249,115,22,0.6)] transition-all duration-700 ease-out"
                         style={{ width: `${Math.min(((currentUser?.xp || 0) / 100) * 100, 100)}%` }}
                       ></div>
                     </div>
@@ -4773,32 +4771,32 @@ export default function BoomkitGame() {
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 relative z-10">
                     <Button
                       onClick={() => setCurrentPage("market")}
-                      className="group bg-orange-600 hover:bg-orange-500 text-white font-bold h-12 rounded-xl border border-orange-400/20 shadow-lg shadow-orange-900/20 transition-all hover:scale-[1.02] hover:-translate-y-0.5"
+                      className="group bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black h-14 rounded-2xl border-none shadow-[0_4px_20px_rgba(249,115,22,0.2)] hover:shadow-[0_8px_30px_rgba(249,115,22,0.3)] transition-all hover:scale-[1.02] hover:-translate-y-0.5 active:scale-95"
                     >
-                      <span className="mr-2 group-hover:animate-bounce">🔓</span> Unlock Booms
+                      <span className="mr-2 text-lg transition-transform group-hover:scale-125 duration-300">🔓</span> Unlock Booms
                     </Button>
                     <Button
                       onClick={() => setCurrentPage("booms")}
-                      className="group bg-blue-600 hover:bg-blue-500 text-white font-bold h-12 rounded-xl border border-blue-400/20 shadow-lg shadow-blue-900/20 transition-all hover:scale-[1.02] hover:-translate-y-0.5"
+                      className="group bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black h-14 rounded-2xl border-none shadow-[0_4px_20px_rgba(37,99,235,0.2)] hover:shadow-[0_8px_30px_rgba(37,99,235,0.3)] transition-all hover:scale-[1.02] hover:-translate-y-0.5 active:scale-95"
                     >
-                      <span className="mr-2 group-hover:rotate-12 transition-transform">⚙️</span> Manage Booms
+                      <span className="mr-2 text-lg transition-transform group-hover:rotate-45 duration-300">⚙️</span> Manage Booms
                     </Button>
                     <Button
                       onClick={() => {
                         setSelectedUserStats(currentUser)
                         setShowUserStats(true)
                       }}
-                      className="group bg-white/10 hover:bg-white/15 text-white font-bold h-12 rounded-xl border border-white/10 backdrop-blur-md transition-all hover:scale-[1.02] hover:-translate-y-0.5"
+                      className="group bg-white/5 hover:bg-white/10 text-white font-black h-14 rounded-2xl border border-white/10 backdrop-blur-md transition-all hover:scale-[1.02] hover:-translate-y-0.5 active:scale-95"
                     >
-                      <span className="mr-2 group-hover:scale-125 transition-transform">📊</span> Full Profile
+                      <span className="mr-2 text-lg transition-transform group-hover:scale-125 duration-300">📊</span> Full Profile
                     </Button>
                   </div>
                 </div>
 
                 {/* Daily Spin Wheel */}
-                <div className="bg-slate-900/80 backdrop-blur-xl border-2 border-slate-800 rounded-3xl p-8 relative overflow-hidden group shadow-2xl">
-                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <SparklesIcon className="w-20 h-20 text-indigo-400" />
+                <div className="bg-gradient-to-br from-slate-900/90 to-purple-950/40 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-8 relative overflow-hidden group shadow-[0_12px_40px_rgba(0,0,0,0.6)] hover:border-purple-500/20 transition-all duration-500">
+                  <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
+                    <SparklesIcon className="w-24 h-24 text-indigo-400" />
                   </div>
 
                   <div className="relative z-10 flex flex-col items-center">
@@ -4821,7 +4819,7 @@ export default function BoomkitGame() {
                     />
 
                     {!canSpin && !spinning && (
-                      <p className="text-white/40 font-bold uppercase tracking-widest text-sm mt-4 animate-pulse">
+                      <p className="text-white/30 font-black uppercase tracking-[0.2em] text-xs mt-6 animate-pulse bg-white/5 border border-white/5 px-4 py-1.5 rounded-full">
                         Come back tomorrow for another spin!
                       </p>
                     )}
@@ -4829,34 +4827,34 @@ export default function BoomkitGame() {
                 </div>
 
                 {/* Daily Login Streak */}
-                <div className="bg-gradient-to-br from-orange-900/30 to-red-900/30 backdrop-blur-xl border-2 border-orange-500/20 rounded-3xl p-8 relative overflow-hidden group shadow-2xl">
-                  <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                    <FlameIcon className="w-20 h-20 text-orange-400" />
+                <div className="bg-gradient-to-br from-slate-900/90 to-orange-950/30 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-8 relative overflow-hidden group shadow-[0_12px_40px_rgba(0,0,0,0.6)] hover:border-orange-500/20 transition-all duration-500">
+                  <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
+                    <FlameIcon className="w-24 h-24 text-orange-400" />
                   </div>
                   <div className="relative z-10">
-                    <h3 className="text-2xl font-black text-white mb-2 flex items-center gap-3">
-                      <FlameIcon className="h-7 w-7 text-orange-500" />
+                    <h3 className="text-3xl font-black text-white mb-2 flex items-center gap-3">
+                      <FlameIcon className="h-8 w-8 text-orange-500 animate-pulse" />
                       Daily Streak
                     </h3>
-                    <p className="text-white/50 text-sm mb-6">Log in every day to build your streak and earn bonus rewards!</p>
+                    <p className="text-white/40 text-xs mb-6 font-medium">Log in every day to build your streak and earn massive bonus rewards!</p>
 
-                    <div className="flex items-center gap-6 mb-6">
-                      <div className="bg-black/40 rounded-2xl p-6 flex flex-col items-center border border-orange-500/20">
-                        <span className="text-5xl font-black text-orange-400">{currentUser?.loginStreak || 0}</span>
-                        <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1">Day Streak</span>
+                    <div className="flex flex-col md:flex-row items-center gap-8 mb-6">
+                      <div className="bg-black/60 backdrop-blur-md rounded-[2rem] p-6 flex flex-col items-center border border-orange-500/20 shadow-inner w-full md:w-36 shrink-0">
+                        <span className="text-6xl font-black text-orange-400 drop-shadow-[0_0_15px_rgba(249,115,22,0.4)]">{currentUser?.loginStreak || 0}</span>
+                        <span className="text-[10px] font-black text-white/40 uppercase tracking-widest mt-2">Day Streak</span>
                       </div>
-                      <div className="flex-grow">
-                        <div className="flex gap-1 mb-3">
+                      <div className="flex-grow w-full space-y-3">
+                        <div className="flex gap-2">
                           {[1, 2, 3, 4, 5, 6, 7].map((day) => {
                             const streakDay = (currentUser?.loginStreak || 0) % 7;
                             const isClaimed = day <= streakDay || (streakDay === 0 && (currentUser?.loginStreak || 0) > 0);
                             const isBonus = day === 7;
                             return (
-                              <div key={day} className={`flex-1 h-3 rounded-full transition-all ${isClaimed ? (isBonus ? "bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.5)]" : "bg-orange-500") : "bg-white/10"}`} />
+                              <div key={day} className={`flex-1 h-3.5 rounded-full transition-all duration-500 ${isClaimed ? (isBonus ? "bg-gradient-to-r from-yellow-400 to-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.6)]" : "bg-gradient-to-r from-orange-500 to-red-500 shadow-[0_0_10px_rgba(239,68,68,0.4)]") : "bg-white/5 border border-white/5"}`} />
                             )
                           })}
                         </div>
-                        <div className="flex justify-between text-[10px] text-white/30 font-bold uppercase">
+                        <div className="flex justify-between text-[10px] text-white/30 font-black uppercase tracking-wider px-1">
                           <span>Day 1</span>
                           <span className="text-yellow-500">Day 7 Bonus</span>
                         </div>
@@ -4865,61 +4863,61 @@ export default function BoomkitGame() {
 
                     <Button
                       onClick={handleClaimStreak}
-                      className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-black py-6 rounded-xl shadow-[0_0_20px_rgba(234,88,12,0.3)] transition-all hover:scale-[1.02]"
+                      className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-black py-7 rounded-2xl shadow-[0_4px_25px_rgba(234,88,12,0.3)] hover:shadow-[0_8px_35px_rgba(234,88,12,0.4)] transition-all hover:scale-[1.02] border-none text-sm"
                     >
-                      <FlameIcon className="w-5 h-5 mr-2" />
+                      <FlameIcon className="w-5 h-5 mr-2 animate-bounce" />
                       Claim Daily Streak Reward
                     </Button>
 
-                    <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-                      <div className="bg-black/20 rounded-lg p-2">
-                        <div className="text-orange-400 font-black text-sm">+50</div>
-                        <div className="text-[9px] text-white/30 font-bold">DAILY</div>
+                    <div className="mt-6 grid grid-cols-3 gap-3 text-center">
+                      <div className="bg-black/40 border border-white/5 rounded-xl p-3 shadow-inner">
+                        <div className="text-orange-400 font-black text-lg">+50</div>
+                        <div className="text-[9px] text-white/30 font-black uppercase tracking-widest mt-0.5">DAILY</div>
                       </div>
-                      <div className="bg-black/20 rounded-lg p-2">
-                        <div className="text-yellow-400 font-black text-sm">+500</div>
-                        <div className="text-[9px] text-white/30 font-bold">7-DAY</div>
+                      <div className="bg-black/40 border border-white/5 rounded-xl p-3 shadow-inner">
+                        <div className="text-yellow-400 font-black text-lg">+500</div>
+                        <div className="text-[9px] text-white/30 font-black uppercase tracking-widest mt-0.5">7-DAY</div>
                       </div>
-                      <div className="bg-black/20 rounded-lg p-2">
-                        <div className="text-pink-400 font-black text-sm">+5,000</div>
-                        <div className="text-[9px] text-white/30 font-bold">30-DAY</div>
+                      <div className="bg-black/40 border border-white/5 rounded-xl p-3 shadow-inner">
+                        <div className="text-pink-400 font-black text-lg">+5,000</div>
+                        <div className="text-[9px] text-white/30 font-black uppercase tracking-widest mt-0.5">30-DAY</div>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Enhanced Quick Stats */}
-                <div className="bg-white/5 backdrop-blur-xl rounded-2xl p-8 border border-white/10 shadow-2xl relative overflow-hidden">
-                  <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500 opacity-50" />
+                <div className="bg-gradient-to-br from-slate-900/50 to-slate-950/80 backdrop-blur-2xl rounded-[2.5rem] p-8 border border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.5)] relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 opacity-50" />
                   <div className="flex items-center justify-between mb-8">
-                    <div className="bg-orange-500 text-white px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest shadow-lg shadow-orange-900/20">
+                    <div className="bg-orange-500 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-orange-950/30 border border-orange-400/20">
                       Live Statistics
                     </div>
-                    <span className="text-white/20 text-[10px] font-bold uppercase tracking-widest">Updated Realtime</span>
+                    <span className="text-white/20 text-[10px] font-black uppercase tracking-widest">Updated Realtime</span>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div className="group relative bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/20 rounded-2xl p-6 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 cursor-default pointer-events-auto">
-                      <div className="absolute -top-4 -right-4 text-6xl opacity-10 group-hover:opacity-20 transition-opacity select-none group-hover:scale-110 duration-500">🪙</div>
-                      <div className="flex flex-col">
-                        <span className="text-purple-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Available Tokens</span>
-                        <div className="text-white text-3xl font-black drop-shadow-md flex items-baseline gap-2">
+                    <div className="group relative bg-gradient-to-br from-purple-600/10 to-indigo-950/40 hover:from-purple-600/20 hover:to-indigo-950/60 border border-purple-500/20 hover:border-purple-500/40 rounded-2xl p-6 transition-all duration-500 hover:scale-[1.02] hover:-translate-y-0.5 shadow-[0_4px_20px_rgba(168,85,247,0.05)] hover:shadow-[0_12px_30px_rgba(168,85,247,0.15)] cursor-default pointer-events-auto">
+                      <div className="absolute -top-4 -right-4 text-7xl opacity-5 group-hover:opacity-10 transition-opacity select-none group-hover:scale-110 duration-500">🪙</div>
+                      <div className="flex flex-col relative z-10">
+                        <span className="text-purple-400 text-[10px] font-black uppercase tracking-[0.25em] mb-1">Available Tokens</span>
+                        <div className="text-white text-4xl font-black drop-shadow-md flex items-baseline gap-2 tabular-nums">
                           {currentUser?.tokens?.toLocaleString() || 0}
-                          <span className="text-yellow-500 text-lg">🪙</span>
+                          <span className="text-yellow-500 text-xl">🪙</span>
                         </div>
-                        <div className="mt-4 h-1 w-12 bg-purple-500 rounded-full" />
+                        <div className="mt-4 h-1.5 w-12 bg-purple-500 rounded-full" />
                       </div>
                     </div>
 
-                    <div className="group relative bg-pink-600/20 hover:bg-pink-600/30 border border-pink-500/20 rounded-2xl p-6 transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 cursor-default pointer-events-auto">
-                      <div className="absolute -top-4 -right-4 text-6xl opacity-10 group-hover:opacity-20 transition-opacity select-none group-hover:scale-110 duration-500">🌌</div>
-                      <div className="flex flex-col">
-                        <span className="text-pink-400 text-[10px] font-black uppercase tracking-[0.2em] mb-1">Collection Size</span>
-                        <div className="text-white text-3xl font-black drop-shadow-md flex items-baseline gap-2">
+                    <div className="group relative bg-gradient-to-br from-pink-600/10 to-rose-950/40 hover:from-pink-600/20 hover:to-rose-950/60 border border-pink-500/20 hover:border-pink-500/40 rounded-2xl p-6 transition-all duration-500 hover:scale-[1.02] hover:-translate-y-0.5 shadow-[0_4px_20px_rgba(236,72,153,0.05)] hover:shadow-[0_12px_30px_rgba(236,72,153,0.15)] cursor-default pointer-events-auto">
+                      <div className="absolute -top-4 -right-4 text-7xl opacity-5 group-hover:opacity-10 transition-opacity select-none group-hover:scale-110 duration-500">🌌</div>
+                      <div className="flex flex-col relative z-10">
+                        <span className="text-pink-400 text-[10px] font-black uppercase tracking-[0.25em] mb-1">Collection Size</span>
+                        <div className="text-white text-4xl font-black drop-shadow-md flex items-baseline gap-2 tabular-nums">
                           {Object.keys(getVirtualBooms(currentUser)).length || 0}
-                          <span className="text-pink-500 text-lg">✨</span>
+                          <span className="text-pink-500 text-xl">✨</span>
                         </div>
-                        <div className="mt-4 h-1 w-12 bg-pink-500 rounded-full" />
+                        <div className="mt-4 h-1.5 w-12 bg-pink-500 rounded-full" />
                       </div>
                     </div>
                   </div>
@@ -4979,42 +4977,36 @@ export default function BoomkitGame() {
                             <Button
                               onClick={() => handleCraftBoom(recipe)}
                               disabled={(currentUser?.tokens || 0) < recipe.token_cost}
-                              className="w-full bg-pink-600 hover:bg-pink-500 text-white font-black py-6 rounded-xl shadow-[0_0_20px_rgba(219,39,119,0.3)] transition-all hover:scale-[1.02]"
-                            >
-                              <CoinsIcon className="w-5 h-5 mr-2" />
-                              Craft ({recipe.token_cost.toLocaleString()})
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                      {craftRecipes.length === 0 && (
-                        <div className="col-span-full p-12 text-center text-white/40 bg-white/5 rounded-2xl border border-white/5 border-dashed">
-                          No recipes discovered yet. Check back later!
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ) : (
+                              className="w-full bg-pink-600 hover:bg-pink-500 text-white font-black py-6 rounded-xl shadow-[0_0_20px_rgba(219,39,119                ) : (
                   <>
                     {/* Level Rewards Banner */}
-                    <div className="w-full bg-gradient-to-r from-purple-900/50 to-blue-900/50 border border-white/10 rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between gap-6">
-                      <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center border-2 border-orange-500 shadow-[0_0_20px_rgba(249,115,22,0.3)] text-3xl">
+                    <div className="w-full bg-gradient-to-r from-slate-900/80 via-purple-950/40 to-slate-900/80 border border-white/10 rounded-[2rem] p-8 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-2xl relative overflow-hidden group">
+                      <div className="absolute -top-12 -right-12 w-32 h-32 bg-purple-500/5 rounded-full blur-2xl pointer-events-none" />
+                      <div className="flex items-center gap-5 relative z-10">
+                        <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 via-amber-500 to-orange-500 rounded-2xl flex items-center justify-center border border-yellow-400/20 shadow-[0_4px_20px_rgba(245,158,11,0.25)] text-4xl transform transition-transform group-hover:scale-105 group-hover:rotate-3 duration-500">
                           🏆
                         </div>
                         <div>
-                          <h3 className="text-xl font-bold text-white">Level Rewards</h3>
-                          <p className="text-white/60 text-sm">Unlock special Booms every 10 levels!</p>
-                          <div className="text-orange-400 font-black text-xs uppercase tracking-widest mt-1">
-                            Next Reward: Level {Math.ceil((currentUser?.level || 1) / 10) * 10}
+                          <h3 className="text-2xl font-black text-white tracking-tight">Level Rewards</h3>
+                          <p className="text-white/40 text-xs font-medium">Unlock exclusive milestone Booms every 10 levels!</p>
+                          <div className="text-orange-400 font-black text-[10px] uppercase tracking-[0.2em] mt-1.5 flex items-center gap-1.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-ping" />
+                            Next Milestone: Level {Math.ceil((currentUser?.level || 1) / 10) * 10}
                           </div>
                         </div>
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex flex-wrap gap-2 relative z-10 justify-center">
                         {[10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((lvl) => {
                           const isUnlocked = (currentUser?.level || 1) >= lvl;
                           return (
-                            <div key={lvl} className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold border ${isUnlocked ? "bg-green-500 border-green-400 text-white shadow-[0_0_10px_rgba(34,197,94,0.5)]" : "bg-black/40 border-white/10 text-white/20"}`} title={`Level ${lvl} Reward`}>
+                            <div
+                              key={lvl}
+                              className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-black border transition-all duration-300 ${isUnlocked
+                                ? "bg-gradient-to-br from-green-500 to-emerald-600 border-green-400 text-white shadow-[0_4px_15px_rgba(16,185,129,0.3)] hover:scale-110"
+                                : "bg-black/60 border-white/5 text-white/20"
+                                }`}
+                              title={`Level ${lvl} Reward`}
+                            >
                               {isUnlocked ? "✓" : lvl}
                             </div>
                           )
@@ -5022,60 +5014,60 @@ export default function BoomkitGame() {
                       </div>
                     </div>
 
-                    <div className="flex gap-4">
-                      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex items-center gap-4 shadow-2xl">
-                        <div className="bg-yellow-500/20 p-3 rounded-xl">
-                          <Star className="h-8 w-8 text-yellow-500 animate-pulse" />
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full">
+                      <div className="bg-gradient-to-br from-slate-900/60 to-slate-950/80 backdrop-blur-xl border border-white/10 rounded-2xl p-5 flex items-center gap-4 shadow-xl hover:border-yellow-500/30 transition-all duration-300 group">
+                        <div className="bg-yellow-500/10 p-3 rounded-xl border border-yellow-500/20 shadow-inner group-hover:scale-105 transition-transform duration-300">
+                          <Star className="h-7 w-7 text-yellow-500 animate-pulse" />
                         </div>
                         <div>
-                          <div className="text-white/50 text-xs uppercase tracking-wider font-bold">Boom Score</div>
-                          <div className="text-white text-2xl font-black">{currentUser?.boomScore || 0}</div>
+                          <div className="text-white/40 text-[10px] uppercase tracking-wider font-black">Boom Score</div>
+                          <div className="text-white text-2xl font-black tabular-nums">{currentUser?.boomScore || 0}</div>
                         </div>
                       </div>
 
-                      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex items-center gap-4 shadow-2xl">
-                        <div className="bg-purple-500/20 p-3 rounded-xl">
-                          <PackageIcon className="h-8 w-8 text-purple-500" />
+                      <div className="bg-gradient-to-br from-slate-900/60 to-slate-950/80 backdrop-blur-xl border border-white/10 rounded-2xl p-5 flex items-center gap-4 shadow-xl hover:border-purple-500/30 transition-all duration-300 group">
+                        <div className="bg-purple-500/10 p-3 rounded-xl border border-purple-500/20 shadow-inner group-hover:scale-105 transition-transform duration-300">
+                          <PackageIcon className="h-7 w-7 text-purple-500" />
                         </div>
                         <div>
-                          <div className="text-white/50 text-xs uppercase tracking-wider font-bold">Packs</div>
-                          <div className="text-white text-2xl font-black">{currentUser?.packs.length || 0}</div>
+                          <div className="text-white/40 text-[10px] uppercase tracking-wider font-black">Packs</div>
+                          <div className="text-white text-2xl font-black tabular-nums">{currentUser?.packs.length || 0}</div>
                         </div>
                       </div>
 
-                      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 flex items-center gap-4 shadow-2xl">
-                        <div className="bg-emerald-500/20 p-3 rounded-xl">
-                          <CoinsIcon className="h-8 w-8 text-emerald-500" />
+                      <div className="bg-gradient-to-br from-slate-900/60 to-slate-950/80 backdrop-blur-xl border border-white/10 rounded-2xl p-5 flex items-center gap-4 shadow-xl hover:border-emerald-500/30 transition-all duration-300 group">
+                        <div className="bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/20 shadow-inner group-hover:scale-105 transition-transform duration-300">
+                          <CoinsIcon className="h-7 w-7 text-emerald-500" />
                         </div>
                         <div>
-                          <div className="text-white/50 text-xs uppercase tracking-wider font-bold">Value</div>
-                          <div className="text-emerald-400 text-2xl font-black">🪙 {currentUser?.totalValue || 0}</div>
+                          <div className="text-white/40 text-[10px] uppercase tracking-wider font-black">Total Value</div>
+                          <div className="text-emerald-400 text-2xl font-black tabular-nums">🪙 {currentUser?.totalValue || 0}</div>
                         </div>
                       </div>
                     </div>
 
-{/* Pack Sections */}
+                    {/* Pack Sections */}
                     <div className="grid grid-cols-1 gap-8">
                       {PACKS.map((pack) => (
                         <div
                           key={pack.id}
-                          className="group bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl overflow-hidden transition-all duration-300 hover:border-white/20 hover:shadow-2xl"
+                          className="group bg-slate-900/40 backdrop-blur-xl border border-white/10 rounded-[2rem] overflow-hidden transition-all duration-500 hover:border-white/20 hover:shadow-3xl shadow-xl"
                         >
-                          <div className={`h-2 w-full bg-gradient-to-r ${pack.color}`} />
-                          <div className="p-6">
-                            <div className="flex justify-between items-center mb-6">
-                              <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-                                <span className="text-4xl filter drop-shadow-md group-hover:scale-110 transition-transform duration-300">
+                          <div className={`h-2.5 w-full bg-gradient-to-r ${pack.color}`} />
+                          <div className="p-8">
+                            <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
+                              <h2 className="text-3xl font-black text-white flex items-center gap-4">
+                                <span className="text-5xl filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.4)] transform transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3 select-none">
                                   {pack.emoji}
                                 </span>
                                 {pack.name}
                               </h2>
-                              <Badge className="bg-white/10 text-white/70 border-none px-3 py-1">
+                              <Badge className="bg-white/5 text-white/50 border border-white/10 px-4 py-2 font-black uppercase text-[10px] tracking-widest rounded-xl shadow-inner">
                                 {pack.booms.filter(b => (getVirtualBooms(currentUser)[b.name] || 0) > 0).length} / {pack.booms.length} Found
                               </Badge>
                             </div>
 
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-5">
                               {pack.booms.map((boom, index) => {
                                 const quantity = getVirtualBooms(currentUser)[boom.name] || 0
                                 const hasBoom = quantity > 0
@@ -5086,66 +5078,72 @@ export default function BoomkitGame() {
                                     r.status === "rented"
                                 )
                                 const isRented = !!activeRental
-                                const rarityColor = getRarityColor(boom.rarity)
+                                const rarity = boom.rarity || "uncommon";
+                                
+                                const glowClass = hasBoom ? (
+                                  rarity === "uncommon" ? "shadow-[0_0_15px_rgba(34,197,94,0.15)] border-green-500/20 bg-green-950/10 text-green-400 hover:shadow-[0_0_25px_rgba(34,197,94,0.35)] hover:border-green-500/40" :
+                                  rarity === "rare" ? "shadow-[0_0_15px_rgba(59,130,246,0.15)] border-blue-500/20 bg-blue-950/10 text-blue-400 hover:shadow-[0_0_25px_rgba(59,130,246,0.35)] hover:border-blue-500/40" :
+                                  rarity === "epic" ? "shadow-[0_0_15px_rgba(168,85,247,0.15)] border-purple-500/20 bg-purple-950/10 text-purple-400 hover:shadow-[0_0_25px_rgba(168,85,247,0.35)] hover:border-purple-500/40" :
+                                  rarity === "legendary" ? "shadow-[0_0_20px_rgba(249,115,22,0.25)] border-orange-500/30 bg-orange-950/15 text-orange-400 hover:shadow-[0_0_30px_rgba(249,115,22,0.45)] hover:border-orange-500/50 animate-pulse-slow" :
+                                  rarity === "chroma" ? "shadow-[0_0_25px_rgba(236,72,153,0.3)] border-pink-500/30 bg-pink-950/20 text-pink-400 hover:shadow-[0_0_35px_rgba(236,72,153,0.5)] hover:border-pink-500/60" :
+                                  "shadow-[0_0_30px_rgba(6,182,212,0.4)] border-cyan-500/40 bg-cyan-950/25 text-cyan-400 hover:shadow-[0_0_40px_rgba(6,182,212,0.6)] hover:border-cyan-500/70"
+                                ) : "bg-black/60 border-white/5 text-white/5 cursor-not-allowed filter grayscale";
 
                                 return (
                                   <div
                                     key={index}
-                                    className="group/item flex flex-col items-center gap-2"
+                                    className="group/item flex flex-col items-center gap-2.5"
                                   >
                                     <div
                                       className={`
-                                    w-full aspect-square rounded-2xl border-2 flex items-center justify-center text-3xl 
-                                    transition-all duration-300 relative overflow-hidden
-                                    ${hasBoom
-                                          ? `${rarityColor} border-white/30 shadow-[0_0_20px_rgba(0,0,0,0.3)] cursor-pointer hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]`
-                                          : "bg-black/40 text-white/10 border-white/5 cursor-not-allowed filter grayscale"
-                                        }
-                                  `}
+                                        w-full aspect-square rounded-2xl border flex items-center justify-center text-4xl 
+                                        transition-all duration-300 relative overflow-hidden
+                                        ${glowClass}
+                                      `}
                                       onClick={() => hasBoom && handleBoomClick(boom.name)}
                                     >
                                       {/* Rarity Glow Effect */}
                                       {hasBoom && (
-                                        <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none" />
+                                        <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none z-0" />
                                       )}
 
                                       {hasBoom ? (
                                         <>
                                           {/* Quantity Badge */}
-                                          {hasBoom && quantity > 1 && (
-                                            <div className="absolute top-2 right-2 bg-white text-black text-[10px] font-black rounded-full w-5 h-5 flex items-center justify-center shadow-lg border border-black/10 z-20">
+                                          {quantity > 1 && (
+                                            <div className="absolute top-2 right-2 bg-white text-black text-[9px] font-black rounded-lg px-1.5 py-0.5 flex items-center justify-center shadow-md border border-black/10 z-20">
                                               {quantity}x
                                             </div>
                                           )}
 
                                           {/* Rented Session Badge */}
                                           {isRented && activeRental && (
-                                            <div className="absolute top-2 left-2 bg-blue-600 text-white text-[8px] font-black rounded-xl px-1.5 py-0.5 flex items-center justify-center shadow-lg border border-blue-500/30 z-20 uppercase tracking-widest animate-pulse">
+                                            <div className="absolute top-2 left-2 bg-blue-600 text-white text-[8px] font-black rounded-lg px-1.5 py-0.5 flex items-center justify-center shadow-lg border border-blue-500/30 z-20 uppercase tracking-widest animate-pulse">
                                               Rent ({activeRental.sessions_remaining})
                                             </div>
                                           )}
 
                                           {boom.avatar.startsWith('/') ? (
-                                            <img src={boom.avatar || "/placeholder.svg"} alt={boom.name} className="z-10 relative w-12 h-12 object-contain drop-shadow-lg" />
+                                            <img src={boom.avatar || "/placeholder.svg"} alt={boom.name} className="z-10 relative w-14 h-14 object-contain drop-shadow-xl transform transition-transform duration-300 group-hover/item:scale-110" />
                                           ) : (
-                                            <span className="z-10 relative drop-shadow-lg">{boom.avatar}</span>
+                                            <span className="z-10 relative drop-shadow-[0_4px_8px_rgba(0,0,0,0.3)] transform transition-transform duration-300 group-hover/item:scale-110 select-none">{boom.avatar}</span>
                                           )}
                                         </>
                                       ) : (
-                                        <LockIcon className="h-8 w-8 opacity-20" />
+                                        <LockIcon className="h-7 w-7 opacity-20 text-white" />
                                       )}
 
                                       {/* Highlight for rare items */}
                                       {hasBoom && (boom.rarity === 'legendary' || boom.rarity === 'chroma' || boom.rarity === 'mystical') && (
-                                        <div className="absolute inset-0 animate-pulse bg-white/5" />
+                                        <div className="absolute inset-0 bg-white/5 animate-pulse" />
                                       )}
                                     </div>
 
                                     <div className="w-full text-center">
-                                      <div className={`text-[10px] uppercase tracking-tighter font-bold mb-0.5 ${hasBoom ? 'text-white/60' : 'text-white/20'}`}>
+                                      <div className={`text-[9px] uppercase tracking-widest font-black mb-0.5 ${hasBoom ? 'text-purple-400' : 'text-white/20'}`}>
                                         {boom.rarity}
                                       </div>
-                                      <div className={`text-xs font-semibold truncate w-full ${hasBoom ? 'text-white' : 'text-white/30'}`}>
+                                      <div className={`text-xs font-black truncate w-full ${hasBoom ? 'text-white' : 'text-white/30'}`}>
                                         {boom.name}
                                       </div>
                                     </div>
@@ -5167,76 +5165,82 @@ export default function BoomkitGame() {
                             <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-600 tracking-tighter">
                               GAMEPASS BOOMS
                             </h2>
-                            <p className="text-white/60 text-sm font-medium mt-1">
+                            <p className="text-white/40 text-xs font-bold uppercase tracking-widest mt-1">
                               Exclusive rewards for reaching milestone levels
                             </p>
                           </div>
                           {(currentUser?.level || 1) >= 100 && (
                             <div className="ml-auto">
-                              <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-full px-6 py-2 border border-white/20">
-                                <span className="text-white font-black text-sm uppercase tracking-wider">⚡ MAX LEVEL ⚡</span>
+                              <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-full px-6 py-2 border border-white/20 shadow-md">
+                                <span className="text-white font-black text-xs uppercase tracking-wider">⚡ MAX LEVEL ⚡</span>
                               </div>
                             </div>
                           )}
                         </div>
 
-                        <div className="bg-white/5 backdrop-blur-md rounded-3xl border border-white/10 p-8 shadow-2xl">
+                        <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2rem] border border-white/10 p-8 shadow-2xl">
                           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                             {GAMEPASS_BOOMS.map((boom) => {
                               const quantity = currentUser?.booms[boom.name] || 0
                               const hasUnlocked = quantity > 0
-                              const rarityColor = getRarityColor(boom.rarity)
+                              const rarity = boom.rarity || "uncommon";
+                              
+                              const glowClass = hasUnlocked ? (
+                                rarity === "uncommon" ? "shadow-[0_0_15px_rgba(34,197,94,0.15)] border-green-500/20 bg-green-950/10 text-green-400 hover:shadow-[0_0_25px_rgba(34,197,94,0.35)] hover:border-green-500/40" :
+                                rarity === "rare" ? "shadow-[0_0_15px_rgba(59,130,246,0.15)] border-blue-500/20 bg-blue-950/10 text-blue-400 hover:shadow-[0_0_25px_rgba(59,130,246,0.35)] hover:border-blue-500/40" :
+                                rarity === "epic" ? "shadow-[0_0_15px_rgba(168,85,247,0.15)] border-purple-500/20 bg-purple-950/10 text-purple-400 hover:shadow-[0_0_25px_rgba(168,85,247,0.35)] hover:border-purple-500/40" :
+                                rarity === "legendary" ? "shadow-[0_0_20px_rgba(249,115,22,0.25)] border-orange-500/30 bg-orange-950/15 text-orange-400 hover:shadow-[0_0_30px_rgba(249,115,22,0.45)] hover:border-orange-500/50 animate-pulse-slow" :
+                                rarity === "chroma" ? "shadow-[0_0_25px_rgba(236,72,153,0.3)] border-pink-500/30 bg-pink-950/20 text-pink-400 hover:shadow-[0_0_35px_rgba(236,72,153,0.5)] hover:border-pink-500/60" :
+                                "shadow-[0_0_30px_rgba(6,182,212,0.4)] border-cyan-500/40 bg-cyan-950/25 text-cyan-400 hover:shadow-[0_0_40px_rgba(6,182,212,0.6)] hover:border-cyan-500/70"
+                              ) : "bg-black/60 border-white/10 text-white/5 grayscale cursor-not-allowed";
 
                               return (
                                 <div key={boom.level} className="group flex flex-col items-center gap-3">
                                   <div
                                     className={`
-                                  w-full aspect-square rounded-2xl border-2 flex flex-col items-center justify-center text-4xl 
-                                  transition-all duration-300 relative overflow-hidden cursor-pointer
-                                  ${hasUnlocked
-                                        ? `${rarityColor} border-white/30 shadow-[0_0_20px_rgba(0,0,0,0.3)] hover:scale-105 hover:shadow-[0_0_30px_rgba(255,255,255,0.2)]`
-                                        : "bg-black/60 text-white/10 border-white/10 grayscale"
-                                      }
-                                `}
+                                      w-full aspect-square rounded-2xl border flex flex-col items-center justify-center text-4xl 
+                                      transition-all duration-300 relative overflow-hidden cursor-pointer
+                                      ${glowClass}
+                                    `}
                                     onClick={() => hasUnlocked && handleBoomClick(boom.name)}
                                   >
                                     {/* Glow Effect */}
                                     {hasUnlocked && (
-                                      <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent pointer-events-none" />
+                                      <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none" />
                                     )}
 
                                     {/* Avatar/Image */}
                                     {hasUnlocked ? (
-                                      <div className="z-10 flex flex-col items-center gap-1">
+                                      <div className="z-10 flex flex-col items-center gap-1.5">
                                         {getBoomAvatar(boom.name).startsWith('/') ? (
-                                          <img src={getBoomAvatar(boom.name) || "/placeholder.svg"} alt={boom.name} className="w-16 h-16 object-contain drop-shadow-lg" />
+                                          <img src={getBoomAvatar(boom.name) || "/placeholder.svg"} alt={boom.name} className="w-16 h-16 object-contain drop-shadow-lg transform transition-transform duration-300 group-hover:scale-115" />
                                         ) : (
-                                          <span className="drop-shadow-lg">{getBoomAvatar(boom.name)}</span>
+                                          <span className="drop-shadow-lg transform transition-transform duration-300 group-hover:scale-115 select-none">{getBoomAvatar(boom.name)}</span>
                                         )}
-                                        <span className="text-[10px] font-bold text-white/60 uppercase tracking-wider">LVL {boom.level}</span>
+                                        <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">LVL {boom.level}</span>
                                       </div>
                                     ) : (
-                                      <div className="flex flex-col items-center gap-1">
-                                        <LockIcon className="h-8 w-8 opacity-20" />
-                                        <span className="text-xs font-bold text-white/20 uppercase tracking-wider">LVL {boom.level}</span>
+                                      <div className="flex flex-col items-center gap-1.5">
+                                        <LockIcon className="h-7 w-7 opacity-20 text-white" />
+                                        <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">LVL {boom.level}</span>
                                       </div>
                                     )}
 
                                     {/* Quantity Badge */}
                                     {hasUnlocked && quantity > 1 && (
-                                      <div className="absolute bottom-2 right-2 bg-black/80 text-white text-xs font-bold px-2 py-1 rounded-full border border-white/20">
+                                      <div className="absolute bottom-2 right-2 bg-black/80 text-white text-[10px] font-black px-2 py-0.5 rounded-full border border-white/20">
                                         ×{quantity}
                                       </div>
                                     )}
                                   </div>
 
                                   {/* Boom Name */}
-                                  <div className="text-center">
-                                    <p className={`text-sm font-bold ${hasUnlocked ? "text-white" : "text-white/30"} line-clamp-2`}>
+                                  <div className="text-center space-y-1">
+                                    <p className={`text-sm font-black ${hasUnlocked ? "text-white" : "text-white/30"} line-clamp-2`}>
                                       {boom.name}
                                     </p>
                                     {hasUnlocked && (
-                                      <p className="text-xs text-white/50 mt-1 line-clamp-1">
+                                      <p className="text-[10px] text-white/40 line-clamp-1">
                                         {String((boom as { description?: string }).description ?? "")}
                                       </p>
                                     )}
@@ -5258,13 +5262,13 @@ export default function BoomkitGame() {
                             <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-purple-500 to-indigo-600 tracking-tighter">
                               LIMITED SECTION
                             </h2>
-                            <p className="text-red-400/80 text-sm font-black mt-1 uppercase tracking-widest">
+                            <p className="text-red-400/80 text-xs font-black mt-1 uppercase tracking-widest">
                               The Vault of the Ancients has opened
                             </p>
                           </div>
                         </div>
 
-                        <div className="bg-gradient-to-br from-red-950/40 to-purple-950/40 backdrop-blur-xl rounded-[2.5rem] border-2 border-red-500/30 p-10 shadow-[0_0_50px_rgba(220,38,38,0.2)] ring-1 ring-white/10">
+                        <div className="bg-gradient-to-br from-red-950/20 to-purple-950/20 backdrop-blur-xl rounded-[2.5rem] border-2 border-red-500/20 p-10 shadow-[0_0_50px_rgba(220,38,38,0.15)] ring-1 ring-white/10">
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                             {LIMITED_BOOMS.map((boom) => {
                               const hasIt = (currentUser?.booms[boom.name] || 0) > 0
@@ -5273,18 +5277,18 @@ export default function BoomkitGame() {
                               return (
                                 <div key={boom.name} className="group flex flex-col items-center gap-4 relative">
                                   <div className="absolute -top-4 -right-2 z-20">
-                                    <Badge className="bg-red-600 text-white font-black border-none px-3 py-1 animate-bounce">LIMITED</Badge>
+                                    <Badge className="bg-red-600 text-white font-black border-none px-3 py-1 animate-bounce text-[9px] tracking-widest uppercase">LIMITED</Badge>
                                   </div>
 
                                   <div
                                     className={`
-                                  w-full aspect-square rounded-[2rem] border-2 flex flex-col items-center justify-center text-6xl 
-                                  transition-all duration-500 relative overflow-hidden cursor-pointer
-                                  ${hasIt
-                                        ? "text-cyan-400 border-cyan-500/50 shadow-[0_0_40px_rgba(34,211,238,0.3)] bg-cyan-950/40"
-                                        : "bg-black/80 text-white/5 border-white/5 hover:border-red-500/40 hover:shadow-[0_0_30px_rgba(220,38,38,0.2)]"
+                                      w-full aspect-square rounded-[2rem] border flex flex-col items-center justify-center text-6xl 
+                                      transition-all duration-500 relative overflow-hidden cursor-pointer
+                                      ${hasIt
+                                        ? "text-cyan-400 border-cyan-500/40 shadow-[0_0_40px_rgba(34,211,238,0.25)] bg-cyan-950/20"
+                                        : "bg-black/80 text-white/5 border-white/5 hover:border-red-500/40 hover:shadow-[0_0_30px_rgba(220,38,38,0.15)]"
                                       }
-                                `}
+                                    `}
                                     onClick={() => {
                                       if (hasIt) {
                                         handleBoomClick(boom.name)
@@ -5313,8 +5317,8 @@ export default function BoomkitGame() {
                                     </span>
 
                                     {!hasIt && (
-                                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-[2px] z-20 group-hover:bg-black/20 transition-all">
-                                        <div className="flex items-center gap-1 bg-yellow-500 text-black px-3 py-1 rounded-full font-black text-sm shadow-xl">
+                                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 backdrop-blur-[2px] z-20 group-hover:bg-black/35 transition-all">
+                                        <div className="flex items-center gap-1.5 bg-yellow-500 text-black px-3.5 py-1.5 rounded-full font-black text-xs shadow-xl">
                                           <CoinsIcon className="w-4 h-4" />
                                           {boom.price}
                                         </div>
@@ -5344,32 +5348,32 @@ export default function BoomkitGame() {
             {currentPage === "market" && (
               <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
                 {/* Market Hero Header */}
-                <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-900/40 to-blue-900/40 border border-white/10 p-8 md:p-12 shadow-2xl">
-                  <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-purple-500/10 rounded-full blur-[100px]" />
-                  <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-blue-500/10 rounded-full blur-[100px]" />
+                <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-slate-950 via-purple-950/30 to-slate-950 border border-white/10 p-8 md:p-12 shadow-[0_12px_40px_rgba(0,0,0,0.6)]">
+                  <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-purple-500/5 rounded-full blur-[100px] pointer-events-none" />
+                  <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-blue-500/5 rounded-full blur-[100px] pointer-events-none" />
 
-                  <div className="relative flex flex-col md:flex-row justify-between items-center gap-8">
+                  <div className="relative flex flex-col md:flex-row justify-between items-center gap-8 z-10">
                     <div className="space-y-4 text-center md:text-left">
                       <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter">
-                        BOOM <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">MARKET</span>
+                        BOOM <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 drop-shadow-sm">MARKET</span>
                       </h1>
-                      <p className="text-white/60 text-lg md:text-xl max-w-md font-medium">
-                        Unleash the power of the arena. Discover legendary Booms and dominate the collection.
+                      <p className="text-white/40 text-base md:text-lg max-w-md font-medium leading-relaxed">
+                        Unleash the power of the arena. Discover legendary Booms, collect rare series, and dominate the rankings.
                       </p>
                     </div>
 
-                    <div className="shrink-0 animate-float">
-                      <div className="bg-white/5 backdrop-blur-2xl border border-white/20 rounded-[2rem] p-8 shadow-[0_0_50px_rgba(234,179,8,0.1)] flex flex-col items-center gap-2">
-                        <div className="text-white/40 text-xs uppercase tracking-[0.3em] font-black">Your Balance</div>
+                    <div className="shrink-0 transform hover:scale-[1.02] transition-transform duration-300">
+                      <div className="bg-slate-900/60 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-8 shadow-2xl flex flex-col items-center gap-1.5 w-64 border-yellow-500/20">
+                        <div className="text-white/40 text-[9px] uppercase tracking-[0.3em] font-black">Your Balance</div>
                         <div className="flex items-center gap-3">
-                          <span className="text-5xl drop-shadow-lg">🪙</span>
-                          <span className="text-5xl font-black text-yellow-400 tabular-nums">
+                          <span className="text-4xl drop-shadow-md">🪙</span>
+                          <span className="text-5xl font-black text-yellow-400 tabular-nums drop-shadow-[0_0_15px_rgba(234,179,8,0.3)]">
                             {currentUser?.tokens.toLocaleString() || 0}
                           </span>
                         </div>
-                        <div className="mt-2 flex items-center gap-2 px-4 py-1.5 bg-yellow-500/10 rounded-full border border-yellow-500/20">
-                          <span className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse" />
-                          <span className="text-yellow-400 text-xs font-bold uppercase tracking-wider">Ready to spend</span>
+                        <div className="mt-3 flex items-center gap-2 px-4 py-1.5 bg-yellow-500/10 rounded-full border border-yellow-500/20 shadow-inner">
+                          <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-ping" />
+                          <span className="text-yellow-500 text-[9px] font-black uppercase tracking-widest">Ready to spend</span>
                         </div>
                       </div>
                     </div>
@@ -5377,29 +5381,29 @@ export default function BoomkitGame() {
                 </div>
 
                 {/* Premium Rarity Banner */}
-                <div className="bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 p-6 shadow-xl">
+                <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2rem] border border-white/10 p-8 shadow-xl">
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-1.5 h-6 bg-primary rounded-full" />
-                    <h3 className="text-xl font-bold text-white uppercase tracking-wider">Global Drop Rates</h3>
+                    <div className="w-1.5 h-6 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full" />
+                    <h3 className="text-lg font-black text-white uppercase tracking-widest">Global Drop Rates</h3>
                   </div>
 
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                     {[
-                      { label: "Uncommon", rate: "60%", color: "bg-green-500", glow: "glow-uncommon" },
-                      { label: "Rare", rate: "25%", color: "bg-blue-500", glow: "glow-rare" },
-                      { label: "Epic", rate: "10%", color: "bg-purple-500", glow: "glow-epic" },
-                      { label: "Legendary", rate: "4%", color: "bg-orange-500", glow: "glow-legendary" },
-                      { label: "Chroma", rate: "0.9%", color: "bg-gradient-to-r from-red-500 via-yellow-500 to-purple-500", glow: "glow-chroma" },
-                      { label: "Mystical", rate: "0.1%", color: "bg-gradient-to-r from-purple-900 via-pink-500 to-indigo-900", glow: "glow-mystical" },
+                      { label: "Uncommon", rate: "60%", color: "bg-green-500", border: "border-green-500/20", glow: "hover:shadow-[0_0_20px_rgba(34,197,94,0.2)]" },
+                      { label: "Rare", rate: "25%", color: "bg-blue-500", border: "border-blue-500/20", glow: "hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]" },
+                      { label: "Epic", rate: "10%", color: "bg-purple-500", border: "border-purple-500/20", glow: "hover:shadow-[0_0_20px_rgba(168,85,247,0.2)]" },
+                      { label: "Legendary", rate: "4%", color: "bg-orange-500", border: "border-orange-500/20", glow: "hover:shadow-[0_0_20px_rgba(249,115,22,0.2)] animate-pulse-slow" },
+                      { label: "Chroma", rate: "0.9%", color: "bg-gradient-to-r from-red-500 via-yellow-500 to-purple-500", border: "border-pink-500/20", glow: "hover:shadow-[0_0_25px_rgba(236,72,153,0.25)]" },
+                      { label: "Mystical", rate: "0.1%", color: "bg-gradient-to-r from-purple-900 via-pink-500 to-indigo-900", border: "border-cyan-500/20", glow: "hover:shadow-[0_0_30px_rgba(6,182,212,0.35)]" },
                     ].map((rarity, i) => (
-                      <div key={i} className={`relative group overflow-hidden rounded-xl border border-white/5 bg-white/5 p-4 transition-all duration-300 hover:bg-white/10 hover:border-white/20 ${rarity.glow}`}>
+                      <div key={i} className={`relative group overflow-hidden rounded-2xl border ${rarity.border} bg-black/40 p-4 transition-all duration-500 hover:bg-black/20 hover:-translate-y-0.5 ${rarity.glow}`}>
                         <div className="relative z-10 flex flex-col items-center gap-2">
-                          <div className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider text-white ${rarity.color}`}>
+                          <div className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider text-white ${rarity.color}`}>
                             {rarity.label}
                           </div>
-                          <div className="text-2xl font-black text-white">{rarity.rate}</div>
+                          <div className="text-3xl font-black text-white drop-shadow">{rarity.rate}</div>
                         </div>
-                        <div className="absolute bottom-0 left-0 w-full h-1 bg-white/10 overflow-hidden">
+                        <div className="absolute bottom-0 left-0 w-full h-1 bg-white/5 overflow-hidden">
                           <div className={`h-full ${rarity.color} group-hover:animate-pulse`} style={{ width: rarity.rate }} />
                         </div>
                       </div>
@@ -5410,67 +5414,67 @@ export default function BoomkitGame() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {PACKS.map((pack) => (
                     <div key={pack.id} className="relative group perspective-1000">
-                      {/* NEW! Label and Series */}
+                      {/* Label and Series */}
                       {pack.isNew && (
                         <div className="absolute -top-3 -right-3 z-30 animate-bounce">
-                          <div className="bg-red-600 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg shadow-red-900/40 border-2 border-white/20 uppercase tracking-widest">
+                          <div className="bg-gradient-to-r from-red-600 to-pink-600 text-white text-[9px] font-black px-3.5 py-1.5 rounded-full shadow-lg shadow-red-900/40 border border-white/20 uppercase tracking-widest">
                             NEW!
                           </div>
                         </div>
                       )}
                       {pack.series && (
                         <div className="absolute top-4 left-4 z-30">
-                          <Badge className="bg-black/40 backdrop-blur-md border-white/20 text-[10px] font-black uppercase text-white/80 px-2 py-0.5 rounded-lg">
+                          <Badge className="bg-black/60 backdrop-blur-md border border-white/10 text-[9px] font-black uppercase text-white/80 px-2.5 py-1 rounded-lg">
                             Series {pack.series}
                           </Badge>
                         </div>
                       )}
                       <div
                         className={`
-                          bg-gradient-to-br ${pack.color} rounded-[2rem] overflow-hidden relative shadow-2xl
+                          bg-gradient-to-br ${pack.color} rounded-[2rem] overflow-hidden relative shadow-[0_8px_30px_rgba(0,0,0,0.5)]
                           transition-all duration-500 ease-out transform-gpu
-                          group-hover:scale-105 group-hover:-rotate-1 group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.5)]
-                          border border-white/20
+                          group-hover:scale-105 group-hover:-rotate-1 group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.65)]
+                          border border-white/10
                         `}
                       >
                         {/* Shine Effect */}
-                        <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity">
-                          <div className="absolute h-[200%] w-[100px] bg-white/30 skew-x-[-30deg] animate-shine blur-xl" />
+                        <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                          <div className="absolute h-[200%] w-[120px] bg-white/20 skew-x-[-30deg] animate-shine blur-2xl" />
                         </div>
 
                         {/* Zigzag Header */}
                         <div
-                          className="absolute top-0 left-0 right-0 h-8 bg-black/20 backdrop-blur-sm z-10"
+                          className="absolute top-0 left-0 right-0 h-8 bg-black/15 backdrop-blur-sm z-10"
                           style={{
                             clipPath: "polygon(0 0, 10% 100%, 20% 0, 30% 100%, 40% 0, 50% 100%, 60% 0, 70% 100%, 80% 0, 90% 100%, 100% 0, 100% 100%, 0 100%)",
                           }}
                         />
 
                         {/* Content */}
-                        <div className="h-64 flex flex-col items-center justify-center relative p-8">
+                        <div className="h-68 flex flex-col items-center justify-center relative p-8 mt-4">
                           {/* Inner card glow */}
-                          <div className="absolute inset-x-8 inset-y-8 bg-white/10 rounded-2xl blur-2xl" />
+                          <div className="absolute inset-x-8 inset-y-8 bg-white/5 rounded-3xl blur-2xl pointer-events-none" />
 
-                          <div className="text-9xl drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] transform-gpu transition-all duration-500 group-hover:scale-110 group-hover:-translate-y-2 select-none z-10">
+                          <div className="text-9xl drop-shadow-[0_12px_15px_rgba(0,0,0,0.6)] transform-gpu transition-all duration-500 group-hover:scale-110 group-hover:-translate-y-2 select-none z-10">
                             {pack.emoji}
                           </div>
                           <div className="mt-6 z-10 text-center">
                             <h2 className="text-3xl font-black text-white tracking-tight drop-shadow-md">
                               {pack.name}
                             </h2>
-                            <div className="mt-1 px-3 py-1 bg-black/20 rounded-full text-[10px] font-bold text-white/50 uppercase tracking-widest inline-block backdrop-blur-md">
+                            <div className="mt-1 px-3 py-1 bg-black/30 rounded-full text-[9px] font-black text-white/50 uppercase tracking-widest inline-block backdrop-blur-md border border-white/5">
                               Series 1
                             </div>
                           </div>
                         </div>
 
                         {/* Footer / Price Area */}
-                        <div className="bg-black/40 backdrop-blur-xl p-6 flex items-center justify-between border-t border-white/10">
+                        <div className="bg-black/50 backdrop-blur-xl p-6 flex items-center justify-between border-t border-white/10">
                           <div className="flex flex-col">
-                            <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Price tag</span>
-                            <div className="flex items-center gap-2">
-                              <span className="text-2xl">🪙</span>
-                              <span className="text-2xl font-black text-yellow-400">{pack.price}</span>
+                            <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">Price tag</span>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span className="text-xl">🪙</span>
+                              <span className="text-2xl font-black text-yellow-400 tabular-nums drop-shadow-[0_0_10px_rgba(234,179,8,0.2)]">{pack.price}</span>
                             </div>
                           </div>
 
@@ -5478,11 +5482,11 @@ export default function BoomkitGame() {
                             onClick={() => handlePackAction(pack.id)}
                             disabled={(currentUser?.tokens || 0) < pack.price}
                             className={`
-                              h-12 px-8 rounded-xl font-black uppercase tracking-wider text-sm
-                              transition-all duration-300 transform active:scale-95
+                              h-12 px-8 rounded-xl font-black uppercase tracking-wider text-xs
+                              transition-all duration-300 transform active:scale-95 border-none
                               ${(currentUser?.tokens || 0) < pack.price
-                                ? "bg-white/10 text-white/30 cursor-not-allowed"
-                                : "bg-white text-black hover:bg-yellow-400 hover:text-black hover:shadow-[0_0_20px_rgba(255,255,255,0.3)] shadow-xl"
+                                ? "bg-white/5 text-white/20 cursor-not-allowed"
+                                : "bg-white text-black hover:bg-yellow-400 hover:text-black hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] shadow-xl"
                               }
                             `}
                           >
