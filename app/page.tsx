@@ -46,6 +46,7 @@ import {
   CoinsIcon,
   ShoppingBagIcon,
   BeakerIcon,
+  ClockIcon,
 } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 
@@ -243,6 +244,13 @@ interface GameUser {
   clan_role?: "leader" | "co_leader" | "member" | null
   clan_tag?: string | null
   clan_tag_color?: string | null
+  fusion_cooldown_ends_at?: string | null
+  consecutive_fusions?: number
+  last_fusion_claim_time?: string | null
+  active_fusion_boom1?: string | null
+  active_fusion_boom2?: string | null
+  active_fusion_ends_at?: string | null
+  active_fusion_started_at?: string | null
 }
 
 interface UserRole {
@@ -849,6 +857,7 @@ export default function BoomkitGame() {
   const [fusionSlot1, setFusionSlot1] = useState<string | null>(null)
   const [fusionSlot2, setFusionSlot2] = useState<string | null>(null)
   const [isFusing, setIsFusing] = useState(false)
+  const [timeNow, setTimeNow] = useState<number>(Date.now())
   const [showCrafting, setShowCrafting] = useState(false)
   const [craftRecipes, setCraftRecipes] = useState<any[]>([])
   const [friendsList, setFriendsList] = useState<any[]>([])
@@ -1224,6 +1233,15 @@ export default function BoomkitGame() {
     return () => clearInterval(interval)
   }, [isMergingGameActive, lobbyActive, showGameResults, activeGamePin, supabase, handleScoreUpdate])
 
+  // Update timeNow dynamically for countdowns in the Fusion Lab
+  useEffect(() => {
+    if (currentPage !== "fusion") return
+    const interval = setInterval(() => {
+      setTimeNow(Date.now())
+    }, 1000)
+    return () => clearInterval(interval)
+  }, [currentPage])
+
   // Load initial data from localStorage
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -1275,7 +1293,7 @@ export default function BoomkitGame() {
       }
 
       // Only select safe fields; never expose password_hash, last_ip, or email to clients.
-      const safeColumns = "id, username, age, tokens, daily_tokens, packs, booms, is_owner, is_banned, is_muted, status, reason, role, join_date, boom_score, total_value, profile_picture, is_plus_user, name_color, banner_color, last_daily_spin, badges, mute_expiry, ban_expiry, last_seen, packs_opened, xp, level, login_streak, last_streak_claim, pinned_boom, season_xp, has_plus_pass, games_played, total_tokens_earned, clan_id, clan_role, clan_tag, clan_tag_color"
+      const safeColumns = "id, username, age, tokens, daily_tokens, packs, booms, is_owner, is_banned, is_muted, status, reason, role, join_date, boom_score, total_value, profile_picture, is_plus_user, name_color, banner_color, last_daily_spin, badges, mute_expiry, ban_expiry, last_seen, packs_opened, xp, level, login_streak, last_streak_claim, pinned_boom, season_xp, has_plus_pass, games_played, total_tokens_earned, clan_id, clan_role, clan_tag, clan_tag_color, fusion_cooldown_ends_at, consecutive_fusions, last_fusion_claim_time, active_fusion_boom1, active_fusion_boom2, active_fusion_ends_at, active_fusion_started_at"
       const { data, error } = await supabase.from("users").select(safeColumns)
 
       if (error) {
@@ -1328,6 +1346,13 @@ export default function BoomkitGame() {
           clan_role: u.clan_role || null,
           clan_tag: u.clan_tag || null,
           clan_tag_color: u.clan_tag_color || null,
+          fusion_cooldown_ends_at: u.fusion_cooldown_ends_at || null,
+          consecutive_fusions: u.consecutive_fusions || 0,
+          last_fusion_claim_time: u.last_fusion_claim_time || null,
+          active_fusion_boom1: u.active_fusion_boom1 || null,
+          active_fusion_boom2: u.active_fusion_boom2 || null,
+          active_fusion_ends_at: u.active_fusion_ends_at || null,
+          active_fusion_started_at: u.active_fusion_started_at || null,
         }))
 
         setUsers(mappedUsers)
@@ -1433,6 +1458,13 @@ export default function BoomkitGame() {
                 clan_role: data.user.clan_role || null,
                 clan_tag: data.user.clan_tag || null,
                 clan_tag_color: data.user.clan_tag_color || null,
+                fusion_cooldown_ends_at: data.user.fusion_cooldown_ends_at || null,
+                consecutive_fusions: data.user.consecutive_fusions || 0,
+                last_fusion_claim_time: data.user.last_fusion_claim_time || null,
+                active_fusion_boom1: data.user.active_fusion_boom1 || null,
+                active_fusion_boom2: data.user.active_fusion_boom2 || null,
+                active_fusion_ends_at: data.user.active_fusion_ends_at || null,
+                active_fusion_started_at: data.user.active_fusion_started_at || null,
               }
 
               if (authoritativeUser.isBanned) {
@@ -3761,15 +3793,40 @@ export default function BoomkitGame() {
 
       if (data.success) {
         toast.success(data.message)
+        setFusionSlot1(null)
+        setFusionSlot2(null)
       } else {
         toast.error(data.message)
       }
 
-      setFusionSlot1(null)
-      setFusionSlot2(null)
-      fetchUsersFromSupabase(true) // Refresh inventory
+      await fetchUsersFromSupabase(true) // Refresh inventory
     } catch (err: any) {
       toast.error(err.message || 'Fusion failed')
+    } finally {
+      setIsFusing(false)
+    }
+  }
+
+  const handleClaimFusion = async () => {
+    if (!currentUser || !supabase) return
+
+    setIsFusing(true)
+    try {
+      const { data, error } = await supabase.rpc('claim_fusion_result', {
+        p_username: currentUser.username
+      })
+
+      if (error) throw error
+
+      if (data.success) {
+        toast.success(data.message)
+      } else {
+        toast.error(data.message)
+      }
+
+      await fetchUsersFromSupabase(true) // Refresh inventory
+    } catch (err: any) {
+      toast.error(err.message || 'Claim failed')
     } finally {
       setIsFusing(false)
     }
@@ -6275,7 +6332,7 @@ export default function BoomkitGame() {
                             <div className="space-y-2">
                               <div className="flex items-center gap-3">
                                 <h1 className="text-4xl font-black text-white tracking-tight">{clanDetails.name}</h1>
-                                <span className={`text-xl font-black px-3 py-1 rounded-xl bg-black/40 border border-white/5 ${clanDetails.tag_color}`}>
+                                <span className={`inline-block text-xl font-black px-3 py-1 rounded-xl bg-black/40 border border-white/5 ${clanDetails.tag_color}`}>
                                   [{clanDetails.tag}]
                                 </span>
                               </div>
@@ -6788,7 +6845,7 @@ export default function BoomkitGame() {
                                     <div>
                                       <div className="flex items-center gap-2">
                                         <h3 className="font-bold text-white leading-tight">{clan.name}</h3>
-                                        <span className={`text-[10px] font-black tracking-tight ${clan.tag_color}`}>
+                                        <span className={`inline-block text-[10px] font-black tracking-tight ${clan.tag_color}`}>
                                           [{clan.tag}]
                                         </span>
                                       </div>
@@ -7016,14 +7073,88 @@ export default function BoomkitGame() {
                                   Join a Clan to Participate
                                 </Button>
                               ) : (
-                                !tournamentParticipants.some(p => p.clan_id === currentUser.clan_id && p.tournament_id === t.id) && (
-                                  <Button
-                                    onClick={(e) => { e.stopPropagation(); handleJoinTournament(t.id) }}
-                                    className="w-full mt-4 bg-yellow-600 hover:bg-yellow-500 text-white font-black rounded-xl h-12 shadow-lg shadow-yellow-600/20"
-                                  >
-                                    Register Clan for Tournament
-                                  </Button>
-                                )
+                                (() => {
+                                  const isRegistered = tournamentParticipants.some(p => p.clan_id === currentUser.clan_id && p.tournament_id === t.id);
+                                  if (!isRegistered) {
+                                    return (
+                                      <Button
+                                        onClick={(e) => { e.stopPropagation(); handleJoinTournament(t.id) }}
+                                        className="w-full mt-4 bg-yellow-600 hover:bg-yellow-500 text-white font-black rounded-xl h-12 shadow-lg shadow-yellow-600/20"
+                                      >
+                                        Register Clan for Tournament
+                                      </Button>
+                                    );
+                                  }
+
+                                  // Find stats
+                                  const myClanPart = tournamentParticipants.find(p => p.clan_id === currentUser.clan_id && p.tournament_id === t.id);
+                                  const myClanIdx = tournamentParticipants.findIndex(p => p.clan_id === currentUser.clan_id && p.tournament_id === t.id);
+                                  const myClanRank = myClanIdx !== -1 ? myClanIdx + 1 : "Unranked";
+                                  const gamesPlayed = myClanPart?.games_played || 0;
+                                  const totalScore = myClanPart?.score || 0;
+                                  const avgScore = gamesPlayed > 0 ? Math.round(totalScore / gamesPlayed) : 0;
+                                  
+                                  // Motivational status based on rank
+                                  let motivation = "Keep pushing to climb the ranks! ⚡";
+                                  if (myClanRank === 1) motivation = "Defending the Crown! 👑 You are leading the pack!";
+                                  else if (myClanRank === 2 || myClanRank === 3) motivation = "Podium spot secured! Push for #1! 🚀";
+                                  else if (myClanRank !== "Unranked" && myClanRank <= 5) motivation = "Top 5! You are close to the podium! 🔥";
+
+                                  return (
+                                    <div 
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="mt-4 p-4 rounded-xl bg-purple-500/10 border border-purple-500/20 flex flex-col gap-3 relative overflow-hidden group cursor-default"
+                                    >
+                                      <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-all pointer-events-none" />
+                                      
+                                      <div className="flex justify-between items-center relative z-10">
+                                        <div>
+                                          <span className="text-[9px] font-black uppercase text-purple-400 tracking-wider">Tournament Entry Status</span>
+                                          <div className="text-sm font-black text-white flex items-center gap-1.5 mt-0.5">
+                                            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                                            Your Clan is Registered! 🛡️
+                                          </div>
+                                        </div>
+                                        <div className="text-right">
+                                          <span className="text-[9px] font-black uppercase text-white/30 tracking-wider">Clan Rank</span>
+                                          <div className="text-lg font-black text-yellow-400">
+                                            {myClanRank !== "Unranked" ? `#${myClanRank}` : myClanRank}
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      <div className="grid grid-cols-3 gap-2 py-2 border-t border-b border-white/5 relative z-10">
+                                        <div className="text-center">
+                                          <div className="text-[9px] font-black text-white/30 uppercase">Score</div>
+                                          <div className="text-sm font-black text-white tabular-nums">{totalScore.toLocaleString()}</div>
+                                        </div>
+                                        <div className="text-center border-l border-r border-white/5">
+                                          <div className="text-[9px] font-black text-white/30 uppercase">Games</div>
+                                          <div className="text-sm font-black text-white tabular-nums">{gamesPlayed}</div>
+                                        </div>
+                                        <div className="text-center">
+                                          <div className="text-[9px] font-black text-white/30 uppercase">Avg Score</div>
+                                          <div className="text-sm font-black text-white tabular-nums">{avgScore}</div>
+                                        </div>
+                                      </div>
+
+                                      <p className="text-[10px] text-white/50 italic font-medium relative z-10">
+                                        {motivation}
+                                      </p>
+
+                                      <Button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          toast.success("Entering Tournament Arena! Play discover quizzes to earn points for your clan.");
+                                          setCurrentPage("discover");
+                                        }}
+                                        className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black rounded-lg h-9 text-xs shadow-md shadow-purple-600/20 relative z-10 transition-all hover:scale-102"
+                                      >
+                                        ⚡ Launch Tournament Arena
+                                      </Button>
+                                    </div>
+                                  );
+                                })()
                               )
                             )}
                           </div>
@@ -7063,7 +7194,7 @@ export default function BoomkitGame() {
                                 <div className="flex-grow flex flex-col font-medium">
                                   <div className="flex items-center gap-2">
                                     <span className="text-white font-bold text-sm truncate max-w-[120px]">{clan?.name || "Unknown Clan"}</span>
-                                    <span className={`text-[10px] font-black px-1.5 py-0.5 rounded bg-black/40 border border-white/5 ${clan?.tag_color || "text-purple-400"}`}>
+                                    <span className={`inline-block text-[10px] font-black px-1.5 py-0.5 rounded bg-black/40 border border-white/5 ${clan?.tag_color || "text-purple-400"}`}>
                                       [{clan?.tag || "???"}]
                                     </span>
                                   </div>
@@ -7101,66 +7232,197 @@ export default function BoomkitGame() {
                     <div className="bg-black/40 border border-white/10 rounded-3xl p-12 flex flex-col items-center justify-center relative overflow-hidden group">
                       <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
-                      <div className="flex items-center gap-12 relative z-10">
-                        {/* Slot 1 */}
-                        <div
-                          onClick={() => setFusionSlot1(null)}
-                          className={`w-32 h-32 rounded-3xl border-2 border-dashed flex items-center justify-center cursor-pointer transition-all ${fusionSlot1 ? 'border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/20' : 'border-white/10 bg-white/5 hover:border-white/20'}`}
-                        >
-                          {fusionSlot1 ? (
-                            <div className="flex flex-col items-center">
-                              <span className="text-5xl">{getBoomAvatar(fusionSlot1)}</span>
-                              <span className="text-[10px] font-black text-white mt-1 uppercase">{fusionSlot1}</span>
-                            </div>
-                          ) : (
-                            <div className="flex flex-col items-center text-white/20">
-                              <BeakerIcon className="w-8 h-8 mb-2" />
-                              <span className="text-[10px] font-black uppercase">Slot 1</span>
-                            </div>
-                          )}
-                        </div>
+                      {currentUser?.active_fusion_boom1 ? (
+                        /* Active Fusion Ongoing / Claim View */
+                        (() => {
+                          const boom1 = currentUser.active_fusion_boom1;
+                          const boom2 = currentUser.active_fusion_boom2 || boom1;
+                          
+                          const activeFusionEndsAt = currentUser.active_fusion_ends_at ? new Date(currentUser.active_fusion_ends_at).getTime() : 0;
+                          const activeFusionStartedAt = currentUser.active_fusion_started_at ? new Date(currentUser.active_fusion_started_at).getTime() : 0;
+                          const activeFusionRemaining = Math.max(0, Math.ceil((activeFusionEndsAt - timeNow) / 1000));
+                          
+                          const totalDuration = Math.max(1, Math.round((activeFusionEndsAt - activeFusionStartedAt) / 1000));
+                          const percentDone = Math.min(100, Math.max(0, Math.round(((totalDuration - activeFusionRemaining) / totalDuration) * 100)));
+                          
+                          const formatTime = (secs: number) => {
+                            const m = Math.floor(secs / 60);
+                            const s = secs % 60;
+                            return `${m.toString().padStart(2, '0')}m ${s.toString().padStart(2, '0')}s`;
+                          };
 
-                        {/* Plus Icon */}
-                        <div className="text-white/20 text-4xl font-black">+</div>
+                          return (
+                            <div className="w-full flex flex-col items-center justify-center relative z-10 space-y-6">
+                              <h3 className="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 uppercase tracking-widest animate-pulse">
+                                {activeFusionRemaining > 0 ? "FUSION IN PROGRESS" : "FUSION COMPLETE"}
+                              </h3>
 
-                        {/* Slot 2 */}
-                        <div
-                          onClick={() => setFusionSlot2(null)}
-                          className={`w-32 h-32 rounded-3xl border-2 border-dashed flex items-center justify-center cursor-pointer transition-all ${fusionSlot2 ? 'border-purple-500 bg-purple-500/10 shadow-lg shadow-purple-500/20' : 'border-white/10 bg-white/5 hover:border-white/20'}`}
-                        >
-                          {fusionSlot2 ? (
-                            <div className="flex flex-col items-center">
-                              <span className="text-5xl">{getBoomAvatar(fusionSlot2)}</span>
-                              <span className="text-[10px] font-black text-white mt-1 uppercase">{fusionSlot2}</span>
+                              <div className="flex items-center gap-8 py-6">
+                                {/* Boom 1 */}
+                                <div className="flex flex-col items-center bg-white/5 border border-white/10 rounded-2xl p-4 w-28 h-28 justify-center shadow-lg">
+                                  <span className="text-4xl">{getBoomAvatar(boom1)}</span>
+                                  <span className="text-[9px] font-black text-white/60 mt-2 uppercase truncate w-full text-center">{boom1}</span>
+                                </div>
+
+                                {/* Animation / Status Icon */}
+                                <div className="flex flex-col items-center">
+                                  {activeFusionRemaining > 0 ? (
+                                    <div className="relative w-16 h-16 flex items-center justify-center">
+                                      <div className="absolute inset-0 rounded-full border-4 border-dashed border-blue-500/30 animate-spin" style={{ animationDuration: '6s' }} />
+                                      <div className="absolute w-12 h-12 rounded-full border-4 border-double border-purple-500/50 animate-pulse" />
+                                      <BeakerIcon className="w-6 h-6 text-blue-400 animate-bounce" />
+                                    </div>
+                                  ) : (
+                                    <div className="w-16 h-16 rounded-full bg-green-500/20 border border-green-500 flex items-center justify-center animate-bounce">
+                                      <span className="text-2xl">✨</span>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Boom 2 */}
+                                <div className="flex flex-col items-center bg-white/5 border border-white/10 rounded-2xl p-4 w-28 h-28 justify-center shadow-lg">
+                                  <span className="text-4xl">{getBoomAvatar(boom2)}</span>
+                                  <span className="text-[9px] font-black text-white/60 mt-2 uppercase truncate w-full text-center">{boom2}</span>
+                                </div>
+                              </div>
+
+                              {activeFusionRemaining > 0 ? (
+                                /* Counting Down */
+                                <div className="w-full max-w-md flex flex-col items-center space-y-4">
+                                  <div className="w-full bg-white/5 rounded-full h-3.5 overflow-hidden border border-white/10 p-0.5">
+                                    <div 
+                                      className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 h-full rounded-full transition-all duration-1000 shadow-md shadow-blue-500/50" 
+                                      style={{ width: `${percentDone}%` }} 
+                                    />
+                                  </div>
+                                  <div className="flex justify-between w-full text-xs font-black text-white/40 uppercase tracking-wider">
+                                    <span>Time Left: {formatTime(activeFusionRemaining)}</span>
+                                    <span>{percentDone}% Complete</span>
+                                  </div>
+                                  <p className="text-white/40 text-xs italic text-center">
+                                    Molecular restructuring in progress. Do not refresh. ⏳
+                                  </p>
+                                </div>
+                              ) : (
+                                /* Ready to Claim */
+                                <div className="w-full flex flex-col items-center space-y-4">
+                                  <Button
+                                    onClick={handleClaimFusion}
+                                    disabled={isFusing}
+                                    className="px-12 py-8 rounded-2xl font-black text-xl bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white shadow-2xl shadow-green-500/30 hover:scale-105 active:scale-95 transition-all"
+                                  >
+                                    {isFusing ? (
+                                      <div className="flex items-center gap-3">
+                                        <div className="w-6 h-6 border-4 border-white/20 border-t-white rounded-full animate-spin" />
+                                        CLAIMING...
+                                      </div>
+                                    ) : (
+                                      '🧪 CLAIM FUSION RESULT'
+                                    )}
+                                  </Button>
+                                  <p className="text-green-400/80 text-xs font-black uppercase tracking-wider">
+                                    Ready to retrieve! Click to view your new Boom. 🎉
+                                  </p>
+                                </div>
+                              )}
                             </div>
-                          ) : (
-                            <div className="flex flex-col items-center text-white/20">
-                              <BeakerIcon className="w-8 h-8 mb-2" />
-                              <span className="text-[10px] font-black uppercase">Slot 2</span>
+                          );
+                        })()
+                      ) : (
+                        /* Normal Slots / Setup View */
+                        (() => {
+                          const cooldownEndsAt = currentUser?.fusion_cooldown_ends_at ? new Date(currentUser.fusion_cooldown_ends_at).getTime() : 0;
+                          const cooldownRemaining = Math.max(0, Math.ceil((cooldownEndsAt - timeNow) / 1000));
+                          
+                          const formatTime = (secs: number) => {
+                            const m = Math.floor(secs / 60);
+                            const s = secs % 60;
+                            return `${m}m ${s.toString().padStart(2, '0')}s`;
+                          };
+
+                          return (
+                            <div className="w-full flex flex-col items-center justify-center relative z-10">
+                              <div className="flex items-center gap-12 relative z-10">
+                                {/* Slot 1 */}
+                                <div
+                                  onClick={() => !cooldownRemaining && setFusionSlot1(null)}
+                                  className={`w-32 h-32 rounded-3xl border-2 border-dashed flex items-center justify-center transition-all ${cooldownRemaining ? 'border-white/5 bg-white/5 opacity-40 cursor-not-allowed' : fusionSlot1 ? 'border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/20 cursor-pointer' : 'border-white/10 bg-white/5 hover:border-white/20 cursor-pointer'}`}
+                                >
+                                  {fusionSlot1 ? (
+                                    <div className="flex flex-col items-center">
+                                      <span className="text-5xl">{getBoomAvatar(fusionSlot1)}</span>
+                                      <span className="text-[10px] font-black text-white mt-1 uppercase">{fusionSlot1}</span>
+                                    </div>
+                                  ) : (
+                                    <div className="flex flex-col items-center text-white/20">
+                                      <BeakerIcon className="w-8 h-8 mb-2" />
+                                      <span className="text-[10px] font-black uppercase">Slot 1</span>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Plus Icon */}
+                                <div className="text-white/20 text-4xl font-black">+</div>
+
+                                {/* Slot 2 */}
+                                <div
+                                  onClick={() => !cooldownRemaining && setFusionSlot2(null)}
+                                  className={`w-32 h-32 rounded-3xl border-2 border-dashed flex items-center justify-center transition-all ${cooldownRemaining ? 'border-white/5 bg-white/5 opacity-40 cursor-not-allowed' : fusionSlot2 ? 'border-purple-500 bg-purple-500/10 shadow-lg shadow-purple-500/20 cursor-pointer' : 'border-white/10 bg-white/5 hover:border-white/20 cursor-pointer'}`}
+                                >
+                                  {fusionSlot2 ? (
+                                    <div className="flex flex-col items-center">
+                                      <span className="text-5xl">{getBoomAvatar(fusionSlot2)}</span>
+                                      <span className="text-[10px] font-black text-white mt-1 uppercase">{fusionSlot2}</span>
+                                    </div>
+                                  ) : (
+                                    <div className="flex flex-col items-center text-white/20">
+                                      <BeakerIcon className="w-8 h-8 mb-2" />
+                                      <span className="text-[10px] font-black uppercase">Slot 2</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
+                              {cooldownRemaining > 0 ? (
+                                /* Cooldown Active Block */
+                                <div className="mt-8 flex flex-col items-center space-y-3 bg-red-500/10 border border-red-500/20 rounded-2xl p-4 max-w-sm w-full">
+                                  <div className="flex items-center gap-2 text-red-400 text-xs font-black uppercase tracking-wider">
+                                    <ClockIcon className="w-4 h-4 animate-pulse" />
+                                    Reactor Overheated
+                                  </div>
+                                  <div className="text-2xl font-black text-white tabular-nums">
+                                    {formatTime(cooldownRemaining)}
+                                  </div>
+                                  <p className="text-[10px] text-white/40 text-center font-medium uppercase tracking-wide">
+                                    Next fusion cooldown: {5 * Math.pow(2, currentUser?.consecutive_fusions || 0)}m (Consecutive: {currentUser?.consecutive_fusions || 0})
+                                  </p>
+                                </div>
+                              ) : (
+                                /* Start Fusion Button */
+                                <Button
+                                  onClick={handleFusion}
+                                  disabled={!fusionSlot1 || !fusionSlot2 || isFusing}
+                                  className={`mt-12 px-12 py-8 rounded-2xl font-black text-xl transition-all relative z-10 ${!fusionSlot1 || !fusionSlot2 ? 'bg-white/5 text-white/20 cursor-not-allowed' : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white shadow-2xl shadow-blue-600/30 hover:scale-105 active:scale-95'}`}
+                                >
+                                  {isFusing ? (
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-6 h-6 border-4 border-white/20 border-t-white rounded-full animate-spin" />
+                                      FUSING...
+                                    </div>
+                                  ) : (
+                                    'START FUSION'
+                                  )}
+                                </Button>
+                              )}
+
+                              {/* Warning */}
+                              <p className="mt-6 text-white/20 text-[10px] font-black uppercase tracking-widest text-center">
+                                Warning: Fusion carries a 30% chance of total loss.<br />Results are random within the tier.
+                              </p>
                             </div>
-                          )}
-                        </div>
-                      </div>
-
-                      <Button
-                        onClick={handleFusion}
-                        disabled={!fusionSlot1 || !fusionSlot2 || isFusing}
-                        className={`mt-12 px-12 py-8 rounded-2xl font-black text-xl transition-all relative z-10 ${!fusionSlot1 || !fusionSlot2 ? 'bg-white/5 text-white/20 cursor-not-allowed' : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white shadow-2xl shadow-blue-600/30 hover:scale-105 active:scale-95'}`}
-                      >
-                        {isFusing ? (
-                          <div className="flex items-center gap-3">
-                            <div className="w-6 h-6 border-4 border-white/20 border-t-white rounded-full animate-spin" />
-                            FUSING...
-                          </div>
-                        ) : (
-                          'START FUSION'
-                        )}
-                      </Button>
-
-                      {/* Warning */}
-                      <p className="mt-6 text-white/20 text-[10px] font-black uppercase tracking-widest text-center">
-                        Warning: Fusion carries a 30% chance of total loss.<br />Results are random within the tier.
-                      </p>
+                          );
+                        })()
+                      )}
                     </div>
 
                     {/* Inventory Helper for Fusion */}
@@ -8236,7 +8498,7 @@ export default function BoomkitGame() {
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <h2 className="text-3xl font-black text-white tracking-tight">{showClanProfileModal.name}</h2>
-                  <span className={`text-sm font-black px-2 py-0.5 rounded-lg bg-black/40 border border-white/5 ${showClanProfileModal.tag_color}`}>
+                  <span className={`inline-block text-sm font-black px-2 py-0.5 rounded-lg bg-black/40 border border-white/5 ${showClanProfileModal.tag_color}`}>
                     [{showClanProfileModal.tag}]
                   </span>
                 </div>

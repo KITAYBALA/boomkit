@@ -146,7 +146,7 @@ export default function RealtimeLeaderboard({ onPlayerClick, ...props }: Realtim
                     <div className="flex items-center gap-2 mb-1">
                       <p className={`font-bold truncate text-lg ${index < 3 ? "text-primary" : "text-foreground"}`}>
                         {user.clan_tag && (
-                          <span className={`text-xs font-black tracking-tight ${user.clan_tag_color || 'text-purple-400'} mr-1`}>
+                          <span className={`inline-block text-xs font-black tracking-tight ${user.clan_tag_color || 'text-purple-400'} mr-1`}>
                             [{user.clan_tag}]
                           </span>
                         )}

@@ -17,7 +17,9 @@ export async function GET() {
                 id, username, email, role, tokens, daily_tokens, booms, packs, xp, level,
                 is_banned, is_muted, is_owner, status, reason, join_date, boom_score,
                 total_value, profile_picture, name_color, banner_color, last_daily_spin,
-                badges, mute_expiry, ban_expiry, ban_reason, last_seen, packs_opened
+                badges, mute_expiry, ban_expiry, ban_reason, last_seen, packs_opened,
+                fusion_cooldown_ends_at, consecutive_fusions, last_fusion_claim_time,
+                active_fusion_boom1, active_fusion_boom2, active_fusion_ends_at, active_fusion_started_at
             `)
             .eq('id', session.userId)
             .single()

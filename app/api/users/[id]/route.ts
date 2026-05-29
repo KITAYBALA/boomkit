@@ -37,6 +37,13 @@ const SAFE_USER_COLUMNS = [
   'clan_role',
   'clan_tag',
   'clan_tag_color',
+  'fusion_cooldown_ends_at',
+  'consecutive_fusions',
+  'last_fusion_claim_time',
+  'active_fusion_boom1',
+  'active_fusion_boom2',
+  'active_fusion_ends_at',
+  'active_fusion_started_at',
 ].join(', ')
 
 export async function GET(_request: Request, { params }: { params: Promise<Params> }) {

@@ -45,6 +45,13 @@ const AUTH_USER_COLUMNS = [
   'clan_role',
   'clan_tag',
   'clan_tag_color',
+  'fusion_cooldown_ends_at',
+  'consecutive_fusions',
+  'last_fusion_claim_time',
+  'active_fusion_boom1',
+  'active_fusion_boom2',
+  'active_fusion_ends_at',
+  'active_fusion_started_at',
 ].join(', ')
 
 const DEBUG_AUTH = process.env.DEBUG_AUTH === 'true' || process.env.NODE_ENV !== 'production'
@@ -244,5 +251,12 @@ function toSafeUser(userData: any) {
     packs_opened: userData.packs_opened,
     xp: userData.xp,
     level: userData.level,
+    fusion_cooldown_ends_at: userData.fusion_cooldown_ends_at,
+    consecutive_fusions: userData.consecutive_fusions,
+    last_fusion_claim_time: userData.last_fusion_claim_time,
+    active_fusion_boom1: userData.active_fusion_boom1,
+    active_fusion_boom2: userData.active_fusion_boom2,
+    active_fusion_ends_at: userData.active_fusion_ends_at,
+    active_fusion_started_at: userData.active_fusion_started_at,
   }
 }

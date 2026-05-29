@@ -457,7 +457,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                               onClanTagClick(userClanData[msg.username].clan_id!)
                             }
                           }}
-                          className={`text-xs font-black tracking-tight ${userClanData[msg.username]?.color || 'text-purple-400'} mr-1 ${userClanData[msg.username]?.clan_id ? 'cursor-pointer hover:underline' : ''}`}
+                          className={`inline-block text-xs font-black tracking-tight ${userClanData[msg.username]?.color || 'text-purple-400'} mr-1 ${userClanData[msg.username]?.clan_id ? 'cursor-pointer hover:underline' : ''}`}
                         >
                           [{userClanData[msg.username]?.tag}]
                         </span>

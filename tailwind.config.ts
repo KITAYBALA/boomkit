@@ -2,6 +2,28 @@
 module.exports = {
   darkMode: ["class"],
   content: ["./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}", "*.{js,ts,jsx,tsx,mdx}"],
+  safelist: [
+    "text-purple-400",
+    "text-red-400",
+    "text-blue-400",
+    "text-green-400",
+    "text-yellow-400",
+    "text-pink-400",
+    "text-cyan-400",
+    "text-orange-400",
+    "text-pink-500",
+    "text-emerald-400",
+    "bg-gradient-to-r",
+    "from-yellow-400",
+    "to-amber-500",
+    "from-pink-500",
+    "via-purple-500",
+    "to-indigo-500",
+    "text-transparent",
+    "bg-clip-text",
+    "font-black",
+    "animate-pulse"
+  ],
   theme: {
     container: {
       center: true,
