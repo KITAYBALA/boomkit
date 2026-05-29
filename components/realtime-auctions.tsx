@@ -604,9 +604,11 @@ export default function RealtimeAuctions({
                              {(() => {
                                const u = users?.find((usr) => usr.username === item.seller)
                                return u?.clan_tag ? (
-                                 <span className={`inline-block text-[10px] font-black tracking-tight ${u.clan_tag_color || 'text-purple-400'}`}>
-                                   [{u.clan_tag}]
-                                 </span>
+                                  <span className="inline-block text-[10px] font-black tracking-tight">
+                                    <span className={u.clan_tag_color || 'text-purple-400'}>
+                                      [{u.clan_tag}]
+                                    </span>
+                                  </span>
                                ) : null
                              })()}
                              {item.seller}
@@ -657,9 +659,11 @@ export default function RealtimeAuctions({
                                   {(() => {
                                     const u = users?.find((usr) => usr.username === item.top_bidder)
                                     return u?.clan_tag ? (
-                                      <span className={`inline-block text-[9px] font-black tracking-tight ${u.clan_tag_color || 'text-purple-400'} mr-0.5`}>
-                                        [{u.clan_tag}]
-                                      </span>
+                                       <span className="inline-block text-[9px] font-black tracking-tight mr-0.5">
+                                         <span className={u.clan_tag_color || 'text-purple-400'}>
+                                           [{u.clan_tag}]
+                                         </span>
+                                       </span>
                                     ) : null;
                                   })()}
                                   {item.top_bidder}

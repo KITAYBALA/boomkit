@@ -530,8 +530,10 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
                             </div>
                             <span className="font-medium text-white flex items-center">
                               {user.clan_tag && (
-                                <span className={`inline-block text-xs font-black tracking-tight ${user.clan_tag_color || 'text-purple-400'} mr-1`}>
-                                  [{user.clan_tag}]
+                                <span className="inline-block text-xs font-black tracking-tight mr-1">
+                                  <span className={user.clan_tag_color || 'text-purple-400'}>
+                                    [{user.clan_tag}]
+                                  </span>
                                 </span>
                               )}
                               {user.username}
@@ -551,8 +553,10 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
                           <p className="text-xs text-purple-300/60 uppercase font-bold tracking-widest">Trading Session</p>
                           <p className="text-lg font-bold text-white flex items-center gap-1">
                             {selectedUser.clan_tag && (
-                              <span className={`inline-block text-xs font-black tracking-tight ${selectedUser.clan_tag_color || 'text-purple-400'}`}>
-                                [{selectedUser.clan_tag}]
+                              <span className="inline-block text-xs font-black tracking-tight">
+                                <span className={selectedUser.clan_tag_color || 'text-purple-400'}>
+                                  [{selectedUser.clan_tag}]
+                                </span>
                               </span>
                             )}
                             {selectedUser.username}
@@ -900,8 +904,10 @@ function TradeCard({
                     {(() => {
                       const sender = users?.find(u => u.username === trade.sender_username);
                       return sender?.clan_tag ? (
-                        <span className={`inline-block text-[10px] font-black tracking-tight ${sender.clan_tag_color || 'text-purple-400'} mr-1`}>
-                          [{sender.clan_tag}]
+                        <span className="inline-block text-[10px] font-black tracking-tight mr-1">
+                          <span className={sender.clan_tag_color || 'text-purple-400'}>
+                            [{sender.clan_tag}]
+                          </span>
                         </span>
                       ) : null;
                     })()}
@@ -945,8 +951,10 @@ function TradeCard({
                     {(() => {
                       const receiver = users?.find(u => u.username === trade.receiver_username);
                       return receiver?.clan_tag ? (
-                        <span className={`inline-block text-[10px] font-black tracking-tight ${receiver.clan_tag_color || 'text-purple-400'} ml-1 md:mr-1`}>
-                          [{receiver.clan_tag}]
+                        <span className="inline-block text-[10px] font-black tracking-tight ml-1 md:mr-1">
+                          <span className={receiver.clan_tag_color || 'text-purple-400'}>
+                            [{receiver.clan_tag}]
+                          </span>
                         </span>
                       ) : null;
                     })()}

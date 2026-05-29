@@ -6332,8 +6332,10 @@ export default function BoomkitGame() {
                             <div className="space-y-2">
                               <div className="flex items-center gap-3">
                                 <h1 className="text-4xl font-black text-white tracking-tight">{clanDetails.name}</h1>
-                                <span className={`inline-block text-xl font-black px-3 py-1 rounded-xl bg-black/40 border border-white/5 ${clanDetails.tag_color}`}>
-                                  [{clanDetails.tag}]
+                                <span className="inline-block text-xl font-black px-3 py-1 rounded-xl bg-black/40 border border-white/5">
+                                  <span className={clanDetails.tag_color}>
+                                    [{clanDetails.tag}]
+                                  </span>
                                 </span>
                               </div>
                               <p className="text-white/60 font-medium text-sm md:text-base max-w-xl">
@@ -6695,8 +6697,10 @@ export default function BoomkitGame() {
                                   const isUnlocked = (clanDetails.unlocked_colors || []).includes(color.code);
                                   return (
                                     <div key={color.code} className="bg-black/30 border border-white/5 rounded-xl p-3 flex flex-col justify-between items-center text-center gap-3">
-                                      <span className={`text-xs font-black px-2 py-0.5 rounded bg-black/40 border border-white/5 ${color.code}`}>
-                                        [{clanDetails.tag}]
+                                      <span className="text-xs font-black px-2 py-0.5 rounded bg-black/40 border border-white/5">
+                                        <span className={color.code}>
+                                          [{clanDetails.tag}]
+                                        </span>
                                       </span>
                                       <div className="text-[10px] text-white/50">{color.name}</div>
                                       
@@ -6845,8 +6849,10 @@ export default function BoomkitGame() {
                                     <div>
                                       <div className="flex items-center gap-2">
                                         <h3 className="font-bold text-white leading-tight">{clan.name}</h3>
-                                        <span className={`inline-block text-[10px] font-black tracking-tight ${clan.tag_color}`}>
-                                          [{clan.tag}]
+                                        <span className="inline-block text-[10px] font-black tracking-tight">
+                                          <span className={clan.tag_color}>
+                                            [{clan.tag}]
+                                          </span>
                                         </span>
                                       </div>
                                       <p className="text-[10px] text-white/40 font-semibold mt-0.5">
@@ -7194,8 +7200,10 @@ export default function BoomkitGame() {
                                 <div className="flex-grow flex flex-col font-medium">
                                   <div className="flex items-center gap-2">
                                     <span className="text-white font-bold text-sm truncate max-w-[120px]">{clan?.name || "Unknown Clan"}</span>
-                                    <span className={`inline-block text-[10px] font-black px-1.5 py-0.5 rounded bg-black/40 border border-white/5 ${clan?.tag_color || "text-purple-400"}`}>
-                                      [{clan?.tag || "???"}]
+                                    <span className="inline-block text-[10px] font-black px-1.5 py-0.5 rounded bg-black/40 border border-white/5">
+                                      <span className={clan?.tag_color || "text-purple-400"}>
+                                        [{clan?.tag || "???"}]
+                                      </span>
                                     </span>
                                   </div>
                                   <div className="text-[10px] text-white/40 uppercase font-black">{p.games_played} Games Played</div>
@@ -8477,7 +8485,6 @@ export default function BoomkitGame() {
           </div>
         )
       }
-
       {/* CLAN PROFILE OVERLAY POPUP */}
       {showClanProfileModal && (
         <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[120] flex items-center justify-center p-4">
@@ -8498,8 +8505,10 @@ export default function BoomkitGame() {
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <h2 className="text-3xl font-black text-white tracking-tight">{showClanProfileModal.name}</h2>
-                  <span className={`inline-block text-sm font-black px-2 py-0.5 rounded-lg bg-black/40 border border-white/5 ${showClanProfileModal.tag_color}`}>
-                    [{showClanProfileModal.tag}]
+                  <span className="inline-block text-sm font-black px-2 py-0.5 rounded-lg bg-black/40 border border-white/5">
+                    <span className={showClanProfileModal.tag_color}>
+                      [{showClanProfileModal.tag}]
+                    </span>
                   </span>
                 </div>
                 <p className="text-[10px] text-white/40 font-bold uppercase tracking-wider">
