@@ -7970,34 +7970,34 @@ export default function BoomkitGame() {
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-500">
             {/* Backdrop with extreme blur and dark tint */}
             <div
-              className="absolute inset-0 bg-black/80 backdrop-blur-3xl"
+              className="absolute inset-0 bg-black/90 backdrop-blur-3xl"
               onClick={() => setShowNews(false)}
             />
 
-            <Card className="w-full max-w-4xl bg-slate-900/90 border-white/10 shadow-[0_0_100px_rgba(0,0,0,0.8)] relative z-10 overflow-hidden flex flex-col md:flex-row h-[80vh] rounded-[2.5rem]">
+            <Card className="w-full max-w-4xl bg-slate-950/80 backdrop-blur-2xl border border-white/10 shadow-[0_0_80px_rgba(0,0,0,0.8)] relative z-10 overflow-hidden flex flex-col md:flex-row h-[80vh] rounded-[2.5rem]">
               {/* Left Side: Featured News Image / Gradient */}
-              <div className="md:w-1/3 relative bg-gradient-to-br from-purple-600 to-blue-700 overflow-hidden hidden md:block">
+              <div className="md:w-1/3 relative bg-gradient-to-br from-purple-900 to-indigo-950 overflow-hidden hidden md:block border-r border-white/10">
                 <div className="absolute inset-0 opacity-40 mix-blend-overlay">
                   <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-from)_0%,_transparent_70%)]" />
                 </div>
-                <div className="absolute inset-0 flex flex-col justify-end p-8 text-white">
-                  <Badge className="w-fit mb-4 bg-white/20 backdrop-blur-md border-none text-[10px] font-black uppercase tracking-widest">
+                <div className="absolute inset-0 flex flex-col justify-end p-8 text-white z-10">
+                  <Badge className="w-fit mb-4 bg-purple-500/20 backdrop-blur-md border border-purple-500/30 text-[9px] font-black uppercase tracking-widest text-purple-300">
                     Community Updates
                   </Badge>
-                  <h3 className="text-4xl font-black leading-none tracking-tighter mb-4">
+                  <h3 className="text-4xl font-black leading-none tracking-tighter mb-4 text-gradient-purple-pink">
                     WHAT'S NEW IN BOOMKIT
                   </h3>
-                  <p className="text-white/70 font-medium text-sm">
+                  <p className="text-slate-300/80 font-medium text-xs leading-relaxed">
                     Stay ahead of the game with our latest features, patches, and community highlights.
                   </p>
                 </div>
                 {/* Decorative floating elements */}
-                <div className="absolute top-10 right-10 w-24 h-24 bg-white/10 rounded-full blur-2xl animate-pulse" />
-                <div className="absolute bottom-40 left-10 w-16 h-16 bg-blue-400/20 rounded-full blur-xl animate-bounce-slow" />
+                <div className="absolute top-10 right-10 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl animate-pulse" />
+                <div className="absolute bottom-40 left-10 w-16 h-16 bg-blue-500/10 rounded-full blur-xl animate-bounce-slow" />
               </div>
 
               {/* Right Side: News Feed */}
-              <div className="flex-1 flex flex-col bg-slate-900/50 backdrop-blur-sm relative">
+              <div className="flex-grow flex flex-col bg-black/40 backdrop-blur-sm relative">
                 <CardHeader className="border-b border-white/5 pb-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -8005,7 +8005,7 @@ export default function BoomkitGame() {
                         <NewspaperIcon className="w-8 h-8 text-purple-400" />
                         The Daily Boom
                       </CardTitle>
-                      <CardDescription className="text-white/40 font-bold uppercase tracking-widest text-[10px] mt-1">
+                      <CardDescription className="text-white/40 font-bold uppercase tracking-widest text-[9px] mt-1">
                         Latest updates from the arena
                       </CardDescription>
                     </div>
@@ -8020,9 +8020,9 @@ export default function BoomkitGame() {
                   </div>
                 </CardHeader>
 
-                <CardContent className="flex-1 overflow-y-auto p-6 space-y-8 scrollbar-hide">
+                <CardContent className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide premium-scrollbar">
                   {NEWS_ITEMS.map((news) => (
-                    <div key={news.id} className="group relative flex flex-col gap-4 animate-in slide-in-from-right-4 duration-500">
+                    <div key={news.id} className="group relative flex flex-col gap-4 bg-white/5 border border-white/5 hover:border-purple-500/20 hover:bg-white/10 rounded-2xl p-5 transition-all duration-300 animate-in slide-in-from-right-4">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
                           <span className="text-2xl filter drop-shadow-md group-hover:scale-125 transition-transform duration-300">
@@ -8034,7 +8034,7 @@ export default function BoomkitGame() {
                                 {news.title}
                               </h4>
                               {news.badge && (
-                                <Badge className={`${news.badgeColor || 'bg-purple-500'} text-white text-[9px] font-black border-none px-1.5 py-0 rounded-full`}>
+                                <Badge className={`${news.badgeColor || 'bg-purple-500'} text-white text-[9px] font-black border-none px-2 py-0.5 rounded-full`}>
                                   {news.badge}
                                 </Badge>
                               )}
@@ -8057,17 +8057,17 @@ export default function BoomkitGame() {
                         </div>
                       )}
 
-                      <p className="text-white/60 text-sm leading-relaxed font-medium pl-10 border-l-2 border-white/5 group-hover:border-purple-500/30 transition-all duration-300">
+                      <p className="text-slate-300/80 text-sm leading-relaxed font-medium pl-4 border-l-2 border-purple-500/20 group-hover:border-purple-500/50 transition-all duration-300">
                         {news.content}
                       </p>
                     </div>
                   ))}
                 </CardContent>
 
-                <div className="p-6 bg-slate-900 border-t border-white/5">
+                <div className="p-6 bg-black/40 border-t border-white/5">
                   <Button
                     onClick={() => setShowNews(false)}
-                    className="w-full h-14 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-black text-lg rounded-2xl shadow-[0_10px_20px_rgba(147,51,234,0.3)] hover:shadow-[0_15px_30px_rgba(147,51,234,0.4)] transition-all hover:-translate-y-1 active:scale-[0.98]"
+                    className="w-full h-14 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-black text-lg rounded-2xl shadow-lg hover:scale-[1.01] active:scale-[0.98] transition-all border-none"
                   >
                     RETURN TO ARENA
                   </Button>
@@ -8449,13 +8449,19 @@ export default function BoomkitGame() {
       {
         packAnimation.show && (
           <div
-            className={`fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50 overflow-hidden ${packAnimation.stage === "done" ? "cursor-pointer" : "cursor-default"}`}
+            className={`fixed inset-0 bg-black/95 backdrop-blur-xl flex items-center justify-center z-50 overflow-hidden ${packAnimation.stage === "done" ? "cursor-pointer" : "cursor-default"}`}
             onClick={() => {
               if (packAnimation.stage === "done") {
                 closePackAnimation()
               }
             }}
           >
+            {/* Ambient Background Nebulas for immersion */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+              <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-purple-600/10 blur-[150px] nebula-float-1" />
+              <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] rounded-full bg-cyan-600/10 blur-[150px] nebula-float-2" />
+            </div>
+
             {/* Confetti particles - colored by rarity */}
             {packAnimation.stage !== "shake" &&
               packAnimation.boom &&
@@ -8463,20 +8469,21 @@ export default function BoomkitGame() {
                 const colors = getConfettiColors(packAnimation.boom!.rarity)
                 const color = colors[Math.floor(Math.random() * colors.length)]
                 const angle = (Math.PI * 2 * i) / packAnimation.particles.length
-                const distance = 200 + Math.random() * 150
+                const distance = 250 + Math.random() * 200
                 const tx = Math.cos(angle) * distance
                 const ty = Math.sin(angle) * distance
                 return (
                   <div
                     key={i}
-                    className="absolute pointer-events-none rounded-full"
+                    className="absolute pointer-events-none rounded-full z-10"
                     style={{
                       left: "50%",
                       top: "50%",
-                      width: "12px",
-                      height: "12px",
+                      width: "8px",
+                      height: "8px",
                       backgroundColor: color,
-                      animation: "particle-explode 1.5s ease-out forwards",
+                      boxShadow: `0 0 10px ${color}`,
+                      animation: "particle-explode 1.8s ease-out forwards",
                       ["--tx" as string]: `${tx}px`,
                       ["--ty" as string]: `${ty}px`,
                     }}
@@ -8484,44 +8491,45 @@ export default function BoomkitGame() {
                 )
               })}
 
-            {/* Pack shaking stage */}
+            {/* Pack shaking stage - Web3 Capsule */}
             {packAnimation.stage === "shake" && (
-              <div className="text-center">
-                <div className="animate-pack-shake">
-                  <div className="w-48 h-64 bg-gradient-to-b from-purple-600 to-purple-900 rounded-lg shadow-2xl flex flex-col items-center justify-center relative overflow-hidden">
-                    {/* Zigzag top */}
-                    <div
-                      className="absolute top-0 left-0 right-0 h-6 bg-white/30"
-                      style={{
-                        clipPath:
-                          "polygon(0 0, 10% 100%, 20% 0, 30% 100%, 40% 0, 50% 100%, 60% 0, 70% 100%, 80% 0, 90% 100%, 100% 0, 100% 100%, 0 100%)",
-                      }}
-                    />
-                    {/* Display Emoji instead of Image */}
-                    <div className="text-8xl drop-shadow-md">
+              <div className="text-center relative z-10">
+                <div className="animate-pack-shake relative">
+                  {/* Rotating Outer Rings */}
+                  <div className="absolute -inset-8 rounded-full border border-purple-500/20 animate-spin" style={{ animationDuration: '4s' }} />
+                  <div className="absolute -inset-12 rounded-full border border-cyan-500/10 animate-spin" style={{ animationDuration: '8s', animationDirection: 'reverse' }} />
+                  
+                  <div className="w-56 h-56 bg-slate-950/60 backdrop-blur-xl border border-white/10 rounded-full shadow-[0_0_50px_rgba(168,85,247,0.2)] flex flex-col items-center justify-center relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-transparent pointer-events-none" />
+                    
+                    {/* Inner spinning core */}
+                    <div className="absolute inset-4 rounded-full border border-dashed border-white/10 animate-spin" style={{ animationDuration: '12s' }} />
+                    
+                    <div className="text-9xl drop-shadow-[0_8px_16px_rgba(168,85,247,0.3)] z-10 select-none animate-pulse">
                       {PACKS.find(p => p.name === packAnimation.packName)?.emoji || "📦"}
                     </div>
-                    <div className="text-white font-bold mt-2">{packAnimation.packName}</div>
                   </div>
                 </div>
-                <p className="text-white/80 mt-6 text-xl animate-pulse">Opening pack...</p>
+                <h3 className="text-white text-2xl font-black mt-8 tracking-wider uppercase animate-pulse drop-shadow-[0_0_10px_purple]">
+                  Decoding Database...
+                </h3>
               </div>
             )}
 
-            {/* Pack burst stage */}
+            {/* Pack burst stage - Energy shockwave */}
             {packAnimation.stage === "burst" && (
-              <div className="text-center">
-                <div className="animate-pack-burst">
-                  <div className="w-48 h-64 bg-gradient-to-b from-yellow-400 to-orange-600 rounded-lg shadow-2xl flex items-center justify-center">
-                    <div className="text-6xl">💥</div>
+              <div className="text-center relative z-10">
+                <div className="animate-pack-burst relative">
+                  <div className="w-64 h-64 rounded-full bg-white flex items-center justify-center shadow-[0_0_100px_#fff]">
+                    <div className="absolute inset-0 rounded-full border-8 border-white animate-ping opacity-75" />
+                    <div className="text-7xl">💥</div>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Boom reveal stage - Blooket-style card */}
+            {/* Boom reveal stage - Holographic Web3 Card */}
             {(packAnimation.stage === "reveal" || packAnimation.stage === "done") && packAnimation.boom && (() => {
-              // Find the pack that contains this boom
               const pack = PACKS.find((p) => p.booms.some((b) => b.name === packAnimation.boom!.name))
               const dropRate = pack ? getBoomDropRate(packAnimation.boom.name, pack) : 0
               const isNew = isBoomNew(packAnimation.boom.name)
@@ -8533,97 +8541,83 @@ export default function BoomkitGame() {
                         packAnimation.boom.rarity === "rare" ? "animate-reveal-rare" :
                           "animate-reveal-uncommon"
 
+              const borderGlowColor =
+                packAnimation.boom.rarity === "mystical" ? "border-cyan-500 shadow-[0_0_40px_rgba(6,182,212,0.4)]" :
+                packAnimation.boom.rarity === "chroma" ? "border-pink-500 shadow-[0_0_40px_rgba(236,72,153,0.4)]" :
+                packAnimation.boom.rarity === "legendary" ? "border-orange-500 shadow-[0_0_35px_rgba(249,115,22,0.35)]" :
+                packAnimation.boom.rarity === "epic" ? "border-purple-500 shadow-[0_0_30px_rgba(168,85,247,0.3)]" :
+                packAnimation.boom.rarity === "rare" ? "border-blue-500 shadow-[0_0_25px_rgba(59,130,246,0.25)]" :
+                "border-green-500 shadow-[0_0_25px_rgba(34,197,94,0.25)]"
+
               return (
-                <div className="flex items-center justify-center w-full h-full" onClick={(e) => {
-                  // Optional: Determine if clicking content should close it. 
-                  // User said "click anywhere and exit", which usually includes the content.
-                  // So we allow propagation to the parent.
-                }}>
-                  {/* Centered Card */}
+                <div className="flex flex-col items-center justify-center w-full h-full relative z-10">
                   <div
-                    className={`relative w-[400px] h-[500px] rounded-2xl shadow-2xl overflow-hidden ${packAnimation.stage === "reveal" ? revealAnimationClass : ""
-                      }`}
-                    style={{
-                      background:
-                        packAnimation.boom.rarity === "mystical"
-                          ? "linear-gradient(135deg, #1e1b4b 0%, #581c87 50%, #831843 100%)" :
-                          packAnimation.boom.rarity === "chroma"
-                            ? "linear-gradient(135deg, #0e7490 0%, #0891b2 50%, #ec4899 100%)" :
-                            packAnimation.boom.rarity === "legendary"
-                              ? "linear-gradient(135deg, #ea580c 0%, #f59e0b 50%, #fbbf24 100%)" :
-                              packAnimation.boom.rarity === "epic"
-                                ? "linear-gradient(135deg, #6b21a8 0%, #9333ea 50%, #a855f7 100%)" :
-                                packAnimation.boom.rarity === "rare"
-                                  ? "linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%)" :
-                                  "linear-gradient(135deg, #166534 0%, #22c55e 50%, #4ade80 100%)"
-                    }}
+                    className={`relative w-[380px] h-[520px] rounded-[2.5rem] border-2 bg-slate-950/70 backdrop-blur-2xl overflow-hidden ${revealAnimationClass} ${borderGlowColor}`}
                   >
-                    {/* Card Background Pattern (snowy scene for example) */}
-                    <div className="absolute inset-0 opacity-20">
-                      <div className="absolute bottom-0 left-0 right-0 h-32 bg-white/30 rounded-t-full"></div>
-                      <div className="absolute bottom-8 left-4 w-16 h-16 bg-white/20 rounded-full"></div>
-                      <div className="absolute bottom-12 right-8 w-12 h-12 bg-white/20 rounded-full"></div>
-                    </div>
+                    {/* Scanline overlay */}
+                    <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0)_95%,rgba(255,255,255,0.03)_95%)] bg-[size:100%_4px] pointer-events-none" />
 
-                    {/* Boom Art - Centered */}
-                    <div className="absolute inset-0 flex items-center justify-center z-10">
-                      {packAnimation.boom.avatar.startsWith('/') ? (
-                        <img
-                          src={packAnimation.boom.avatar || "/placeholder.svg"}
-                          alt={packAnimation.boom.name}
-                          className="w-48 h-48 object-contain drop-shadow-2xl animate-in zoom-in duration-500"
-                        />
-                      ) : (
-                        <span className="text-8xl drop-shadow-md">{packAnimation.boom.avatar}</span>
-                      )}
-                    </div>
+                    {/* Laser shine sweep */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-[100%] animate-legendary-shine pointer-events-none" />
 
-                    {/* Boom Name - Top */}
-                    <div className="absolute top-6 left-0 right-0 text-center z-20">
-                      <h2 className="text-3xl font-bold text-white drop-shadow-lg">
-                        {packAnimation.boom.name}
-                      </h2>
-                    </div>
+                    <div className="absolute inset-x-6 top-6 bottom-6 flex flex-col justify-between items-center z-10">
+                      {/* Name - Top */}
+                      <div className="text-center space-y-1">
+                        <h2 className="text-3xl font-black text-white tracking-tight drop-shadow-md">
+                          {packAnimation.boom.name}
+                        </h2>
+                        <Badge className={`uppercase font-black text-[9px] tracking-widest border-none px-3 py-1 rounded-full ${
+                          packAnimation.boom.rarity === "uncommon" ? "bg-green-500" :
+                          packAnimation.boom.rarity === "rare" ? "bg-blue-500" :
+                          packAnimation.boom.rarity === "epic" ? "bg-purple-500" :
+                          packAnimation.boom.rarity === "legendary" ? "bg-orange-500" :
+                          packAnimation.boom.rarity === "chroma" ? "bg-pink-500" :
+                          "bg-cyan-500"
+                        } text-white`}>
+                          {packAnimation.boom.rarity}
+                        </Badge>
+                      </div>
 
-                    {/* Rarity Label - Under Name */}
-                    <div className="absolute top-20 left-0 right-0 text-center z-20">
-                      <div
-                        className={`inline-block px-4 py-1 rounded-full text-sm font-bold uppercase ${packAnimation.boom.rarity === "mystical" || packAnimation.boom.rarity === "chroma"
-                          ? "animate-pulse"
-                          : ""
-                          }`}
-                        style={{
-                          background:
-                            packAnimation.boom.rarity === "mystical"
-                              ? "linear-gradient(135deg, #a855f7, #ec4899)"
-                              : packAnimation.boom.rarity === "chroma"
-                                ? "linear-gradient(135deg, #06b6d4, #ec4899, #f59e0b)"
-                                : packAnimation.boom.rarity === "legendary"
-                                  ? "#f59e0b"
-                                  : packAnimation.boom.rarity === "epic"
-                                    ? "#9333ea"
-                                    : packAnimation.boom.rarity === "rare"
-                                      ? "#3b82f6"
-                                      : "#22c55e",
-                          color: "white",
-                        }}
-                      >
-                        {getRarityText(packAnimation.boom.rarity).replace(/[💚💙💜🔥🌈✨]/g, "").trim()}
+                      {/* Centered Art */}
+                      <div className="w-48 h-48 rounded-[2rem] bg-black/40 border border-white/5 flex items-center justify-center text-8xl shadow-inner relative overflow-hidden group">
+                        {packAnimation.boom.avatar.startsWith('/') ? (
+                          <img
+                            src={packAnimation.boom.avatar || "/placeholder.svg"}
+                            alt={packAnimation.boom.name}
+                            className="w-36 h-36 object-contain drop-shadow-2xl group-hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <span className="drop-shadow-lg group-hover:scale-105 transition-transform duration-500 select-none">
+                            {packAnimation.boom.avatar}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Drop rate + NEW stamp */}
+                      <div className="text-center space-y-3 w-full">
+                        <div className="flex justify-between items-center bg-white/5 border border-white/5 rounded-2xl px-5 py-3">
+                          <span className="text-white/40 text-[9px] font-black uppercase tracking-wider">Drop Rate</span>
+                          <span className="text-white font-black text-sm">{dropRate}%</span>
+                        </div>
+                        {isNew && (
+                          <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white font-black border-none text-[9px] tracking-widest px-4 py-1.5 rounded-xl shadow-md uppercase animate-pulse">
+                            NEW ACQUISITION
+                          </Badge>
+                        )}
                       </div>
                     </div>
 
-                    {/* Drop Rate + NEW - Bottom */}
-                    <div className="absolute bottom-6 left-0 right-0 text-center z-20">
-                      <p className="text-white text-lg font-semibold drop-shadow-lg">
-                        {dropRate}%{isNew && " – NEW!"}
-                      </p>
-                    </div>
-
-                    {/* Glow effect for legendary+ */}
+                    {/* Pulsing card glow for ultra-rare */}
                     {["legendary", "chroma", "mystical"].includes(packAnimation.boom.rarity) && (
-                      <div className="absolute inset-0 animate-glow-pulse opacity-50" />
+                      <div className="absolute inset-0 animate-glow-pulse opacity-20 pointer-events-none" />
                     )}
                   </div>
+
+                  {packAnimation.stage === "done" && (
+                    <p className="text-white/30 text-xs font-black uppercase tracking-[0.25em] mt-8 animate-pulse">
+                      Click Anywhere to Continue
+                    </p>
+                  )}
                 </div>
               )
             })()}
@@ -8957,77 +8951,74 @@ export default function BoomkitGame() {
         showUserStats && selectedUserStats && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center z-[100] p-4 transition-all duration-300">
             <Card
-              className={`w-full max-w-2xl overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] relative animate-in zoom-in-95 duration-300 ${selectedUserStats.bannerColor === "rainbow"
-                ? "bg-slate-900/95"
-                : "bg-slate-900/90"
-                }`}
+              className="w-full max-w-2xl bg-slate-950/80 backdrop-blur-2xl border border-white/10 shadow-[0_0_80px_rgba(168,85,247,0.15)] rounded-[2.5rem] overflow-hidden relative animate-in zoom-in-95 duration-300"
             >
               {/* Header Banner */}
               <div className={`h-32 w-full relative ${selectedUserStats.bannerColor === "rainbow"
                 ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 animate-pulse"
                 : selectedUserStats.bannerColor || "bg-gradient-to-r from-purple-600 to-pink-600"
                 }`}>
-                <div className="absolute inset-0 bg-black/20" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/60" />
                 <button
                   onClick={() => setShowUserStats(false)}
-                  className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition-colors z-20"
+                  className="absolute top-6 right-6 w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition-colors z-20 border border-white/5"
                 >
                   ✕
                 </button>
               </div>
 
-              <CardContent className="px-8 pb-8 -mt-12 relative z-10">
-                <div className="flex flex-col md:flex-row gap-6">
+              <CardContent className="px-8 pb-8 -mt-16 relative z-10">
+                <div className="flex flex-col md:flex-row gap-8">
                   {/* Left Column: Profile Picture & Primary Info */}
-                  <div className="flex flex-col items-center md:items-start space-y-4">
+                  <div className="flex flex-col items-center md:items-start space-y-5 md:w-1/3">
                     <div className="relative group">
-                      <div className="w-32 h-32 rounded-3xl bg-slate-800 border-4 border-slate-900 flex items-center justify-center text-6xl shadow-2xl relative overflow-hidden">
+                      <div className="w-32 h-32 rounded-[2rem] bg-black/40 border-4 border-slate-950 flex items-center justify-center text-6xl shadow-2xl relative overflow-hidden ring-4 ring-purple-500/25">
                         {selectedUserStats.profilePicture || "🎮"}
                         {selectedUserStats.role === "owner" && (
-                          <div className="absolute inset-0 border-4 border-yellow-500/30 animate-pulse rounded-2xl" />
+                          <div className="absolute inset-0 border-4 border-yellow-500/40 animate-pulse rounded-[2rem]" />
                         )}
                       </div>
                       {selectedUserStats.isPlusUser && (
-                        <div className="absolute -top-2 -right-2 bg-gradient-to-r from-cyan-400 to-blue-500 text-white text-[10px] font-black px-2 py-1 rounded-full shadow-lg">
+                        <div className="absolute -top-2 -right-2 bg-gradient-to-r from-cyan-400 to-blue-500 text-white text-[9px] font-black px-2.5 py-1 rounded-full shadow-lg shadow-cyan-900/40 tracking-wider">
                           PLUS
                         </div>
                       )}
                     </div>
 
-                    <div className="text-center md:text-left">
-                      <h2 className={`text-3xl font-black mb-1 ${selectedUserStats.nameColor === "rainbow"
+                    <div className="text-center md:text-left space-y-1.5 w-full">
+                      <h2 className={`text-3xl font-black tracking-tight ${selectedUserStats.nameColor === "rainbow"
                         ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent animate-pulse"
                         : "text-white"
                         }`}>
                         {selectedUserStats.username}
                       </h2>
-                      <Badge variant="outline" className="border-white/20 text-white/60 bg-white/5 uppercase tracking-widest text-[10px] font-bold">
-                        ID: {selectedUserStats.id.slice(0, 8)}...
+                      <Badge variant="outline" className="border-white/5 text-white/40 bg-white/5 uppercase tracking-widest text-[9px] font-black px-2.5 py-1 rounded-lg">
+                        ID: {selectedUserStats.id.slice(0, 8)}
                       </Badge>
                     </div>
 
                     <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-                      <Badge className={`${getRoleColor(selectedUserStats.role)} text-white px-3 py-1 text-xs font-black uppercase tracking-wider border-none shadow-lg shadow-black/20`}>
+                      <Badge className={`${getRoleColor(selectedUserStats.role)} text-white px-3 py-1.5 text-[10px] font-black uppercase tracking-wider border-none shadow-lg`}>
                         {getUserRoleName(selectedUserStats)}
                       </Badge>
                       {selectedUserStats.isOwner && (
-                        <Badge className="bg-emerald-500 text-white px-3 py-1 text-xs font-black uppercase tracking-wider border-none shadow-lg shadow-black/20">
+                        <Badge className="bg-emerald-500 text-white px-3 py-1.5 text-[10px] font-black uppercase tracking-wider border-none shadow-lg">
                           Official
                         </Badge>
                       )}
                     </div>
 
-                    <div className="w-full pt-4">
-                      <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
-                        <p className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-3">Active Badges</p>
+                    <div className="w-full pt-2">
+                      <div className="bg-black/40 rounded-2xl p-4 border border-white/5">
+                        <p className="text-white/40 text-[9px] font-black uppercase tracking-widest mb-3">Active Badges</p>
                         <div className="flex flex-wrap gap-2">
                           {(selectedUserStats.badges ?? []).length > 0 ? (
                             selectedUserStats.badges.map((badgeId) => {
                               const badge = AVAILABLE_BADGES.find((b) => b.id === badgeId)
                               return badge ? (
-                                <div key={badgeId} className="flex items-center gap-1.5 bg-black/40 px-3 py-1.5 rounded-xl border border-white/10">
-                                  <span className="text-base">{badge.emoji}</span>
-                                  <span className="text-[10px] text-white font-bold opacity-80">{badge.name}</span>
+                                <div key={badgeId} className="flex items-center gap-1 bg-black/60 px-2.5 py-1 rounded-xl border border-white/5" title={badge.name}>
+                                  <span className="text-sm">{badge.emoji}</span>
+                                  <span className="text-[9px] text-white/80 font-bold">{badge.name}</span>
                                 </div>
                               ) : null
                             })
@@ -9040,69 +9031,74 @@ export default function BoomkitGame() {
                   </div>
 
                   {/* Right Column: Key Statistics */}
-                  <div className="flex-1 space-y-4">
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border border-yellow-500/20 rounded-2xl p-4 transition-all hover:scale-[1.02] cursor-default">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xl">💰</span>
-                          <span className="text-white/40 text-[10px] font-black uppercase tracking-widest">Tokens</span>
+                  <div className="flex-1 space-y-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-gradient-to-br from-yellow-500/5 to-orange-500/5 border border-yellow-500/10 rounded-2xl p-4 transition-all hover:scale-[1.02] cursor-default shadow-md">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="text-lg">💰</span>
+                          <span className="text-white/40 text-[9px] font-black uppercase tracking-widest">Tokens</span>
                         </div>
-                        <div className="text-2xl font-black text-yellow-500">
+                        <div className="text-3xl font-black text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.2)]">
                           {selectedUserStats.tokens.toLocaleString()}
                         </div>
                       </div>
 
-                      <div className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-2xl p-4 transition-all hover:scale-[1.02] cursor-default">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xl">⭐</span>
-                          <span className="text-white/40 text-[10px] font-black uppercase tracking-widest">Score</span>
+                      <div className="bg-gradient-to-br from-purple-500/5 to-pink-500/5 border border-purple-500/10 rounded-2xl p-4 transition-all hover:scale-[1.02] cursor-default shadow-md">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="text-lg">⭐</span>
+                          <span className="text-white/40 text-[9px] font-black uppercase tracking-widest">Score</span>
                         </div>
-                        <div className="text-2xl font-black text-purple-400">
+                        <div className="text-3xl font-black text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.2)]">
                           {selectedUserStats.boomScore.toLocaleString()}
                         </div>
                       </div>
 
-                      <div className="bg-gradient-to-br from-blue-500/10 to-cyan-500/10 border border-blue-500/20 rounded-2xl p-4 transition-all hover:scale-[1.02] cursor-default">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xl">📦</span>
-                          <span className="text-white/40 text-[10px] font-black uppercase tracking-widest">Opened</span>
+                      <div className="bg-gradient-to-br from-blue-500/5 to-cyan-500/5 border border-blue-500/10 rounded-2xl p-4 transition-all hover:scale-[1.02] cursor-default shadow-md">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="text-lg">📦</span>
+                          <span className="text-white/40 text-[9px] font-black uppercase tracking-widest">Opened</span>
                         </div>
-                        <div className="text-2xl font-black text-blue-400">
+                        <div className="text-3xl font-black text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.2)]">
                           {selectedUserStats.packsOpened || 0}
                         </div>
                       </div>
 
-                      <div className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 rounded-2xl p-4 transition-all hover:scale-[1.02] cursor-default">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xl">🎆</span>
-                          <span className="text-white/40 text-[10px] font-black uppercase tracking-widest">Unique</span>
+                      <div className="bg-gradient-to-br from-emerald-500/5 to-teal-500/5 border border-emerald-500/10 rounded-2xl p-4 transition-all hover:scale-[1.02] cursor-default shadow-md">
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="text-lg">🎆</span>
+                          <span className="text-white/40 text-[9px] font-black uppercase tracking-widest">Unique</span>
                         </div>
-                        <div className="text-2xl font-black text-emerald-400">
+                        <div className="text-3xl font-black text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.2)]">
                           {Object.keys(selectedUserStats.booms).length}
                         </div>
                       </div>
                     </div>
 
-                    <div className="bg-white/5 rounded-2xl p-5 border border-white/5 space-y-4">
-                      <div className="flex justify-between items-center">
-                        <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">Recent Activity</p>
-                        <Badge className="bg-white/5 text-white/40 border-white/10 text-[9px]">Live Tracking</Badge>
+                    <div className="bg-black/40 rounded-2xl p-5 border border-white/5 space-y-4">
+                      <div className="flex justify-between items-center border-b border-white/5 pb-2">
+                        <p className="text-white/40 text-[9px] font-black uppercase tracking-widest">Timeline Registry</p>
+                        <Badge className="bg-white/5 text-white/40 border-white/10 text-[8px] font-black tracking-widest uppercase">REALTIME SYNC</Badge>
                       </div>
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-3 text-xs">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                          <p className="text-white/70">Joined the Booom Arena on <span className="text-emerald-400 font-bold">{new Date(selectedUserStats.joinDate).toLocaleDateString()}</span></p>
+                      <div className="space-y-4">
+                        <div className="flex gap-3">
+                          <div className="flex flex-col items-center">
+                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
+                            <div className="w-0.5 h-6 bg-white/10 my-0.5" />
+                          </div>
+                          <p className="text-white/60 text-xs font-medium">Joined the Arena on <span className="text-emerald-400 font-bold">{new Date(selectedUserStats.joinDate).toLocaleDateString()}</span></p>
                         </div>
-                        <div className="flex items-center gap-3 text-xs">
-                          <span className="w-2 h-2 rounded-full bg-yellow-500" />
-                          <p className="text-white/70">Highest token balance recorded: <span className="text-yellow-400 font-bold">{selectedUserStats.tokens.toLocaleString()}</span></p>
+                        <div className="flex gap-3">
+                          <div className="flex flex-col items-center">
+                            <span className="w-2.5 h-2.5 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
+                          </div>
+                          <p className="text-white/60 text-xs font-medium">Earned a total value of <span className="text-yellow-400 font-bold">{selectedUserStats.tokens.toLocaleString()}</span> tokens</p>
                         </div>
                       </div>
                     </div>
 
                     <Button
                       onClick={() => setShowUserStats(false)}
-                      className="w-full h-12 bg-white/10 hover:bg-white/20 text-white font-black uppercase tracking-widest text-xs border border-white/10 rounded-xl transition-all"
+                      className="w-full h-14 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-black uppercase tracking-widest text-xs border-none rounded-2xl transition-all hover:scale-[1.01] active:scale-95 shadow-lg shadow-purple-900/40"
                     >
                       Close Profile
                     </Button>
@@ -9253,64 +9249,137 @@ export default function BoomkitGame() {
       }
       {
         showBoomAction && selectedBoom && (
-          <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
-            <Card className="w-full max-w-md p-6 bg-slate-900 border-slate-800">
-              <CardHeader>
-                <CardTitle className="text-2xl font-bold text-white">Boom Actions</CardTitle>
-                <CardDescription>What do you want to do with {selectedBoom}?</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-white">
-                  <span className="text-3xl">{getBoomAvatar(selectedBoom)}</span> {selectedBoom}
-                </p>
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
+            <Card className="w-full max-w-md bg-slate-950/80 backdrop-blur-2xl border border-white/10 shadow-[0_0_50px_rgba(168,85,247,0.15)] rounded-[2.5rem] overflow-hidden relative">
+              <div className="absolute top-0 right-0 p-4">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setShowBoomAction(false)}
+                  className="rounded-full text-white/40 hover:text-white hover:bg-white/5"
+                >
+                  <XIcon className="h-5 w-5" />
+                </Button>
+              </div>
 
-                <div className="space-y-2">
-                  <Label className="text-white">Quantity to Sell: {sellQuantity}</Label>
-                  <Input
-                    type="range"
-                    min="1"
-                    max={currentUser?.booms[selectedBoom] || 1}
-                    value={sellQuantity}
-                    onChange={(e) => setSellQuantity(parseInt(e.target.value))}
-                    className="w-full"
-                  />
-                  <div className="flex justify-between text-xs text-white/70">
-                    <span>1</span>
-                    <span>{currentUser?.booms[selectedBoom] || 1}</span>
+              <CardHeader className="text-center pb-2 pt-8">
+                <CardTitle className="text-3xl font-black text-white tracking-tight">Boom Actions</CardTitle>
+                <CardDescription className="text-white/40 font-medium">Manage your digital assets</CardDescription>
+              </CardHeader>
+
+              <CardContent className="space-y-6 px-8 pb-8 pt-4">
+                <div className="flex flex-col items-center gap-4">
+                  <div className="w-32 h-32 rounded-3xl bg-black/40 border border-white/10 flex items-center justify-center text-6xl shadow-inner relative overflow-hidden group">
+                    {getBoomAvatar(selectedBoom).startsWith('/') ? (
+                      <img
+                        src={getBoomAvatar(selectedBoom)}
+                        alt={selectedBoom}
+                        className="w-24 h-24 object-contain drop-shadow-xl group-hover:scale-110 transition-transform duration-300"
+                      />
+                    ) : (
+                      <span className="drop-shadow-lg group-hover:scale-110 transition-transform duration-300 select-none">
+                        {getBoomAvatar(selectedBoom)}
+                      </span>
+                    )}
+                    <div className={`absolute inset-0 border-2 rounded-3xl opacity-30 ${
+                      getBoomRarity(selectedBoom) === 'uncommon' ? 'border-green-500' :
+                      getBoomRarity(selectedBoom) === 'rare' ? 'border-blue-500' :
+                      getBoomRarity(selectedBoom) === 'epic' ? 'border-purple-500' :
+                      getBoomRarity(selectedBoom) === 'legendary' ? 'border-orange-500' :
+                      getBoomRarity(selectedBoom) === 'chroma' ? 'border-pink-500 animate-pulse' :
+                      'border-cyan-500 animate-pulse'
+                    }`} />
+                  </div>
+                  <div className="text-center">
+                    <h3 className="text-2xl font-black text-white">{selectedBoom}</h3>
+                    <Badge className={`mt-2 uppercase font-black text-[9px] tracking-widest border-none px-3.5 py-1.5 rounded-full ${
+                      getBoomRarity(selectedBoom) === 'uncommon' ? 'bg-green-500' :
+                      getBoomRarity(selectedBoom) === 'rare' ? 'bg-blue-500' :
+                      getBoomRarity(selectedBoom) === 'epic' ? 'bg-purple-500' :
+                      getBoomRarity(selectedBoom) === 'legendary' ? 'bg-orange-500' :
+                      getBoomRarity(selectedBoom) === 'chroma' ? 'bg-pink-500' :
+                      'bg-cyan-500'
+                    } text-white`}>
+                      {getBoomRarity(selectedBoom)}
+                    </Badge>
                   </div>
                 </div>
 
-                <div className="bg-white/10 rounded p-3 text-center">
-                  <p className="text-white/70 text-sm">Total Value</p>
-                  <p className="text-yellow-400 font-bold text-xl">
-                    {getBoomSellPrice(selectedBoom) * sellQuantity} tokens
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center px-1">
+                    <Label className="text-white/60 font-black uppercase text-[10px] tracking-wider">Quantity to Sell</Label>
+                    <span className="text-white font-black text-sm">{sellQuantity} / {currentUser?.booms[selectedBoom] || 1}</span>
+                  </div>
+                  <div className="flex items-center gap-4 bg-black/40 border border-white/5 rounded-2xl p-3">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      disabled={sellQuantity <= 1}
+                      onClick={() => setSellQuantity(prev => Math.max(1, prev - 1))}
+                      className="h-10 w-10 rounded-xl bg-white/5 hover:bg-white/10 text-white disabled:opacity-30 disabled:hover:bg-white/5"
+                    >
+                      -
+                    </Button>
+                    <Input
+                      type="range"
+                      min="1"
+                      max={currentUser?.booms[selectedBoom] || 1}
+                      value={sellQuantity}
+                      onChange={(e) => setSellQuantity(parseInt(e.target.value))}
+                      className="w-full accent-purple-500 bg-transparent h-1.5 rounded-lg border-none"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      disabled={sellQuantity >= (currentUser?.booms[selectedBoom] || 1)}
+                      onClick={() => setSellQuantity(prev => Math.min(currentUser?.booms[selectedBoom] || 1, prev + 1))}
+                      className="h-10 w-10 rounded-xl bg-white/5 hover:bg-white/10 text-white disabled:opacity-30 disabled:hover:bg-white/5"
+                    >
+                      +
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="bg-purple-500/5 border border-purple-500/10 rounded-2xl p-4 text-center">
+                  <p className="text-white/40 text-[9px] font-black uppercase tracking-wider mb-1">Estimated Return Value</p>
+                  <p className="text-yellow-400 font-black text-3xl drop-shadow-[0_0_10px_rgba(234,179,8,0.2)] flex items-center justify-center gap-2">
+                    <span>🪙</span>
+                    <span>{(getBoomSellPrice(selectedBoom) * sellQuantity).toLocaleString()}</span>
                   </p>
                 </div>
 
-                {/* Prevent selling rented booms */}
-                {rentalListings.some(r => r.renter_username === currentUser?.username && r.boom_name === selectedBoom && r.status === "rented") ? (
-                  <div className="bg-blue-950/40 border border-blue-500/30 rounded-xl p-3 text-center text-xs text-blue-300 font-medium">
-                    This is a rented Boom and cannot be sold.
-                  </div>
-                ) : (
-                  <Button onClick={() => handleConfirmSell()} className="w-full bg-blue-600 hover:bg-blue-700">
-                    Sell {sellQuantity} for {getBoomSellPrice(selectedBoom) * sellQuantity} tokens
+                <div className="space-y-3 pt-2">
+                  {/* Prevent selling rented booms */}
+                  {rentalListings.some(r => r.renter_username === currentUser?.username && r.boom_name === selectedBoom && r.status === "rented") ? (
+                    <div className="bg-blue-950/20 border border-blue-500/20 rounded-2xl p-4 text-center text-xs text-blue-300 font-medium">
+                      ⚠️ This is a rented Boom and cannot be sold.
+                    </div>
+                  ) : (
+                    <Button
+                      onClick={() => handleConfirmSell()}
+                      className="w-full h-14 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black rounded-2xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all border-none"
+                    >
+                      Confirm Asset Disposal
+                    </Button>
+                  )}
+
+                  <Button
+                    onClick={async () => {
+                      setShowBoomAction(false)
+                      await pinBoomToProfile(selectedBoom)
+                    }}
+                    className="w-full h-14 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-black rounded-2xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all border-none"
+                  >
+                    📌 Pin to Showcase
                   </Button>
-                )}
 
-                <Button 
-                  onClick={async () => {
-                    setShowBoomAction(false)
-                    await pinBoomToProfile(selectedBoom)
-                  }} 
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white font-black"
-                >
-                  📌 Pin to Profile Showcase
-                </Button>
-
-                <Button onClick={() => setShowBoomAction(false)} className="w-full bg-gray-600 hover:bg-gray-700">
-                  Cancel
-                </Button>
+                  <Button
+                    onClick={() => setShowBoomAction(false)}
+                    className="w-full h-12 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white font-bold rounded-2xl border border-white/5 transition-all"
+                  >
+                    Cancel Action
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
