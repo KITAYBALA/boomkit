@@ -69,6 +69,7 @@ import { createBrowserClient } from "@supabase/ssr"
 import GameResults from "@/components/game-results"
 import DailySpinWheel from "@/components/daily-spin-wheel"
 import { toast } from "sonner"
+import { BoomAvatar } from "@/components/boom-avatar"
 
 // Advanced computer identification system
 const generateSystemSignature = (): string => {
@@ -4088,11 +4089,7 @@ export default function BoomkitGame() {
                 className="aspect-square bg-slate-900/60 rounded-2xl flex items-center justify-center text-4xl shadow-inner border border-white/5 hover:border-purple-500/30 hover:scale-110 transition-all duration-300 cursor-default select-none overflow-hidden"
                 title={boom.name}
               >
-                {boom.avatar.startsWith('/') ? (
-                  <img src={boom.avatar || "/placeholder.svg"} alt={boom.name} className="w-full h-full object-cover" />
-                ) : (
-                  boom.avatar
-                )}
+                <BoomAvatar name={boom.name} className="w-full h-full object-contain" />
               </div>
             ))}
           </div>
@@ -4815,92 +4812,7 @@ export default function BoomkitGame() {
                   </div>
                 </div>
 
-                {/* Visual Segmented Switcher for Collection / Forge */}
-                <div className="flex p-1 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl w-fit">
-                  <button
-                    onClick={() => setShowCrafting(false)}
-                    className={`px-6 py-2.5 rounded-xl text-sm font-black transition-all duration-300 flex items-center gap-2 ${!showCrafting ? "bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-lg" : "text-white/40 hover:text-white hover:bg-white/5"}`}
-                  >
-                    🛡️ Collection Vault
-                  </button>
-                  <button
-                    onClick={() => setShowCrafting(true)}
-                    className={`px-6 py-2.5 rounded-xl text-sm font-black transition-all duration-300 flex items-center gap-2 ${showCrafting ? "bg-gradient-to-r from-pink-600 to-purple-600 text-white shadow-lg" : "text-white/40 hover:text-white hover:bg-white/5"}`}
-                  >
-                    🧪 Mystic Forge
-                  </button>
-                </div>
 
-                {showCrafting ? (
-                  <div className="space-y-8 animate-in fade-in duration-500">
-                    {/* Mystic Forge Core Header */}
-                    <div className="bg-gradient-to-r from-pink-950/30 via-purple-950/20 to-black/40 border border-pink-500/20 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden group">
-                      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:30px_30px]" />
-                      <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
-                        <SparklesIcon className="w-24 h-24 text-pink-400" />
-                      </div>
-                      <div className="relative z-10 space-y-2">
-                        <h2 className="text-3xl font-black text-white flex items-center gap-3">
-                          <span className="animate-pulse">🧪</span>
-                          MYSTIC FORGE REACTOR
-                        </h2>
-                        <p className="text-white/60 text-sm max-w-xl">
-                          Recombine duplicate Booms and direct quantum energy (tokens) to synthesize high-tier, legendary assets. Fusion is irreversible.
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Forge Recipes Grid */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {craftRecipes.map((recipe) => (
-                        <div key={recipe.id} className="bg-gradient-to-br from-slate-900/60 to-slate-950/80 border border-white/10 rounded-[2rem] p-6 flex flex-col sm:flex-row items-center gap-6 relative overflow-hidden group hover:border-pink-500/30 transition-all duration-300 shadow-xl">
-                          <div className="absolute inset-0 bg-gradient-to-r from-pink-500/0 via-pink-500/0 to-pink-500/5 group-hover:to-pink-500/10 transition-colors" />
-
-                          {/* Output Preview */}
-                          <div className="flex-shrink-0 flex flex-col items-center justify-center p-4 bg-black/60 rounded-2xl border border-white/10 w-32 h-32 relative overflow-hidden">
-                            <div className="absolute inset-0 bg-pink-500/10 blur-xl rounded-full animate-pulse" />
-                            <div className="text-5xl drop-shadow-[0_0_20px_rgba(236,72,153,0.5)] z-10 transform group-hover:scale-110 duration-300 select-none">
-                              {getBoomAvatar(recipe.output_boom)}
-                            </div>
-                            <span className="text-[10px] font-black text-white/70 mt-2 text-center z-10 uppercase tracking-wider truncate w-full">{recipe.output_boom}</span>
-                          </div>
-
-                          <div className="flex-grow flex flex-col justify-between h-full min-w-0 w-full">
-                            <div>
-                              <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">SYNTHESIS REAGENTS</h3>
-                              <div className="flex flex-wrap gap-2 mb-4">
-                                {Object.entries(recipe.inputs).map(([name, qty]: [string, any]) => {
-                                  const playerHas = currentUser?.booms[name] || 0;
-                                  const hasEnough = playerHas >= qty;
-                                  return (
-                                    <Badge key={name} className={`px-3 py-1.5 flex items-center gap-2 rounded-xl text-xs font-bold ${hasEnough ? "bg-green-500/10 text-green-400 border-green-500/20" : "bg-red-500/10 text-red-400 border-red-500/20"} border`}>
-                                      <span className="text-base">{getBoomAvatar(name)}</span>
-                                      {name} <span className="font-black bg-black/40 px-1.5 rounded-lg">{playerHas}/{qty}</span>
-                                    </Badge>
-                                  )
-                                })}
-                              </div>
-                            </div>
-
-                            <Button
-                              onClick={() => handleCraftBoom(recipe)}
-                              disabled={(currentUser?.tokens || 0) < recipe.token_cost}
-                              className="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-black py-6 rounded-2xl shadow-[0_4px_20px_rgba(219,39,119,0.3)] transition-all hover:scale-[1.02] border-none text-xs"
-                            >
-                              <CoinsIcon className="w-4 h-4 mr-2" />
-                              Craft ({recipe.token_cost.toLocaleString()})
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                      {craftRecipes.length === 0 && (
-                        <div className="col-span-full p-16 text-center text-white/40 bg-white/5 rounded-3xl border border-white/10 border-dashed">
-                          No recipes discovered yet. Check back later!
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ) : (
                   <div className="space-y-12 animate-in fade-in duration-500">
                     {/* Level Rewards Banner */}
                     <div className="w-full bg-gradient-to-r from-slate-950 via-purple-950/20 to-slate-950 border border-white/10 rounded-[2.5rem] p-8 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-2xl relative overflow-hidden group">
@@ -5051,11 +4963,7 @@ export default function BoomkitGame() {
                                             </div>
                                           )}
 
-                                          {boom.avatar.startsWith('/') ? (
-                                            <img src={boom.avatar || "/placeholder.svg"} alt={boom.name} className="z-10 relative w-14 h-14 object-contain drop-shadow-xl transform transition-transform duration-300 group-hover/item:scale-110" />
-                                          ) : (
-                                            <span className="z-10 relative drop-shadow-[0_4px_8px_rgba(0,0,0,0.3)] transform transition-transform duration-300 group-hover/item:scale-110 select-none">{boom.avatar}</span>
-                                          )}
+                                          <BoomAvatar name={boom.name} className="z-10 relative w-14 h-14 object-contain drop-shadow-xl transform transition-transform duration-300 group-hover/item:scale-110" />
                                         </>
                                       ) : (
                                         <LockIcon className="h-7 w-7 opacity-20 text-white" />
@@ -5141,11 +5049,7 @@ export default function BoomkitGame() {
                                     {/* Avatar/Image */}
                                     {hasUnlocked ? (
                                       <div className="z-10 flex flex-col items-center gap-1.5">
-                                        {getBoomAvatar(boom.name).startsWith('/') ? (
-                                          <img src={getBoomAvatar(boom.name) || "/placeholder.svg"} alt={boom.name} className="w-16 h-16 object-contain drop-shadow-lg transform transition-transform duration-300 group-hover:scale-115" />
-                                        ) : (
-                                          <span className="drop-shadow-lg transform transition-transform duration-300 group-hover:scale-115 select-none">{getBoomAvatar(boom.name)}</span>
-                                        )}
+                                        <BoomAvatar name={boom.name} className="w-16 h-16 object-contain drop-shadow-lg transform transition-transform duration-300 group-hover:scale-115" />
                                         <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">LVL {boom.level}</span>
                                       </div>
                                     ) : (
@@ -5270,7 +5174,6 @@ export default function BoomkitGame() {
                       </div>
                     )}
                   </div>
-                )}
               </div>
             )}
 
@@ -7200,7 +7103,7 @@ export default function BoomkitGame() {
                                 </div>
                                 {t.prize_boom_name && (
                                   <div className="flex items-center gap-2 bg-black/40 rounded-xl px-4 py-2 border border-white/5">
-                                    <span className="text-lg">{getBoomAvatar(t.prize_boom_name)}</span>
+                                    <BoomAvatar name={t.prize_boom_name} className="w-5 h-5 object-contain" />
                                     <span className="text-white font-black uppercase text-[10px] tracking-wider">{t.prize_boom_name}</span>
                                   </div>
                                 )}
@@ -7388,7 +7291,7 @@ export default function BoomkitGame() {
                                 <div className="relative group/slot">
                                   <div className="absolute -inset-0.5 bg-blue-500 rounded-2xl blur opacity-25" />
                                   <div className="relative flex flex-col items-center bg-slate-900/80 border border-blue-500/30 rounded-2xl p-4 w-28 h-28 justify-center shadow-lg">
-                                    <span className="text-4xl drop-shadow-md">{getBoomAvatar(boom1)}</span>
+                                    <BoomAvatar name={boom1} className="w-16 h-16 object-contain drop-shadow-md" />
                                     <span className="text-[8px] font-black text-white/50 mt-3 uppercase truncate w-full text-center tracking-wider">{boom1}</span>
                                   </div>
                                 </div>
@@ -7422,7 +7325,7 @@ export default function BoomkitGame() {
                                 <div className="relative group/slot">
                                   <div className="absolute -inset-0.5 bg-purple-500 rounded-2xl blur opacity-25" />
                                   <div className="relative flex flex-col items-center bg-slate-900/80 border border-purple-500/30 rounded-2xl p-4 w-28 h-28 justify-center shadow-lg">
-                                    <span className="text-4xl drop-shadow-md">{getBoomAvatar(boom2)}</span>
+                                    <BoomAvatar name={boom2} className="w-16 h-16 object-contain drop-shadow-md" />
                                     <span className="text-[8px] font-black text-white/50 mt-3 uppercase truncate w-full text-center tracking-wider">{boom2}</span>
                                   </div>
                                 </div>
@@ -7489,7 +7392,7 @@ export default function BoomkitGame() {
                                 >
                                   {fusionSlot1 ? (
                                     <div className="flex flex-col items-center">
-                                      <span className="text-5xl drop-shadow-md">{getBoomAvatar(fusionSlot1)}</span>
+                                      <BoomAvatar name={fusionSlot1} className="w-16 h-16 object-contain drop-shadow-md" />
                                       <span className="text-[9px] font-black text-white mt-2 uppercase max-w-[110px] truncate">{fusionSlot1}</span>
                                     </div>
                                   ) : (
@@ -7510,7 +7413,7 @@ export default function BoomkitGame() {
                                 >
                                   {fusionSlot2 ? (
                                     <div className="flex flex-col items-center">
-                                      <span className="text-5xl drop-shadow-md">{getBoomAvatar(fusionSlot2)}</span>
+                                      <BoomAvatar name={fusionSlot2} className="w-16 h-16 object-contain drop-shadow-md" />
                                       <span className="text-[9px] font-black text-white mt-2 uppercase max-w-[110px] truncate">{fusionSlot2}</span>
                                     </div>
                                   ) : (
@@ -7641,7 +7544,9 @@ export default function BoomkitGame() {
                                       }}
                                       className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col items-center group/item hover:-translate-y-0.5 ${fusionSlot1 === name || fusionSlot2 === name ? 'bg-blue-600/25 border-blue-500 shadow-md shadow-blue-500/10' : 'bg-black/30 border-white/5 hover:border-white/20'}`}
                                     >
-                                      <div className="text-3xl mb-2 group-hover/item:scale-110 transition-transform duration-300 select-none">{getBoomAvatar(name)}</div>
+                                      <div className="mb-2 group-hover/item:scale-110 transition-transform duration-300 select-none">
+                                        <BoomAvatar name={name} className="w-10 h-10 object-contain" />
+                                      </div>
                                       <div className="text-[9px] font-black text-white text-center uppercase truncate w-full tracking-wider">{name}</div>
                                       <div className="text-[8px] font-black text-white/30 mt-1 uppercase tracking-widest">Qty: {count}</div>
                                     </div>
@@ -7752,8 +7657,8 @@ export default function BoomkitGame() {
                           {/* Bay number */}
                           <div className="absolute top-4 left-4 text-[9px] font-black text-white/10 uppercase tracking-widest">Dispenser #{item.id.slice(0, 4)}</div>
 
-                          <div className="text-8xl my-6 transform group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 select-none filter drop-shadow-2xl">
-                            {getBoomAvatar(item.boom_name)}
+                          <div className="my-6 transform group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 select-none filter drop-shadow-2xl">
+                            <BoomAvatar name={item.boom_name} className="w-24 h-24 object-contain" />
                           </div>
                           
                           <Badge className={`${rarityColor} mb-3 px-3.5 py-1 text-white border-none uppercase text-[9px] font-black tracking-widest rounded-lg shadow-md`}>
@@ -7908,8 +7813,8 @@ export default function BoomkitGame() {
                                 isUnlocked ? 'border-orange-500/20 shadow-[0_0_15px_rgba(249,115,22,0.1)]' : 'border-white/5'
                               }`}>
                                 {r.reward_type === 'boom' ? (
-                                  <span className="group-hover:scale-110 transition-transform duration-300">{getBoomAvatar(r.reward_value)}</span>
-                                ) : (
+                                   <BoomAvatar name={r.reward_value} className="w-10 h-10 object-contain group-hover:scale-110 transition-transform duration-300" />
+                                 ) : (
                                   <CoinsIcon className="w-7 h-7 text-yellow-500 animate-pulse" />
                                 )}
                               </div>
@@ -8370,7 +8275,7 @@ export default function BoomkitGame() {
 
             <Card className="w-full max-w-4xl bg-slate-950/80 backdrop-blur-2xl border border-white/10 shadow-[0_0_80px_rgba(0,0,0,0.8)] relative z-10 overflow-hidden flex flex-col md:flex-row h-[80vh] rounded-[2.5rem]">
               {/* Left Side: Featured News Image / Gradient */}
-              <div className="md:w-1/3 relative bg-gradient-to-br from-purple-900 to-indigo-950 overflow-hidden hidden md:block border-r border-white/10">
+              <div className="md:w-1/3 shrink-0 relative bg-gradient-to-br from-purple-900 to-indigo-950 overflow-hidden hidden md:block border-r border-white/10">
                 <div className="absolute inset-0 opacity-40 mix-blend-overlay">
                   <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-from)_0%,_transparent_70%)]" />
                 </div>
@@ -8378,7 +8283,7 @@ export default function BoomkitGame() {
                   <Badge className="w-fit mb-4 bg-purple-500/20 backdrop-blur-md border border-purple-500/30 text-[9px] font-black uppercase tracking-widest text-purple-300">
                     Community Updates
                   </Badge>
-                  <h3 className="text-4xl font-black leading-none tracking-tighter mb-4 text-gradient-purple-pink">
+                  <h3 className="text-2xl font-black leading-none tracking-tight mb-4 text-gradient-purple-pink">
                     WHAT'S NEW IN BOOMKIT
                   </h3>
                   <p className="text-slate-300/80 font-medium text-xs leading-relaxed">
@@ -8611,7 +8516,9 @@ export default function BoomkitGame() {
                       <div className={`p-4 rounded-xl border-2 flex flex-col items-center bg-black/40 backdrop-blur-md shadow-xl ${getAnimationClass(getBoomRarity(selectedProfileUser.pinned_boom))} ${getBoomRarity(selectedProfileUser.pinned_boom) === "legendary" ? "border-orange-500/50" :
                         getBoomRarity(selectedProfileUser.pinned_boom) === "mystical" ? "border-purple-500/50" : "border-slate-700"
                         }`}>
-                        <div className="text-6xl mb-2 drop-shadow-2xl">{getBoomAvatar(selectedProfileUser.pinned_boom)}</div>
+                        <div className="mb-2 drop-shadow-2xl">
+                          <BoomAvatar name={selectedProfileUser.pinned_boom} className="w-20 h-20 object-contain" />
+                        </div>
                         <Badge className={`${getRarityColor(getBoomRarity(selectedProfileUser.pinned_boom))} px-3 uppercase text-[10px] font-black mb-2`}>
                           {selectedProfileUser.pinned_boom}
                         </Badge>
@@ -8974,17 +8881,10 @@ export default function BoomkitGame() {
 
                       {/* Centered Art */}
                       <div className="w-48 h-48 rounded-[2rem] bg-black/40 border border-white/5 flex items-center justify-center text-8xl shadow-inner relative overflow-hidden group">
-                        {packAnimation.boom.avatar.startsWith('/') ? (
-                          <img
-                            src={packAnimation.boom.avatar || "/placeholder.svg"}
-                            alt={packAnimation.boom.name}
-                            className="w-36 h-36 object-contain drop-shadow-2xl group-hover:scale-105 transition-transform duration-500"
-                          />
-                        ) : (
-                          <span className="drop-shadow-lg group-hover:scale-105 transition-transform duration-500 select-none">
-                            {packAnimation.boom.avatar}
-                          </span>
-                        )}
+                        <BoomAvatar
+                          name={packAnimation.boom.name}
+                          className="w-36 h-36 object-contain drop-shadow-2xl group-hover:scale-105 transition-transform duration-500"
+                        />
                       </div>
 
                       {/* Drop rate + NEW stamp */}
@@ -9664,17 +9564,7 @@ export default function BoomkitGame() {
               <CardContent className="space-y-6 px-8 pb-8 pt-4">
                 <div className="flex flex-col items-center gap-4">
                   <div className="w-32 h-32 rounded-3xl bg-black/40 border border-white/10 flex items-center justify-center text-6xl shadow-inner relative overflow-hidden group">
-                    {getBoomAvatar(selectedBoom).startsWith('/') ? (
-                      <img
-                        src={getBoomAvatar(selectedBoom)}
-                        alt={selectedBoom}
-                        className="w-24 h-24 object-contain drop-shadow-xl group-hover:scale-110 transition-transform duration-300"
-                      />
-                    ) : (
-                      <span className="drop-shadow-lg group-hover:scale-110 transition-transform duration-300 select-none">
-                        {getBoomAvatar(selectedBoom)}
-                      </span>
-                    )}
+                    <BoomAvatar name={selectedBoom} className="w-24 h-24 object-contain drop-shadow-xl group-hover:scale-110 transition-transform duration-300" />
                     <div className={`absolute inset-0 border-2 rounded-3xl opacity-30 ${
                       getBoomRarity(selectedBoom) === 'uncommon' ? 'border-green-500' :
                       getBoomRarity(selectedBoom) === 'rare' ? 'border-blue-500' :

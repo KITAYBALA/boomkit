@@ -21,6 +21,7 @@ import {
   CheckIcon,
   BellIcon
 } from 'lucide-react'
+import { BoomAvatar } from './boom-avatar'
 
 // Define GameUser interface locally or import if available
 interface GameUser {
@@ -446,11 +447,7 @@ export default function RealtimeAuctions({
                           }`}
                       >
                         <div className="text-4xl group-hover:scale-110 transition-transform duration-300 flex items-center justify-center">
-                          {getBoomAvatar(boom).startsWith('/') ? (
-                            <img src={getBoomAvatar(boom)} alt={boom} className="w-[1em] h-[1em] object-contain drop-shadow-md" />
-                          ) : (
-                            getBoomAvatar(boom)
-                          )}
+                          <BoomAvatar name={boom} className="w-[1em] h-[1em]" />
                         </div>
                         <div className="text-center">
                           <p className={`text-xs font-bold leading-tight ${selectedBoom === boom ? 'text-white' : 'text-white/70'}`}>{boom}</p>
@@ -568,11 +565,7 @@ export default function RealtimeAuctions({
                       <div className="flex items-center gap-4">
                         <div className="relative">
                           <div className={`text-6xl drop-shadow-2xl group-hover:rotate-12 transition-transform duration-500 drop-shadow-[0_0_20px_rgba(255,255,255,0.2)] flex items-center justify-center`}>
-                            {getBoomAvatar(item.boom_name).startsWith('/') ? (
-                              <img src={getBoomAvatar(item.boom_name)} alt={item.boom_name} className="w-[1em] h-[1em] object-contain drop-shadow-lg" />
-                            ) : (
-                              getBoomAvatar(item.boom_name)
-                            )}
+                            <BoomAvatar name={item.boom_name} className="w-[1em] h-[1em]" />
                           </div>
                           {rarity === 'legendary' || rarity === 'chroma' || rarity === 'mystical' ? (
                             <div className="absolute -top-2 -right-2">
@@ -739,11 +732,7 @@ export default function RealtimeAuctions({
             <CardHeader className="p-8 text-center">
               <div className="mx-auto w-24 h-24 bg-purple-600/10 rounded-full flex items-center justify-center mb-6 ring-1 ring-purple-500/30">
                 <span className="text-6xl drop-shadow-2xl flex items-center justify-center">
-                  {getBoomAvatar(biddingItem.boom_name).startsWith('/') ? (
-                    <img src={getBoomAvatar(biddingItem.boom_name)} alt={biddingItem.boom_name} className="w-[1em] h-[1em] object-contain drop-shadow-lg" />
-                  ) : (
-                    getBoomAvatar(biddingItem.boom_name)
-                  )}
+                  <BoomAvatar name={biddingItem.boom_name} className="w-[1em] h-[1em]" />
                 </span>
               </div>
               <CardTitle className="text-3xl font-black text-white tracking-tight">Place Your Bid</CardTitle>
