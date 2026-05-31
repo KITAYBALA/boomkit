@@ -46,7 +46,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
   const [text, setText] = useState("")
   const bottomRef = useRef<HTMLDivElement>(null)
   const [userRoles, setUserRoles] = useState<Record<string, string>>({})
-  const [userClanData, setUserClanData] = useState<Record<string, { tag: string | null; color: string | null; clan_id: string | null }>>({})
+  const [userClanData, setUserClanData] = useState<Record<string, { tag: string | null; color: string | null; clan_id: string | null; avatar: string | null }>>({})
   const [isMuted, setIsMuted] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editText, setEditText] = useState("")
@@ -85,7 +85,6 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
   // Scroll to bottom when messages change
   useEffect(() => {
     if (bottomRef.current) {
-      // Use block: 'nearest' to prevent scrolling the whole page if already in view
       bottomRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" })
     }
   }, [messages])
@@ -93,13 +92,13 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
   useEffect(() => {
     const fetchUserRolesAndClans = async () => {
       if (supabase) {
-        const { data } = await supabase.from("users").select("username, role, clan_id, clan_tag, clan_tag_color")
+        const { data } = await supabase.from("users").select("username, role, clan_id, clan_tag, clan_tag_color, profile_picture")
         if (data) {
           const roles: Record<string, string> = {}
-          const clans: Record<string, { tag: string | null; color: string | null; clan_id: string | null }> = {}
+          const clans: Record<string, { tag: string | null; color: string | null; clan_id: string | null; avatar: string | null }> = {}
           data.forEach((u: any) => {
             roles[u.username] = u.role || "player"
-            clans[u.username] = { tag: u.clan_tag, color: u.clan_tag_color, clan_id: u.clan_id }
+            clans[u.username] = { tag: u.clan_tag, color: u.clan_tag_color, clan_id: u.clan_id, avatar: u.profile_picture }
           })
           setUserRoles(roles)
           setUserClanData(clans)
@@ -107,10 +106,6 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
       }
     }
     fetchUserRolesAndClans()
-
-    // Refresh roles every 30 seconds - REMOVED POLLING for performance
-    // const interval = setInterval(fetchUserRoles, 30000)
-    // return () => clearInterval(interval)
   }, [supabase])
 
   // Load initial data and subscribe to changes
@@ -133,6 +128,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
             message: d.message,
             role: d.role,
             timestamp: d.inserted_at || new Date().toISOString(),
+            reactions: d.reactions || {}
           }))
           setMessages(mapped)
           setupRealtime()
@@ -153,7 +149,6 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
           .order("inserted_at", { ascending: false })
           .limit(50)
 
-        // Reverse so that oldest of the 50 is first
         if (!error && data) {
           data.reverse()
           const mapped = data.map((d: any) => ({
@@ -162,6 +157,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
             message: d.message,
             role: d.role,
             timestamp: d.inserted_at || new Date().toISOString(),
+            reactions: d.reactions || {}
           }))
           setMessages(mapped)
           setupRealtime()
@@ -196,13 +192,14 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                   username: d.username,
                   message: d.message,
                   role: d.role,
-                  timestamp: d.inserted_at || new Date().toISOString()
+                  timestamp: d.inserted_at || new Date().toISOString(),
+                  reactions: d.reactions || {}
                 },
               ])
             } else if (payload.eventType === "UPDATE") {
               const d = payload.new as any
               setMessages((prev) =>
-                prev.map(m => m.id === d.id ? { ...m, message: d.message } : m)
+                prev.map(m => m.id === d.id ? { ...m, message: d.message, reactions: d.reactions || {} } : m)
               )
             } else if (payload.eventType === "DELETE") {
               const oldId = payload.old.id
@@ -226,7 +223,6 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
   const send = async () => {
     if (!text.trim() || !currentUser) return
 
-    // Client-side check (also enforced server-side)
     if (isMuted) {
       return
     }
@@ -276,7 +272,6 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
 
     console.log("[v0] Sending message:", text.trim(), "with role:", userRole)
 
-    // Use API route for server-side mute enforcement
     try {
       const response = await fetch("/api/chat-messages", {
         method: "POST",
@@ -291,7 +286,6 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
       if (!response.ok) {
         const errorData = await response.json()
         if (response.status === 403 && errorData.error === "MUTED") {
-          // User got muted - update local state and block message
           setIsMuted(true)
           console.log("[v0] Message blocked: User is muted")
           return
@@ -403,22 +397,42 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
         </div>
       )}
 
-      <div className="flex items-center justify-between">
-        <h1 className="text-5xl font-black text-white tracking-tighter">Global Chat</h1>
-        <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold px-3 py-1">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 mr-2 animate-pulse" />
-          Live
-        </Badge>
+      {/* Cyber Communications Console Header */}
+      <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 border border-white/10 p-6 md:p-8 shadow-[0_12px_40px_rgba(0,0,0,0.6)]">
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-purple-500/5 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-blue-500/5 rounded-full blur-[100px] pointer-events-none" />
+
+        <div className="relative flex flex-col sm:flex-row justify-between items-center gap-4 z-10">
+          <div className="space-y-1 text-center sm:text-left">
+            <h1 className="text-3xl md:text-5xl font-black text-white tracking-tighter">
+              COMMS <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 drop-shadow-sm">TERMINAL</span>
+            </h1>
+            <p className="text-white/40 text-xs md:text-sm font-semibold uppercase tracking-wider">
+              Secure System Channel • Real-time Broadcast
+            </p>
+          </div>
+
+          <div className="flex items-center gap-4 bg-slate-900/60 backdrop-blur-xl border border-white/10 px-6 py-3 rounded-2xl">
+            <span className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+            </span>
+            <div className="text-left">
+              <div className="text-[10px] text-white/40 font-black uppercase tracking-wider">Network Status</div>
+              <div className="text-xs font-black text-emerald-400 uppercase tracking-widest">ONLINE</div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-6 border border-white/10 shadow-2xl">
-        <ScrollArea className="h-[500px] w-full pr-4 mb-6">
-          <div className="space-y-4">
+      <div className="bg-slate-950/40 backdrop-blur-2xl rounded-[2.5rem] p-6 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+        <ScrollArea className="h-[550px] w-full pr-4 mb-6">
+          <div className="space-y-6">
             {messages.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-white/20 p-20 border-2 border-dashed border-white/5 rounded-3xl">
-                <MessageCircleIcon className="w-12 h-12 mb-4 opacity-10" />
-                <p className="font-bold uppercase tracking-widest text-sm">No messages yet</p>
-                <p className="text-xs">Be the first to start the conversation!</p>
+              <div className="h-full flex flex-col items-center justify-center text-white/20 p-20 border border-dashed border-white/10 rounded-[2rem] bg-black/20">
+                <MessageCircleIcon className="w-12 h-12 mb-4 opacity-20 text-purple-400 animate-pulse" />
+                <p className="font-bold uppercase tracking-widest text-sm text-white/60">No Transmissions Found</p>
+                <p className="text-xs text-white/30 mt-1">Initiate conversation to establish downlink.</p>
               </div>
             ) : (
               messages.map((msg) => {
@@ -427,154 +441,173 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                 const isEditing = editingId === msg.id
                 const isStaff = ["owner", "admin", "senior_moderator", "moderator", "tester"].includes(currentUser?.role || "")
                 const canDelete = isMe || isStaff
+                const avatar = userClanData[msg.username]?.avatar || "🎯"
 
                 return (
                   <div
                     key={msg.id}
-                    className={`group flex flex-col ${isMe ? "items-end" : "items-start"} transition-all duration-300`}
+                    className={`group flex items-start gap-4 ${isMe ? "flex-row-reverse text-right" : "text-left"} transition-all duration-300`}
                   >
-                    <div className="flex items-center gap-2 mb-1 px-1">
-                      {!isMe && (
-                        <>
-                          <Badge className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 border-none ${getRoleColor(displayRole)}`}>
+                    {/* User Avatar with Rarity glow */}
+                    <div 
+                      className={`w-11 h-11 rounded-2xl flex items-center justify-center text-2xl border bg-slate-900 relative cursor-pointer flex-shrink-0 group-hover:scale-105 transition-transform duration-300 shadow-md ${
+                        isMe ? "border-purple-500/30 shadow-[0_0_10px_rgba(168,85,247,0.15)]" : "border-white/10"
+                      }`}
+                      onClick={() => onUsernameClick(msg.username)}
+                    >
+                      <span>{avatar}</span>
+                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-white/5 to-transparent pointer-events-none" />
+                    </div>
+
+                    <div className={`flex flex-col max-w-[75%] ${isMe ? "items-end" : "items-start"}`}>
+                      {/* Name / Role Info */}
+                      <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                        {!isMe && (
+                          <Badge className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 border-none ${getRoleColor(displayRole)}`}>
                             {displayRole}
                           </Badge>
-                          {isStaff && (
-                            <button
-                              onClick={() => setDeleteConfirmId(msg.id)}
-                              className="p-1 opacity-0 group-hover:opacity-100 hover:bg-red-500/20 rounded-md text-white/40 hover:text-red-400 transition-all"
-                              title="Staff Delete"
-                            >
-                              <Trash2Icon className="w-3 h-3" />
-                            </button>
-                          )}
-                        </>
-                      )}
-                      {userClanData[msg.username]?.tag && (
-                        <span 
-                          onClick={() => {
-                            if (userClanData[msg.username]?.clan_id && onClanTagClick) {
-                              onClanTagClick(userClanData[msg.username].clan_id!)
-                            }
-                          }}
-                          className={`inline-block text-xs font-black tracking-tight mr-1 ${userClanData[msg.username]?.clan_id ? 'cursor-pointer hover:underline' : ''}`}
-                        >
-                          <span className={userClanData[msg.username]?.color || 'text-purple-400'}>
-                            [{userClanData[msg.username]?.tag}]
+                        )}
+                        
+                        {userClanData[msg.username]?.tag && (
+                          <span 
+                            onClick={() => {
+                              if (userClanData[msg.username]?.clan_id && onClanTagClick) {
+                                onClanTagClick(userClanData[msg.username].clan_id!)
+                              }
+                            }}
+                            className={`inline-block text-xs font-black tracking-tight ${userClanData[msg.username]?.clan_id ? 'cursor-pointer hover:underline' : ''}`}
+                          >
+                            <span className={userClanData[msg.username]?.color || 'text-purple-400'}>
+                              [{userClanData[msg.username]?.tag}]
+                            </span>
                           </span>
-                        </span>
-                      )}
-                      <span
-                        className={`text-xs font-black tracking-tight cursor-pointer hover:underline transition-all ${isMe ? "text-purple-400" : "text-white/60"
+                        )}
+
+                        <span
+                          className={`text-xs font-bold tracking-wide cursor-pointer hover:underline transition-all ${
+                            isMe ? "text-purple-400" : "text-white/80"
                           }`}
-                        onClick={() => onUsernameClick(msg.username)}
-                      >
-                        {msg.username}
-                      </span>
-                      {isMe && (
-                        <>
-                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          onClick={() => onUsernameClick(msg.username)}
+                        >
+                          {msg.username}
+                        </span>
+
+                        {isMe && (
+                          <Badge className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 border-none ${getRoleColor(displayRole)}`}>
+                            {displayRole}
+                          </Badge>
+                        )}
+
+                        {/* Message actions on hover */}
+                        <div className={`flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ml-1 ${isMe ? "flex-row-reverse" : ""}`}>
+                          {isMe && (
                             <button
                               onClick={() => startEditing(msg)}
                               className="p-1 hover:bg-white/10 rounded-md text-white/40 hover:text-white transition-colors"
+                              title="Edit Message"
                             >
-                              <PencilIcon className="w-3 h-3" />
+                              <PencilIcon className="w-3.5 h-3.5" />
                             </button>
+                          )}
+                          {canDelete && (
                             <button
                               onClick={() => setDeleteConfirmId(msg.id)}
                               className="p-1 hover:bg-red-500/20 rounded-md text-white/40 hover:text-red-400 transition-colors"
+                              title="Delete Message"
                             >
-                              <Trash2Icon className="w-3 h-3" />
+                              <Trash2Icon className="w-3.5 h-3.5" />
                             </button>
-                          </div>
-                          <Badge className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 border-none ${getRoleColor(displayRole)}`}>
-                            {displayRole}
-                          </Badge>
-                        </>
-                      )}
-                    </div>
-
-                    <div className={`
-                      max-w-[85%] px-4 py-2.5 rounded-2xl border transition-all duration-300 relative
-                      ${isMe
-                        ? "bg-purple-600/20 border-purple-500/30 text-white rounded-tr-none shadow-lg shadow-purple-900/10"
-                        : "bg-white/5 border-white/10 text-white/90 rounded-tl-none hover:bg-white/10"
-                      }
-                      ${isEditing ? "ring-2 ring-purple-500 border-transparent w-full" : ""}
-                    `}>
-                      {isEditing ? (
-                        <div className="flex flex-col gap-2">
-                          <textarea
-                            value={editText}
-                            onChange={(e) => setEditText(e.target.value)}
-                            className="bg-transparent border-none text-white focus:ring-0 text-sm resize-none w-full min-h-[60px]"
-                            autoFocus
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter" && !e.shiftKey) {
-                                e.preventDefault()
-                                handleUpdate()
-                              }
-                              if (e.key === "Escape") setEditingId(null)
-                            }}
-                          />
-                          <div className="flex justify-end gap-2">
-                            <button
-                              onClick={() => setEditingId(null)}
-                              className="p-1.5 hover:bg-white/10 rounded-lg text-white/40 hover:text-white transition-colors"
-                            >
-                              <XIcon className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={handleUpdate}
-                              className="p-1.5 bg-purple-500 hover:bg-purple-400 rounded-lg text-white shadow-lg transition-colors"
-                            >
-                              <CheckIcon className="w-4 h-4" />
-                            </button>
-                          </div>
+                          )}
                         </div>
-                      ) : (
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.message}</p>
-                      )}
-                    </div>
+                      </div>
 
-                    {/* Reactions */}
-                    <div className={`flex items-center gap-1 mt-1 px-1 flex-wrap ${isMe ? 'justify-end' : 'justify-start'}`}>
-                      {/* Existing reactions */}
-                      {Object.entries(msg.reactions || {}).map(([emoji, users]) => {
-                        const reacted = (users as string[]).includes(currentUser?.username || '')
-                        return (
-                          <button
-                            key={emoji}
-                            onClick={() => toggleReaction(msg.id, emoji)}
-                            className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs transition-all ${reacted ? 'bg-purple-500/30 border border-purple-500/50' : 'bg-white/5 border border-white/10 hover:bg-white/10'}`}
-                          >
-                            <span>{emoji}</span>
-                            <span className="font-bold text-white/60">{(users as string[]).length}</span>
-                          </button>
-                        )
-                      })}
-                      {/* Add reaction button */}
-                      <div className="relative group/reaction">
-                        <button className="opacity-0 group-hover:opacity-100 px-1.5 py-0.5 rounded-full bg-white/5 hover:bg-white/10 text-white/30 hover:text-white/60 text-xs transition-all border border-transparent hover:border-white/10">
-                          +
-                        </button>
-                        <div className="absolute bottom-full left-0 mb-1 hidden group-hover/reaction:flex bg-slate-900 border border-white/10 rounded-xl p-1 gap-1 shadow-xl z-50">
-                          {REACTION_EMOJIS.map(emoji => (
+                      {/* Bubble Text */}
+                      <div className={`
+                        px-5 py-3.5 rounded-3xl border transition-all duration-300 relative shadow-lg
+                        ${isMe
+                          ? "bg-gradient-to-br from-purple-900/20 to-indigo-950/20 border-purple-500/30 text-white rounded-tr-none shadow-[0_0_20px_rgba(168,85,247,0.05)]"
+                          : "bg-gradient-to-br from-slate-900/60 to-slate-950/80 border-white/10 text-white/95 rounded-tl-none hover:border-white/20"
+                        }
+                        ${isEditing ? "ring-2 ring-purple-500 border-transparent w-full" : ""}
+                      `}>
+                        {isEditing ? (
+                          <div className="flex flex-col gap-2 min-w-[250px]">
+                            <textarea
+                              value={editText}
+                              onChange={(e) => setEditText(e.target.value)}
+                              className="bg-transparent border-none text-white focus:ring-0 text-sm resize-none w-full min-h-[60px] outline-none"
+                              autoFocus
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" && !e.shiftKey) {
+                                  e.preventDefault()
+                                  handleUpdate()
+                                }
+                                if (e.key === "Escape") setEditingId(null)
+                              }}
+                            />
+                            <div className="flex justify-end gap-2">
+                              <button
+                                onClick={() => setEditingId(null)}
+                                className="p-1.5 hover:bg-white/10 rounded-lg text-white/40 hover:text-white transition-colors"
+                              >
+                                <XIcon className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={handleUpdate}
+                                className="p-1.5 bg-purple-500 hover:bg-purple-400 rounded-lg text-white shadow-lg transition-colors"
+                              >
+                                <CheckIcon className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.message}</p>
+                        )}
+                      </div>
+
+                      {/* Reactions Drawer */}
+                      <div className={`flex items-center gap-1.5 mt-2 flex-wrap ${isMe ? 'justify-end' : 'justify-start'}`}>
+                        {Object.entries(msg.reactions || {}).map(([emoji, users]) => {
+                          const reacted = (users as string[]).includes(currentUser?.username || '')
+                          return (
                             <button
                               key={emoji}
                               onClick={() => toggleReaction(msg.id, emoji)}
-                              className="hover:bg-white/10 rounded-lg px-1.5 py-1 text-base transition-colors"
+                              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs transition-all duration-300 ${
+                                reacted 
+                                  ? 'bg-purple-500/20 border border-purple-500/40 text-purple-300 shadow-[0_0_10px_rgba(168,85,247,0.1)]' 
+                                  : 'bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 text-white/60'
+                              }`}
                             >
-                              {emoji}
+                              <span>{emoji}</span>
+                              <span className="font-black">{(users as string[]).length}</span>
                             </button>
-                          ))}
+                          )
+                        })}
+
+                        {/* Floating mini-reaction popover */}
+                        <div className="relative group/reactbtn">
+                          <button className="opacity-0 group-hover:opacity-100 flex items-center justify-center w-6 h-6 rounded-full bg-white/5 hover:bg-white/10 text-white/40 hover:text-white text-xs border border-white/5 transition-all duration-300">
+                            +
+                          </button>
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/reactbtn:flex bg-slate-950 border border-white/10 rounded-2xl p-1.5 gap-1.5 shadow-2xl z-40 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                            {REACTION_EMOJIS.map(emoji => (
+                              <button
+                                key={emoji}
+                                onClick={() => toggleReaction(msg.id, emoji)}
+                                className="hover:bg-white/10 rounded-xl w-8 h-8 flex items-center justify-center text-base transition-colors"
+                              >
+                                {emoji}
+                              </button>
+                            ))}
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <span className="text-[9px] text-white/20 mt-1 px-1 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
-                      {new Date(isNaN(Number(msg.timestamp)) ? msg.timestamp : Number(msg.timestamp)).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                    </span>
+                      <span className="text-[9px] text-white/20 mt-1 px-1 font-bold">
+                        {new Date(isNaN(Number(msg.timestamp)) ? msg.timestamp : Number(msg.timestamp)).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    </div>
                   </div>
                 )
               })
@@ -583,29 +616,30 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
           </div>
         </ScrollArea>
 
+        {/* Input Dock */}
         <div className="relative group">
-          <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-blue-600 rounded-3xl blur opacity-20 group-focus-within:opacity-40 transition duration-500" />
-          <div className="relative flex items-center bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-2 pl-4">
+          <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 rounded-[2rem] blur opacity-15 group-focus-within:opacity-30 transition duration-500" />
+          <div className="relative flex items-center bg-black/60 backdrop-blur-xl border border-white/10 rounded-[1.8rem] p-2.5 pl-5 shadow-2xl">
             <Input
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder={isMuted ? "You have been silenced" : "Share something with the arena..."}
+              placeholder={isMuted ? "SYSTEM BLOCKED • MUTED" : "Interface terminal input..."}
               disabled={isMuted}
-              className="flex-1 bg-transparent border-none text-white placeholder:text-white/20 focus-visible:ring-0 focus-visible:ring-offset-0 h-10"
+              className="flex-1 bg-transparent border-none text-white placeholder:text-white/20 focus-visible:ring-0 focus-visible:ring-offset-0 h-11 text-sm font-medium"
               onKeyDown={(e) => e.key === "Enter" && !isMuted && send()}
             />
             <Button
               onClick={send}
               disabled={isMuted || !text.trim()}
               className={`
-                ml-2 rounded-xl h-10 w-10 p-0 transition-all duration-300
+                ml-3 rounded-2xl h-11 px-6 font-black uppercase tracking-wider text-xs transition-all duration-300
                 ${isMuted || !text.trim()
-                  ? "bg-white/5 text-white/20"
-                  : "bg-gradient-to-br from-purple-600 to-blue-600 text-white shadow-lg shadow-purple-900/40 hover:scale-105 active:scale-95"
+                  ? "bg-white/5 text-white/20 cursor-not-allowed border-none"
+                  : "bg-white text-black hover:bg-gradient-to-r hover:from-purple-500 hover:to-indigo-500 hover:text-white shadow-xl hover:shadow-[0_0_20px_rgba(168,85,247,0.3)] active:scale-95 border-none"
                 }
               `}
             >
-              <SendIcon className="h-4 w-4" />
+              <SendIcon className="h-4 w-4 mr-2" /> Send
             </Button>
           </div>
         </div>

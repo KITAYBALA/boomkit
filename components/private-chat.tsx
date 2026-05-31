@@ -327,32 +327,35 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
     }
 
     return (
-        <div className="flex flex-col h-[600px] bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2.5rem] overflow-hidden shadow-2xl animate-in slide-in-from-bottom-5 duration-700">
-            <div className="flex grow overflow-hidden">
+        <div className="flex flex-col md:flex-row h-[650px] bg-slate-950/40 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-in slide-in-from-bottom-5 duration-700">
+            <div className="flex flex-col md:flex-row grow overflow-hidden w-full">
 
                 {/* Sidebar: Chat List */}
-                <div className="w-80 border-r border-white/10 flex flex-col bg-black/20">
+                <div className="w-full md:w-80 border-b md:border-b-0 md:border-r border-white/10 flex flex-col bg-black/30">
                     <div className="p-6 border-b border-white/10 flex items-center justify-between">
-                        <h2 className="text-xl font-black text-white tracking-tight flex items-center gap-2">
-                            <MessageSquareIcon className="h-5 w-5 text-purple-400" />
-                            Directs
-                        </h2>
+                        <div className="space-y-0.5">
+                            <h2 className="text-lg font-black text-white tracking-tight flex items-center gap-2">
+                                <MessageSquareIcon className="h-4 w-4 text-purple-400" />
+                                SECURE CHATS
+                            </h2>
+                            <p className="text-[9px] text-white/30 font-black uppercase tracking-widest">Downlink channels</p>
+                        </div>
                         <Button
                             size="icon"
                             variant="ghost"
                             onClick={() => setShowNewChat(true)}
-                            className="rounded-xl hover:bg-white/5 text-purple-400"
+                            className="rounded-xl hover:bg-white/5 text-purple-400 border border-purple-500/10 hover:border-purple-500/30 transition-all duration-300"
                         >
-                            <UserPlusIcon className="h-5 w-5" />
+                            <UserPlusIcon className="h-4 w-4" />
                         </Button>
                     </div>
 
-                    <ScrollArea className="flex-1">
-                        <div className="p-3 space-y-2">
+                    <ScrollArea className="flex-grow">
+                        <div className="p-4 space-y-2.5">
                             {conversations.length === 0 ? (
-                                <div className="py-20 text-center space-y-3 opacity-20">
-                                    <MessageCircleIcon className="h-10 w-10 mx-auto" />
-                                    <p className="text-xs font-black uppercase tracking-widest">No chats active</p>
+                                <div className="py-20 text-center space-y-3 opacity-20 bg-black/10 rounded-2xl border border-dashed border-white/5 m-2">
+                                    <MessageCircleIcon className="h-8 w-8 mx-auto text-purple-400 animate-pulse" />
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-white">No active decodes</p>
                                 </div>
                             ) : (
                                 conversations.map(conv => (
@@ -366,20 +369,24 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
                                                 setActiveConversation(conv)
                                                 fetchMessages(conv.id)
                                             }}
-                                            className={`w-full p-4 rounded-2xl text-left transition-all duration-300 pr-10 ${activeConversation?.id === conv.id
-                                                ? 'bg-purple-600/20 border border-purple-500/30'
-                                                : 'hover:bg-white/5 border border-transparent'
-                                                }`}
+                                            className={`w-full p-4 rounded-2xl text-left transition-all duration-300 pr-10 border ${
+                                                activeConversation?.id === conv.id
+                                                    ? 'bg-purple-900/20 border-purple-500/40 shadow-[0_0_15px_rgba(168,85,247,0.15)] text-white'
+                                                    : 'bg-black/10 hover:bg-white/5 border-white/5 hover:border-white/10 text-white/70 hover:text-white'
+                                            }`}
                                         >
                                             <div className="flex items-center gap-3">
-                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${conv.is_group ? 'bg-blue-500/10 border-blue-500/20' : 'bg-purple-500/10 border-purple-500/20'
-                                                    }`}>
-                                                    {conv.is_group ? <UsersIcon className="h-5 w-5 text-blue-400" /> : <MessageSquareIcon className="h-5 w-5 text-purple-400" />}
+                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-colors ${
+                                                    conv.is_group 
+                                                        ? 'bg-blue-500/10 border-blue-500/20 text-blue-400' 
+                                                        : 'bg-purple-500/10 border-purple-500/20 text-purple-400'
+                                                }`}>
+                                                    {conv.is_group ? <UsersIcon className="h-4 w-4" /> : <MessageSquareIcon className="h-4 w-4" />}
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="font-black text-white text-sm truncate tracking-tight">{getChatTitle(conv)}</p>
-                                                    <p className="text-[10px] text-white/30 font-bold uppercase truncate">
-                                                        {conv.members.length} MEMBERS
+                                                    <p className="font-black text-sm truncate tracking-tight">{getChatTitle(conv)}</p>
+                                                    <p className="text-[9px] text-white/30 font-bold uppercase tracking-wider mt-0.5">
+                                                        {conv.members.length} operators
                                                     </p>
                                                 </div>
                                                 {activeConversation?.id === conv.id && (
@@ -398,8 +405,8 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
                                         </button>
 
                                         {showChatActions === conv.id && (
-                                            <div className="absolute right-0 top-full mt-2 w-48 bg-[#1a1a1c] border border-white/10 rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 origin-top-right">
-                                                <div className="p-1">
+                                            <div className="absolute right-0 top-full mt-2 w-48 bg-slate-950 border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 origin-top-right">
+                                                <div className="p-1.5 space-y-1">
                                                     {!conv.is_group && (
                                                         (() => {
                                                             const otherUser = conv.members.find(m => m !== currentUser?.username)
@@ -418,7 +425,7 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
                                                                         }
                                                                         setShowChatActions(null)
                                                                     }}
-                                                                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-white hover:bg-white/10 rounded-lg"
+                                                                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-white hover:bg-white/10 rounded-xl"
                                                                 >
                                                                     {isBlocked ? (
                                                                         <>
@@ -440,7 +447,7 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
                                                             deleteChat(conv.id)
                                                             setShowChatActions(null)
                                                         }}
-                                                        className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-red-400 hover:bg-red-500/10 rounded-lg"
+                                                        className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-red-400 hover:bg-red-500/10 rounded-xl"
                                                     >
                                                         <Trash2Icon className="h-3.5 w-3.5" /> Delete Chat
                                                     </button>
@@ -455,80 +462,103 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
                 </div>
 
                 {/* Main Chat Area */}
-                <div className="flex-1 flex flex-col relative">
+                <div className="flex-1 flex flex-col relative bg-black/10 min-w-0">
                     {!activeConversation ? (
-                        <div className="flex-1 flex flex-col items-center justify-center text-center p-12 space-y-6">
-                            <div className="w-24 h-24 bg-white/5 rounded-[2rem] flex items-center justify-center border border-white/10">
-                                <ShieldCheckIcon className="h-12 w-12 text-white/10" />
+                        <div className="flex-1 flex flex-col items-center justify-center text-center p-8 space-y-6 relative">
+                            {/* Glowing Grid Background */}
+                            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:30px_30px]" />
+                            <div className="absolute w-72 h-72 rounded-full bg-purple-500/5 blur-[80px] pointer-events-none" />
+
+                            <div className="w-20 h-20 bg-gradient-to-br from-purple-500/10 to-indigo-500/5 rounded-3xl flex items-center justify-center border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.4)] relative z-10">
+                                <ShieldCheckIcon className="h-10 w-10 text-purple-400 animate-pulse" />
                             </div>
-                            <div className="max-w-xs space-y-2">
-                                <h3 className="text-2xl font-black text-white tracking-tight">Encrypted Zone</h3>
-                                <p className="text-sm text-white/30 font-medium leading-relaxed">
-                                    Private and group chats are restricted to members.
-                                    Mods cannot view or interrupt. Total freedom of speech.
+                            <div className="max-w-sm space-y-2 relative z-10">
+                                <h3 className="text-2xl font-black text-white tracking-tight">ENCRYPTED DOWNLINK</h3>
+                                <p className="text-xs text-white/40 font-semibold leading-relaxed uppercase tracking-wider max-w-xs mx-auto">
+                                    Private quantum links are completely encrypted. Peer-to-peer connection bypasses global logs.
                                 </p>
                             </div>
                             <Button
                                 onClick={() => setShowNewChat(true)}
-                                className="bg-purple-600 hover:bg-purple-500 text-white rounded-2xl px-8 font-black shadow-xl shadow-purple-900/40"
+                                className="bg-purple-600 hover:bg-purple-500 text-white rounded-2xl px-8 py-6 font-black shadow-xl shadow-purple-900/30 hover:scale-[1.02] active:scale-95 transition-all relative z-10 border-none text-xs uppercase tracking-wider"
                             >
-                                Start new conversation
+                                Open Channel
                             </Button>
                         </div>
                     ) : (
                         <>
                             {/* Chat Header */}
-                            <div className="p-6 border-b border-white/10 flex items-center justify-between bg-black/10">
+                            <div className="p-6 border-b border-white/10 flex items-center justify-between bg-slate-900/20 backdrop-blur-md">
                                 <div className="flex items-center gap-4">
-                                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border ${activeConversation.is_group ? 'bg-blue-500/10 border-blue-500/20' : 'bg-purple-500/10 border-purple-500/20'
-                                        }`}>
-                                        {activeConversation.is_group ? <UsersIcon className="h-6 w-6 text-blue-400" /> : <MessageSquareIcon className="h-6 w-6 text-purple-400" />}
+                                    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center border ${
+                                        activeConversation.is_group 
+                                            ? 'bg-blue-500/10 border-blue-500/20 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.1)]' 
+                                            : 'bg-purple-500/10 border-purple-500/20 text-purple-400 shadow-[0_0_15px_rgba(168,85,247,0.1)]'
+                                    }`}>
+                                        {activeConversation.is_group ? <UsersIcon className="h-5 w-5" /> : <MessageSquareIcon className="h-5 w-5" />}
                                     </div>
                                     <div>
-                                        <h3 className="text-xl font-black text-white tracking-tight leading-none mb-1">
+                                        <h3 className="text-base font-black text-white tracking-tight leading-none mb-1">
                                             {getChatTitle(activeConversation)}
                                         </h3>
                                         <div className="flex items-center gap-2">
-                                            <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-                                            <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">{activeConversation.members.join(', ')}</span>
+                                            <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                            <span className="text-[9px] font-black text-white/30 uppercase tracking-widest truncate max-w-xs">{activeConversation.members.join(', ')}</span>
                                         </div>
                                     </div>
                                 </div>
-                                <Button variant="ghost" size="icon" className="rounded-xl text-white/20 hover:text-white" onClick={() => setActiveConversation(null)}>
-                                    <XIcon className="h-5 w-5" />
+                                <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    className="rounded-xl text-white/40 hover:text-white border border-white/5 hover:bg-white/5" 
+                                    onClick={() => setActiveConversation(null)}
+                                >
+                                    <XIcon className="h-4 w-4" />
                                 </Button>
                             </div>
 
                             {/* Messages Display */}
-                            <ScrollArea className="flex-1 p-8">
+                            <ScrollArea className="flex-1 p-6 md:p-8">
                                 <div className="space-y-6">
                                     {messages.filter(m => !blockedUsers.includes(m.sender_username)).map((msg, idx) => {
-                                        // Filtering by username for now as simple block strategy
-                                        // This is effective enough for client-side hide
                                         const isMe = msg.sender_id === currentUser?.id
                                         const showName = idx === 0 || messages[idx - 1].sender_id !== msg.sender_id
 
                                         return (
-                                            <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} animate-in fade-in slide-in-from-bottom-2`}>
-                                                {showName && !isMe && (
-                                                    <span
-                                                        className={`text-[10px] font-black text-white/20 uppercase tracking-[0.2em] mb-2 ml-1 ${onPlayerClick ? 'cursor-pointer hover:text-white/40 transition-colors' : ''}`}
+                                            <div key={msg.id} className={`flex items-start gap-3.5 ${isMe ? 'flex-row-reverse text-right' : 'text-left'} animate-in fade-in slide-in-from-bottom-2 duration-300`}>
+                                                {/* Left avatar placeholder (only for incoming messages) */}
+                                                {!isMe && (
+                                                    <div 
+                                                        className={`w-9 h-9 rounded-xl bg-slate-900 border border-white/10 flex items-center justify-center text-sm font-black cursor-pointer shadow-md`}
                                                         onClick={() => onPlayerClick && onPlayerClick(msg.sender_id)}
                                                     >
-                                                        {msg.sender_username}
-                                                    </span>
+                                                        {msg.sender_username[0].toUpperCase()}
+                                                    </div>
                                                 )}
-                                                <div className={`max-w-[70%] px-5 py-3 rounded-2xl border transition-all ${isMe
-                                                    ? 'bg-purple-600/20 border-purple-500/30 text-white rounded-tr-none shadow-lg shadow-purple-900/10'
-                                                    : 'bg-white/5 border-white/10 text-white/90 rounded-tl-none'
+
+                                                <div className={`flex flex-col max-w-[75%] ${isMe ? 'items-end' : 'items-start'}`}>
+                                                    {showName && !isMe && (
+                                                        <span
+                                                            className={`text-[9px] font-black text-white/30 uppercase tracking-[0.2em] mb-1.5 ml-1 ${onPlayerClick ? 'cursor-pointer hover:text-purple-400 transition-colors' : ''}`}
+                                                            onClick={() => onPlayerClick && onPlayerClick(msg.sender_id)}
+                                                        >
+                                                            {msg.sender_username}
+                                                        </span>
+                                                    )}
+                                                    
+                                                    <div className={`px-4.5 py-3 rounded-3xl border transition-all shadow-md ${
+                                                        isMe
+                                                            ? 'bg-gradient-to-br from-purple-900/20 to-indigo-950/20 border-purple-500/30 text-white rounded-tr-none shadow-[0_0_15px_rgba(168,85,247,0.05)]'
+                                                            : 'bg-gradient-to-br from-slate-900/60 to-slate-950/80 border-white/10 text-white/90 rounded-tl-none'
                                                     }`}>
-                                                    <p className="text-sm leading-relaxed whitespace-pre-wrap break-words font-medium">
-                                                        {msg.message}
-                                                    </p>
+                                                        <p className="text-sm leading-relaxed whitespace-pre-wrap break-words font-medium">
+                                                            {msg.message}
+                                                        </p>
+                                                    </div>
+                                                    <span className="text-[8px] text-white/20 mt-1 font-bold">
+                                                        {new Date(msg.inserted_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                    </span>
                                                 </div>
-                                                <span className="text-[9px] text-white/10 mt-1 font-bold">
-                                                    {new Date(msg.inserted_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </span>
                                             </div>
                                         )
                                     })}
@@ -537,21 +567,25 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
                             </ScrollArea>
 
                             {/* Message Input */}
-                            <div className="p-6 bg-black/20 border-t border-white/5">
+                            <div className="p-6 bg-slate-950/30 border-t border-white/10 backdrop-blur-md">
                                 <div className="relative group">
-                                    <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/50 to-blue-600/50 rounded-3xl blur opacity-10 group-focus-within:opacity-30 transition duration-500" />
-                                    <div className="relative flex items-center bg-black/40 backdrop-blur-xl border border-white/10 rounded-2xl p-2 pl-6">
+                                    <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/50 to-blue-600/50 rounded-3xl blur opacity-10 group-focus-within:opacity-20 transition duration-500" />
+                                    <div className="relative flex items-center bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl p-2 pl-5 shadow-2xl">
                                         <Input
                                             value={inputText}
                                             onChange={(e) => setInputText(e.target.value)}
-                                            placeholder="Whisper something private..."
-                                            className="flex-1 bg-transparent border-none text-white first-letter:placeholder:text-white/20 focus-visible:ring-0 h-10 text-sm font-medium"
+                                            placeholder="Transmit secure whisper..."
+                                            className="flex-1 bg-transparent border-none text-white placeholder:text-white/20 focus-visible:ring-0 focus-visible:ring-offset-0 h-10 text-sm font-medium"
                                             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
                                         />
                                         <Button
                                             onClick={sendMessage}
                                             disabled={!inputText.trim()}
-                                            className="ml-2 bg-gradient-to-br from-purple-600 to-blue-600 text-white h-10 w-10 p-0 rounded-xl shadow-lg shadow-black/40 hover:scale-105 active:scale-95 transition-all"
+                                            className={`ml-2 h-10 w-10 p-0 rounded-xl transition-all duration-300 border-none ${
+                                                !inputText.trim() 
+                                                    ? "bg-white/5 text-white/20" 
+                                                    : "bg-gradient-to-br from-purple-600 to-blue-600 text-white shadow-lg hover:scale-105 active:scale-95"
+                                            }`}
                                         >
                                             <SendIcon className="h-4 w-4" />
                                         </Button>
