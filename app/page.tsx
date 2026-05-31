@@ -4028,20 +4028,28 @@ export default function BoomkitGame() {
     const showcaseBooms = PACKS.flatMap(p => p.booms).slice(0, 16) // Take first 16 for grid
 
     return (
-      <div className="min-h-screen bg-slate-900 flex flex-col font-sans">
+      <div className="min-h-screen bg-[#050212] flex flex-col font-sans relative overflow-hidden">
+        {/* Glowing Nebula Backgrounds */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+          <div className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-purple-600/10 blur-[130px] nebula-float-1" />
+          <div className="absolute top-[20%] -right-40 w-[600px] h-[600px] rounded-full bg-pink-600/10 blur-[150px] nebula-float-2" />
+        </div>
+
         {/* Navbar */}
-        <nav className="flex justify-between items-center p-6 px-10">
-          <h1 className="text-3xl font-extrabold text-white tracking-tight">Boomkit</h1>
+        <nav className="flex justify-between items-center p-6 px-10 backdrop-blur-md bg-slate-950/20 border-b border-white/5 relative z-10">
+          <h1 className="text-3xl font-black text-gradient-purple-pink tracking-tight hover:scale-[1.02] transition-transform duration-300 cursor-pointer">
+            Boomkit
+          </h1>
           <div className="space-x-4">
             <Button
               onClick={() => setCurrentView("login")}
-              className="bg-transparent hover:bg-white/10 text-white border border-white/20 font-bold px-6"
+              className="bg-transparent hover:bg-white/10 text-white border border-white/10 font-bold px-6 h-11 rounded-xl transition-all"
             >
               Login
             </Button>
             <Button
               onClick={() => setCurrentView("register")}
-              className="bg-purple-600 hover:bg-purple-700 text-white font-bold px-6 shadow-lg shadow-purple-500/20"
+              className="bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold px-6 h-11 rounded-xl shadow-[0_0_20px_rgba(168,85,247,0.3)] transition-all hover:scale-[1.02]"
             >
               Register
             </Button>
@@ -4049,34 +4057,37 @@ export default function BoomkitGame() {
         </nav>
 
         {/* Hero Section */}
-        <main className="flex-1 flex flex-col md:flex-row items-center justify-center p-6 md:p-20 gap-12">
+        <main className="flex-1 flex flex-col md:flex-row items-center justify-center p-6 md:p-20 gap-12 relative z-10">
 
           {/* Left Content */}
           <div className="flex-1 space-y-6 text-center md:text-left max-w-xl">
-            <h1 className="text-6xl md:text-7xl font-black text-white leading-tight">
+            <h1 className="text-6xl md:text-8xl font-black text-white leading-tight tracking-tighter">
               Boomkit
             </h1>
-            <p className="text-3xl md:text-4xl text-purple-400 font-bold">
+            <p className="text-3xl md:text-5xl font-black text-gradient-purple-pink">
               The Ultimate Emoji Trading Arena
             </p>
-            <p className="text-slate-400 text-lg md:text-xl max-w-md mx-auto md:mx-0">
+            <p className="text-slate-400 text-lg md:text-xl max-w-md mx-auto md:mx-0 leading-relaxed">
               Collect rare emojis, dominate the market, and climb the ranks in the world's premier emoji-based trading experience.
             </p>
             <div className="pt-4 flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
               <Button
                 onClick={() => setCurrentView("register")}
-                className="h-14 px-8 text-xl bg-purple-600 hover:bg-purple-700 font-bold rounded-xl shadow-xl shadow-purple-900/20 transition-transform hover:scale-105"
+                className="h-14 px-10 text-xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-black rounded-2xl shadow-[0_0_30px_rgba(168,85,247,0.4)] transition-all hover:scale-105 active:scale-[0.98]"
               >
                 Get Started
               </Button>
-              {/* Hidden Owner Access Trigger (Double click title or similar? Keeping it simple for now, maybe a small footer link) */}
             </div>
           </div>
 
           {/* Right Content - Boom Grid */}
-          <div className="flex-1 grid grid-cols-4 gap-4 max-w-lg p-6 bg-white/5 rounded-3xl backdrop-blur-sm border border-white/10 rotate-3 hover:rotate-0 transition-transform duration-500">
+          <div className="flex-1 grid grid-cols-4 gap-4 max-w-lg p-6 bg-slate-950/40 rounded-[2.5rem] backdrop-blur-xl border border-white/10 rotate-3 hover:rotate-0 transition-all duration-700 shadow-2xl shadow-purple-950/10">
             {showcaseBooms.map((boom, idx) => (
-              <div key={idx} className="aspect-square bg-slate-800 rounded-xl flex items-center justify-center text-4xl shadow-lg border border-slate-700 hover:scale-110 transition-transform cursor-default select-none overflow-hidden" title={boom.name}>
+              <div
+                key={idx}
+                className="aspect-square bg-slate-900/60 rounded-2xl flex items-center justify-center text-4xl shadow-inner border border-white/5 hover:border-purple-500/30 hover:scale-110 transition-all duration-300 cursor-default select-none overflow-hidden"
+                title={boom.name}
+              >
                 {boom.avatar.startsWith('/') ? (
                   <img src={boom.avatar || "/placeholder.svg"} alt={boom.name} className="w-full h-full object-cover" />
                 ) : (
@@ -4089,7 +4100,7 @@ export default function BoomkitGame() {
         </main>
 
         {/* Footer / Secret Access */}
-        <footer className="p-4 text-center text-slate-600 text-sm">
+        <footer className="p-6 text-center text-slate-600 text-xs border-t border-white/5 bg-slate-950/10 relative z-10">
           <p>&copy; 2026 Boomkit. All rights reserved.</p>
         </footer>
       </div>
@@ -4098,35 +4109,41 @@ export default function BoomkitGame() {
 
   if (currentView === "register") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-400 via-pink-500 to-red-500 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl overflow-hidden">
+      <div className="min-h-screen bg-[#050212] flex items-center justify-center p-4 relative overflow-hidden font-sans">
+        {/* Glowing Nebula Backgrounds */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+          <div className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-purple-600/10 blur-[130px] nebula-float-1" />
+          <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full bg-pink-600/10 blur-[130px] nebula-float-2" />
+        </div>
+
+        <Card className="w-full max-w-md bg-slate-950/45 backdrop-blur-xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-[2rem] overflow-hidden relative z-10">
           <CardHeader className="text-center relative overflow-hidden pb-8">
-            <div className="absolute inset-0 bg-gradient-to-b from-purple-600/30 to-transparent" />
-            <CardTitle className="text-4xl font-black text-white relative z-10 drop-shadow-md">
+            <div className="absolute inset-0 bg-gradient-to-b from-purple-600/10 to-transparent" />
+            <CardTitle className="text-4xl font-black text-gradient-purple-pink relative z-10 drop-shadow-md pb-1">
               Join Boomkit!
             </CardTitle>
-            <CardDescription className="text-white/80 font-medium relative z-10">Start your adventure today</CardDescription>
+            <CardDescription className="text-white/60 font-medium relative z-10">Start your adventure today</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 pt-0 relative z-10">
             <form onSubmit={handleRegister} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="username" className="text-white font-bold tracking-wide ml-1">Username</Label>
+                <Label htmlFor="username" className="text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Username</Label>
                 <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl blur opacity-30 group-focus-within:opacity-100 transition duration-500" />
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl blur opacity-20 group-focus-within:opacity-100 transition duration-500" />
                   <Input
                     id="username"
                     value={registerForm.username}
                     onChange={(e) => setRegisterForm((prev) => ({ ...prev, username: e.target.value }))}
                     required
-                    className="bg-black/40 border-white/10 text-white placeholder:text-white/30 rounded-xl relative h-12"
+                    className="glass-input placeholder:text-white/20 rounded-xl relative h-12"
                     placeholder="Choose a cool name..."
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-white font-bold tracking-wide ml-1">Password</Label>
+                <Label htmlFor="password" className="text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Password</Label>
                 <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl blur opacity-30 group-focus-within:opacity-100 transition duration-500" />
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl blur opacity-20 group-focus-within:opacity-100 transition duration-500" />
                   <Input
                     id="password"
                     type="password"
@@ -4134,15 +4151,15 @@ export default function BoomkitGame() {
                     onChange={(e) => setRegisterForm((prev) => ({ ...prev, password: e.target.value }))}
                     required
                     minLength={8}
-                    className="bg-black/40 border-white/10 text-white placeholder:text-white/30 rounded-xl relative h-12"
+                    className="glass-input placeholder:text-white/20 rounded-xl relative h-12"
                     placeholder="At least 8 characters..."
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="age" className="text-white font-bold tracking-wide ml-1">Age (Minimum 10)</Label>
+                <Label htmlFor="age" className="text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Age (Minimum 10)</Label>
                 <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl blur opacity-30 group-focus-within:opacity-100 transition duration-500" />
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl blur opacity-20 group-focus-within:opacity-100 transition duration-500" />
                   <Input
                     id="age"
                     type="number"
@@ -4150,21 +4167,21 @@ export default function BoomkitGame() {
                     value={registerForm.age}
                     onChange={(e) => setRegisterForm((prev) => ({ ...prev, age: e.target.value }))}
                     required
-                    className="bg-black/40 border-white/10 text-white placeholder:text-white/30 rounded-xl relative h-12"
+                    className="glass-input placeholder:text-white/20 rounded-xl relative h-12"
                     placeholder="Enter your age"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="reason" className="text-white font-bold tracking-wide ml-1">Application Reason</Label>
+                <Label htmlFor="reason" className="text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Application Reason</Label>
                 <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl blur opacity-30 group-focus-within:opacity-100 transition duration-500" />
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl blur opacity-20 group-focus-within:opacity-100 transition duration-500" />
                   <textarea
                     id="reason"
                     value={registerForm.reason}
                     onChange={(e) => setRegisterForm((prev) => ({ ...prev, reason: e.target.value }))}
-                    className="w-full bg-black/40 border-white/10 text-white placeholder:text-white/30 rounded-xl relative p-3 min-h-[80px] focus:outline-none focus:ring-0"
+                    className="w-full glass-input placeholder:text-white/20 rounded-xl relative p-3 min-h-[80px] focus:outline-none focus:ring-0 text-sm resize-none"
                     placeholder="Tell us why you want to join Boomkit..."
                     required
                   />
@@ -4179,7 +4196,7 @@ export default function BoomkitGame() {
                     id="tos"
                     checked={tosAccepted}
                     onChange={(e) => setTosAccepted(e.target.checked)}
-                    className="peer h-5 w-5 cursor-pointer appearance-none rounded-md border border-white/20 bg-black/40 checked:bg-green-500 checked:border-green-500 transition-all"
+                    className="peer h-5 w-5 cursor-pointer appearance-none rounded-md border border-white/20 bg-black/40 checked:bg-green-500 checked:border-green-500 checked:scale-105 transition-all"
                   />
                   <CheckIcon className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
                 </div>
@@ -4198,7 +4215,7 @@ export default function BoomkitGame() {
               <Button
                 type="submit"
                 disabled={!tosAccepted}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white h-12 rounded-xl text-lg font-bold shadow-lg shadow-purple-900/40 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform active:scale-95"
+                className="w-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white h-12 rounded-xl text-lg font-bold shadow-lg shadow-purple-900/40 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform active:scale-95 hover:scale-[1.02]"
               >
                 Let's Go! 🚀
               </Button>
@@ -4219,14 +4236,14 @@ export default function BoomkitGame() {
         {/* ToS Modal */}
         {showTosModal && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-            <Card className="w-full max-w-2xl bg-[#0a0a0c] border-white/10 shadow-2xl max-h-[80vh] flex flex-col">
+            <Card className="w-full max-w-2xl bg-[#0e0a22]/95 border-white/10 shadow-2xl max-h-[80vh] flex flex-col rounded-[2rem] overflow-hidden">
               <CardHeader className="border-b border-white/10 bg-white/5">
-                <CardTitle className="text-2xl font-bold text-white flex items-center gap-2">
+                <CardTitle className="text-2xl font-black text-white flex items-center gap-2">
                   <FileTextIcon className="w-6 h-6 text-purple-400" />
                   Terms of Service
                 </CardTitle>
               </CardHeader>
-              <CardContent className="flex-1 overflow-y-auto p-6 space-y-4 text-white/80 leading-relaxed text-sm">
+              <CardContent className="flex-1 overflow-y-auto p-6 space-y-4 text-white/80 leading-relaxed text-sm premium-scrollbar">
                 <p><strong className="text-white">1. Respect Required:</strong> Treat all players with kindness. No bullying, hate speech, or harassment.</p>
                 <p><strong className="text-white">2. No Cheating:</strong> Using bots, scripts, or unfair advantages will result in an immediate ban.</p>
                 <p><strong className="text-white">3. Safety First:</strong> Do not share personal information (real name, address, phone number) in public chats.</p>
@@ -4240,7 +4257,7 @@ export default function BoomkitGame() {
                     setShowTosModal(false)
                     setTosAccepted(true)
                   }}
-                  className="bg-green-600 hover:bg-green-500 text-white px-8 font-bold"
+                  className="bg-green-600 hover:bg-green-500 text-white px-8 font-bold rounded-xl h-11"
                 >
                   I Understand & Accept
                 </Button>
@@ -4254,47 +4271,53 @@ export default function BoomkitGame() {
 
   if (currentView === "login") {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-400 via-purple-500 to-pink-500 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl overflow-hidden">
+      <div className="min-h-screen bg-[#050212] flex items-center justify-center p-4 relative overflow-hidden font-sans">
+        {/* Glowing Nebula Backgrounds */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+          <div className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-purple-600/10 blur-[130px] nebula-float-1" />
+          <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full bg-pink-600/10 blur-[130px] nebula-float-2" />
+        </div>
+
+        <Card className="w-full max-w-md bg-slate-950/45 backdrop-blur-xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-[2rem] overflow-hidden relative z-10">
           <CardHeader className="text-center relative overflow-hidden pb-8">
-            <div className="absolute inset-0 bg-gradient-to-b from-blue-600/30 to-transparent" />
-            <CardTitle className="text-4xl font-black text-white relative z-10 drop-shadow-md">
+            <div className="absolute inset-0 bg-gradient-to-b from-blue-600/10 to-transparent" />
+            <CardTitle className="text-4xl font-black text-gradient-cyan-blue relative z-10 drop-shadow-md pb-1">
               Welcome Back!
             </CardTitle>
-            <CardDescription className="text-white/80 font-medium relative z-10">Continue your quiz journey</CardDescription>
+            <CardDescription className="text-white/60 font-medium relative z-10">Continue your quiz journey</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 pt-0 relative z-10">
             <form onSubmit={handleLogin} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="loginUsername" className="text-white font-bold tracking-wide ml-1">Username</Label>
+                <Label htmlFor="loginUsername" className="text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Username</Label>
                 <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl blur opacity-30 group-focus-within:opacity-100 transition duration-500" />
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl blur opacity-20 group-focus-within:opacity-100 transition duration-500" />
                   <Input
                     id="loginUsername"
                     value={loginForm.username}
                     onChange={(e) => setLoginForm((prev) => ({ ...prev, username: e.target.value }))}
                     required
-                    className="bg-black/40 border-white/10 text-white placeholder:text-white/30 rounded-xl relative h-12"
+                    className="glass-input placeholder:text-white/20 rounded-xl relative h-12"
                     placeholder="Your username..."
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="loginPassword" className="text-white font-bold tracking-wide ml-1">Password</Label>
+                <Label htmlFor="loginPassword" className="text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Password</Label>
                 <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl blur opacity-30 group-focus-within:opacity-100 transition duration-500" />
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl blur opacity-20 group-focus-within:opacity-100 transition duration-500" />
                   <Input
                     id="loginPassword"
                     type="password"
                     value={loginForm.password}
                     onChange={(e) => setLoginForm((prev) => ({ ...prev, password: e.target.value }))}
                     required
-                    className="bg-black/40 border-white/10 text-white placeholder:text-white/30 rounded-xl relative h-12"
+                    className="glass-input placeholder:text-white/20 rounded-xl relative h-12"
                     placeholder="Your password..."
                   />
                 </div>
               </div>
-              <Button type="submit" className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white h-12 rounded-xl text-lg font-bold shadow-lg shadow-blue-900/40 transition-all transform active:scale-95">
+              <Button type="submit" className="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white h-12 rounded-xl text-lg font-bold shadow-lg shadow-blue-900/40 transition-all transform active:scale-95 hover:scale-[1.02]">
                 Login
               </Button>
             </form>
@@ -4315,34 +4338,35 @@ export default function BoomkitGame() {
 
   return (
     <div
-      className={`min-h-screen flex transition-colors duration-500 ${themeMode === "dark"
-        ? "bg-gradient-to-br from-cyan-400 via-purple-500 to-pink-500" // Original dark theme
-        : themeMode === "light"
-          ? "bg-gradient-to-br from-sky-400 via-indigo-400 to-purple-400" // Mid-tone light theme
-          : "" // Custom theme handled via style prop
-        }`}
+      className="min-h-screen flex transition-colors duration-500 bg-[#050212] text-slate-100 font-sans relative overflow-hidden w-full z-10"
       style={themeMode === "custom" ? { background: customThemeColor } : {}}
     >
+      {/* Glowing Nebula Backgrounds */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-purple-600/5 blur-[130px] nebula-float-1" />
+        <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] rounded-full bg-pink-600/5 blur-[150px] nebula-float-2" />
+        <div className="absolute top-[35%] left-[25%] w-[400px] h-[400px] rounded-full bg-blue-600/5 blur-[120px] nebula-float-1" />
+      </div>
+
       {/* Mobile Overlay */}
       {sidebarOpen && (
-        <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={() => setSidebarOpen(false)} />
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* Sidebar - Hidden on mobile, toggleable */}
       <div
         className={`
-        fixed md:relative inset-y-0 left-0 z-50
-        w-48 text-white flex flex-col
-        transform transition-transform duration-300 ease-in-out
-        ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
-        ${themeMode === "dark" ? "bg-gradient-to-b from-purple-600 to-purple-800" : ""}
-        ${themeMode === "light" ? "bg-gradient-to-b from-indigo-500 to-indigo-700" : ""}
-      `}
+          fixed md:relative inset-y-0 left-0 z-50
+          w-52 text-white flex flex-col
+          transform transition-transform duration-300 ease-in-out
+          bg-[#0a071d]/60 backdrop-blur-xl border-r border-white/5 shadow-2xl relative
+          ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
+        `}
         style={themeMode === "custom" ? { background: customThemeColor, filter: "brightness(0.8)" } : {}}
       >
         {/* Logo */}
-        <div className="p-4 text-center flex items-center justify-between">
-          <h1 className="text-2xl font-sans font-extrabold text-white">Boomkit</h1>
+        <div className="p-5 text-center flex items-center justify-between border-b border-white/5">
+          <h1 className="text-2xl font-black text-gradient-purple-pink tracking-tight">Boomkit</h1>
           {/* Close button on mobile */}
           <button onClick={() => setSidebarOpen(false)} className="md:hidden p-1 rounded-lg hover:bg-white/10">
             <XIcon className="h-5 w-5" />
@@ -4350,240 +4374,51 @@ export default function BoomkitGame() {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-2 space-y-1 overflow-y-auto">
-          <button
-            onClick={() => {
-              setCurrentPage("stats")
-              setSidebarOpen(false)
-            }}
-            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "stats" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
-              }`}
-          >
-            <BarChart3Icon className="h-5 w-5 mr-3" />
-            Stats
-          </button>
-
-          <button
-            onClick={() => {
-              setCurrentPage("booms")
-              setSidebarOpen(false)
-            }}
-            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "booms" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
-              }`}
-          >
-            <PackageIcon className="h-5 w-5 mr-3" />
-            Booms
-          </button>
-
-          <button
-            onClick={() => {
-              setCurrentPage("market")
-              setSidebarOpen(false)
-            }}
-            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "market" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
-              }`}
-          >
-            <ShoppingCartIcon className="h-5 w-5 mr-3" />
-            Market
-          </button>
-
-          <button
-            onClick={() => {
-              setCurrentPage("chat")
-              setSidebarOpen(false)
-            }}
-            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "chat" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
-              }`}
-          >
-            <MessageCircleIcon className="h-5 w-5 mr-3" />
-            Chat
-          </button>
-
-          <button
-            onClick={() => {
-              setCurrentPage("private-chat")
-              setSidebarOpen(false)
-            }}
-            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "private-chat" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
-              }`}
-          >
-            <Users2Icon className="h-5 w-5 mr-3" />
-            Private Chat
-          </button>
-
-          <button
-            onClick={() => {
-              setCurrentPage("auction")
-              setSidebarOpen(false)
-            }}
-            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "auction" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
-              }`}
-          >
-            <GavelIcon className="h-5 w-5 mr-3" />
-            Auction
-          </button>
-
-          <button
-            onClick={() => {
-              setCurrentPage("leaderboard")
-              setSidebarOpen(false)
-            }}
-            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "leaderboard" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
-              }`}
-          >
-            <BarChart3Icon className="h-5 w-5 mr-3" />
-            Leaderboard
-          </button>
-
-          <button
-            onClick={() => {
-              setCurrentPage("trading")
-              setSidebarOpen(false)
-            }}
-            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "trading" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
-              }`}
-          >
-            <PackageIcon className="h-5 w-5 mr-3" />
-            Trading
-          </button>
-
-          <button
-            onClick={() => {
-              setCurrentPage("discover")
-              setSidebarOpen(false)
-            }}
-            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "discover" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
-              }`}
-          >
-            <CompassIcon className="h-5 w-5 mr-3" />
-            Discover
-          </button>
-
-          <button
-            onClick={() => {
-              setCurrentPage("friends")
-              setSidebarOpen(false)
-              fetchFriends()
-            }}
-            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "friends" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
-              }`}
-          >
-            <Users2Icon className="h-5 w-5 mr-3" />
-            Friends
-          </button>
-
-          <button
-            onClick={() => {
-              setCurrentPage("clans")
-              setSidebarOpen(false)
-              if (currentUser?.clan_id) {
-                fetchClanDetails(currentUser.clan_id)
-              } else {
-                fetchClansList()
-              }
-            }}
-            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "clans" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
-              }`}
-          >
-            <ShieldIcon className="h-5 w-5 mr-3" />
-            Clans
-          </button>
-
-          <button
-            onClick={() => {
-              setCurrentPage("fusion")
-              setSidebarOpen(false)
-            }}
-            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "fusion" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
-              }`}
-          >
-            <BeakerIcon className="h-5 w-5 mr-3" />
-            Fusion Lab
-          </button>
-
-          <button
-            onClick={() => {
-              setCurrentPage("tournaments")
-              setSidebarOpen(false)
-              fetchTournaments()
-            }}
-            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "tournaments" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
-              }`}
-          >
-            <TrophyIcon className="h-5 w-5 mr-3" />
-            Tournaments
-          </button>
-
-          <button
-            onClick={() => {
-              setCurrentPage("shop")
-              setSidebarOpen(false)
-              fetchShopItems()
-            }}
-            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "shop" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
-              }`}
-          >
-            <ShoppingBagIcon className="h-5 w-5 mr-3" />
-            Shop
-          </button>
-
-          <button
-            onClick={() => {
-              setCurrentPage("season")
-              setSidebarOpen(false)
-              fetchActiveSeason()
-            }}
-            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "season" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
-              }`}
-          >
-            <FlameIcon className="h-5 w-5 mr-3" />
-            Season Pass
-          </button>
-
-          <button
-            onClick={() => {
-              setCurrentPage("achievements")
-              setSidebarOpen(false)
-              fetchAchievements()
-            }}
-            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "achievements" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
-              }`}
-          >
-            <StarIcon className="h-5 w-5 mr-3" />
-            Achievements
-          </button>
-
-          {(currentUser?.role === "moderator" ||
-            currentUser?.role === "senior_moderator" ||
-            currentUser?.role === "admin" ||
-            currentUser?.role === "tester" || // Added check for tester role
-            isOwner()) && (
+        <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto premium-scrollbar relative z-10">
+          {[
+            { id: "stats", label: "Stats", icon: BarChart3Icon },
+            { id: "booms", label: "Booms", icon: PackageIcon },
+            { id: "market", label: "Market", icon: ShoppingCartIcon },
+            { id: "chat", label: "Chat", icon: MessageCircleIcon },
+            { id: "private-chat", label: "Private Chat", icon: Users2Icon },
+            { id: "auction", label: "Auction", icon: GavelIcon },
+            { id: "leaderboard", label: "Leaderboard", icon: BarChart3Icon },
+            { id: "trading", label: "Trading", icon: PackageIcon },
+            { id: "discover", label: "Discover", icon: CompassIcon },
+            { id: "friends", label: "Friends", icon: Users2Icon, fetch: fetchFriends },
+            { id: "clans", label: "Clans", icon: ShieldIcon, fetch: () => currentUser?.clan_id ? fetchClanDetails(currentUser.clan_id) : fetchClansList() },
+            { id: "fusion", label: "Fusion Lab", icon: BeakerIcon },
+            { id: "tournaments", label: "Tournaments", icon: TrophyIcon, fetch: fetchTournaments },
+            { id: "shop", label: "Shop", icon: ShoppingBagIcon, fetch: fetchShopItems },
+            { id: "season", label: "Season Pass", icon: FlameIcon, fetch: fetchActiveSeason },
+            { id: "achievements", label: "Achievements", icon: StarIcon, fetch: fetchAchievements },
+            ...(currentUser?.role === "moderator" || currentUser?.role === "senior_moderator" || currentUser?.role === "admin" || currentUser?.role === "tester" || isOwner() ? [{ id: "staff", label: "Staff", icon: ShieldIcon }] : []),
+            { id: "settings", label: "Settings", icon: SettingsIcon },
+          ].map((item) => {
+            const Icon = item.icon
+            const isActive = currentPage === item.id
+            return (
               <button
+                key={item.id}
                 onClick={() => {
-                  setCurrentPage("staff")
+                  setCurrentPage(item.id as any)
                   setSidebarOpen(false)
+                  if (item.fetch) item.fetch()
                 }}
-                className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "staff" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
-                  }`}
+                className={`w-full flex items-center px-4 py-3 rounded-xl text-left transition-all duration-300 group gap-3 relative overflow-hidden ${
+                  isActive
+                    ? "bg-gradient-to-r from-purple-500/10 to-pink-500/5 border-l-4 border-purple-500 text-white font-black shadow-[inset_0_0_12px_rgba(168,85,247,0.08)]"
+                    : "text-slate-400/80 hover:text-white hover:bg-white/5 border-l-4 border-transparent font-bold"
+                }`}
               >
-                <ShieldIcon className="h-5 w-5 mr-3" />
-                Staff
+                {isActive && (
+                  <div className="absolute right-0 top-0 bottom-0 w-1 bg-gradient-to-b from-purple-500 to-pink-500 animate-pulse" />
+                )}
+                <Icon className={`h-4 w-4 shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6 ${isActive ? "text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]" : "text-slate-500"}`} />
+                <span className="text-xs uppercase tracking-wider">{item.label}</span>
               </button>
-            )}
-
-          <button
-            onClick={() => {
-              setCurrentPage("settings")
-              setSidebarOpen(false)
-            }}
-            className={`w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors ${currentPage === "settings" ? "bg-white/20 text-white" : "text-white/80 hover:bg-white/10"
-              }`}
-          >
-            <SettingsIcon className="h-5 w-5 mr-3" />
-            Settings
-          </button>
-
-
+            )
+          })}
         </nav>
       </div>
 
