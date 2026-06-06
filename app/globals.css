@@ -592,3 +592,17 @@
   transform: translateY(-6px) scale(1.02);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
+
+/* Instant Open Animation Adjustments */
+.instant-open-active .animate-reveal-uncommon { animation-duration: 0.3s !important; }
+.instant-open-active .animate-reveal-rare { animation-duration: 0.35s !important; }
+.instant-open-active .animate-reveal-epic { animation-duration: 0.25s !important; }
+.instant-open-active .animate-reveal-legendary { animation-duration: 0.5s !important; }
+.instant-open-active .animate-reveal-chroma { animation-duration: 0.6s !important; }
+.instant-open-active .animate-reveal-mystical { animation-duration: 0.75s !important; }
+.instant-open-active .animate-reveal-hidden { animation-duration: 0.9s !important; }
+.instant-open-active .animate-pack-shake { animation-duration: 0.4s !important; }
+.instant-open-active .animate-pack-burst { animation-duration: 0.25s !important; }
+.instant-open-active [style*="particle-explode"] {
+  animation: particle-explode 0.9s ease-out forwards !important;
+}

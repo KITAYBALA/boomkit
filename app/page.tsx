@@ -868,6 +868,8 @@ export default function BoomkitGame() {
   } | null>(null)
   const [isMergingGameActive, setIsMergingGameActive] = useState(false)
   const [lobbyActive, setLobbyActive] = useState(false)
+  const [isInstantOpen, setIsInstantOpen] = useState(false)
+  const [isAutoOpen, setIsAutoOpen] = useState(false)
   const [activeGamePin, setActiveGamePin] = useState("")
   const [selectedDuration, setSelectedDuration] = useState(120)
   const [discoveredSets, setDiscoveredSets] = useState<any[]>([])
@@ -2447,7 +2449,24 @@ export default function BoomkitGame() {
   }
 
   // Buy or open pack
-  const handlePackAction = (packId: string) => {
+  
+  // Auto Open effect
+  useEffect(() => {
+    if (packAnimation.show && packAnimation.stage === "done" && isAutoOpen && currentUser) {
+      const pack = PACKS.find((p) => p.name === packAnimation.packName)
+      if (pack && currentUser.tokens >= pack.price) {
+        const autoOpenDelay = isInstantOpen ? 400 : 1000
+        const timer = setTimeout(() => {
+          closePackAnimation()
+          handlePackAction(pack.id)
+        }, autoOpenDelay)
+        return () => clearTimeout(timer)
+      } else if (pack && currentUser.tokens < pack.price) {
+        setIsAutoOpen(false)
+      }
+    }
+  }, [packAnimation.stage, isAutoOpen, currentUser?.tokens, isInstantOpen, packAnimation.show, packAnimation.packName])
+const handlePackAction = (packId: string) => {
     if (!currentUser) return
 
     const pack = PACKS.find((p) => p.id === packId)
@@ -8827,7 +8846,7 @@ export default function BoomkitGame() {
       {
         packAnimation.show && (
           <div
-            className={`fixed inset-0 bg-black/95 backdrop-blur-xl flex items-center justify-center z-50 overflow-hidden ${packAnimation.stage === "done" ? "cursor-pointer" : "cursor-default"}`}
+            className={`fixed inset-0 bg-black/95 backdrop-blur-xl flex items-center justify-center z-50 overflow-hidden ${isInstantOpen ? "instant-open-active" : ""} ${packAnimation.stage === "done" ? "cursor-pointer" : "cursor-default"}`}
             onClick={() => {
               if (packAnimation.stage === "done") {
                 closePackAnimation()
