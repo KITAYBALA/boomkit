@@ -16,7 +16,7 @@ interface Question {
 
 interface MergeItem {
     id: string
-    rarity: "uncommon" | "rare" | "epic" | "legendary" | "chroma" | "mystical"
+    rarity: "uncommon" | "rare" | "epic" | "legendary" | "chroma" | "mystical" | "hidden"
     emoji: string
     x: number
     y: number
@@ -82,7 +82,8 @@ const RARITY_DATA = {
     rare: { emoji: "💎", points: 1, next: "epic", nextPoints: 2, color: "text-blue-400", tokenAward: 10 },
     epic: { emoji: "🔥", points: 2, next: "legendary", nextPoints: 3, color: "text-purple-400", tokenAward: 20 },
     legendary: { emoji: "👑", points: 3, next: "chroma", nextPoints: 5, color: "text-yellow-400", tokenAward: 50 },
-    chroma: { emoji: "🌈", points: 5, next: "mystical", nextPoints: 10, color: "text-pink-400", tokenAward: 100 },
+    chroma: { emoji: "🌈", points: 5, next: "hidden", nextPoints: 8, color: "text-pink-400", tokenAward: 100 },
+    hidden: { emoji: "🖤", points: 8, next: "mystical", nextPoints: 10, color: "text-slate-400", tokenAward: 150 },
     mystical: { emoji: "✨", points: 10, next: null, nextPoints: 0, color: "text-cyan-400", tokenAward: 250 },
 }
 
@@ -92,7 +93,8 @@ const DROP_RATES = [
     { rarity: "epic", chance: 10 },
     { rarity: "legendary", chance: 4 },
     { rarity: "chroma", chance: 0.9 },
-    { rarity: "mystical", chance: 0.1 },
+    { rarity: "hidden", chance: 0.09 },
+    { rarity: "mystical", chance: 0.01 },
 ]
 
 export default function MergingGame({

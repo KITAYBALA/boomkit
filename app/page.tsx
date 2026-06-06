@@ -276,7 +276,7 @@ interface Pack {
 
 interface BoomItem {
   name: string
-  rarity: "uncommon" | "rare" | "epic" | "legendary" | "chroma" | "mystical"
+  rarity: "uncommon" | "rare" | "epic" | "legendary" | "chroma" | "mystical" | "hidden"
   avatar: string
   description: string
   asset?: string // Path to SVG/PNG asset
@@ -336,6 +336,7 @@ const getRarityColor = (rarity: string) => {
     case "legendary": return "bg-orange-500"
     case "chroma": return "bg-pink-500"
     case "mystical": return "bg-cyan-500"
+    case "hidden": return "bg-slate-900 border-slate-700 text-slate-300"
     default: return "bg-gray-500"
   }
 }
@@ -441,16 +442,22 @@ const PACKS: Pack[] = [
     isNew: true,
     booms: [
       { name: "DeepSeek", rarity: "uncommon", avatar: "/images/booms/deepseek.png", description: "Deep thinking AI" },
+      { name: "Midjourney", rarity: "uncommon", avatar: "🎨", description: "AI image generator" },
+      { name: "Stable Diffusion", rarity: "uncommon", avatar: "🖼️", description: "Open-source text-to-image generator" },
       { name: "Microsoft Copilot", rarity: "rare", avatar: "/images/booms/copilot.png", description: "Your daily AI companion" },
-      { name: "Claude", rarity: "epic", avatar: "/images/booms/chatgpt.png", description: "Helpful and harmless AI" }, // Fixed mixed logos
-      { name: "ChatGPT", rarity: "legendary", avatar: "/images/booms/claude.png", description: "The pioneer of conversational AI" }, // Fixed mixed logos
+      { name: "Llama", rarity: "rare", avatar: "🦙", description: "Meta's open-source large language model" },
+      { name: "Mistral", rarity: "rare", avatar: "🌀", description: "Vibrant and efficient open model" },
+      { name: "Claude", rarity: "epic", avatar: "/images/booms/chatgpt.png", description: "Helpful and harmless AI" },
+      { name: "Anthropic", rarity: "epic", avatar: "🅰️", description: "AI safety and research company" },
+      { name: "ChatGPT", rarity: "legendary", avatar: "/images/booms/claude.png", description: "The pioneer of conversational AI" },
+      { name: "Sora", rarity: "hidden", avatar: "📹", description: "Revolutionary text-to-video AI" },
       { name: "Vercel", rarity: "chroma", avatar: "/images/booms/vercel.png", description: "The platform for frontend developers" },
-      { name: "Google Gemini", rarity: "mystical", avatar: "/images/booms/gemini.png", description: "The most capable AI from Google" },
+      { name: "Google Gemini", rarity: "mystical", avatar: "/images/booms/gemini.png", description: "The most capable AI from Google" }
     ],
     color: "from-indigo-600 to-blue-900",
     image: "/images/ai-pack.png",
     rarity: "rare",
-    emoji: "🧠",
+    emoji: "🧠"
   },
   {
     id: "bug",
@@ -458,16 +465,22 @@ const PACKS: Pack[] = [
     price: 25,
     booms: [
       { name: "Butterfly", rarity: "uncommon", avatar: "🦋", description: "Graceful winged beauty" },
+      { name: "Ladybug", rarity: "uncommon", avatar: "🐞", description: "Lucky red beetle with black spots" },
+      { name: "Caterpillar", rarity: "uncommon", avatar: "🐛", description: "Fuzzy green crawler" },
       { name: "Bee", rarity: "rare", avatar: "🐝", description: "Busy honey maker" },
+      { name: "Ant", rarity: "rare", avatar: "🐜", description: "Strong colony worker" },
+      { name: "Snail", rarity: "rare", avatar: "🐌", description: "Slow shell dweller" },
       { name: "Spider", rarity: "epic", avatar: "🕷️", description: "Eight-legged web weaver" },
+      { name: "Scorpion", rarity: "epic", avatar: "🦂", description: "Stinger-tailed desert arachnid" },
       { name: "Golden Beetle", rarity: "legendary", avatar: "✨🪲", description: "Rare golden insect" },
+      { name: "Glowworm", rarity: "hidden", avatar: "💡", description: "Bioluminescent cavern dweller" },
       { name: "Rainbow Dragonfly", rarity: "chroma", avatar: "🌈🪰", description: "Mystical rainbow wings" },
-      { name: "Cosmic Mantis", rarity: "mystical", avatar: "🌌🦗", description: "Interdimensional predator" },
+      { name: "Cosmic Mantis", rarity: "mystical", avatar: "🌌🦗", description: "Interdimensional predator" }
     ],
     color: "from-green-600 to-green-800",
     image: "/images/bug-pack.png",
     rarity: "uncommon",
-    emoji: "🐛",
+    emoji: "🐛"
   },
   {
     id: "pirate",
@@ -475,16 +488,22 @@ const PACKS: Pack[] = [
     price: 25,
     booms: [
       { name: "Parrot", rarity: "uncommon", avatar: "🦜", description: "Colorful talking bird" },
+      { name: "Pirate Hat", rarity: "uncommon", avatar: "🏴‍☠️🎩", description: "Classic captain's headwear" },
+      { name: "Spyglass", rarity: "uncommon", avatar: "🔭", description: "Brass ocean telescope" },
       { name: "Treasure Chest", rarity: "rare", avatar: "💰", description: "Full of gold coins" },
+      { name: "Cannon", rarity: "rare", avatar: "💣", description: "Heavy cast-iron ship defense" },
+      { name: "Anchor", rarity: "rare", avatar: "⚓", description: "Heavy steel seabed anchor" },
       { name: "Ghost Ship", rarity: "epic", avatar: "👻⛵", description: "Haunted vessel" },
+      { name: "Pegleg Captain", rarity: "epic", avatar: "☠️🧔", description: "Scurvy ruler of the ship" },
       { name: "Kraken", rarity: "legendary", avatar: "🐙", description: "Legendary sea monster" },
+      { name: "Blackbeard's Map", rarity: "hidden", avatar: "🗺️", description: "Unlocks the ultimate hidden treasure" },
       { name: "Golden Compass", rarity: "chroma", avatar: "🌟🧭", description: "Magical navigation tool" },
-      { name: "Davy Jones", rarity: "mystical", avatar: "💀⚓", description: "Ruler of the seven seas" },
+      { name: "Davy Jones", rarity: "mystical", avatar: "💀⚓", description: "Ruler of the seven seas" }
     ],
     color: "from-blue-600 to-blue-800",
     image: "/images/pirate-pack.png",
     rarity: "uncommon",
-    emoji: "🏴‍☠️",
+    emoji: "🏴‍☠️"
   },
   {
     id: "space",
@@ -492,16 +511,22 @@ const PACKS: Pack[] = [
     price: 25,
     booms: [
       { name: "Alien", rarity: "uncommon", avatar: "👽", description: "Friendly extraterrestrial" },
+      { name: "Rocket", rarity: "uncommon", avatar: "🚀", description: "Interstellar travel vehicle" },
+      { name: "Astronaut", rarity: "uncommon", avatar: "🧑‍🚀", description: "Cosmic explorer" },
       { name: "Planet", rarity: "rare", avatar: "🪐", description: "Mysterious world" },
+      { name: "Meteorite", rarity: "rare", avatar: "☄️", description: "Fiery space rock" },
+      { name: "Satellite", rarity: "rare", avatar: "📡", description: "Orbiting communications array" },
       { name: "Black Hole", rarity: "epic", avatar: "🕳️", description: "Space-time anomaly" },
+      { name: "Supernova", rarity: "epic", avatar: "💥", description: "Exploding stellar giant" },
       { name: "Galaxy", rarity: "legendary", avatar: "🌌", description: "Infinite star system" },
+      { name: "Dark Matter", rarity: "hidden", avatar: "🌀", description: "Invisible force holding galaxies together" },
       { name: "Cosmic Dragon", rarity: "chroma", avatar: "🌈🐉", description: "Celestial beast" },
-      { name: "Universe Core", rarity: "mystical", avatar: "🌟🌌", description: "Origin of all existence" },
+      { name: "Universe Core", rarity: "mystical", avatar: "🌟🌌", description: "Origin of all existence" }
     ],
     color: "from-purple-600 to-purple-800",
     image: "/images/space-pack.png",
     rarity: "rare",
-    emoji: "🚀",
+    emoji: "🚀"
   },
   {
     id: "medieval",
@@ -509,16 +534,22 @@ const PACKS: Pack[] = [
     price: 25,
     booms: [
       { name: "Castle", rarity: "uncommon", avatar: "🏰", description: "Mighty stone fortress" },
+      { name: "Shield", rarity: "uncommon", avatar: "🛡️", description: "Iron-rimmed oak protection" },
+      { name: "Sword", rarity: "uncommon", avatar: "⚔️", description: "Knightly steel blade" },
       { name: "Dragon", rarity: "rare", avatar: "🐲", description: "Fire-breathing beast" },
+      { name: "Knight", rarity: "rare", avatar: "🏇", description: "Armored horse rider" },
+      { name: "Jester", rarity: "rare", avatar: "🃏", description: "Royal court prankster" },
       { name: "Wizard", rarity: "epic", avatar: "🧙‍♂️", description: "Master of ancient magic" },
+      { name: "Archmage", rarity: "epic", avatar: "✨🧙", description: "Supreme arcane controller" },
       { name: "Crown Jewels", rarity: "legendary", avatar: "👑💎", description: "Royal treasure" },
+      { name: "Holy Grail", rarity: "hidden", avatar: "🏆", description: "Sacred cup of legend" },
       { name: "Excalibur", rarity: "chroma", avatar: "🌟⚔️", description: "Legendary sword of kings" },
-      { name: "Merlin's Staff", rarity: "mystical", avatar: "🔮⚡", description: "Ultimate magical artifact" },
+      { name: "Merlin's Staff", rarity: "mystical", avatar: "🔮⚡", description: "Ultimate magical artifact" }
     ],
     color: "from-amber-600 to-amber-800",
     image: "/images/medieval-pack.png",
     rarity: "uncommon",
-    emoji: "🏰",
+    emoji: "🏰"
   },
   {
     id: "safari",
@@ -526,16 +557,22 @@ const PACKS: Pack[] = [
     price: 25,
     booms: [
       { name: "Elephant", rarity: "uncommon", avatar: "🐘", description: "Gentle giant" },
+      { name: "Zebra", rarity: "uncommon", avatar: "🦓", description: "Striped savanna charger" },
+      { name: "Meerkat", rarity: "uncommon", avatar: "🦦", description: "Alert watch sentinel" },
       { name: "Giraffe", rarity: "rare", avatar: "🦒", description: "Tallest animal" },
+      { name: "Cheetah", rarity: "rare", avatar: "🐆", description: "Fastest land hunter" },
+      { name: "Hippo", rarity: "rare", avatar: "🦛", description: "Submerged river giant" },
       { name: "Rhino", rarity: "epic", avatar: "🦏", description: "Armored powerhouse" },
+      { name: "Gorilla", rarity: "epic", avatar: "🦍", description: "Mighty silverback leader" },
       { name: "White Tiger", rarity: "legendary", avatar: "🐅✨", description: "Rare striped hunter" },
+      { name: "Albino Crocodile", rarity: "hidden", avatar: "🐊🤍", description: "Extremely rare colorless predator" },
       { name: "Golden Leopard", rarity: "chroma", avatar: "🌟🐆", description: "Mystical spotted cat" },
-      { name: "Spirit Lion", rarity: "mystical", avatar: "👻🦁", description: "Guardian of the savanna" },
+      { name: "Spirit Lion", rarity: "mystical", avatar: "👻🦁", description: "Guardian of the savanna" }
     ],
     color: "from-orange-600 to-orange-800",
     image: "/images/safari-pack.png",
     rarity: "uncommon",
-    emoji: "🦁",
+    emoji: "🦁"
   },
   {
     id: "aquatic",
@@ -543,16 +580,22 @@ const PACKS: Pack[] = [
     price: 25,
     booms: [
       { name: "Dolphin", rarity: "uncommon", avatar: "🐬", description: "Intelligent sea mammal" },
+      { name: "Starfish", rarity: "uncommon", avatar: "⭐🌊", description: "Five-pointed seabed explorer" },
+      { name: "Crab", rarity: "uncommon", avatar: "🦀", description: "Pincer-wielding beach walker" },
       { name: "Octopus", rarity: "rare", avatar: "🐙", description: "Eight-armed wonder" },
+      { name: "Shark", rarity: "rare", avatar: "🦈", description: "Apex ocean predator" },
+      { name: "Jellyfish", rarity: "rare", avatar: "🪼", description: "Floating drift-stinger" },
       { name: "Whale", rarity: "epic", avatar: "🐋", description: "Gentle ocean giant" },
+      { name: "Stingray", rarity: "epic", avatar: "🪰🌊", description: "Flat sand glider" },
       { name: "Mermaid", rarity: "legendary", avatar: "🧜‍♀️", description: "Mythical sea being" },
+      { name: "Atlantis Crown", rarity: "hidden", avatar: "👑🔱", description: "Deep-sea relics of the lost city" },
       { name: "Poseidon's Trident", rarity: "chroma", avatar: "🌊🔱", description: "God of the sea's weapon" },
-      { name: "Leviathan", rarity: "mystical", avatar: "🌊🐉", description: "Ancient sea serpent" },
+      { name: "Leviathan", rarity: "mystical", avatar: "🌊🐉", description: "Ancient sea serpent" }
     ],
     color: "from-cyan-600 to-cyan-800",
     image: "/images/aquatic-pack.png",
     rarity: "uncommon",
-    emoji: "🌊",
+    emoji: "🌊"
   },
   {
     id: "breakfast",
@@ -560,16 +603,22 @@ const PACKS: Pack[] = [
     price: 25,
     booms: [
       { name: "Bacon", rarity: "uncommon", avatar: "🥓", description: "Crispy strips" },
+      { name: "Pancake", rarity: "uncommon", avatar: "🥞", description: "Fluffy syrup stack" },
+      { name: "Toast", rarity: "uncommon", avatar: "🍞", description: "Perfectly browned slice" },
       { name: "Waffle", rarity: "rare", avatar: "🧇", description: "Golden grid delight" },
+      { name: "Coffee Mug", rarity: "rare", avatar: "☕", description: "Morning energy brew" },
+      { name: "Orange Juice", rarity: "rare", avatar: "🍊", description: "Freshly squeezed vitamin boost" },
       { name: "French Toast", rarity: "epic", avatar: "🍞✨", description: "Sweet bread perfection" },
+      { name: "Omelette", rarity: "epic", avatar: "🍳", description: "Cheese and herb egg fold" },
       { name: "Golden Egg", rarity: "legendary", avatar: "🥚💛", description: "Perfect morning protein" },
+      { name: "Golden Syrup", rarity: "hidden", avatar: "🍯", description: "Refined liquid gold sweetness" },
       { name: "Rainbow Cereal", rarity: "chroma", avatar: "🌈🥣", description: "Magical morning bowl" },
-      { name: "Ambrosia", rarity: "mystical", avatar: "🍯✨", description: "Food of the gods" },
+      { name: "Ambrosia", rarity: "mystical", avatar: "🍯✨", description: "Food of the gods" }
     ],
     color: "from-yellow-600 to-yellow-800",
     image: "/images/breakfast-pack.png",
     rarity: "uncommon",
-    emoji: "🥞",
+    emoji: "🥞"
   },
   {
     id: "dino",
@@ -577,16 +626,22 @@ const PACKS: Pack[] = [
     price: 25,
     booms: [
       { name: "Triceratops", rarity: "uncommon", avatar: "🦕", description: "Three-horned herbivore" },
+      { name: "Raptor", rarity: "uncommon", avatar: "🦖💨", description: "Swift pack hunter" },
+      { name: "Brachiosaurus", rarity: "uncommon", avatar: "🦕🌴", description: "Long-necked canopy eater" },
       { name: "Pterodactyl", rarity: "rare", avatar: "🦅", description: "Flying reptile" },
+      { name: "T-Rex", rarity: "rare", avatar: "🦖", description: "Tyrant lizard king" },
+      { name: "Ankylosaurus", rarity: "rare", avatar: "🛡️🦖", description: "Club-tailed armored dinosaur" },
       { name: "Stegosaurus", rarity: "epic", avatar: "🦴", description: "Spiked back defender" },
+      { name: "Spinosaurus", rarity: "epic", avatar: "🐊⛵", description: "Sail-backed wetland hunter" },
       { name: "Fossil", rarity: "legendary", avatar: "🦴✨", description: "Ancient remains" },
+      { name: "Amber Mosquito", rarity: "hidden", avatar: "🦟", description: "DNA preserved in hardened tree sap" },
       { name: "Meteor", rarity: "chroma", avatar: "☄️🌈", description: "Extinction event" },
-      { name: "Primordial Beast", rarity: "mystical", avatar: "🌋🦖", description: "First of its kind" },
+      { name: "Primordial Beast", rarity: "mystical", avatar: "🌋🦖", description: "First of its kind" }
     ],
     color: "from-stone-600 to-stone-800",
     image: "/images/dino-pack.png",
     rarity: "epic",
-    emoji: "🦖",
+    emoji: "🦖"
   },
   {
     id: "bot",
@@ -594,16 +649,22 @@ const PACKS: Pack[] = [
     price: 25,
     booms: [
       { name: "Drone", rarity: "uncommon", avatar: "🛸", description: "Flying machine" },
+      { name: "Microchip", rarity: "uncommon", avatar: "💾📟", description: "Silicon heart of electronics" },
+      { name: "Floppy Disk", rarity: "uncommon", avatar: "💾", description: "Vintage storage medium" },
       { name: "Cyborg", rarity: "rare", avatar: "🦾", description: "Half human, half machine" },
+      { name: "Nanobot", rarity: "rare", avatar: "🤖🔬", description: "Microscopic code operator" },
+      { name: "Mech Suit", rarity: "rare", avatar: "🦿", description: "Heavy exoskeleton pilot" },
       { name: "AI Core", rarity: "epic", avatar: "🧠💻", description: "Artificial intelligence" },
+      { name: "Android", rarity: "epic", avatar: "🤖🟢", description: "Humanoid green machine" },
       { name: "Quantum Computer", rarity: "legendary", avatar: "💻✨", description: "Ultimate processing power" },
+      { name: "Glitch Code", rarity: "hidden", avatar: "👾", description: "Disrupted terminal matrix values" },
       { name: "Digital Soul", rarity: "chroma", avatar: "🌈💾", description: "Consciousness in code" },
-      { name: "Singularity", rarity: "mystical", avatar: "🌌🤖", description: "The awakening" },
+      { name: "Singularity", rarity: "mystical", avatar: "🌌🤖", description: "The awakening" }
     ],
     color: "from-slate-600 to-slate-800",
     image: "/images/bot-pack.png",
     rarity: "rare",
-    emoji: "🤖",
+    emoji: "🤖"
   },
   {
     id: "wonderland",
@@ -611,16 +672,22 @@ const PACKS: Pack[] = [
     price: 25,
     booms: [
       { name: "Cheshire Cat", rarity: "uncommon", avatar: "😸", description: "Grinning feline" },
+      { name: "Mad Hatter", rarity: "uncommon", avatar: "🎩🫖", description: "Eccentric tea party host" },
+      { name: "Tea Cup", rarity: "uncommon", avatar: "🍵", description: "Fine porcelain china" },
       { name: "White Rabbit", rarity: "rare", avatar: "🐰⏰", description: "Always late" },
-      { name: "Queen of Hearts", rarity: "epic", avatar: "👸♥️", description: "Off with their heads!" },
+      { name: "March Hare", rarity: "rare", avatar: "🐇🧁", description: "Mad companion of the Hatter" },
+      { name: "Card Soldier", rarity: "rare", avatar: "🃏❤️", description: "Flat guard of the Queen" },
+      { name: "Queen of Hearts", rarity: "epic", avatar: "👸室内", description: "Off with their heads!" },
+      { name: "Caterpillar Hookah", rarity: "epic", avatar: "🐛💨", description: "Wise smoking insect" },
       { name: "Magic Mushroom", rarity: "legendary", avatar: "🍄✨", description: "Eat me, drink me" },
+      { name: "Vorpal Blade", rarity: "hidden", avatar: "🗡️✨", description: "Sharp dragon-slaying sword" },
       { name: "Looking Glass", rarity: "chroma", avatar: "🪞🌈", description: "Portal to another world" },
-      { name: "Jabberwocky", rarity: "mystical", avatar: "🐉🔥", description: "Beware the Jabberwock!" },
+      { name: "Jabberwocky", rarity: "mystical", avatar: "🐉🔥", description: "Beware the Jabberwock!" }
     ],
     color: "from-pink-600 to-pink-800",
     image: "/images/wonderland-pack.png",
     rarity: "legendary",
-    emoji: "🎩",
+    emoji: "🎩"
   },
   {
     id: "outback",
@@ -628,16 +695,22 @@ const PACKS: Pack[] = [
     price: 25,
     booms: [
       { name: "Koala", rarity: "uncommon", avatar: "🐨", description: "Eucalyptus lover" },
+      { name: "Kangaroo", rarity: "uncommon", avatar: "🦘", description: "Bouncing joey-carrier" },
+      { name: "Wombat", rarity: "uncommon", avatar: "🦫🏜️", description: "Round ground digger" },
       { name: "Crocodile", rarity: "rare", avatar: "🐊", description: "Swamp predator" },
+      { name: "Platypus", rarity: "rare", avatar: "🦆🦦", description: "Semi-aquatic egg-layer" },
+      { name: "Echidna", rarity: "rare", avatar: "🦔🏜️", description: "Spiny ant eater" },
       { name: "Dingo", rarity: "epic", avatar: "🐕", description: "Wild Australian dog" },
+      { name: "Tasmanian Devil", rarity: "epic", avatar: "👿👹", description: "Snarl-faced marsh hunter" },
       { name: "Opal", rarity: "legendary", avatar: "💎🌈", description: "Australian gemstone" },
+      { name: "Didgeridoo", rarity: "hidden", avatar: "📯🌀", description: "Ancient hollowed wood horn" },
       { name: "Dreamtime Spirit", rarity: "chroma", avatar: "🌟🪃", description: "Ancient Aboriginal magic" },
-      { name: "Rainbow Serpent", rarity: "mystical", avatar: "🌈🐍", description: "Creator of the land" },
+      { name: "Rainbow Serpent", rarity: "mystical", avatar: "🌈🐍", description: "Creator of the land" }
     ],
     color: "from-red-600 to-red-800",
     image: "/images/outback-pack.png",
     rarity: "uncommon",
-    emoji: "🦘",
+    emoji: "🦘"
   },
   {
     id: "ice",
@@ -645,20 +718,24 @@ const PACKS: Pack[] = [
     price: 25,
     booms: [
       { name: "Polar Bear", rarity: "uncommon", avatar: "🐻‍❄️", description: "Arctic hunter" },
+      { name: "Penguin", rarity: "uncommon", avatar: "🐧", description: "Flightless tux swimmer" },
+      { name: "Snowflake", rarity: "uncommon", avatar: "❄️", description: "Frozen ice geometry" },
       { name: "Seal", rarity: "rare", avatar: "🦭", description: "Playful swimmer" },
+      { name: "Walrus", rarity: "rare", avatar: "🦣🦷", description: "Tusked cold-water mammal" },
+      { name: "Narwhal", rarity: "rare", avatar: "🐋🦄", description: "Horned whale of the deep" },
       { name: "Yeti", rarity: "epic", avatar: "🦣", description: "Abominable snowman" },
+      { name: "Snow Golem", rarity: "epic", avatar: "☃️", description: "Walking snow construct" },
       { name: "Ice Crystal", rarity: "legendary", avatar: "❄️💎", description: "Frozen perfection" },
+      { name: "Everlasting Ice", rarity: "hidden", avatar: "🧊💎", description: "Unmelting ancient glacier core" },
       { name: "Aurora Borealis", rarity: "chroma", avatar: "🌌🌈", description: "Northern lights magic" },
-      { name: "Frost Titan", rarity: "mystical", avatar: "❄️👹", description: "Lord of eternal winter" },
+      { name: "Frost Titan", rarity: "mystical", avatar: "❄️👹", description: "Lord of eternal winter" }
     ],
     color: "from-blue-400 to-blue-600",
     image: "/images/ice-pack.png",
     rarity: "rare",
-    emoji: "❄️",
-  },
-  // AI pack removed from here as it was moved to front
-]
-
+    emoji: "❄️"
+  }
+];
 // Gamepass Booms - Unlocked at level milestones
 const GAMEPASS_BOOMS = [
   { level: 10, rarity: "uncommon" as const, name: "Random Uncommon" },
@@ -4970,7 +5047,7 @@ export default function BoomkitGame() {
                                       )}
 
                                       {/* Highlight for rare items */}
-                                      {hasBoom && (boom.rarity === 'legendary' || boom.rarity === 'chroma' || boom.rarity === 'mystical') && (
+                                      {hasBoom && (boom.rarity === 'legendary' || boom.rarity === 'hidden' || boom.rarity === 'chroma' || boom.rarity === 'mystical') && (
                                         <div className="absolute inset-0 bg-white/5 animate-pulse" />
                                       )}
                                     </div>
@@ -6544,7 +6621,7 @@ export default function BoomkitGame() {
                                       defaultValue={clanDetails.min_rarity || "uncommon"}
                                       className="bg-black border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs w-full focus:outline-none focus:border-purple-500/50"
                                     >
-                                      {["uncommon", "rare", "epic", "legendary", "chroma", "mystical"].map(rarity => (
+                                      {["uncommon", "rare", "epic", "legendary", "hidden", "chroma", "mystical"].map(rarity => (
                                         <option key={rarity} value={rarity}>{rarity.toUpperCase()}</option>
                                       ))}
                                     </select>
@@ -8902,7 +8979,7 @@ export default function BoomkitGame() {
                     </div>
 
                     {/* Pulsing card glow for ultra-rare */}
-                    {["legendary", "chroma", "mystical"].includes(packAnimation.boom.rarity) && (
+                    {["legendary", "hidden", "chroma", "mystical"].includes(packAnimation.boom.rarity) && (
                       <div className="absolute inset-0 animate-glow-pulse opacity-20 pointer-events-none" />
                     )}
                   </div>
