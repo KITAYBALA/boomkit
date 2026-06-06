@@ -5311,19 +5311,51 @@ const handlePackAction = (packId: string) => {
 
                 {/* Premium Rarity Banner */}
                 <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2rem] border border-white/10 p-8 shadow-xl">
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="w-1.5 h-6 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full" />
-                    <h3 className="text-lg font-black text-white uppercase tracking-widest">Global Drop Rates</h3>
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                    <div className="flex items-center gap-3">
+                      <div className="w-1.5 h-6 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full" />
+                      <h3 className="text-lg font-black text-white uppercase tracking-widest">Global Drop Rates</h3>
+                    </div>
+                    
+                    {/* Toggles for Instant & Auto Open */}
+                    <div className="flex items-center gap-6">
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none group">
+                        <input
+                          type="checkbox"
+                          checked={isInstantOpen}
+                          onChange={(e) => setIsInstantOpen(e.target.checked)}
+                          className="sr-only"
+                        />
+                        <div className={`w-10 h-6 rounded-full p-1 transition-colors duration-300 ${isInstantOpen ? 'bg-purple-600' : 'bg-slate-800 border border-white/10'}`}>
+                          <div className={`w-4 h-4 rounded-full bg-white transition-transform duration-300 ${isInstantOpen ? 'translate-x-4' : 'translate-x-0'}`} />
+                        </div>
+                        <span className="text-[10px] font-black uppercase tracking-wider text-white/70 group-hover:text-white transition-colors">Instant Open (2x)</span>
+                      </label>
+
+                      <label className="flex items-center gap-2.5 cursor-pointer select-none group">
+                        <input
+                          type="checkbox"
+                          checked={isAutoOpen}
+                          onChange={(e) => setIsAutoOpen(e.target.checked)}
+                          className="sr-only"
+                        />
+                        <div className={`w-10 h-6 rounded-full p-1 transition-colors duration-300 ${isAutoOpen ? 'bg-pink-600' : 'bg-slate-800 border border-white/10'}`}>
+                          <div className={`w-4 h-4 rounded-full bg-white transition-transform duration-300 ${isAutoOpen ? 'translate-x-4' : 'translate-x-0'}`} />
+                        </div>
+                        <span className="text-[10px] font-black uppercase tracking-wider text-white/70 group-hover:text-white transition-colors">Auto Open</span>
+                      </label>
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
                     {[
                       { label: "Uncommon", rate: "60%", color: "bg-green-500", border: "border-green-500/20", glow: "hover:shadow-[0_0_20px_rgba(34,197,94,0.2)]" },
-                      { label: "Rare", rate: "25%", color: "bg-blue-500", border: "border-blue-500/20", glow: "hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]" },
-                      { label: "Epic", rate: "10%", color: "bg-purple-500", border: "border-purple-500/20", glow: "hover:shadow-[0_0_20px_rgba(168,85,247,0.2)]" },
-                      { label: "Legendary", rate: "4%", color: "bg-orange-500", border: "border-orange-500/20", glow: "hover:shadow-[0_0_20px_rgba(249,115,22,0.2)] animate-pulse-slow" },
+                      { label: "Rare", rate: "30%", color: "bg-blue-500", border: "border-blue-500/20", glow: "hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]" },
+                      { label: "Epic", rate: "8%", color: "bg-purple-500", border: "border-purple-500/20", glow: "hover:shadow-[0_0_20px_rgba(168,85,247,0.2)]" },
+                      { label: "Legendary", rate: "1%", color: "bg-orange-500", border: "border-orange-500/20", glow: "hover:shadow-[0_0_20px_rgba(249,115,22,0.2)]" },
+                      { label: "Hidden", rate: "0.09%", color: "bg-slate-800 text-slate-100", border: "border-slate-700", glow: "hover:shadow-[0_0_20px_rgba(148,163,184,0.3)] animate-pulse" },
                       { label: "Chroma", rate: "0.9%", color: "bg-gradient-to-r from-red-500 via-yellow-500 to-purple-500", border: "border-pink-500/20", glow: "hover:shadow-[0_0_25px_rgba(236,72,153,0.25)]" },
-                      { label: "Mystical", rate: "0.1%", color: "bg-gradient-to-r from-purple-900 via-pink-500 to-indigo-900", border: "border-cyan-500/20", glow: "hover:shadow-[0_0_30px_rgba(6,182,212,0.35)]" },
+                      { label: "Mystical", rate: "0.01%", color: "bg-gradient-to-r from-purple-900 via-pink-500 to-indigo-900", border: "border-cyan-500/20", glow: "hover:shadow-[0_0_30px_rgba(6,182,212,0.35)]" },
                     ].map((rarity, i) => (
                       <div key={i} className={`relative group overflow-hidden rounded-2xl border ${rarity.border} bg-black/40 p-4 transition-all duration-500 hover:bg-black/20 hover:-translate-y-0.5 ${rarity.glow}`}>
                         <div className="relative z-10 flex flex-col items-center gap-2">
@@ -8963,14 +8995,15 @@ const handlePackAction = (packId: string) => {
                         <h2 className="text-3xl font-black text-white tracking-tight drop-shadow-md">
                           {packAnimation.boom.name}
                         </h2>
-                        <Badge className={`uppercase font-black text-[9px] tracking-widest border-none px-3 py-1 rounded-full ${
-                          packAnimation.boom.rarity === "uncommon" ? "bg-green-500" :
-                          packAnimation.boom.rarity === "rare" ? "bg-blue-500" :
-                          packAnimation.boom.rarity === "epic" ? "bg-purple-500" :
-                          packAnimation.boom.rarity === "legendary" ? "bg-orange-500" :
-                          packAnimation.boom.rarity === "chroma" ? "bg-pink-500" :
-                          "bg-cyan-500"
-                        } text-white`}>
+                        <Badge className={`uppercase font-black text-[9px] tracking-widest px-3 py-1 rounded-full ${
+                          packAnimation.boom.rarity === "uncommon" ? "bg-green-500 text-white border-none" :
+                          packAnimation.boom.rarity === "rare" ? "bg-blue-500 text-white border-none" :
+                          packAnimation.boom.rarity === "epic" ? "bg-purple-500 text-white border-none" :
+                          packAnimation.boom.rarity === "legendary" ? "bg-orange-500 text-white border-none" :
+                          packAnimation.boom.rarity === "hidden" ? "bg-slate-800 text-slate-100 border border-slate-700" :
+                          packAnimation.boom.rarity === "chroma" ? "bg-gradient-to-r from-red-500 via-yellow-500 to-purple-500 text-white border-none" :
+                          "bg-gradient-to-r from-purple-900 via-pink-500 to-indigo-900 text-white border-none"
+                        }`}>
                           {packAnimation.boom.rarity}
                         </Badge>
                       </div>
@@ -9007,6 +9040,17 @@ const handlePackAction = (packId: string) => {
                     <p className="text-white/30 text-xs font-black uppercase tracking-[0.25em] mt-8 animate-pulse">
                       Click Anywhere to Continue
                     </p>
+                  )}
+                  {isAutoOpen && (
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setIsAutoOpen(false)
+                      }}
+                      className="mt-6 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-black uppercase text-[10px] tracking-widest rounded-xl border border-red-500/30 shadow-lg shadow-red-950/50 z-20 animate-pulse animate-duration-1000"
+                    >
+                      🛑 Stop Auto Open
+                    </Button>
                   )}
                 </div>
               )
