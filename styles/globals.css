@@ -109,3 +109,31 @@
 .instant-open-active [style*="particle-explode"] {
   animation: particle-explode 0.9s ease-out forwards !important;
 }
+
+/* Mystical Avatar Animation */
+@keyframes mystical-avatar-float {
+  0% {
+    transform: translateY(0px) rotate(0deg) scale(1);
+    filter: drop-shadow(0 0 15px rgba(168, 85, 247, 0.6));
+  }
+  25% {
+    transform: translateY(-8px) rotate(2deg) scale(1.03);
+    filter: drop-shadow(0 0 25px rgba(236, 72, 153, 0.8));
+  }
+  50% {
+    transform: translateY(0px) rotate(0deg) scale(1);
+    filter: drop-shadow(0 0 15px rgba(168, 85, 247, 0.6));
+  }
+  75% {
+    transform: translateY(8px) rotate(-2deg) scale(0.97);
+    filter: drop-shadow(0 0 25px rgba(6, 182, 212, 0.8));
+  }
+  100% {
+    transform: translateY(0px) rotate(0deg) scale(1);
+    filter: drop-shadow(0 0 15px rgba(168, 85, 247, 0.6));
+  }
+}
+.animate-mystical-avatar {
+  animation: mystical-avatar-float 6s ease-in-out infinite;
+}
+

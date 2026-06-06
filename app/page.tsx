@@ -757,11 +757,12 @@ const LIMITED_BOOMS = [
 // Rarity chances for pack opening (total = 100%)
 const RARITY_CHANCES = {
   uncommon: 60,
-  rare: 25,
-  epic: 10,
-  legendary: 4,
+  rare: 30,
+  epic: 8,
+  legendary: 1,
+  hidden: 0.09,
   chroma: 0.9,
-  mystical: 0.1,
+  mystical: 0.01,
 }
 
 const DAILY_SPIN_REWARDS = [100, 150, 200, 250, 300, 350, 400, 500]
@@ -2235,6 +2236,7 @@ export default function BoomkitGame() {
     let cumulativeChance = 0
     const rarityOrder: (keyof typeof RARITY_CHANCES)[] = [
       "mystical",
+      "hidden",
       "chroma",
       "legendary",
       "epic",
@@ -2381,7 +2383,7 @@ export default function BoomkitGame() {
     if (!boom) return 0
     const rarityChance = RARITY_CHANCES[boom.rarity as keyof typeof RARITY_CHANCES] || 0
     const boomsOfSameRarity = pack.booms.filter((b) => b.rarity === boom.rarity).length
-    return boomsOfSameRarity > 0 ? Number((rarityChance / boomsOfSameRarity).toFixed(1)) : 0
+    return boomsOfSameRarity > 0 ? Number((rarityChance / boomsOfSameRarity).toFixed(2)) : 0
   }
 
   // Check if boom is new (user doesn't own it)
@@ -8981,7 +8983,9 @@ const handlePackAction = (packId: string) => {
               return (
                 <div className="flex flex-col items-center justify-center w-full h-full relative z-10">
                   <div
-                    className={`relative w-[380px] h-[520px] rounded-[2.5rem] border-2 bg-slate-950/70 backdrop-blur-2xl overflow-hidden ${revealAnimationClass} ${borderGlowColor}`}
+                    className={`relative w-[380px] h-[520px] rounded-[2.5rem] border-2 bg-slate-950/70 backdrop-blur-2xl overflow-hidden ${revealAnimationClass} ${borderGlowColor} ${
+                      packAnimation.boom.rarity === "mystical" ? "animate-mystical-aura" : ""
+                    }`}
                   >
                     {/* Scanline overlay */}
                     <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0)_95%,rgba(255,255,255,0.03)_95%)] bg-[size:100%_4px] pointer-events-none" />
@@ -9008,11 +9012,12 @@ const handlePackAction = (packId: string) => {
                         </Badge>
                       </div>
 
-                      {/* Centered Art */}
                       <div className="w-48 h-48 rounded-[2rem] bg-black/40 border border-white/5 flex items-center justify-center text-8xl shadow-inner relative overflow-hidden group">
                         <BoomAvatar
                           name={packAnimation.boom.name}
-                          className="w-36 h-36 object-contain drop-shadow-2xl group-hover:scale-105 transition-transform duration-500"
+                          className={`w-36 h-36 object-contain drop-shadow-2xl group-hover:scale-105 transition-transform duration-500 ${
+                            packAnimation.boom.rarity === "mystical" ? "animate-mystical-avatar" : ""
+                          }`}
                         />
                       </div>
 
