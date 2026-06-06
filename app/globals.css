@@ -633,3 +633,55 @@
 .animate-mystical-avatar {
   animation: mystical-avatar-float 6s ease-in-out infinite;
 }
+
+/* Global Mobile Responsiveness Overrides */
+@media (max-width: 768px) {
+  /* Scale down large container paddings to give content more breathing room */
+  .p-8 {
+    padding: 1rem !important;
+  }
+  .p-10 {
+    padding: 1.25rem !important;
+  }
+  .p-12 {
+    padding: 1.5rem !important;
+  }
+  .p-6 {
+    padding: 0.75rem !important;
+  }
+
+  /* Scale down massive border radiuses on small devices */
+  .rounded-\[2\.5rem\] {
+    border-radius: 1.25rem !important;
+  }
+  .rounded-\[2rem\] {
+    border-radius: 1rem !important;
+  }
+  .rounded-\[3rem\] {
+    border-radius: 1.5rem !important;
+  }
+
+  /* Adjust gaps to prevent vertical squishing */
+  .gap-8 {
+    gap: 1.25rem !important;
+  }
+  .gap-6 {
+    gap: 1rem !important;
+  }
+
+  /* Force wrap on flex layouts that could overflow horizontally */
+  .flex-row {
+    flex-wrap: wrap;
+  }
+
+  /* Ensure text elements stay within viewport bounds */
+  h1 {
+    font-size: 2rem !important;
+    line-height: 2.25rem !important;
+  }
+  h2 {
+    font-size: 1.5rem !important;
+    line-height: 1.75rem !important;
+  }
+}
+

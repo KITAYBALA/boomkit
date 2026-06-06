@@ -4538,7 +4538,7 @@ const handlePackAction = (packId: string) => {
             {currentUser?.isOwner && <CrownIcon className="h-5 w-5 md:h-6 md:w-6 text-yellow-400" />}
 
             {/* Credentials - Hidden on mobile */}
-            <div className="flex items-center space-x-2 bg-purple-500/30 rounded-lg px-3 py-1 text-xs text-white">
+            <div className="hidden md:flex items-center space-x-2 bg-purple-500/30 rounded-lg px-3 py-1 text-xs text-white">
               <span className="font-semibold">Credentials:</span>
               <span>Oktay Abdullazada (Owner)</span>
               <span className="text-white/50">|</span>
