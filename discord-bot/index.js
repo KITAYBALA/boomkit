@@ -21,7 +21,17 @@
  */
 
 require('dotenv').config();
-const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { 
+    Client, 
+    GatewayIntentBits, 
+    REST, 
+    Routes, 
+    SlashCommandBuilder, 
+    PermissionFlagsBits,
+    ActionRowBuilder,
+    ButtonBuilder,
+    ButtonStyle
+} = require('discord.js');
 const { createClient } = require('@supabase/supabase-js');
 const crypto = require('crypto');
 const fs = require('fs');
@@ -152,6 +162,18 @@ const commands = [
             option.setName('username')
                 .setDescription('Boomkit username to check alts for')
                 .setRequired(true)),
+
+    new SlashCommandBuilder()
+        .setName('coinflip')
+        .setDescription('Wager your tokens on a 50/50 coin flip')
+        .addIntegerOption(option => 
+            option.setName('amount')
+                .setDescription('Number of tokens to bet (Min: 100, Max: 10000)')
+                .setRequired(true)),
+                
+    new SlashCommandBuilder()
+        .setName('trivia')
+        .setDescription('Start a trivia question and win 100 tokens! (5 runs per hour limit)'),
 ].map(command => command.toJSON());
 
 // Slash Command Registration Helper
@@ -174,6 +196,135 @@ if (process.argv.includes('--register')) {
     registerCommands().then(() => process.exit(0));
     return;
 }
+
+// ==========================================
+// IN-MEMORY COOLDOWNS & STATIC DATA
+// ==========================================
+const coinflipCooldowns = new Map(); // discordUserId -> timestamp of next allowed flip
+const triviaHostLimits = new Map();  // discordUserId -> array of timestamps of last runs
+
+const TRIVIA_QUESTIONS = [
+    {
+        question: "Which rarity of Boom has a 0.01% drop rate?",
+        options: ["A) Legendary", "B) Chroma", "C) Hidden", "D) Mystical"],
+        correct: "D",
+        correctText: "D) Mystical"
+    },
+    {
+        question: "How many Booms are there in each Pack in the new update?",
+        options: ["A) 6", "B) 8", "C) 10", "D) 12"],
+        correct: "D",
+        correctText: "D) 12"
+    },
+    {
+        question: "What is the sell price of a Hidden rarity Boom?",
+        options: ["A) 200 credits", "B) 500 credits", "C) 750 credits", "D) 1000 credits"],
+        correct: "C",
+        correctText: "C) 750 credits"
+    },
+    {
+        question: "Which of these is NOT a pack in Boomkit?",
+        options: ["A) Dino Pack", "B) Aquatic Pack", "C) Insect Pack", "D) Space Pack"],
+        correct: "C",
+        correctText: "C) Insect Pack (It is actually named 'Bug Pack')"
+    },
+    {
+        question: "What is the drop rate percentage of a Hidden Boom?",
+        options: ["A) 0.01%", "B) 0.09%", "C) 0.1%", "D) 0.9%"],
+        correct: "B",
+        correctText: "B) 0.09%"
+    },
+    {
+        question: "What is the capital of France?",
+        options: ["A) Berlin", "B) Madrid", "C) Paris", "D) Rome"],
+        correct: "C",
+        correctText: "C) Paris"
+    },
+    {
+        question: "Which planet is closest to the Sun?",
+        options: ["A) Venus", "B) Earth", "C) Mercury", "D) Mars"],
+        correct: "C",
+        correctText: "C) Mercury"
+    },
+    {
+        question: "What is the largest ocean on Earth?",
+        options: ["A) Atlantic Ocean", "B) Indian Ocean", "C) Arctic Ocean", "D) Pacific Ocean"],
+        correct: "D",
+        correctText: "D) Pacific Ocean"
+    },
+    {
+        question: "Which element has the chemical symbol 'O'?",
+        options: ["A) Osmium", "B) Oxygen", "C) Gold", "D) Helium"],
+        correct: "B",
+        correctText: "B) Oxygen"
+    },
+    {
+        question: "Who wrote 'Romeo and Juliet'?",
+        options: ["A) Charles Dickens", "B) William Shakespeare", "C) Mark Twain", "D) Jane Austen"],
+        correct: "B",
+        correctText: "B) William Shakespeare"
+    },
+    {
+        question: "How many continents are there on Earth?",
+        options: ["A) 5", "B) 6", "C) 7", "D) 8"],
+        correct: "C",
+        correctText: "C) 7"
+    },
+    {
+        question: "What is the boiling point of water in Celsius?",
+        options: ["A) 50°C", "B) 90°C", "C) 100°C", "D) 120°C"],
+        correct: "C",
+        correctText: "C) 100°C"
+    },
+    {
+        question: "Which gas do plants absorb from the atmosphere for photosynthesis?",
+        options: ["A) Oxygen", "B) Nitrogen", "C) Hydrogen", "D) Carbon Dioxide"],
+        correct: "D",
+        correctText: "D) Carbon Dioxide"
+    },
+    {
+        question: "How many legs does a spider typically have?",
+        options: ["A) 6", "B) 8", "C) 10", "D) 12"],
+        correct: "B",
+        correctText: "B) 8"
+    },
+    {
+        question: "What is the name of the wizard in the Medieval Pack?",
+        options: ["A) Gandalf", "B) Harry", "C) Merlin", "D) Dumbledore"],
+        correct: "C",
+        correctText: "C) Merlin"
+    },
+    {
+        question: "Which company created the game engine 'Unreal Engine'?",
+        options: ["A) Unity Technologies", "B) Epic Games", "C) Valve", "C) EA"],
+        correct: "B",
+        correctText: "B) Epic Games"
+    },
+    {
+        question: "What is the currency symbol used for tokens in Boomkit?",
+        options: ["A) 🪙", "B) 💎", "C) 💵", "D) 💵"],
+        correct: "B",
+        correctText: "B) 💎 (Tokens are represented by gems/diamonds)"
+    },
+    {
+        question: "In what year did the Titanic sink?",
+        options: ["A) 1908", "B) 1912", "C) 1916", "D) 1920"],
+        correct: "B",
+        correctText: "B) 1912"
+    },
+    {
+        question: "Which organ is responsible for pumping blood throughout the human body?",
+        options: ["A) Lungs", "B) Brain", "C) Liver", "D) Heart"],
+        correct: "D",
+        correctText: "D) Heart"
+    },
+    {
+        question: "What is the speed of light approximately?",
+        options: ["A) 150,000 km/s", "B) 300,000 km/s", "C) 450,000 km/s", "D) 600,000 km/s"],
+        correct: "B",
+        correctText: "B) 300,000 km/s"
+    }
+];
 
 // ==========================================
 // HELPERS
@@ -985,6 +1136,218 @@ client.on('interactionCreate', async interaction => {
             console.error('[Interaction check-alts] Error:', err);
             return interaction.editReply({ content: '⚠️ An unexpected error occurred while checking alts.' });
         }
+    }
+
+    // --- COINFLIP COMMAND ---
+    if (commandName === 'coinflip') {
+        const amount = interaction.options.getInteger('amount');
+        
+        if (amount < 100 || amount > 10000) {
+            return interaction.reply({
+                content: '🛑 **Invalid Wager**: Coinflip wager must be between **100** and **10,000** tokens!',
+                ephemeral: true
+            });
+        }
+        
+        const now = Date.now();
+        const cooldownTime = coinflipCooldowns.get(user.id);
+        if (cooldownTime && now < cooldownTime) {
+            const timeLeft = Math.ceil((cooldownTime - now) / 1000 / 60);
+            return interaction.reply({
+                content: `⏳ **Cooldown**: You must wait **${timeLeft} minutes** before flipping again! (1-hour cooldown)`,
+                ephemeral: true
+            });
+        }
+        
+        await interaction.deferReply({ ephemeral: false });
+        
+        try {
+            const boomkitUsername = await getLinkedUsername(user.id);
+            if (!boomkitUsername) {
+                return interaction.editReply({
+                    content: '🛑 **Not Linked**: Your Discord account is not linked to any Boomkit username. Link it using `/link [username] [password]` first!'
+                });
+            }
+            
+            const { data: player, error: playerErr } = await supabase
+                .from('users')
+                .select('tokens, username')
+                .eq('username', boomkitUsername)
+                .single();
+                
+            if (playerErr || !player) {
+                return interaction.editReply({
+                    content: '🛑 **Error**: Could not retrieve your account data.'
+                });
+            }
+            
+            if (player.tokens < amount) {
+                return interaction.editReply({
+                    content: `🛑 **Insufficient Balance**: You only have **${player.tokens}** tokens (trying to bet **${amount}**).`
+                });
+            }
+            
+            const isWin = Math.random() < 0.5;
+            const newBalance = isWin ? (player.tokens + amount) : (player.tokens - amount);
+            
+            const { error: updateErr } = await supabase
+                .from('users')
+                .update({ tokens: newBalance })
+                .eq('username', player.username);
+                
+            if (updateErr) {
+                console.error('[Coinflip DB Update] Error:', updateErr);
+                return interaction.editReply({
+                    content: '⚠️ Failed to record the coinflip in the database. Your balance was not changed.'
+                });
+            }
+            
+            coinflipCooldowns.set(user.id, now + 3600000); // 1 hour
+            
+            const resultText = isWin 
+                ? `🎉 **YOU WON!** Heads! 🪙\n\n**${player.username}** successfully flipped **Heads** and won **${amount}** tokens!\n💎 **New Balance**: **${newBalance}** tokens.`
+                : `💀 **YOU LOST!** Tails! 🪙\n\n**${player.username}** flipped **Tails** and lost **${amount}** tokens.\n💎 **New Balance**: **${newBalance}** tokens.`;
+                
+            return interaction.editReply({ content: resultText });
+        } catch (err) {
+            console.error('[Interaction coinflip] Error:', err);
+            return interaction.editReply({ content: '⚠️ An unexpected error occurred during the coinflip.' });
+        }
+    }
+
+    // --- TRIVIA COMMAND ---
+    if (commandName === 'trivia') {
+        const now = Date.now();
+        
+        let userRuns = triviaHostLimits.get(user.id) || [];
+        userRuns = userRuns.filter(time => now - time < 3600000);
+        
+        if (userRuns.length >= 5) {
+            const oldestRun = userRuns[0];
+            const minutesLeft = Math.ceil((3600000 - (now - oldestRun)) / 1000 / 60);
+            return interaction.reply({
+                content: `🛑 **Rate Limit**: You can only host 5 trivias per hour! Try again in **${minutesLeft} minutes**.`,
+                ephemeral: true
+            });
+        }
+        
+        userRuns.push(now);
+        triviaHostLimits.set(user.id, userRuns);
+        
+        const triviaObj = TRIVIA_QUESTIONS[Math.floor(Math.random() * TRIVIA_QUESTIONS.length)];
+        
+        const buttons = triviaObj.options.map((option, idx) => {
+            const customId = `trivia_${idx}_${now}`;
+            const label = option.substring(0, 80);
+            return new ButtonBuilder()
+                .setCustomId(customId)
+                .setLabel(label)
+                .setStyle(ButtonStyle.Secondary);
+        });
+        
+        const row = new ActionRowBuilder().addComponents(buttons);
+        
+        const embed = {
+            color: 0x9900ff,
+            title: '🧠 Boomkit Interactive Trivia!',
+            description: `**${triviaObj.question}**\n\n*Click the correct button below to win **100 tokens**!*`,
+            footer: { text: `Hosted by ${user.username} | 30s remaining` }
+        };
+        
+        await interaction.reply({ embeds: [embed], components: [row] });
+        
+        const filter = () => true;
+        const collector = interaction.channel.createMessageComponentCollector({
+            filter,
+            time: 30000
+        });
+        
+        let answered = false;
+        
+        collector.on('collect', async buttonInteraction => {
+            if (answered) return;
+            
+            const selectedIdx = parseInt(buttonInteraction.customId.split('_')[1]);
+            const selectedChoice = ['A', 'B', 'C', 'D'][selectedIdx];
+            
+            if (selectedChoice === triviaObj.correct) {
+                answered = true;
+                collector.stop('answered');
+                
+                await buttonInteraction.deferReply({ ephemeral: false });
+                
+                try {
+                    const winnerUsername = await getLinkedUsername(buttonInteraction.user.id);
+                    if (!winnerUsername) {
+                        return buttonInteraction.editReply({
+                            content: `🎉 **Correct!** **${buttonInteraction.user.username}** answered **${triviaObj.correctText}** first!\n\n⚠️ **Note**: Your Discord account is not linked to Boomkit. Link it using \`/link\` to claim rewards next time!`
+                        });
+                    }
+                    
+                    const { data: player, error: playerErr } = await supabase
+                        .from('users')
+                        .select('tokens, username')
+                        .eq('username', winnerUsername)
+                        .single();
+                        
+                    if (playerErr || !player) {
+                        return buttonInteraction.editReply({
+                            content: `🎉 **Correct!** **${buttonInteraction.user.username}** (Boomkit: **${winnerUsername}**) answered **${triviaObj.correctText}** first, but there was an error updating their balance.`
+                        });
+                    }
+                    
+                    const newBalance = player.tokens + 100;
+                    const { error: updateErr } = await supabase
+                        .from('users')
+                        .update({ tokens: newBalance })
+                        .eq('username', player.username);
+                        
+                    if (updateErr) {
+                        return buttonInteraction.editReply({
+                            content: `🎉 **Correct!** **${buttonInteraction.user.username}** (Boomkit: **${player.username}**) answered **${triviaObj.correctText}** first, but there was an error updating their balance.`
+                        });
+                    }
+                    
+                    return buttonInteraction.editReply({
+                        content: `🎉 **Correct Answer!**\n\n**${buttonInteraction.user.username}** (Boomkit: **${player.username}**) answered **${triviaObj.correctText}** first and won **100 tokens**!\n💎 **New Balance**: **${newBalance}** tokens.`
+                    });
+                } catch (err) {
+                    console.error('[Trivia Winner Update] Error:', err);
+                    return buttonInteraction.editReply({
+                        content: `🎉 **Correct!** **${buttonInteraction.user.username}** answered **${triviaObj.correctText}** first, but an error occurred.`
+                    });
+                }
+            } else {
+                return buttonInteraction.reply({
+                    content: '❌ **Incorrect!** That is not the right answer. Try another one!',
+                    ephemeral: true
+                });
+            }
+        });
+        
+        collector.on('end', (collected, reason) => {
+            const disabledButtons = buttons.map(btn => ButtonBuilder.from(btn).setDisabled(true));
+            const disabledRow = new ActionRowBuilder().addComponents(disabledButtons);
+            
+            if (reason === 'time') {
+                const expiredEmbed = {
+                    color: 0x555555,
+                    title: '🧠 Boomkit Trivia - Closed',
+                    description: `**${triviaObj.question}**\n\n⏰ **Time\'s Up!** No one got the correct answer in time.\n\n💡 **Correct Answer**: **${triviaObj.correctText}**`,
+                    footer: { text: `Hosted by ${user.username}` }
+                };
+                
+                interaction.editReply({ embeds: [expiredEmbed], components: [disabledRow] }).catch(console.error);
+            } else {
+                const endedEmbed = {
+                    color: 0x555555,
+                    title: '🧠 Boomkit Trivia - Answered',
+                    description: `**${triviaObj.question}**\n\n💡 **Correct Answer**: **${triviaObj.correctText}**`,
+                    footer: { text: `Hosted by ${user.username}` }
+                };
+                interaction.editReply({ embeds: [endedEmbed], components: [disabledRow] }).catch(console.error);
+            }
+        });
     }
 });
 
