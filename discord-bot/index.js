@@ -21,7 +21,7 @@
  */
 
 require('dotenv').config();
-const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder } = require('discord.js');
+const { Client, GatewayIntentBits, REST, Routes, SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { createClient } = require('@supabase/supabase-js');
 const crypto = require('crypto');
 
@@ -83,9 +83,12 @@ client.on('interactionCreate', async interaction => {
 
     if (commandName === 'getkey') {
         try {
-            // 1. Check if user is verified
+            // 1. Check if user is verified, admin, or owner
+            const isOwner = interaction.guild?.ownerId === member.id;
+            const isAdmin = member.permissions?.has(PermissionFlagsBits.Administrator);
             const isVerified = member.roles.cache.has(process.env.VERIFIED_ROLE_ID);
-            if (!isVerified) {
+
+            if (!isVerified && !isAdmin && !isOwner) {
                 return interaction.reply({
                     content: '🛑 **Access Denied**: You must pass server verification first to generate an access key!',
                     ephemeral: true
