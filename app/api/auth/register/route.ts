@@ -27,8 +27,27 @@ export async function POST(request: NextRequest) {
       }, { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfter) } })
     }
 
-    const { username, email, password, age, reason } = await request.json()
+    const { username, email, password, age, reason, accessKey } = await request.json()
     const supabase = getSupabaseServerClient()
+
+    if (!accessKey) {
+      return NextResponse.json({ success: false, message: 'An access key is required to register. Please generate one from our Discord server!' }, { status: 400 })
+    }
+
+    // Validate the access key
+    const { data: keyRecord, error: keyError } = await supabase
+      .from('access_keys')
+      .select('key, is_used')
+      .eq('key', accessKey)
+      .maybeSingle()
+
+    if (keyError || !keyRecord) {
+      return NextResponse.json({ success: false, message: 'Invalid access key. Make sure you generated it from our Discord server!' }, { status: 400 })
+    }
+
+    if (keyRecord.is_used) {
+      return NextResponse.json({ success: false, message: 'This access key has already been used.' }, { status: 400 })
+    }
 
     // CHECK IP BLACKLIST
     const { data: blacklisted } = await supabase
@@ -167,6 +186,16 @@ export async function POST(request: NextRequest) {
         success: false,
         message: `Registration failed: ${insertError.message || insertError.code || 'Unknown database error'}`
       }, { status: 500 })
+    }
+
+    // Mark key as used since user registration succeeded
+    const { error: keyUpdateError } = await supabase
+      .from('access_keys')
+      .update({ is_used: true, used_by_username: username })
+      .eq('key', accessKey)
+
+    if (keyUpdateError) {
+      console.error('[AUTH] Failed to mark access key as used:', keyUpdateError)
     }
 
     if (DEBUG_AUTH) {

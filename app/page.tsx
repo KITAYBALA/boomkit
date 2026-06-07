@@ -1040,6 +1040,7 @@ export default function BoomkitGame() {
     password: "",
     age: "",
     reason: "",
+    accessKey: "",
   })
 
   // ToS State
@@ -2029,8 +2030,8 @@ export default function BoomkitGame() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!registerForm.username || !registerForm.password || !registerForm.age) {
-      alert("Please fill in all required fields")
+    if (!registerForm.username || !registerForm.password || !registerForm.age || !registerForm.accessKey) {
+      alert("Please fill in all required fields (including Access Key)")
       return
     }
 
@@ -2056,6 +2057,7 @@ export default function BoomkitGame() {
           password: registerForm.password,
           age: registerForm.age,
           reason: registerForm.reason,
+          accessKey: registerForm.accessKey,
         }),
       })
 
@@ -4279,6 +4281,21 @@ const handlePackAction = (packId: string) => {
                     className="w-full glass-input placeholder:text-white/20 rounded-xl relative p-3 min-h-[80px] focus:outline-none focus:ring-0 text-sm resize-none"
                     placeholder="Tell us why you want to join Boomkit..."
                     required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="accessKey" className="text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Discord Access Key</Label>
+                <div className="relative group">
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl blur opacity-20 group-focus-within:opacity-100 transition duration-500" />
+                  <Input
+                    id="accessKey"
+                    value={registerForm.accessKey}
+                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, accessKey: e.target.value }))}
+                    required
+                    className="glass-input placeholder:text-white/20 rounded-xl relative h-12"
+                    placeholder="Enter key BK-KEY-..."
                   />
                 </div>
               </div>
