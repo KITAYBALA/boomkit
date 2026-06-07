@@ -1,0 +1,14 @@
+{
+  "name": "boomkit-discord-bot",
+  "version": "1.0.0",
+  "description": "Discord Access Key Registry Bot for Boomkit",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0",
+    "discord.js": "^14.14.1",
+    "dotenv": "^16.4.5"
+  }
+}

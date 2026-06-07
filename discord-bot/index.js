@@ -67,7 +67,7 @@ if (process.argv.includes('--register')) {
 
 // Initialize Discord Client
 const client = new Client({
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers]
+    intents: [GatewayIntentBits.Guilds]
 });
 
 client.once('ready', () => {
