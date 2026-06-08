@@ -150,20 +150,39 @@ async function handleStaffCommand(
     broadcastMessage = `System 🛡️: User ${userData.username} has unmuted ${targetUser.username}.`;
   }
   else if (cmd === "/check-alts") {
-    const { data: fullTargetUser, error: ipErr } = await supabase
+    const { data: fullTargetUser, error: dbErr } = await supabase
       .from("users")
-      .select("username, last_ip")
+      .select("username, last_ip, mac_address")
       .eq("id", targetUser.id)
       .single();
 
-    if (ipErr || !fullTargetUser) {
+    if (dbErr || !fullTargetUser) {
       return NextResponse.json({ error: `Could not fetch data for ${targetUser.username}.` }, { status: 500 });
     }
 
+    const mac = fullTargetUser.mac_address;
     const ip = fullTargetUser.last_ip;
-    if (!ip || ip === "127.0.0.1") {
-      broadcastMessage = `System 🛡️: User ${targetUser.username} has no logged IP address (or is 127.0.0.1). Cannot check alts.`;
-    } else {
+
+    if (mac) {
+      // Check based on device ID (mac_address)
+      const { data: alts, error: altsErr } = await supabase
+        .from("users")
+        .select("username, is_banned, role, join_date")
+        .eq("mac_address", mac);
+
+      if (altsErr || !alts) {
+        return NextResponse.json({ error: "Error querying for alt accounts." }, { status: 500 });
+      }
+
+      const otherAlts = alts.filter((a: any) => a.username.toLowerCase() !== targetUser.username.toLowerCase());
+      if (otherAlts.length === 0) {
+        broadcastMessage = `System 🛡️: Alt accounts check for ${targetUser.username}: No other accounts found on this device.`;
+      } else {
+        const altNames = otherAlts.map((a: any) => `${a.username}${a.is_banned ? " (Banned)" : ""}`).join(", ");
+        broadcastMessage = `System 🛡️: Alt accounts check for ${targetUser.username} found on same device: ${altNames}`;
+      }
+    } else if (ip && ip !== "127.0.0.1") {
+      // Fallback to IP address if no device ID is registered
       const { data: alts, error: altsErr } = await supabase
         .from("users")
         .select("username, is_banned, role, join_date")
@@ -178,8 +197,10 @@ async function handleStaffCommand(
         broadcastMessage = `System 🛡️: Alt accounts check for ${targetUser.username}: No other accounts found on this IP.`;
       } else {
         const altNames = otherAlts.map((a: any) => `${a.username}${a.is_banned ? " (Banned)" : ""}`).join(", ");
-        broadcastMessage = `System 🛡️: Alt accounts check for ${targetUser.username} found: ${altNames} (IP Redacted)`;
+        broadcastMessage = `System 🛡️: Alt accounts check for ${targetUser.username} found on same IP: ${altNames} (IP Redacted)`;
       }
+    } else {
+      broadcastMessage = `System 🛡️: User ${targetUser.username} has no device ID or logged IP address. Cannot check alts.`;
     }
   }
   else if (cmd === "/gift-tokens") {

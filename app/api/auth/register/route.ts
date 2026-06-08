@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
       }, { status: 429, headers: { 'Retry-After': String(rateLimit.retryAfter) } })
     }
 
-    const { username, email, password, age, reason, accessKey } = await request.json()
+    const { username, email, password, age, reason, accessKey, mac_address } = await request.json()
     const supabase = getSupabaseServerClient()
 
     if (!accessKey) {
@@ -151,6 +151,7 @@ export async function POST(request: NextRequest) {
       packs_opened: 0,
       reason: reason || '',
       last_ip: ip,
+      mac_address: mac_address || null,
     }
 
     const { data: insertedUser, error: insertError } = await supabase

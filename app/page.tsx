@@ -833,6 +833,55 @@ const NEWS_ITEMS: NewsItem[] = [
   },
 ]
 
+let globalAudioCtx: any = null;
+
+const initAudioContext = () => {
+  if (typeof window === "undefined") return null;
+  if (!globalAudioCtx) {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (AudioContextClass) {
+      globalAudioCtx = new AudioContextClass();
+    }
+  }
+  return globalAudioCtx;
+};
+
+const playPingSound = () => {
+  try {
+    const ctx = initAudioContext();
+    if (!ctx) return;
+    if (ctx.state === "suspended") {
+      ctx.resume().catch(() => {});
+    }
+    const now = ctx.currentTime;
+    
+    // High-pitched dual-note chime synthesizer
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = "sine";
+    osc1.frequency.setValueAtTime(587.33, now); // D5
+    gain1.gain.setValueAtTime(0.15, now);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.start(now);
+    osc1.stop(now + 0.45);
+    
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = "sine";
+    osc2.frequency.setValueAtTime(880, now + 0.1); // A5
+    gain2.gain.setValueAtTime(0.15, now + 0.1);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.start(now + 0.1);
+    osc2.stop(now + 0.55);
+  } catch (e) {
+    console.error("Failed to play synthesized ping sound:", e);
+  }
+};
+
 export default function BoomkitGame() {
   const [currentView, setCurrentView] = useState<"register" | "login" | "game" | "owner-access">("owner-access")
   const [currentPage, setCurrentPage] = useState<
@@ -857,6 +906,57 @@ export default function BoomkitGame() {
     | "season"
     | "fusion"
   >("stats")
+  const [chatNotificationCount, setChatNotificationCount] = useState(0)
+  const [deviceId, setDeviceId] = useState<string>("")
+  const currentPageRef = useRef("stats")
+
+  useEffect(() => {
+    currentPageRef.current = currentPage
+    if (currentPage === "chat") {
+      setChatNotificationCount(0)
+    }
+  }, [currentPage])
+
+  useEffect(() => {
+    let id = localStorage.getItem("boomkit_device_id")
+    if (!id) {
+      id = "BK-DEV-" + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      localStorage.setItem("boomkit_device_id", id)
+    }
+    setDeviceId(id)
+  }, [])
+
+  // Unlock audio context on user interaction
+  useEffect(() => {
+    const unlockAudio = () => {
+      const ctx = initAudioContext();
+      if (ctx) {
+        if (ctx.state === "suspended") {
+          ctx.resume().then(() => {
+            console.log("[Audio] AudioContext unlocked successfully via user gesture.");
+            cleanup();
+          }).catch((err: any) => {
+            console.warn("[Audio] Failed to unlock AudioContext:", err);
+          });
+        } else if (ctx.state === "running") {
+          console.log("[Audio] AudioContext is already running.");
+          cleanup();
+        }
+      }
+    };
+
+    const cleanup = () => {
+      window.removeEventListener("click", unlockAudio);
+      window.removeEventListener("keydown", unlockAudio);
+      window.removeEventListener("touchstart", unlockAudio);
+    };
+
+    window.addEventListener("click", unlockAudio);
+    window.addEventListener("keydown", unlockAudio);
+    window.addEventListener("touchstart", unlockAudio);
+
+    return cleanup;
+  }, []);
   const [activeDiscoverGame, setActiveDiscoverGame] = useState<{
     grade: number
     subject: string
@@ -1716,6 +1816,48 @@ export default function BoomkitGame() {
     }
   }, [syncCurrentUserRole, currentUser?.id, supabase])
 
+  useEffect(() => {
+    let chatChannel: any = null
+
+    if (currentUser?.id && supabase) {
+      console.log("[v0] Subscribing to global chat messages insert events for notifications...")
+      chatChannel = supabase
+        .channel("global_chat_notifications")
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "chat_messages",
+          },
+          (payload: any) => {
+            const d = payload.new
+            if (d && d.username !== currentUser.username) {
+              const myNameLower = currentUser.username.toLowerCase();
+              const pingRegex = new RegExp(`@${myNameLower}\\b`, "i");
+              if (pingRegex.test(d.message)) {
+                // Play synthesized notification sound
+                playPingSound();
+                // Show toast alert
+                toast(`🔔 @${currentUser.username} mentioned you in chat!`, {
+                  description: d.message.length > 80 ? `${d.message.slice(0, 80)}...` : d.message,
+                });
+                // Increment unread chat notification count if user is not on Chat page
+                if (currentPageRef.current !== "chat") {
+                  setChatNotificationCount(prev => prev + 1);
+                }
+              }
+            }
+          }
+        )
+        .subscribe()
+    }
+
+    return () => {
+      if (chatChannel) supabase?.removeChannel(chatChannel)
+    }
+  }, [currentUser?.id, supabase])
+
   // Real-time listener for clan chat messages & auto-details loading
   useEffect(() => {
     if (!supabase || !currentUser?.clan_id) {
@@ -2058,6 +2200,7 @@ export default function BoomkitGame() {
           age: registerForm.age,
           reason: registerForm.reason,
           accessKey: registerForm.accessKey,
+          mac_address: deviceId || null,
         }),
       })
 
@@ -2150,6 +2293,7 @@ export default function BoomkitGame() {
         body: JSON.stringify({
           username: loginForm.username,
           password: loginForm.password,
+          mac_address: deviceId || null,
         }),
       })
 
@@ -4234,7 +4378,7 @@ const handlePackAction = (packId: string) => {
                 <p className="text-[10px] text-white/70 leading-relaxed font-medium">
                   Registering? Join our{" "}
                   <a
-                    href={process.env.NEXT_PUBLIC_DISCORD_INVITE_URL || "#"}
+                    href={process.env.NEXT_PUBLIC_DISCORD_INVITE_URL || "https://discord.gg/a8Q8Mm9X"}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-cyan-400 hover:text-cyan-300 underline font-bold transition-colors"
@@ -4434,7 +4578,7 @@ const handlePackAction = (packId: string) => {
                 <p className="text-[10px] text-white/70 leading-relaxed font-medium">
                   Need an access key or looking for active promo codes? Join the{" "}
                   <a
-                    href={process.env.NEXT_PUBLIC_DISCORD_INVITE_URL || "#"}
+                    href={process.env.NEXT_PUBLIC_DISCORD_INVITE_URL || "https://discord.gg/a8Q8Mm9X"}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-cyan-400 hover:text-cyan-300 underline font-bold transition-colors"
@@ -4561,6 +4705,9 @@ const handlePackAction = (packId: string) => {
                 onClick={() => {
                   setCurrentPage(item.id as any)
                   setSidebarOpen(false)
+                  if (item.id === "chat") {
+                    setChatNotificationCount(0)
+                  }
                   if (item.fetch) item.fetch()
                 }}
                 className={`w-full flex items-center px-4 py-3 rounded-xl text-left transition-all duration-300 group gap-3 relative overflow-hidden ${
@@ -4574,6 +4721,11 @@ const handlePackAction = (packId: string) => {
                 )}
                 <Icon className={`h-4 w-4 shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6 ${isActive ? "text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]" : "text-slate-500"}`} />
                 <span className="text-xs uppercase tracking-wider">{item.label}</span>
+                {item.id === "chat" && chatNotificationCount > 0 && (
+                  <span className="ml-auto w-5 h-5 bg-red-600 border border-red-500 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-[0_0_8px_rgba(220,38,38,0.6)] animate-pulse shrink-0">
+                    {chatNotificationCount}
+                  </span>
+                )}
               </button>
             )
           })}
@@ -4597,7 +4749,7 @@ const handlePackAction = (packId: string) => {
             Join for giveaways, access keys & active promo codes!
           </p>
           <a
-            href={process.env.NEXT_PUBLIC_DISCORD_INVITE_URL || "#"}
+            href={process.env.NEXT_PUBLIC_DISCORD_INVITE_URL || "https://discord.gg/a8Q8Mm9X"}
             target="_blank"
             rel="noopener noreferrer"
             className="w-full py-1.5 px-3 rounded-xl bg-[#5865F2] hover:bg-[#4752C4] text-white text-[11px] font-black uppercase tracking-wider text-center transition-all duration-300 shadow-md shadow-indigo-900/30 hover:shadow-indigo-500/20 active:scale-95 text-center block"

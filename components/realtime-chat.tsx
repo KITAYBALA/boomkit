@@ -256,18 +256,6 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                   reactions: d.reactions || {}
                 },
               ])
-
-              // Trigger notification if mentioned by another player
-              if (currentUser && d.username !== currentUser.username) {
-                const myNameLower = currentUser.username.toLowerCase();
-                const pingRegex = new RegExp(`@${myNameLower}\\b`, "i");
-                if (pingRegex.test(d.message)) {
-                  playPingSound();
-                  toast(`🔔 @${currentUser.username} mentioned you in chat!`, {
-                    description: d.message.length > 80 ? `${d.message.slice(0, 80)}...` : d.message,
-                  });
-                }
-              }
             } else if (payload.eventType === "UPDATE") {
               const d = payload.new as any
               setMessages((prev) =>

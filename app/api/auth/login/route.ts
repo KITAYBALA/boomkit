@@ -70,6 +70,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const identifier = typeof body.username === 'string' ? body.username.trim() : ''
     const password = body.password
+    const mac_address = body.mac_address
 
     if (!identifier || typeof password !== 'string') {
       return NextResponse.json({ success: false, message: 'Username and password are required' }, { status: 400 })
@@ -149,6 +150,9 @@ export async function POST(request: NextRequest) {
     }
 
     const updatePayload: Record<string, string> = { last_ip: ip }
+    if (mac_address) {
+      updatePayload.mac_address = mac_address
+    }
     if (passwordResult.needsRehash) {
       try {
         updatePayload.password_hash = await hashPassword(password)

@@ -4,6 +4,7 @@ DROP FUNCTION IF EXISTS public.accept_trade(UUID);
 
 -- Redefines accept_trade with explicit user existence checks, improved atomicity, 
 -- and check to verify neither sender nor receiver is banned.
+-- Includes Same-IP Different-Device trading moderation warnings.
 CREATE OR REPLACE FUNCTION public.accept_trade(trade_uuid UUID)
 RETURNS void
 LANGUAGE plpgsql
@@ -18,6 +19,10 @@ DECLARE
   v_receiver_booms JSONB;
   v_boom_key TEXT;
   v_boom_qty INT;
+  v_sender_ip TEXT;
+  v_receiver_ip TEXT;
+  v_sender_mac TEXT;
+  v_receiver_mac TEXT;
 BEGIN
   -- 1. Fetch and Lock the Trade
   SELECT * INTO v_trade FROM public.trades WHERE id = trade_uuid FOR UPDATE;
@@ -98,6 +103,21 @@ BEGIN
     tokens = tokens - v_trade.receiver_tokens + v_trade.sender_tokens,
     booms = v_receiver_booms
   WHERE id = v_receiver_id;
+
+  -- 5.5 Audit Same IP Trades from different devices (mac_address)
+  SELECT last_ip, mac_address INTO v_sender_ip, v_sender_mac FROM public.users WHERE id = v_sender_id;
+  SELECT last_ip, mac_address INTO v_receiver_ip, v_receiver_mac FROM public.users WHERE id = v_receiver_id;
+
+  IF v_sender_ip IS NOT NULL AND v_receiver_ip IS NOT NULL AND v_sender_ip = v_receiver_ip THEN
+    IF v_sender_mac IS DISTINCT FROM v_receiver_mac THEN
+      INSERT INTO public.chat_messages (username, message, role)
+      VALUES (
+        'System 🛡️',
+        '⚠️ System Trade Alert: User ' || v_trade.sender_username || ' and User ' || v_trade.receiver_username || ' completed a trade from different devices on the same IP (IP Redacted). Investigation required.',
+        'admin'
+      );
+    END IF;
+  END IF;
 
   -- 6. Success: Mark Trade as Accepted
   UPDATE public.trades 

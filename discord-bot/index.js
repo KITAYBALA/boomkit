@@ -1139,7 +1139,7 @@ client.on('interactionCreate', async interaction => {
         try {
             const { data: targetRecord, error: targetErr } = await supabase
                 .from('users')
-                .select('username, last_ip')
+                .select('username, last_ip, mac_address')
                 .ilike('username', targetUsername)
                 .maybeSingle();
                 
@@ -1147,15 +1147,29 @@ client.on('interactionCreate', async interaction => {
                 return interaction.editReply({ content: `❌ **User Not Found**: Boomkit user **${targetUsername}** does not exist.` });
             }
             
+            const mac = targetRecord.mac_address;
             const ip = targetRecord.last_ip;
-            if (!ip || ip === '127.0.0.1') {
-                return interaction.editReply({ content: `ℹ️ User **${targetRecord.username}** has no logged IP address (or is 127.0.0.1). Cannot check alts.` });
+            
+            let queryField = '';
+            let queryValue = '';
+            let matchType = '';
+            
+            if (mac) {
+                queryField = 'mac_address';
+                queryValue = mac;
+                matchType = 'device ID';
+            } else if (ip && ip !== '127.0.0.1') {
+                queryField = 'last_ip';
+                queryValue = ip;
+                matchType = 'IP address';
+            } else {
+                return interaction.editReply({ content: `ℹ️ User **${targetRecord.username}** has no logged device ID or IP address (or is 127.0.0.1). Cannot check alts.` });
             }
             
             const { data: alts, error: altsErr } = await supabase
                 .from('users')
                 .select('username, is_banned, role, join_date')
-                .eq('last_ip', ip);
+                .eq(queryField, queryValue);
                 
             if (altsErr || !alts) {
                 return interaction.editReply({ content: '⚠️ Error querying for alt accounts.' });
@@ -1164,10 +1178,12 @@ client.on('interactionCreate', async interaction => {
             const otherAlts = alts.filter(a => a.username.toLowerCase() !== targetRecord.username.toLowerCase());
             
             if (otherAlts.length === 0) {
-                return interaction.editReply({ content: `✅ **No alts found** for **${targetRecord.username}** (IP: \`${ip}\`).` });
+                const redactedVal = queryField === 'last_ip' ? 'Redacted' : queryValue;
+                return interaction.editReply({ content: `✅ **No alts found** for **${targetRecord.username}** (${matchType}: \`${redactedVal}\`).` });
             }
             
-            let altsListText = `Other accounts registered/logged under the same IP (\`${ip}\`):\n\n`;
+            const redactedVal = queryField === 'last_ip' ? 'Redacted' : queryValue;
+            let altsListText = `Other accounts registered/logged under the same ${matchType} (\`${redactedVal}\`):\n\n`;
             otherAlts.forEach(alt => {
                 const status = alt.is_banned ? '❌ Banned' : '✅ Active';
                 altsListText += `- **${alt.username}** [${alt.role}] - Status: ${status} (Joined: ${alt.join_date})\n`;
