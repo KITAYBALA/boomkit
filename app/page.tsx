@@ -4222,6 +4222,29 @@ const handlePackAction = (packId: string) => {
             <CardDescription className="text-white/60 font-medium relative z-10">Start your adventure today</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 pt-0 relative z-10">
+            {/* Promo Code / Discord Key Notice */}
+            <div className="p-3.5 rounded-2xl bg-indigo-950/40 border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.1)] flex items-start gap-3 relative overflow-hidden animate-pulse">
+              <div className="p-2 bg-[#5865F2]/10 rounded-xl border border-[#5865F2]/20 text-[#5865F2] shrink-0">
+                <svg className="w-4 h-4" viewBox="0 0 127.14 96.36" fill="currentColor">
+                  <path d="M107.7,8.07A105.15,105.15,0,0,0,77.26,0a77.19,77.19,0,0,0-3.3,6.83A96.67,96.67,0,0,0,53.22,6.83,77.19,77.19,0,0,0,49.88,0,105.15,105.15,0,0,0,19.44,8.07C3.66,31.58-1.86,54.65,1,77.53A105.73,105.73,0,0,0,32,96.36a77.7,77.7,0,0,0,6.63-10.85,68.43,68.43,0,0,1-10.4-5c.89-.65,1.76-1.34,2.58-2.06a75.22,75.22,0,0,0,72.57,0c.82.72,1.69,1.41,2.58,2.06a68.43,68.43,0,0,1-10.4,5,77.7,77.7,0,0,0,6.63,10.85,105.73,105.73,0,0,0,31-18.83C129,54.65,123.5,31.58,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53S36.18,40.36,42.45,40.36,53.83,46,53.83,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.24,60,73.24,53S78.41,40.36,84.69,40.36,96.07,46,96.07,53,91,65.69,84.69,65.69Z"/>
+                </svg>
+              </div>
+              <div className="space-y-1 text-left">
+                <div className="text-[11px] font-black tracking-wider text-indigo-400 uppercase">Need an Access Key?</div>
+                <p className="text-[10px] text-white/70 leading-relaxed font-medium">
+                  Registering? Join our{" "}
+                  <a
+                    href={process.env.NEXT_PUBLIC_DISCORD_INVITE_URL || "#"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-cyan-400 hover:text-cyan-300 underline font-bold transition-colors"
+                  >
+                    Discord server
+                  </a>{" "}
+                  to generate your access key via <code className="text-pink-400 bg-black/40 px-1 py-0.5 rounded font-mono text-[9px]">/getkey</code> and claim active promo codes!
+                </p>
+              </div>
+            </div>
             <form onSubmit={handleRegister} className="space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="username" className="text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Username</Label>
@@ -4399,6 +4422,29 @@ const handlePackAction = (packId: string) => {
             <CardDescription className="text-white/60 font-medium relative z-10">Continue your quiz journey</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 pt-0 relative z-10">
+            {/* Promo Code / Discord Key Notice */}
+            <div className="p-3.5 rounded-2xl bg-indigo-950/40 border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.1)] flex items-start gap-3 relative overflow-hidden animate-pulse">
+              <div className="p-2 bg-[#5865F2]/10 rounded-xl border border-[#5865F2]/20 text-[#5865F2] shrink-0">
+                <svg className="w-4 h-4" viewBox="0 0 127.14 96.36" fill="currentColor">
+                  <path d="M107.7,8.07A105.15,105.15,0,0,0,77.26,0a77.19,77.19,0,0,0-3.3,6.83A96.67,96.67,0,0,0,53.22,6.83,77.19,77.19,0,0,0,49.88,0,105.15,105.15,0,0,0,19.44,8.07C3.66,31.58-1.86,54.65,1,77.53A105.73,105.73,0,0,0,32,96.36a77.7,77.7,0,0,0,6.63-10.85,68.43,68.43,0,0,1-10.4-5c.89-.65,1.76-1.34,2.58-2.06a75.22,75.22,0,0,0,72.57,0c.82.72,1.69,1.41,2.58,2.06a68.43,68.43,0,0,1-10.4,5,77.7,77.7,0,0,0,6.63,10.85,105.73,105.73,0,0,0,31-18.83C129,54.65,123.5,31.58,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53S36.18,40.36,42.45,40.36,53.83,46,53.83,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.24,60,73.24,53S78.41,40.36,84.69,40.36,96.07,46,96.07,53,91,65.69,84.69,65.69Z"/>
+                </svg>
+              </div>
+              <div className="space-y-1 text-left">
+                <div className="text-[11px] font-black tracking-wider text-indigo-400 uppercase">Join our Discord</div>
+                <p className="text-[10px] text-white/70 leading-relaxed font-medium">
+                  Need an access key or looking for active promo codes? Join the{" "}
+                  <a
+                    href={process.env.NEXT_PUBLIC_DISCORD_INVITE_URL || "#"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-cyan-400 hover:text-cyan-300 underline font-bold transition-colors"
+                  >
+                    Discord community
+                  </a>{" "}
+                  to claim exclusive giveaways!
+                </p>
+              </div>
+            </div>
             <form onSubmit={handleLogin} className="space-y-5">
               <div className="space-y-2">
                 <Label htmlFor="loginUsername" className="text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Username</Label>
@@ -4532,6 +4578,33 @@ const handlePackAction = (packId: string) => {
             )
           })}
         </nav>
+
+        {/* Discord Promo Widget */}
+        <div className="p-4 m-3 mt-auto rounded-2xl bg-gradient-to-br from-indigo-950/40 via-purple-950/20 to-slate-950/60 border border-indigo-500/20 shadow-[0_0_15px_rgba(99,102,241,0.15)] flex flex-col items-center gap-3 relative overflow-hidden group shrink-0">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
+          <div className="flex items-center gap-2 w-full justify-start">
+            <div className="p-2 bg-[#5865F2]/10 rounded-xl border border-[#5865F2]/20 shadow-[0_0_10px_rgba(88,101,242,0.2)] text-[#5865F2]">
+              <svg className="w-5 h-5" viewBox="0 0 127.14 96.36" fill="currentColor">
+                <path d="M107.7,8.07A105.15,105.15,0,0,0,77.26,0a77.19,77.19,0,0,0-3.3,6.83A96.67,96.67,0,0,0,53.22,6.83,77.19,77.19,0,0,0,49.88,0,105.15,105.15,0,0,0,19.44,8.07C3.66,31.58-1.86,54.65,1,77.53A105.73,105.73,0,0,0,32,96.36a77.7,77.7,0,0,0,6.63-10.85,68.43,68.43,0,0,1-10.4-5c.89-.65,1.76-1.34,2.58-2.06a75.22,75.22,0,0,0,72.57,0c.82.72,1.69,1.41,2.58,2.06a68.43,68.43,0,0,1-10.4,5,77.7,77.7,0,0,0,6.63,10.85,105.73,105.73,0,0,0,31-18.83C129,54.65,123.5,31.58,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53S36.18,40.36,42.45,40.36,53.83,46,53.83,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.24,60,73.24,53S78.41,40.36,84.69,40.36,96.07,46,96.07,53,91,65.69,84.69,65.69Z"/>
+              </svg>
+            </div>
+            <div className="text-left">
+              <div className="text-[10px] font-black tracking-widest text-[#5865F2] uppercase">Discord</div>
+              <div className="text-[11px] font-bold text-white/90 leading-none">Key Giveaways!</div>
+            </div>
+          </div>
+          <p className="text-[10px] text-white/40 font-medium text-left leading-relaxed">
+            Join for giveaways, access keys & active promo codes!
+          </p>
+          <a
+            href={process.env.NEXT_PUBLIC_DISCORD_INVITE_URL || "#"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full py-1.5 px-3 rounded-xl bg-[#5865F2] hover:bg-[#4752C4] text-white text-[11px] font-black uppercase tracking-wider text-center transition-all duration-300 shadow-md shadow-indigo-900/30 hover:shadow-indigo-500/20 active:scale-95 text-center block"
+          >
+            Join Discord
+          </a>
+        </div>
       </div>
 
       {/* Main Content */}

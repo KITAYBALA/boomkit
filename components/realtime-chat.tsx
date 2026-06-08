@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { SendIcon, MessageCircleIcon, PencilIcon, Trash2Icon, CheckIcon, XIcon, AlertTriangleIcon } from "lucide-react"
+import { toast } from "sonner"
 
 type Props = {
   currentUser: { id: string; username: string; isMuted?: boolean; role?: string } | null
@@ -35,10 +36,69 @@ const getRoleColor = (role: string) => {
       return "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)] text-white"
     case "staff":
       return "bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.4)] text-white"
+    case "system":
+      return "bg-gradient-to-r from-red-600 to-orange-500 shadow-[0_0_12px_rgba(239,68,68,0.5)] text-white font-extrabold"
     default:
       return "bg-slate-600 text-white"
   }
 }
+
+const playPingSound = () => {
+  try {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContextClass) return;
+    const ctx = new AudioContextClass();
+    const now = ctx.currentTime;
+    
+    // High-pitched chime synthesizer
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = "sine";
+    osc1.frequency.setValueAtTime(587.33, now); // D5
+    gain1.gain.setValueAtTime(0.15, now);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.start(now);
+    osc1.stop(now + 0.45);
+    
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = "sine";
+    osc2.frequency.setValueAtTime(880, now + 0.1); // A5
+    gain2.gain.setValueAtTime(0.15, now + 0.1);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.start(now + 0.1);
+    osc2.stop(now + 0.55);
+  } catch (e) {
+    console.error("Failed to play synthesized ping sound:", e);
+  }
+};
+
+const renderMessageText = (text: string, userRoles: Record<string, string>) => {
+  const parts = text.split(/(@[a-zA-Z0-9_-]+)/g);
+  return parts.map((part, idx) => {
+    if (part.startsWith("@")) {
+      const pingedName = part.slice(1);
+      const pingedNameLower = pingedName.toLowerCase();
+      const actualUsername = Object.keys(userRoles).find(u => u.toLowerCase() === pingedNameLower);
+      if (actualUsername) {
+        return (
+          <span
+            key={idx}
+            className="text-red-500 font-extrabold bg-red-500/15 px-1.5 py-0.5 rounded border border-red-500/20"
+            title={`Mentioned ${actualUsername}`}
+          >
+            @{actualUsername}
+          </span>
+        );
+      }
+    }
+    return part;
+  });
+};
 
 export default function RealtimeChat({ currentUser, roleName, onUsernameClick, onClanTagClick }: Props) {
   const supabase = useMemo(() => getSupabaseBrowserClient(), [])
@@ -196,6 +256,18 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                   reactions: d.reactions || {}
                 },
               ])
+
+              // Trigger notification if mentioned by another player
+              if (currentUser && d.username !== currentUser.username) {
+                const myNameLower = currentUser.username.toLowerCase();
+                const pingRegex = new RegExp(`@${myNameLower}\\b`, "i");
+                if (pingRegex.test(d.message)) {
+                  playPingSound();
+                  toast(`🔔 @${currentUser.username} mentioned you in chat!`, {
+                    description: d.message.length > 80 ? `${d.message.slice(0, 80)}...` : d.message,
+                  });
+                }
+              }
             } else if (payload.eventType === "UPDATE") {
               const d = payload.new as any
               setMessages((prev) =>
@@ -436,12 +508,13 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
               </div>
             ) : (
               messages.map((msg) => {
-                const displayRole = userRoles[msg.username] || msg.role
-                const isMe = msg.username === currentUser?.username
-                const isEditing = editingId === msg.id
-                const isStaff = ["owner", "admin", "senior_moderator", "moderator", "tester"].includes(currentUser?.role || "")
-                const canDelete = isMe || isStaff
-                const avatar = userClanData[msg.username]?.avatar || "🎯"
+                 const isSystem = msg.username === "System 🛡️"
+                 const displayRole = isSystem ? "system" : (userRoles[msg.username] || msg.role)
+                 const isMe = msg.username === currentUser?.username
+                 const isEditing = editingId === msg.id
+                 const isStaff = ["owner", "admin", "senior_moderator", "moderator", "tester"].includes(currentUser?.role || "")
+                 const canDelete = isMe || isStaff
+                 const avatar = isSystem ? "🛡️" : (userClanData[msg.username]?.avatar || "🎯")
 
                 return (
                   <div
@@ -453,7 +526,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                       className={`w-11 h-11 rounded-2xl flex items-center justify-center text-2xl border bg-slate-900 relative cursor-pointer flex-shrink-0 group-hover:scale-105 transition-transform duration-300 shadow-md ${
                         isMe ? "border-purple-500/30 shadow-[0_0_10px_rgba(168,85,247,0.15)]" : "border-white/10"
                       }`}
-                      onClick={() => onUsernameClick(msg.username)}
+                      onClick={() => !isSystem && onUsernameClick(msg.username)}
                     >
                       <span>{avatar}</span>
                       <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-white/5 to-transparent pointer-events-none" />
@@ -462,13 +535,13 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                     <div className={`flex flex-col max-w-[75%] ${isMe ? "items-end" : "items-start"}`}>
                       {/* Name / Role Info */}
                       <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-                        {!isMe && (
+                        {!isMe && !isSystem && (
                           <Badge className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 border-none ${getRoleColor(displayRole)}`}>
                             {displayRole}
                           </Badge>
                         )}
                         
-                        {userClanData[msg.username]?.tag && (
+                        {!isSystem && userClanData[msg.username]?.tag && (
                           <span 
                             onClick={() => {
                               if (userClanData[msg.username]?.clan_id && onClanTagClick) {
@@ -484,15 +557,19 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                         )}
 
                         <span
-                          className={`text-xs font-bold tracking-wide cursor-pointer hover:underline transition-all ${
-                            isMe ? "text-purple-400" : "text-white/80"
+                          className={`text-xs font-bold tracking-wide transition-all ${
+                            isSystem
+                              ? "text-red-400 drop-shadow-[0_0_6px_rgba(239,68,68,0.6)] font-black"
+                              : isMe
+                                ? "text-purple-400 cursor-pointer hover:underline"
+                                : "text-white/80 cursor-pointer hover:underline"
                           }`}
-                          onClick={() => onUsernameClick(msg.username)}
+                          onClick={() => !isSystem && onUsernameClick(msg.username)}
                         >
                           {msg.username}
                         </span>
 
-                        {isMe && (
+                        {isMe && !isSystem && (
                           <Badge className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 border-none ${getRoleColor(displayRole)}`}>
                             {displayRole}
                           </Badge>
@@ -524,9 +601,11 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                       {/* Bubble Text */}
                       <div className={`
                         px-5 py-3.5 rounded-3xl border transition-all duration-300 relative shadow-lg
-                        ${isMe
-                          ? "bg-gradient-to-br from-purple-900/20 to-indigo-950/20 border-purple-500/30 text-white rounded-tr-none shadow-[0_0_20px_rgba(168,85,247,0.05)]"
-                          : "bg-gradient-to-br from-slate-900/60 to-slate-950/80 border-white/10 text-white/95 rounded-tl-none hover:border-white/20"
+                        ${isSystem
+                          ? "bg-gradient-to-br from-red-950/50 via-orange-950/25 to-slate-950/70 border-red-500/30 text-red-200 rounded-tl-none shadow-[0_0_20px_rgba(239,68,68,0.15)] w-full"
+                          : isMe
+                            ? "bg-gradient-to-br from-purple-900/20 to-indigo-950/20 border-purple-500/30 text-white rounded-tr-none shadow-[0_0_20px_rgba(168,85,247,0.05)]"
+                            : "bg-gradient-to-br from-slate-900/60 to-slate-950/80 border-white/10 text-white/95 rounded-tl-none hover:border-white/20"
                         }
                         ${isEditing ? "ring-2 ring-purple-500 border-transparent w-full" : ""}
                       `}>
@@ -561,7 +640,9 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                             </div>
                           </div>
                         ) : (
-                          <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{msg.message}</p>
+                          <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
+                            {renderMessageText(msg.message, userRoles)}
+                          </p>
                         )}
                       </div>
 

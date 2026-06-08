@@ -27,6 +27,234 @@ export async function GET() {
 import { containsProfanity } from "@/lib/profanity"
 import { verifySession } from "@/lib/auth-server"
 
+async function handleStaffCommand(
+  cmd: string,
+  commandParts: string[],
+  userData: { id: string; username: string; role: string },
+  supabase: any
+) {
+  const targetUsername = commandParts[1]?.trim();
+  if (!targetUsername) {
+    return NextResponse.json({ error: "Missing username parameter." }, { status: 400 });
+  }
+
+  // Find target user
+  const { data: targetUser, error: fetchErr } = await supabase
+    .from("users")
+    .select("id, username, tokens")
+    .ilike("username", targetUsername)
+    .maybeSingle();
+
+  if (fetchErr || !targetUser) {
+    return NextResponse.json({ error: `User "${targetUsername}" not found.` }, { status: 404 });
+  }
+
+  let broadcastMessage = "";
+
+  if (cmd === "/ban") {
+    let duration: number | null = null;
+    let reason = "Banned by staff";
+    if (commandParts.length > 2) {
+      const lastPart = commandParts[commandParts.length - 1];
+      const parsedDuration = parseInt(lastPart, 10);
+      if (!isNaN(parsedDuration) && parsedDuration > 0) {
+        duration = parsedDuration;
+        reason = commandParts.slice(2, -1).join(" ") || "Banned by staff";
+      } else {
+        reason = commandParts.slice(2).join(" ");
+      }
+    }
+
+    const expiryTime = duration ? (Date.now() + duration * 3600000) : null;
+    const { error: updateErr } = await supabase
+      .from("users")
+      .update({
+        is_banned: true,
+        ban_reason: reason,
+        ban_expiry: expiryTime
+      })
+      .eq("username", targetUser.username);
+
+    if (updateErr) {
+      return NextResponse.json({ error: `Failed to ban user ${targetUser.username}.` }, { status: 500 });
+    }
+
+    const durationText = duration ? `for ${duration} hours` : "permanently";
+    broadcastMessage = `System 🛡️: User ${userData.username} has banned ${targetUser.username} ${durationText}. Reason: ${reason}`;
+  } 
+  else if (cmd === "/unban") {
+    const { error: updateErr } = await supabase
+      .from("users")
+      .update({
+        is_banned: false,
+        ban_reason: null,
+        ban_expiry: null
+      })
+      .eq("username", targetUser.username);
+
+    if (updateErr) {
+      return NextResponse.json({ error: `Failed to unban user ${targetUser.username}.` }, { status: 500 });
+    }
+
+    broadcastMessage = `System 🛡️: User ${userData.username} has unbanned ${targetUser.username}.`;
+  }
+  else if (cmd === "/mute") {
+    let duration: number | null = null;
+    let reason = "Muted by staff";
+    if (commandParts.length > 2) {
+      const lastPart = commandParts[commandParts.length - 1];
+      const parsedDuration = parseInt(lastPart, 10);
+      if (!isNaN(parsedDuration) && parsedDuration > 0) {
+        duration = parsedDuration;
+        reason = commandParts.slice(2, -1).join(" ") || "Muted by staff";
+      } else {
+        reason = commandParts.slice(2).join(" ");
+      }
+    }
+
+    let expiryTime = null;
+    if (duration) {
+      const expDate = new Date();
+      expDate.setHours(expDate.getHours() + duration);
+      expiryTime = expDate.toISOString();
+    }
+
+    const { error: updateErr } = await supabase
+      .from("users")
+      .update({
+        is_muted: true,
+        mute_expiry: expiryTime
+      })
+      .eq("username", targetUser.username);
+
+    if (updateErr) {
+      return NextResponse.json({ error: `Failed to mute user ${targetUser.username}.` }, { status: 500 });
+    }
+
+    const durationText = duration ? `for ${duration} hours` : "permanently";
+    broadcastMessage = `System 🛡️: User ${userData.username} has muted ${targetUser.username} ${durationText}. Reason: ${reason}`;
+  }
+  else if (cmd === "/unmute") {
+    const { error: updateErr } = await supabase
+      .from("users")
+      .update({
+        is_muted: false,
+        mute_expiry: null
+      })
+      .eq("username", targetUser.username);
+
+    if (updateErr) {
+      return NextResponse.json({ error: `Failed to unmute user ${targetUser.username}.` }, { status: 500 });
+    }
+
+    broadcastMessage = `System 🛡️: User ${userData.username} has unmuted ${targetUser.username}.`;
+  }
+  else if (cmd === "/check-alts") {
+    const { data: fullTargetUser, error: ipErr } = await supabase
+      .from("users")
+      .select("username, last_ip")
+      .eq("id", targetUser.id)
+      .single();
+
+    if (ipErr || !fullTargetUser) {
+      return NextResponse.json({ error: `Could not fetch data for ${targetUser.username}.` }, { status: 500 });
+    }
+
+    const ip = fullTargetUser.last_ip;
+    if (!ip || ip === "127.0.0.1") {
+      broadcastMessage = `System 🛡️: User ${targetUser.username} has no logged IP address (or is 127.0.0.1). Cannot check alts.`;
+    } else {
+      const { data: alts, error: altsErr } = await supabase
+        .from("users")
+        .select("username, is_banned, role, join_date")
+        .eq("last_ip", ip);
+
+      if (altsErr || !alts) {
+        return NextResponse.json({ error: "Error querying for alt accounts." }, { status: 500 });
+      }
+
+      const otherAlts = alts.filter((a: any) => a.username.toLowerCase() !== targetUser.username.toLowerCase());
+      if (otherAlts.length === 0) {
+        broadcastMessage = `System 🛡️: Alt accounts check for ${targetUser.username}: No other accounts found on this IP.`;
+      } else {
+        const altNames = otherAlts.map((a: any) => `${a.username}${a.is_banned ? " (Banned)" : ""}`).join(", ");
+        broadcastMessage = `System 🛡️: Alt accounts check for ${targetUser.username} found: ${altNames} (IP Redacted)`;
+      }
+    }
+  }
+  else if (cmd === "/gift-tokens") {
+    const amountStr = commandParts[2];
+    if (!amountStr) {
+      return NextResponse.json({ error: "Missing amount parameter." }, { status: 400 });
+    }
+    const amount = parseInt(amountStr, 10);
+    if (isNaN(amount) || amount <= 0) {
+      return NextResponse.json({ error: "Invalid amount. Must be a positive integer." }, { status: 400 });
+    }
+
+    if (userData.username.toLowerCase() === targetUser.username.toLowerCase()) {
+      return NextResponse.json({ error: "You cannot gift tokens to yourself!" }, { status: 400 });
+    }
+
+    // Check sender's tokens
+    const { data: senderUser, error: senderErr } = await supabase
+      .from("users")
+      .select("tokens")
+      .eq("id", userData.id)
+      .single();
+
+    if (senderErr || !senderUser) {
+      return NextResponse.json({ error: "Could not retrieve your account data." }, { status: 500 });
+    }
+
+    if (senderUser.tokens < amount) {
+      return NextResponse.json({ error: `Insufficient Balance: You only have ${senderUser.tokens} tokens (trying to gift ${amount}).` }, { status: 400 });
+    }
+
+    // Deduct from sender
+    const { error: deductErr } = await supabase
+      .from("users")
+      .update({ tokens: senderUser.tokens - amount })
+      .eq("id", userData.id);
+
+    if (deductErr) {
+      return NextResponse.json({ error: "Failed to deduct tokens from your balance." }, { status: 500 });
+    }
+
+    // Credit to receiver
+    const { error: creditErr } = await supabase
+      .from("users")
+      .update({ tokens: targetUser.tokens + amount })
+      .eq("id", targetUser.id);
+
+    if (creditErr) {
+      await supabase.from("users").update({ tokens: senderUser.tokens }).eq("id", userData.id);
+      return NextResponse.json({ error: "Failed to credit tokens to recipient. Reverted transaction." }, { status: 500 });
+    }
+
+    broadcastMessage = `System 🛡️: User ${userData.username} has gifted ${amount} tokens to ${targetUser.username}.`;
+  }
+
+  // Insert broadcast message into chat_messages
+  const { data: insertData, error: insertErr } = await supabase
+    .from("chat_messages")
+    .insert([
+      {
+        username: "System 🛡️",
+        message: broadcastMessage,
+        role: "admin",
+      }
+    ])
+    .select();
+
+  if (insertErr) {
+    console.error("[Staff Command Broadcast] Error:", insertErr);
+    return NextResponse.json({ success: true, message: broadcastMessage, note: "Broadcast failed" }, { status: 201 });
+  }
+
+  return NextResponse.json(insertData, { status: 201 });
+}
+
 export async function POST(request: Request) {
   try {
     const session = await verifySession()
@@ -53,6 +281,22 @@ export async function POST(request: Request) {
     const role = userData.role
 
     console.log("[v0] Verifying user for chat:", username)
+
+    // Intercept staff-only commands
+    const cleanMsg = message?.trim() || "";
+    if (cleanMsg.startsWith("/")) {
+      const commandParts = cleanMsg.split(/\s+/);
+      const cmd = commandParts[0].toLowerCase();
+      const supportedCommands = ["/ban", "/unban", "/mute", "/unmute", "/check-alts", "/gift-tokens"];
+      
+      if (supportedCommands.includes(cmd)) {
+        const STAFF_ROLES = ["owner", "admin", "senior_moderator", "moderator"];
+        if (!STAFF_ROLES.includes(role || "")) {
+          return NextResponse.json({ error: "Unauthorized command: Staff only." }, { status: 403 });
+        }
+        return await handleStaffCommand(cmd, commandParts, userData, supabase);
+      }
+    }
 
     // Check if mute has expired
     if (userData.is_muted && userData.mute_expiry) {
