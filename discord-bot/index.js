@@ -487,6 +487,19 @@ const client = new Client({
     intents: [GatewayIntentBits.Guilds]
 });
 
+// Global Error Handlers to prevent crashes from WebSocket disconnections (e.g. ECONNRESET)
+client.on('error', error => {
+    console.error('Discord Client WebSocket Error:', error);
+});
+
+process.on('unhandledRejection', error => {
+    console.error('Unhandled Promise Rejection:', error);
+});
+
+process.on('uncaughtException', error => {
+    console.error('Uncaught Exception:', error);
+});
+
 client.once('ready', () => {
     console.log(`🤖 Discord bot logged in as ${client.user.tag}`);
     console.log(`Verified Role ID set to: ${process.env.VERIFIED_ROLE_ID}`);
