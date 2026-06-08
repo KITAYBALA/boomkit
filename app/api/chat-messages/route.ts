@@ -163,7 +163,7 @@ async function handleStaffCommand(
     const mac = fullTargetUser.mac_address;
     const ip = fullTargetUser.last_ip;
 
-    if (mac) {
+    if (mac && mac.trim() !== "" && mac !== "null") {
       // Check based on device ID (mac_address)
       const { data: alts, error: altsErr } = await supabase
         .from("users")

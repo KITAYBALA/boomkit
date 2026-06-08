@@ -504,10 +504,20 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                  const canDelete = isMe || isStaff
                  const avatar = isSystem ? "🛡️" : (userClanData[msg.username]?.avatar || "🎯")
 
+                  // Check if the current user is mentioned in this message, or if it is a global ping
+                  const isPinged = currentUser?.username && msg.username !== currentUser.username && (() => {
+                    const myNameEscaped = currentUser.username.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                    return new RegExp(`@(${myNameEscaped}|everyone|here)\\b`, "i").test(msg.message);
+                  })();
+
                 return (
                   <div
                     key={msg.id}
-                    className={`group flex items-start gap-4 ${isMe ? "flex-row-reverse text-right" : "text-left"} transition-all duration-300`}
+                    className={`group flex items-start gap-4 ${isMe ? "flex-row-reverse text-right" : "text-left"} transition-all duration-300 p-3 rounded-2xl ${
+                      isPinged 
+                        ? "bg-red-500/10 border-l-4 border-red-500 shadow-[inset_0_0_15px_rgba(239,68,68,0.08)]" 
+                        : "border-l-4 border-transparent"
+                    }`}
                   >
                     {/* User Avatar with Rarity glow */}
                     <div 

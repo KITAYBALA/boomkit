@@ -1574,7 +1574,12 @@ export default function BoomkitGame() {
       if (!isStorageLoaded) return
 
       try {
-        const res = await fetch('/api/auth/verify')
+        const activeMac = localStorage.getItem("boomkit_device_id")
+        const res = await fetch('/api/auth/verify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mac_address: activeMac })
+        })
         const data = await res.json()
 
         if (!data.authenticated) {
@@ -1819,44 +1824,56 @@ export default function BoomkitGame() {
   useEffect(() => {
     let chatChannel: any = null
 
-    if (currentUser?.id && supabase) {
-      console.log("[v0] Subscribing to global chat messages insert events for notifications...")
+    if (currentUser?.id && currentUser?.username && supabase) {
+      console.log("[v0] Subscribing to global chat messages insert events for notifications... User:", currentUser.username)
       chatChannel = supabase
         .channel("global_chat_notifications")
         .on(
           "postgres_changes",
           {
-            event: "INSERT",
+            event: "*",
             schema: "public",
             table: "chat_messages",
           },
           (payload: any) => {
-            const d = payload.new
-            if (d && d.username !== currentUser.username) {
-              const myNameLower = currentUser.username.toLowerCase();
-              const pingRegex = new RegExp(`@${myNameLower}\\b`, "i");
-              if (pingRegex.test(d.message)) {
-                // Play synthesized notification sound
-                playPingSound();
-                // Show toast alert
-                toast(`🔔 @${currentUser.username} mentioned you in chat!`, {
-                  description: d.message.length > 80 ? `${d.message.slice(0, 80)}...` : d.message,
-                });
-                // Increment unread chat notification count if user is not on Chat page
-                if (currentPageRef.current !== "chat") {
-                  setChatNotificationCount(prev => prev + 1);
+            console.log("[v0] Global chat notification event received:", payload.eventType, payload)
+            if (payload.eventType === "INSERT") {
+              const d = payload.new
+              if (d && d.username !== currentUser.username) {
+                const myNameLower = currentUser.username.toLowerCase();
+                const pingRegex = new RegExp(`@(${myNameLower}|everyone|here)\\b`, "i");
+                if (pingRegex.test(d.message)) {
+                  // Play synthesized notification sound
+                  playPingSound();
+                  
+                  const isGlobalPing = /@(everyone|here)\b/i.test(d.message);
+                  const toastTitle = isGlobalPing ? "📢 Global ping in chat!" : `🔔 @${currentUser.username} mentioned you in chat!`;
+                  
+                  // Show toast alert
+                  toast(toastTitle, {
+                    description: d.message.length > 80 ? `${d.message.slice(0, 80)}...` : d.message,
+                  });
+                  // Increment unread chat notification count if user is not on Chat page
+                  if (currentPageRef.current !== "chat") {
+                    setChatNotificationCount(prev => prev + 1);
+                  }
                 }
               }
             }
           }
         )
-        .subscribe()
+        .subscribe((status: string) => {
+          console.log("[v0] Global chat subscription status:", status)
+        })
     }
 
     return () => {
-      if (chatChannel) supabase?.removeChannel(chatChannel)
+      if (chatChannel) {
+        console.log("[v0] Cleaning up global chat notifications subscription")
+        supabase?.removeChannel(chatChannel)
+      }
     }
-  }, [currentUser?.id, supabase])
+  }, [currentUser?.id, currentUser?.username, supabase])
 
   // Real-time listener for clan chat messages & auto-details loading
   useEffect(() => {

@@ -1154,7 +1154,7 @@ client.on('interactionCreate', async interaction => {
             let queryValue = '';
             let matchType = '';
             
-            if (mac) {
+            if (mac && mac.trim() !== '' && mac !== 'null') {
                 queryField = 'mac_address';
                 queryValue = mac;
                 matchType = 'device ID';
