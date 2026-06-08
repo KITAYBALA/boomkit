@@ -174,6 +174,42 @@ const commands = [
     new SlashCommandBuilder()
         .setName('trivia')
         .setDescription('Start a trivia question and win 100 tokens! (5 runs per hour limit)'),
+
+    new SlashCommandBuilder()
+        .setName('claim-daily')
+        .setDescription('Claim your daily token reward directly from Discord'),
+        
+    new SlashCommandBuilder()
+        .setName('claim-code')
+        .setDescription('Redeem a promo code for tokens')
+        .addStringOption(option => 
+            option.setName('code')
+                .setDescription('The promo code to redeem')
+                .setRequired(true)),
+                
+    new SlashCommandBuilder()
+        .setName('create-code')
+        .setDescription('Create a new promo code (Staff Only)')
+        .addStringOption(option => 
+            option.setName('code')
+                .setDescription('The code text (e.g. WELCOME100)')
+                .setRequired(true))
+        .addIntegerOption(option => 
+            option.setName('reward')
+                .setDescription('Tokens rewarded upon redemption')
+                .setRequired(true))
+        .addIntegerOption(option => 
+            option.setName('max_uses')
+                .setDescription('Maximum number of times this code can be claimed overall')
+                .setRequired(true))
+        .addIntegerOption(option => 
+            option.setName('duration_hours')
+                .setDescription('Number of hours before this code expires (leave empty for never)')
+                .setRequired(false)),
+                
+    new SlashCommandBuilder()
+        .setName('active-codes')
+        .setDescription('View all currently active promo codes (Staff Only)'),
 ].map(command => command.toJSON());
 
 // Slash Command Registration Helper
@@ -1361,6 +1397,276 @@ client.on('interactionCreate', async interaction => {
                 interaction.editReply({ embeds: [endedEmbed], components: [disabledRow] }).catch(console.error);
             }
         });
+    }
+
+    // --- CLAIM-DAILY COMMAND ---
+    if (commandName === 'claim-daily') {
+        await interaction.deferReply({ ephemeral: false });
+        
+        try {
+            const boomkitUsername = await getLinkedUsername(user.id);
+            if (!boomkitUsername) {
+                return interaction.editReply({
+                    content: '🛑 **Not Linked**: Your Discord account is not linked to any Boomkit username. Link it using `/link [username] [password]` first!'
+                });
+            }
+            
+            // Fetch player's current data
+            const { data: player, error: playerErr } = await supabase
+                .from('users')
+                .select('tokens, last_daily_spin, username')
+                .eq('username', boomkitUsername)
+                .single();
+                
+            if (playerErr || !player) {
+                return interaction.editReply({ content: '🛑 **Error**: Could not retrieve your account data.' });
+            }
+            
+            const today = new Date().toDateString();
+            if (player.last_daily_spin === today) {
+                return interaction.editReply({ content: `⏳ **Already Claimed**: You have already claimed your daily reward today! Come back tomorrow.` });
+            }
+            
+            // Update balance and daily spin date
+            const dailyReward = 50; // Award 50 tokens
+            const newBalance = player.tokens + dailyReward;
+            
+            const { error: updateErr } = await supabase
+                .from('users')
+                .update({
+                    tokens: newBalance,
+                    last_daily_spin: today
+                })
+                .eq('username', player.username);
+                
+            if (updateErr) {
+                console.error('[Daily Claim DB Update] Error:', updateErr);
+                return interaction.editReply({ content: '⚠️ Failed to record your claim in the database. Please try again.' });
+            }
+            
+            return interaction.editReply({
+                content: `🎁 **Daily Reward Claimed!**\n\n**${player.username}** successfully claimed their daily reward of **${dailyReward} tokens**!\n💎 **New Balance**: **${newBalance}** tokens.`
+            });
+        } catch (err) {
+            console.error('[Interaction claim-daily] Error:', err);
+            return interaction.editReply({ content: '⚠️ An unexpected error occurred while claiming your daily reward.' });
+        }
+    }
+
+    // --- CREATE-CODE COMMAND ---
+    if (commandName === 'create-code') {
+        const code = interaction.options.getString('code').trim().toUpperCase();
+        const reward = interaction.options.getInteger('reward');
+        const maxUses = interaction.options.getInteger('max_uses');
+        const durationHours = interaction.options.getInteger('duration_hours');
+        
+        const isOwner = interaction.guild?.ownerId === interaction.member.id;
+        const isAdmin = interaction.member.permissions?.has(PermissionFlagsBits.Administrator);
+        if (!isAdmin && !isOwner) {
+            return interaction.reply({ content: '🛑 **Permission Denied**: This is a staff-only command!', ephemeral: true });
+        }
+        
+        await interaction.deferReply({ ephemeral: false });
+        
+        try {
+            let expiresAt = null;
+            if (durationHours) {
+                const expDate = new Date();
+                expDate.setHours(expDate.getHours() + durationHours);
+                expiresAt = expDate.toISOString();
+            }
+            
+            const { error: insertError } = await supabase
+                .from('promo_codes')
+                .insert({
+                    code: code,
+                    tokens_reward: reward,
+                    max_uses: maxUses,
+                    current_uses: 0,
+                    expires_at: expiresAt
+                });
+                
+            if (insertError) {
+                console.error('[Create Code DB Insert] Error:', insertError);
+                if (insertError.code === '23505') { // unique key violation
+                    return interaction.editReply({ content: `❌ **Failed**: A promo code with the name \`${code}\` already exists.` });
+                }
+                return interaction.editReply({ content: '⚠️ Failed to create promo code in the database. Make sure the database schema is up-to-date.' });
+            }
+            
+            const expiryText = durationHours ? `expires in **${durationHours} hours**` : 'does not expire';
+            
+            const embed = {
+                color: 0x00ff00,
+                title: '🎁 New Promo Code Created!',
+                description: `A server promo code is now active!`,
+                fields: [
+                    { name: '🔑 Code', value: `\`${code}\``, inline: true },
+                    { name: '💎 Reward', value: `**${reward} tokens**`, inline: true },
+                    { name: '👥 Max Uses', value: `**${maxUses} times**`, inline: true },
+                    { name: '⏳ Expiry', value: expiryText, inline: false }
+                ],
+                footer: { text: `Created by ${user.username}` },
+                timestamp: new Date().toISOString()
+            };
+            
+            return interaction.editReply({ embeds: [embed] });
+        } catch (err) {
+            console.error('[Interaction create-code] Error:', err);
+            return interaction.editReply({ content: '⚠️ An unexpected error occurred while creating the promo code.' });
+        }
+    }
+
+    // --- CLAIM-CODE COMMAND ---
+    if (commandName === 'claim-code') {
+        const code = interaction.options.getString('code').trim().toUpperCase();
+        
+        await interaction.deferReply({ ephemeral: true });
+        
+        try {
+            const boomkitUsername = await getLinkedUsername(user.id);
+            if (!boomkitUsername) {
+                return interaction.editReply({
+                    content: '🛑 **Not Linked**: Your Discord account is not linked to any Boomkit username. Link it using `/link [username] [password]` first!'
+                });
+            }
+            
+            // 1. Fetch code record
+            const { data: codeRecord, error: codeErr } = await supabase
+                .from('promo_codes')
+                .select('*')
+                .eq('code', code)
+                .maybeSingle();
+                
+            if (codeErr || !codeRecord) {
+                return interaction.editReply({ content: '❌ **Invalid Code**: That promo code does not exist.' });
+            }
+            
+            // 2. Check Expiry
+            if (codeRecord.expires_at && new Date(codeRecord.expires_at) < new Date()) {
+                return interaction.editReply({ content: '❌ **Code Expired**: This promo code has expired!' });
+            }
+            
+            // 3. Check Uses Limit
+            if (codeRecord.current_uses >= codeRecord.max_uses) {
+                return interaction.editReply({ content: '❌ **Limit Reached**: This promo code has already reached its maximum number of claims!' });
+            }
+            
+            // 4. Check if already claimed by user
+            const { data: redemptionRecord, error: redErr } = await supabase
+                .from('promo_redemptions')
+                .select('id')
+                .eq('code', code)
+                .eq('username', boomkitUsername)
+                .maybeSingle();
+                
+            if (redemptionRecord) {
+                return interaction.editReply({ content: '❌ **Already Claimed**: You have already redeemed this promo code!' });
+            }
+            
+            // 5. Insert redemption
+            const { error: redInsertErr } = await supabase
+                .from('promo_redemptions')
+                .insert({
+                    code: code,
+                    username: boomkitUsername
+                });
+                
+            if (redInsertErr) {
+                console.error('[Redemption DB Insert] Error:', redInsertErr);
+                return interaction.editReply({ content: '⚠️ Failed to claim. An error occurred saving your redemption.' });
+            }
+            
+            // 6. Update uses count on code
+            await supabase
+                .from('promo_codes')
+                .update({ current_uses: codeRecord.current_uses + 1 })
+                .eq('code', code);
+                
+            // 7. Update player tokens
+            const { data: player, error: playerErr } = await supabase
+                .from('users')
+                .select('tokens')
+                .eq('username', boomkitUsername)
+                .single();
+                
+            if (playerErr || !player) {
+                return interaction.editReply({ content: '🎉 **Code claimed**, but an error occurred checking your token balance.' });
+            }
+            
+            const newBalance = player.tokens + codeRecord.tokens_reward;
+            const { error: balanceErr } = await supabase
+                .from('users')
+                .update({ tokens: newBalance })
+                .eq('username', boomkitUsername);
+                
+            if (balanceErr) {
+                console.error('[Claim Tokens Update] Error:', balanceErr);
+                return interaction.editReply({ content: '🎉 **Code claimed**, but an error occurred adding tokens to your balance.' });
+            }
+            
+            // Post public success message in the channel so they can show off
+            await interaction.channel.send({
+                content: `🎉 **Promo Code Redeemed!**\n\n**${boomkitUsername}** successfully redeemed code \`${code}\` and received **${codeRecord.tokens_reward} tokens**!`
+            }).catch(console.error);
+            
+            return interaction.editReply({ content: `🎉 **Success!** You received **${codeRecord.tokens_reward} tokens**! Your new balance is **${newBalance}**.` });
+        } catch (err) {
+            console.error('[Interaction claim-code] Error:', err);
+            return interaction.editReply({ content: '⚠️ An unexpected error occurred while claiming the code.' });
+        }
+    }
+
+    // --- ACTIVE-CODES COMMAND ---
+    if (commandName === 'active-codes') {
+        const isOwner = interaction.guild?.ownerId === interaction.member.id;
+        const isAdmin = interaction.member.permissions?.has(PermissionFlagsBits.Administrator);
+        if (!isAdmin && !isOwner) {
+            return interaction.reply({ content: '🛑 **Permission Denied**: This is a staff-only command!', ephemeral: true });
+        }
+        
+        await interaction.deferReply({ ephemeral: true });
+        
+        try {
+            const { data: codes, error } = await supabase
+                .from('promo_codes')
+                .select('*')
+                .order('created_at', { ascending: false });
+                
+            if (error || !codes || codes.length === 0) {
+                return interaction.editReply({ content: 'ℹ️ No promo codes exist in the database.' });
+            }
+            
+            const now = new Date();
+            let codesText = '';
+            
+            codes.forEach(code => {
+                const isExpired = code.expires_at && new Date(code.expires_at) < now;
+                const isExhausted = code.current_uses >= code.max_uses;
+                
+                let status = '✅ Active';
+                if (isExpired) status = '❌ Expired';
+                else if (isExhausted) status = '❌ Exhausted';
+                
+                const expDateText = code.expires_at ? new Date(code.expires_at).toLocaleString() : 'Never';
+                
+                codesText += `• **\`${code.code}\`** [${status}]\n`;
+                codesText += `  💎 Reward: **${code.tokens_reward}** | Uses: **${code.current_uses}/${code.max_uses}**\n`;
+                codesText += `  ⏳ Expiry: ${expDateText}\n\n`;
+            });
+            
+            const embed = {
+                color: 0x00ff00,
+                title: '🔑 Boomkit Active Promo Codes',
+                description: codesText,
+                timestamp: new Date().toISOString()
+            };
+            
+            return interaction.editReply({ embeds: [embed] });
+        } catch (err) {
+            console.error('[Interaction active-codes] Error:', err);
+            return interaction.editReply({ content: '⚠️ An unexpected error occurred while listing promo codes.' });
+        }
     }
 });
 
