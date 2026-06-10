@@ -2405,7 +2405,7 @@ export function BoomAvatar({ name, className = "w-12 h-12" }: { name: string; cl
     return <img src={name} alt="Boom" className={`${className} object-contain`} />
   }
 
-  // Check if it is a standard AI Pack boom which maps to an image URL
+  // Check if it is a standard AI Pack or OG Pack boom which maps to an image URL
   const aiAvatarMap: Record<string, string> = {
     DeepSeek: "/images/booms/deepseek.png",
     "Microsoft Copilot": "/images/booms/copilot.png",
@@ -2413,6 +2413,19 @@ export function BoomAvatar({ name, className = "w-12 h-12" }: { name: string; cl
     ChatGPT: "/images/booms/claude.png",  // Keep V2 mapping matching configuration
     Vercel: "/images/booms/vercel.png",
     "Google Gemini": "/images/booms/gemini.png",
+    // OG Pack mappings
+    Nurik: "/images/booms/og/nurik.jpg",
+    Eok: "/images/booms/og/eok.png",
+    Yessir: "/images/booms/og/yessir.jpg",
+    OmarBoss: "/images/booms/og/omarboss.jpg",
+    Gunar69: "/images/booms/og/gunar69.jpg",
+    MrVortex: "/images/booms/og/mrvortex.png",
+    deniz: "/images/booms/og/deniz.png",
+    "(●ˇ∀ˇ●)": "/images/booms/og/emoji_guy.jpg",
+    HadiGidek: "/images/booms/og/hadigidek.jpg",
+    TUran1545: "/images/booms/og/turan1545.jpg",
+    StrmY_YT: "/images/booms/og/strmy_yt.jpg",
+    system: "/images/booms/og/system.jpg"
   }
 
   if (aiAvatarMap[name]) {

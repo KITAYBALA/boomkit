@@ -1300,6 +1300,8 @@ client.on('interactionCreate', async interaction => {
         triviaHostLimits.set(user.id, userRuns);
         
         const triviaObj = TRIVIA_QUESTIONS[Math.floor(Math.random() * TRIVIA_QUESTIONS.length)];
+        const wrongAttempts = new Set();
+        const expiresAt = Math.floor((Date.now() + 30000) / 1000);
         
         const buttons = triviaObj.options.map((option, idx) => {
             const customId = `trivia_${idx}_${now}`;
@@ -1315,8 +1317,8 @@ client.on('interactionCreate', async interaction => {
         const embed = {
             color: 0x9900ff,
             title: '🧠 Boomkit Interactive Trivia!',
-            description: `**${triviaObj.question}**\n\n*Click the correct button below to win **100 tokens**!*`,
-            footer: { text: `Hosted by ${user.username} | 30s remaining` }
+            description: `**${triviaObj.question}**\n\n*Click the correct button below to win **100 tokens**!*\n\n⏰ **Time Limit**: Ends <t:${expiresAt}:R>`,
+            footer: { text: `Hosted by ${user.username}` }
         };
         
         await interaction.reply({ embeds: [embed], components: [row] });
@@ -1331,6 +1333,14 @@ client.on('interactionCreate', async interaction => {
         
         collector.on('collect', async buttonInteraction => {
             if (answered) return;
+            
+            const userId = buttonInteraction.user.id;
+            if (wrongAttempts.has(userId)) {
+                return buttonInteraction.reply({
+                    content: '❌ **Incorrect!** You already answered this trivia incorrectly and cannot try again.',
+                    ephemeral: true
+                });
+            }
             
             const selectedIdx = parseInt(buttonInteraction.customId.split('_')[1]);
             const selectedChoice = ['A', 'B', 'C', 'D'][selectedIdx];
@@ -1350,11 +1360,11 @@ client.on('interactionCreate', async interaction => {
                     }
                     
                     const { data: player, error: playerErr } = await supabase
-                        .from('users')
-                        .select('tokens, username')
-                        .eq('username', winnerUsername)
-                        .single();
-                        
+                         .from('users')
+                         .select('tokens, username')
+                         .eq('username', winnerUsername)
+                         .single();
+                         
                     if (playerErr || !player) {
                         return buttonInteraction.editReply({
                             content: `🎉 **Correct!** **${buttonInteraction.user.username}** (Boomkit: **${winnerUsername}**) answered **${triviaObj.correctText}** first, but there was an error updating their balance.`
@@ -1363,10 +1373,10 @@ client.on('interactionCreate', async interaction => {
                     
                     const newBalance = player.tokens + 100;
                     const { error: updateErr } = await supabase
-                        .from('users')
-                        .update({ tokens: newBalance })
-                        .eq('username', player.username);
-                        
+                         .from('users')
+                         .update({ tokens: newBalance })
+                         .eq('username', player.username);
+                         
                     if (updateErr) {
                         return buttonInteraction.editReply({
                             content: `🎉 **Correct!** **${buttonInteraction.user.username}** (Boomkit: **${player.username}**) answered **${triviaObj.correctText}** first, but there was an error updating their balance.`
@@ -1383,8 +1393,9 @@ client.on('interactionCreate', async interaction => {
                     });
                 }
             } else {
+                wrongAttempts.add(userId);
                 return buttonInteraction.reply({
-                    content: '❌ **Incorrect!** That is not the right answer. Try another one!',
+                    content: '❌ **Incorrect!** That is not the right answer. Better luck next time!',
                     ephemeral: true
                 });
             }

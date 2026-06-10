@@ -435,6 +435,29 @@ const AVAILABLE_BADGES = [
 
 const PACKS: Pack[] = [
   {
+    id: "og",
+    name: "OG Pack",
+    price: 50,
+    booms: [
+      { name: "Nurik", rarity: "uncommon", avatar: "/images/booms/og/nurik.jpg", description: "Respected OG community member" },
+      { name: "Eok", rarity: "uncommon", avatar: "/images/booms/og/eok.png", description: "Respected OG community member" },
+      { name: "Yessir", rarity: "uncommon", avatar: "/images/booms/og/yessir.jpg", description: "Respected OG community member" },
+      { name: "OmarBoss", rarity: "rare", avatar: "/images/booms/og/omarboss.jpg", description: "Respected OG community member" },
+      { name: "Gunar69", rarity: "rare", avatar: "/images/booms/og/gunar69.jpg", description: "Respected OG community member" },
+      { name: "MrVortex", rarity: "rare", avatar: "/images/booms/og/mrvortex.png", description: "Respected OG community member" },
+      { name: "deniz", rarity: "epic", avatar: "/images/booms/og/deniz.png", description: "Respected OG community member" },
+      { name: "(●ˇ∀ˇ●)", rarity: "epic", avatar: "/images/booms/og/emoji_guy.jpg", description: "Respected OG community member" },
+      { name: "HadiGidek", rarity: "legendary", avatar: "/images/booms/og/hadigidek.jpg", description: "Respected OG community member" },
+      { name: "TUran1545", rarity: "hidden", avatar: "/images/booms/og/turan1545.jpg", description: "Respected OG community member" },
+      { name: "StrmY_YT", rarity: "chroma", avatar: "/images/booms/og/strmy_yt.jpg", description: "Respected OG community member" },
+      { name: "system", rarity: "mystical", avatar: "/images/booms/og/system.jpg", description: "Respected OG community member" }
+    ],
+    color: "from-purple-600 via-indigo-700 to-indigo-900",
+    image: "/images/og-pack.png",
+    rarity: "legendary",
+    emoji: "👑"
+  },
+  {
     id: "ai",
     name: "AI Pack",
     price: 35,
@@ -734,29 +757,6 @@ const PACKS: Pack[] = [
     image: "/images/ice-pack.png",
     rarity: "rare",
     emoji: "❄️"
-  },
-  {
-    id: "og",
-    name: "OG Pack",
-    price: 50,
-    booms: [
-      { name: "Nurik", rarity: "uncommon", avatar: "/images/booms/og/nurik.jpg", description: "Respected OG community member" },
-      { name: "Eok", rarity: "uncommon", avatar: "/images/booms/og/eok.png", description: "Respected OG community member" },
-      { name: "Yessir", rarity: "uncommon", avatar: "/images/booms/og/yessir.jpg", description: "Respected OG community member" },
-      { name: "OmarBoss", rarity: "rare", avatar: "/images/booms/og/omarboss.jpg", description: "Respected OG community member" },
-      { name: "Gunar69", rarity: "rare", avatar: "/images/booms/og/gunar69.jpg", description: "Respected OG community member" },
-      { name: "MrVortex", rarity: "rare", avatar: "/images/booms/og/mrvortex.png", description: "Respected OG community member" },
-      { name: "deniz", rarity: "epic", avatar: "/images/booms/og/deniz.png", description: "Respected OG community member" },
-      { name: "(●ˇ∀ˇ●)", rarity: "epic", avatar: "/images/booms/og/emoji_guy.jpg", description: "Respected OG community member" },
-      { name: "HadiGidek", rarity: "legendary", avatar: "/images/booms/og/hadigidek.jpg", description: "Respected OG community member" },
-      { name: "TUran1545", rarity: "hidden", avatar: "/images/booms/og/turan1545.jpg", description: "Respected OG community member" },
-      { name: "StrmY_YT", rarity: "chroma", avatar: "/images/booms/og/strmy_yt.jpg", description: "Respected OG community member" },
-      { name: "system", rarity: "mystical", avatar: "/images/booms/og/system.jpg", description: "Respected OG community member" }
-    ],
-    color: "from-purple-600 via-indigo-700 to-indigo-900",
-    image: "/images/og-pack.png",
-    rarity: "legendary",
-    emoji: "👑"
   }
 ];
 // Gamepass Booms - Unlocked at level milestones
