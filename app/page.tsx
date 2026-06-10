@@ -738,11 +738,11 @@ const PACKS: Pack[] = [
   {
     id: "og",
     name: "OG Pack",
-    price: 45,
+    price: 50,
     booms: [
       { name: "Nurik", rarity: "uncommon", avatar: "/images/booms/og/nurik.jpg", description: "Respected OG community member" },
       { name: "Eok", rarity: "uncommon", avatar: "/images/booms/og/eok.png", description: "Respected OG community member" },
-      { name: "Yessir", rarity: "uncommon", avatar: "/images/booms/og/yessir.png", description: "Respected OG community member" },
+      { name: "Yessir", rarity: "uncommon", avatar: "/images/booms/og/yessir.jpg", description: "Respected OG community member" },
       { name: "OmarBoss", rarity: "rare", avatar: "/images/booms/og/omarboss.jpg", description: "Respected OG community member" },
       { name: "Gunar69", rarity: "rare", avatar: "/images/booms/og/gunar69.jpg", description: "Respected OG community member" },
       { name: "MrVortex", rarity: "rare", avatar: "/images/booms/og/mrvortex.png", description: "Respected OG community member" },
