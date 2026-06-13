@@ -411,12 +411,6 @@ const DEFAULT_ROLES: UserRole[] = [
 ]
 
 const gradingGroups = [
-  { grade: 1, label: "1st Grade" },
-  { grade: 2, label: "2nd Grade" },
-  { grade: 3, label: "3rd Grade" },
-  { grade: 4, label: "4th Grade" },
-  { grade: 5, label: "5th Grade" },
-  { grade: 6, label: "6th Grade" },
   { grade: 7, label: "7th Grade" },
   { grade: 8, label: "8th Grade" },
   { grade: 9, label: "9th Grade" },
@@ -1028,7 +1022,7 @@ export default function BoomkitGame() {
   const [aiSetPrompt, setAiSetPrompt] = useState("")
   const [aiQuestionCount, setAiQuestionCount] = useState(25)
   const [aiIsPublic, setAiIsPublic] = useState(false)
-  const [aiGrade, setAiGrade] = useState(3)
+  const [aiGrade, setAiGrade] = useState(7)
   const [aiSubject, setAiSubject] = useState("Math")
   const [currentUser, setCurrentUser] = useState<GameUser | null>(null)
   const [users, setUsers] = useState<GameUser[]>([])
@@ -2300,8 +2294,8 @@ export default function BoomkitGame() {
       return
     }
 
-    if (Number.parseInt(registerForm.age) < 10) {
-      alert("You must be at least 10 years old to register")
+    if (Number.parseInt(registerForm.age) < 13) {
+      alert("You must be at least 13 years old to register")
       return
     }
 
@@ -2584,20 +2578,33 @@ export default function BoomkitGame() {
       particles,
     })
 
-    // Stage 2: Burst (after 1.5s)
+    const burstDelay = isInstantOpen ? 400 : 1500
+    const revealDelay = isInstantOpen ? 650 : 2000
+    const doneDelay = isInstantOpen 
+      ? 650 + (
+          randomBoom.rarity === "uncommon" ? 300 :
+          randomBoom.rarity === "rare" ? 350 :
+          randomBoom.rarity === "epic" ? 250 :
+          randomBoom.rarity === "legendary" ? 500 :
+          randomBoom.rarity === "chroma" ? 600 :
+          randomBoom.rarity === "mystical" ? 750 : 900
+        ) + 100
+      : 2800
+
+    // Stage 2: Burst
     setTimeout(() => {
       setPackAnimation((prev) => ({ ...prev, stage: "burst" }))
-    }, 1500)
+    }, burstDelay)
 
-    // Stage 3: Reveal (after 2s)
+    // Stage 3: Reveal
     setTimeout(() => {
       setPackAnimation((prev) => ({ ...prev, stage: "reveal" }))
-    }, 2000)
+    }, revealDelay)
 
-    // Stage 4: Done (after 2.8s)
+    // Stage 4: Done
     setTimeout(() => {
       setPackAnimation((prev) => ({ ...prev, stage: "done" }))
-    }, 2800)
+    }, doneDelay)
 
     const updatedBooms = { ...updatedUser.booms }
     updatedBooms[randomBoom.name] = (updatedBooms[randomBoom.name] || 0) + 1
