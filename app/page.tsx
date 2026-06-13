@@ -793,13 +793,13 @@ const renderProfilePicture = (profilePic: string, className: string = "w-full h-
 
 // Rarity chances for pack opening (total = 100%)
 const RARITY_CHANCES = {
-  uncommon: 60,
+  uncommon: 60.849,
   rare: 30,
   epic: 8,
   legendary: 1,
-  hidden: 0.09,
-  chroma: 0.9,
-  mystical: 0.01,
+  chroma: 0.1,
+  hidden: 0.05,
+  mystical: 0.001,
 }
 
 const DAILY_SPIN_REWARDS = [100, 150, 200, 250, 300, 350, 400, 500]
@@ -5729,13 +5729,13 @@ const handlePackAction = (packId: string) => {
 
                   <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
                     {[
-                      { label: "Uncommon", rate: "60%", color: "bg-green-500", border: "border-green-500/20", glow: "hover:shadow-[0_0_20px_rgba(34,197,94,0.2)]" },
+                      { label: "Uncommon", rate: "60.849%", color: "bg-green-500", border: "border-green-500/20", glow: "hover:shadow-[0_0_20px_rgba(34,197,94,0.2)]" },
                       { label: "Rare", rate: "30%", color: "bg-blue-500", border: "border-blue-500/20", glow: "hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]" },
                       { label: "Epic", rate: "8%", color: "bg-purple-500", border: "border-purple-500/20", glow: "hover:shadow-[0_0_20px_rgba(168,85,247,0.2)]" },
                       { label: "Legendary", rate: "1%", color: "bg-orange-500", border: "border-orange-500/20", glow: "hover:shadow-[0_0_20px_rgba(249,115,22,0.2)]" },
-                      { label: "Hidden", rate: "0.09%", color: "bg-slate-800 text-slate-100", border: "border-slate-700", glow: "hover:shadow-[0_0_20px_rgba(148,163,184,0.3)] animate-pulse" },
-                      { label: "Chroma", rate: "0.9%", color: "bg-gradient-to-r from-red-500 via-yellow-500 to-purple-500", border: "border-pink-500/20", glow: "hover:shadow-[0_0_25px_rgba(236,72,153,0.25)]" },
-                      { label: "Mystical", rate: "0.01%", color: "bg-gradient-to-r from-purple-900 via-pink-500 to-indigo-900", border: "border-cyan-500/20", glow: "hover:shadow-[0_0_30px_rgba(6,182,212,0.35)]" },
+                      { label: "Chroma", rate: "0.1%", color: "bg-gradient-to-r from-red-500 via-yellow-500 to-purple-500", border: "border-pink-500/20", glow: "hover:shadow-[0_0_25px_rgba(236,72,153,0.25)]" },
+                      { label: "Hidden", rate: "0.05%", color: "bg-slate-800 text-slate-100", border: "border-slate-700", glow: "hover:shadow-[0_0_20px_rgba(148,163,184,0.3)] animate-pulse" },
+                      { label: "Mystical", rate: "0.001%", color: "bg-gradient-to-r from-purple-900 via-pink-500 to-indigo-900", border: "border-cyan-500/20", glow: "hover:shadow-[0_0_30px_rgba(6,182,212,0.35)]" },
                     ].map((rarity, i) => (
                       <div key={i} className={`relative group overflow-hidden rounded-2xl border ${rarity.border} bg-black/40 p-4 transition-all duration-500 hover:bg-black/20 hover:-translate-y-0.5 ${rarity.glow}`}>
                         <div className="relative z-10 flex flex-col items-center gap-2">
