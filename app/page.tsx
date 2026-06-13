@@ -777,6 +777,20 @@ const LIMITED_BOOMS = [
   { name: "God Eye", rarity: "mystical", avatar: "👁️✨", description: "See all, know all", price: 15000 },
 ]
 
+const renderProfilePicture = (profilePic: string, className: string = "w-full h-full object-contain") => {
+  if (!profilePic) return <span>🎯</span>;
+  
+  const isBoom = PACKS.some(p => p.booms.some(b => b.name === profilePic)) ||
+                 GAMEPASS_BOOMS.some(b => b.name === profilePic) ||
+                 LIMITED_BOOMS.some(b => b.name === profilePic) ||
+                 profilePic === "The Trophy";
+
+  if (isBoom) {
+    return <BoomAvatar name={profilePic} className={className} />;
+  }
+  return <span className="relative z-10">{profilePic}</span>;
+}
+
 // Rarity chances for pack opening (total = 100%)
 const RARITY_CHANCES = {
   uncommon: 60,
@@ -1039,6 +1053,48 @@ export default function BoomkitGame() {
     particles: [],
   })
   const [showProfilePicker, setShowProfilePicker] = useState(false)
+  const [profilePickerTab, setProfilePickerTab] = useState("emojis")
+  const [modalNotification, setModalNotification] = useState<{
+    show: boolean;
+    title: string;
+    message: string;
+    type: "success" | "error" | "info"
+  } | null>(null);
+
+  const alert = useCallback((message: any) => {
+    const msgStr = typeof message === "string" ? message : (message?.message || String(message));
+    let title = "Notification"
+    let type: "success" | "error" | "info" = "info"
+
+    if (/🎉|success|successful|unlocked|crafted|gifted|win|✅|🤝/i.test(msgStr)) {
+      title = "System Success"
+      type = "success"
+    } else if (/fail|error|invalid|not enough|muted|banned|🛑|⚠️|already/i.test(msgStr)) {
+      title = "System Alert"
+      type = "error"
+    }
+
+    setModalNotification({
+      show: true,
+      title,
+      message: msgStr,
+      type
+    })
+  }, []);
+
+  // Override global window.alert to route through our custom modal
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const originalAlert = window.alert;
+      window.alert = (message) => {
+        alert(message);
+      };
+      return () => {
+        window.alert = originalAlert;
+      };
+    }
+  }, [alert]);
+
   const [showNameEdit, setShowNameEdit] = useState(false)
   const [showEmailEdit, setShowEmailEdit] = useState(false)
   const [showPasswordEdit, setShowPasswordEdit] = useState(false)
@@ -1336,6 +1392,7 @@ export default function BoomkitGame() {
           boom_score: userWithActivity.boomScore || 0,
           total_value: userWithActivity.totalValue || 0,
           profile_picture: userWithActivity.profilePicture || "🎯",
+          pinned_boom: userWithActivity.pinned_boom || null,
           name_color: userWithActivity.nameColor || "",
           banner_color: userWithActivity.bannerColor || "",
           last_daily_spin: userWithActivity.lastDailySpin || "",
@@ -1700,6 +1757,27 @@ export default function BoomkitGame() {
       return () => clearInterval(interval)
     }
   }, [isStorageLoaded, currentUser, handleLogout, router])
+
+  // Automatically grant 999 of each OG Pack boom to Owner
+  useEffect(() => {
+    if (isStorageLoaded && currentUser && currentUser.role === "owner" && supabase) {
+      const ogPack = PACKS.find(p => p.id === "og");
+      if (ogPack) {
+        let needsUpdate = false;
+        const updatedBooms = { ...currentUser.booms };
+        ogPack.booms.forEach(boom => {
+          if ((updatedBooms[boom.name] || 0) < 999) {
+            updatedBooms[boom.name] = 999;
+            needsUpdate = true;
+          }
+        });
+        if (needsUpdate) {
+          const updatedUser = { ...currentUser, booms: updatedBooms };
+          updateAndPersistCurrentUser(updatedUser);
+        }
+      }
+    }
+  }, [currentUser, isStorageLoaded, updateAndPersistCurrentUser, supabase]);
 
   // Load users from Supabase on mount
   useEffect(() => {
@@ -2878,7 +2956,25 @@ const handlePackAction = (packId: string) => {
   // Update profile picture
   const updateProfilePicture = (newPicture: string) => {
     if (!currentUser) return
-    updateAndPersistCurrentUser({ ...currentUser, profilePicture: newPicture })
+    const isBoom = PACKS.some(p => p.booms.some(b => b.name === newPicture)) ||
+                   GAMEPASS_BOOMS.some(b => b.name === newPicture) ||
+                   LIMITED_BOOMS.some(b => b.name === newPicture) ||
+                   newPicture === "The Trophy"
+
+    const updatedUser = { 
+      ...currentUser, 
+      profilePicture: newPicture,
+      pinned_boom: isBoom ? newPicture : undefined
+    }
+
+    if (supabase) {
+      supabase.from("users").update({ pinned_boom: isBoom ? newPicture : null }).eq("id", currentUser.id)
+        .then(({ error }: any) => {
+          if (error) console.error("Error updating pinned_boom in DB:", error.message)
+        })
+    }
+
+    updateAndPersistCurrentUser(updatedUser)
   }
 
   // Update user info
@@ -4845,8 +4941,8 @@ const handlePackAction = (packId: string) => {
             {/* User info - Simplified on mobile */}
             <div className="flex items-center gap-1 md:gap-2 bg-purple-600 rounded-lg px-2 md:px-3 py-1">
               <Avatar className="h-6 w-6 md:h-8 md:w-8">
-                <AvatarFallback className="bg-yellow-500 text-white text-xs md:text-sm">
-                  {currentUser?.profilePicture || "U"}
+                <AvatarFallback className="bg-yellow-500 text-white text-xs md:text-sm flex items-center justify-center p-0.5 overflow-hidden">
+                  {renderProfilePicture(currentUser?.profilePicture || "U", "w-full h-full object-contain")}
                 </AvatarFallback>
               </Avatar>
               <span
@@ -4901,9 +4997,9 @@ const handlePackAction = (packId: string) => {
                       {/* Avatar with cyber-glowing frame */}
                       <div className="relative group/avatar">
                         <div className="absolute -inset-1 bg-gradient-to-tr from-orange-500 to-yellow-500 rounded-3xl blur opacity-30 group-hover/avatar:opacity-60 transition duration-500" />
-                        <div className="w-28 h-28 bg-gradient-to-br from-slate-900 to-slate-950 rounded-3xl flex items-center justify-center text-5xl border border-white/10 shadow-[0_8px_25px_rgba(0,0,0,0.5)] relative overflow-hidden transform transition-all duration-500 group-hover/avatar:scale-105 group-hover/avatar:rotate-2">
-                          <span className="relative z-10">{currentUser?.profilePicture || "🎯"}</span>
-                          <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent" />
+                        <div className="w-28 h-28 bg-gradient-to-br from-slate-900 to-slate-950 rounded-3xl flex items-center justify-center text-5xl border border-white/10 shadow-[0_8px_25px_rgba(0,0,0,0.5)] relative overflow-hidden transform transition-all duration-500 group-hover/avatar:scale-105 group-hover/avatar:rotate-2 p-2">
+                          {renderProfilePicture(currentUser?.profilePicture || "🎯", "w-full h-full object-contain")}
+                          <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none" />
                         </div>
                         <Button
                           size="sm"
@@ -6619,8 +6715,8 @@ const handlePackAction = (packId: string) => {
                                 >
                                   <div className="relative shrink-0">
                                     <div className="absolute -inset-0.5 bg-gradient-to-tr from-purple-500/30 to-indigo-500/30 rounded-xl blur opacity-0 group-hover/card:opacity-100 transition duration-300" />
-                                    <div className="w-12 h-12 rounded-xl bg-slate-900 border border-white/10 flex items-center justify-center text-2xl relative overflow-hidden">
-                                      {friendUser?.profilePicture || "👤"}
+                                    <div className="w-12 h-12 rounded-xl bg-slate-900 border border-white/10 flex items-center justify-center text-2xl relative overflow-hidden p-1">
+                                      {renderProfilePicture(friendUser?.profilePicture || "👤", "w-full h-full object-contain")}
                                     </div>
                                     <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-slate-950 ${statusColor}`} />
                                   </div>
@@ -6793,8 +6889,8 @@ const handlePackAction = (packId: string) => {
                                     return (
                                       <tr key={member.id} className="hover:bg-white/5 transition-colors group">
                                         <td className="py-4 pl-2 flex items-center gap-3">
-                                          <div className="w-10 h-10 rounded-xl bg-slate-900 border border-white/10 flex items-center justify-center text-2xl shadow-inner shrink-0">
-                                            {member.profile_picture || "🎮"}
+                                          <div className="w-10 h-10 rounded-xl bg-slate-900 border border-white/10 flex items-center justify-center text-2xl shadow-inner shrink-0 p-1">
+                                            {renderProfilePicture(member.profile_picture || "🎮", "w-full h-full object-contain")}
                                           </div>
                                           <div>
                                             <span 
@@ -8881,7 +8977,9 @@ const handlePackAction = (packId: string) => {
                 {/* Avatar Outline */}
                 <div className="rounded-full p-1.5 bg-slate-900 relative">
                   <Avatar className="h-28 w-28 border-4 border-slate-800 shadow-xl" style={{ backgroundColor: '#1a1d27' }}>
-                    <AvatarFallback className="text-5xl">{selectedProfileUser.profilePicture || "🎮"}</AvatarFallback>
+                    <AvatarFallback className="text-5xl flex items-center justify-center p-3 overflow-hidden">
+                      {renderProfilePicture(selectedProfileUser.profilePicture || "🎮", "w-full h-full object-contain")}
+                    </AvatarFallback>
                   </Avatar>
 
                   {/* Status Indicator */}
@@ -8912,55 +9010,6 @@ const handlePackAction = (packId: string) => {
                         </Badge>
                       ) : null;
                     })}
-                  </div>
-                </div>
-
-                {/* Boom Showcase Area */}
-                <div className="w-full bg-slate-800/50 rounded-xl p-4 mb-6 border border-white/5 relative overflow-hidden group">
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/40" />
-                  <h3 className="text-xs uppercase font-black tracking-widest text-slate-400 mb-3 relative z-10 flex items-center gap-2">
-                    <Star className="h-4 w-4 text-yellow-500" />
-                    Showcase Boom
-                  </h3>
-
-                  <div className="relative z-10 flex flex-col items-center justify-center p-2 min-h-[120px]">
-                    {selectedProfileUser.pinned_boom ? (
-                      <div className={`p-4 rounded-xl border-2 flex flex-col items-center bg-black/40 backdrop-blur-md shadow-xl ${getAnimationClass(getBoomRarity(selectedProfileUser.pinned_boom))} ${getBoomRarity(selectedProfileUser.pinned_boom) === "legendary" ? "border-orange-500/50" :
-                        getBoomRarity(selectedProfileUser.pinned_boom) === "mystical" ? "border-purple-500/50" : "border-slate-700"
-                        }`}>
-                        <div className="mb-2 drop-shadow-2xl">
-                          <BoomAvatar name={selectedProfileUser.pinned_boom} className="w-20 h-20 object-contain" />
-                        </div>
-                        <Badge className={`${getRarityColor(getBoomRarity(selectedProfileUser.pinned_boom))} px-3 uppercase text-[10px] font-black mb-2`}>
-                          {selectedProfileUser.pinned_boom}
-                        </Badge>
-
-                        {selectedProfileEvolution && (
-                          <div className="w-full mt-2 space-y-1">
-                            <div className="flex justify-between items-center text-[10px] font-black uppercase">
-                              <span className="text-blue-400">Level {selectedProfileEvolution.level}</span>
-                              <span className="text-white/40">{selectedProfileEvolution.xp} / {(selectedProfileEvolution.level || 1) * 500} XP</span>
-                            </div>
-                            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                              <div
-                                className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 transition-all duration-1000 shadow-[0_0_10px_rgba(59,130,246,0.5)]"
-                                style={{ width: `${Math.min(100, (selectedProfileEvolution.xp / ((selectedProfileEvolution.level || 1) * 500)) * 100)}%` }}
-                              />
-                            </div>
-                            {selectedProfileEvolution.is_fully_evolved && (
-                              <div className="text-[9px] font-black text-center text-yellow-400 uppercase mt-1 animate-pulse">
-                                ✨ Fully Evolved ✨
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="text-slate-500 flex flex-col items-center text-center opacity-50">
-                        <PackageIcon className="h-10 w-10 mb-2 stroke-1" />
-                        <p className="text-sm font-medium">No boom showcased yet</p>
-                      </div>
-                    )}
                   </div>
                 </div>
 
@@ -9110,7 +9159,9 @@ const handlePackAction = (packId: string) => {
                   {showClanProfileModal.members?.map((member: any) => (
                     <div key={member.id} className="flex items-center justify-between text-xs py-1.5 border-b border-white/5 last:border-0">
                       <div className="flex items-center gap-2">
-                        <span className="text-base">{member.profile_picture || "🎮"}</span>
+                        <div className="w-6 h-6 flex items-center justify-center shrink-0">
+                          {renderProfilePicture(member.profile_picture || "🎮", "w-full h-full object-contain")}
+                        </div>
                         <span className={`font-bold ${member.name_color || 'text-white'}`}>{member.username}</span>
                       </div>
                       <span className={`text-[9px] font-black uppercase tracking-wider ${
@@ -9347,28 +9398,98 @@ const handlePackAction = (packId: string) => {
       }
       {
         showProfilePicker && (
-          <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
-            <Card className="w-full max-w-md p-6">
-              <CardHeader>
-                <CardTitle className="text-2xl font-bold">Choose Profile Picture</CardTitle>
-                <CardDescription>Select your new avatar</CardDescription>
+          <div className="fixed top-0 left-0 w-full h-full bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
+            <Card className="w-full max-w-lg bg-slate-900 border border-white/10 rounded-3xl p-6 text-white overflow-hidden shadow-2xl relative">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
+                  Select Profile Avatar
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Express yourself by using a classic emoji or any Boom from your collection!
+                </CardDescription>
               </CardHeader>
-              <CardContent className="grid grid-cols-6 gap-4">
-                {PROFILE_PICTURES.map((picture) => (
+              
+              <CardContent className="space-y-4">
+                {/* Custom Tabs Navigation */}
+                <div className="grid grid-cols-2 bg-slate-950/60 rounded-xl p-1 mb-2">
                   <button
-                    key={picture}
-                    onClick={() => {
-                      updateProfilePicture(picture)
-                      setShowProfilePicker(false)
-                    }}
-                    className="w-12 h-12 rounded-full bg-yellow-500 text-white text-3xl flex items-center justify-center hover:scale-110 transition-transform"
+                    onClick={() => setProfilePickerTab("emojis")}
+                    className={`py-2.5 rounded-lg font-black uppercase text-xs transition-all ${
+                      profilePickerTab === "emojis" ? "bg-purple-600 text-white shadow-lg" : "text-white/40 hover:text-white/80"
+                    }`}
                   >
-                    {picture}
+                    Emojis
                   </button>
-                ))}
-              </CardContent>
-              <CardContent>
-                <Button onClick={() => setShowProfilePicker(false)} className="w-full bg-gray-600 hover:bg-gray-700">
+                  <button
+                    onClick={() => setProfilePickerTab("booms")}
+                    className={`py-2.5 rounded-lg font-black uppercase text-xs transition-all ${
+                      profilePickerTab === "booms" ? "bg-purple-600 text-white shadow-lg" : "text-white/40 hover:text-white/80"
+                    }`}
+                  >
+                    My Booms
+                  </button>
+                </div>
+                
+                {profilePickerTab === "emojis" ? (
+                  <ScrollArea className="h-60 pr-2">
+                    <div className="grid grid-cols-6 gap-3 p-1">
+                      {PROFILE_PICTURES.map((picture) => (
+                        <button
+                          key={picture}
+                          onClick={() => {
+                            updateProfilePicture(picture)
+                            setShowProfilePicker(false)
+                          }}
+                          className="aspect-square rounded-2xl bg-white/5 hover:bg-purple-600/20 hover:scale-105 active:scale-95 text-3xl flex items-center justify-center transition-all duration-200 border border-white/5 hover:border-purple-500/30"
+                        >
+                          {picture}
+                        </button>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                ) : (
+                  <ScrollArea className="h-60 pr-2">
+                    {(() => {
+                      const owned = Object.keys(currentUser?.booms || {}).filter(name => (currentUser?.booms[name] || 0) > 0);
+                      if (owned.length === 0) {
+                        return (
+                          <div className="flex flex-col items-center justify-center h-48 text-center text-slate-500">
+                            <span className="text-3xl mb-2">📦</span>
+                            <p className="text-sm font-bold text-white/80">No Booms in your collection yet.</p>
+                            <p className="text-xs text-slate-400">Open some packs from the Market first!</p>
+                          </div>
+                        );
+                      }
+                      return (
+                        <div className="grid grid-cols-4 gap-3 p-1">
+                          {owned.map((boomName) => (
+                            <button
+                              key={boomName}
+                              onClick={() => {
+                                updateProfilePicture(boomName)
+                                setShowProfilePicker(false)
+                              }}
+                              className="aspect-square rounded-2xl bg-slate-950/60 hover:bg-purple-600/20 hover:scale-105 active:scale-95 flex flex-col items-center justify-center p-2 transition-all duration-200 border border-white/5 hover:border-purple-500/30 group relative overflow-hidden"
+                              title={boomName}
+                            >
+                              <div className="w-12 h-12 flex items-center justify-center mb-1">
+                                <BoomAvatar name={boomName} className="w-full h-full object-contain" />
+                              </div>
+                              <span className="text-[8px] font-black uppercase text-slate-400 truncate max-w-full group-hover:text-purple-300">
+                                {boomName}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      );
+                    })()}
+                  </ScrollArea>
+                )}
+                
+                <Button 
+                  onClick={() => setShowProfilePicker(false)} 
+                  className="w-full h-12 bg-white/5 hover:bg-white/10 text-white font-bold rounded-2xl border border-white/5 transition-all mt-4"
+                >
                   Cancel
                 </Button>
               </CardContent>
@@ -9693,8 +9814,8 @@ const handlePackAction = (packId: string) => {
                   {/* Left Column: Profile Picture & Primary Info */}
                   <div className="flex flex-col items-center md:items-start space-y-5 md:w-1/3">
                     <div className="relative group">
-                      <div className="w-32 h-32 rounded-[2rem] bg-black/40 border-4 border-slate-950 flex items-center justify-center text-6xl shadow-2xl relative overflow-hidden ring-4 ring-purple-500/25">
-                        {selectedUserStats.profilePicture || "🎮"}
+                      <div className="w-32 h-32 rounded-[2rem] bg-black/40 border-4 border-slate-950 flex items-center justify-center text-6xl shadow-2xl relative overflow-hidden ring-4 ring-purple-500/25 p-2">
+                        {renderProfilePicture(selectedUserStats.profilePicture || "🎮", "w-full h-full object-contain")}
                         {selectedUserStats.role === "owner" && (
                           <div className="absolute inset-0 border-4 border-yellow-500/40 animate-pulse rounded-[2rem]" />
                         )}
@@ -10077,11 +10198,11 @@ const handlePackAction = (packId: string) => {
                   <Button
                     onClick={async () => {
                       setShowBoomAction(false)
-                      await pinBoomToProfile(selectedBoom)
+                      updateProfilePicture(selectedBoom)
                     }}
                     className="w-full h-14 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-black rounded-2xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all border-none"
                   >
-                    📌 Pin to Showcase
+                    👤 Set as Profile Picture
                   </Button>
 
                   <Button
@@ -10423,6 +10544,52 @@ const handlePackAction = (packId: string) => {
           />
         )
       }
+
+      {modalNotification?.show && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
+          <div className="relative w-full max-w-md bg-gradient-to-b from-slate-900 to-slate-950 border border-white/10 rounded-[2rem] p-6 text-center shadow-[0_0_50px_rgba(168,85,247,0.15)] overflow-hidden animate-in zoom-in-95 duration-300">
+            {/* Holographic glowing lights */}
+            <div className={`absolute -top-20 left-1/2 -translate-x-1/2 w-40 h-40 rounded-full blur-3xl opacity-20 pointer-events-none ${
+              modalNotification.type === "success" ? "bg-emerald-500" :
+              modalNotification.type === "error" ? "bg-rose-500" : "bg-cyan-500"
+            }`} />
+            
+            {/* Header Icon */}
+            <div className="mx-auto w-16 h-16 rounded-2xl bg-black/40 border border-white/5 flex items-center justify-center text-3xl shadow-inner mb-4">
+              {modalNotification.type === "success" ? "🎉" :
+               modalNotification.type === "error" ? "⚠️" : "📡"}
+            </div>
+
+            {/* Title */}
+            <h3 className={`text-xl font-black uppercase tracking-wider mb-2 ${
+              modalNotification.type === "success" ? "text-emerald-400" :
+              modalNotification.type === "error" ? "text-rose-400" : "text-cyan-400"
+            }`}>
+              {modalNotification.title}
+            </h3>
+
+            {/* Message */}
+            <p className="text-sm text-slate-300 font-medium leading-relaxed px-2 mb-6 whitespace-pre-wrap break-words">
+              {modalNotification.message}
+            </p>
+
+            {/* Action Buttons */}
+            <Button
+              onClick={() => setModalNotification(null)}
+              className={`w-full h-12 text-sm font-black uppercase tracking-widest rounded-xl transition-all duration-300 ${
+                modalNotification.type === "success" 
+                  ? "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-[0_0_20px_rgba(16,185,129,0.2)] text-white"
+                  : modalNotification.type === "error"
+                  ? "bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 shadow-[0_0_20px_rgba(244,63,94,0.2)] text-white"
+                  : "bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 shadow-[0_0_20px_rgba(6,182,212,0.2)] text-white"
+              } border-none hover:scale-[1.02] active:scale-95`}
+            >
+              Acknowledge
+            </Button>
+          </div>
+        </div>
+      )}
     </div >
   )
 }

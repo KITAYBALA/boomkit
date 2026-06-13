@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { BoomAvatar } from "./boom-avatar"
 import {
     Users2Icon,
     TimerIcon,
@@ -266,8 +267,8 @@ export default function GameLobby({
                                     key={player.id || i}
                                     className="bg-white/10 border border-white/10 rounded-2xl p-4 flex flex-col items-center gap-2 transition-all hover:scale-105 hover:bg-white/20 animate-in slide-in-from-bottom-2 duration-300"
                                 >
-                                    <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center text-xl shadow-lg border-2 border-white/20">
-                                        {player.profilePicture || "👤"}
+                                    <div className="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center text-xl shadow-lg border border-white/10 p-1 relative overflow-hidden">
+                                        <BoomAvatar name={player.profilePicture || "👤"} className="w-full h-full object-contain" />
                                     </div>
                                     <p className="text-white font-black text-sm truncate w-full text-center">{player.username}</p>
                                     {player.username === currentUser.username && (

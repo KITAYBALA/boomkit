@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { SendIcon, MessageCircleIcon, PencilIcon, Trash2Icon, CheckIcon, XIcon, AlertTriangleIcon } from "lucide-react"
 import { toast } from "sonner"
+import { BoomAvatar } from "./boom-avatar"
 
 type Props = {
   currentUser: { id: string; username: string; isMuted?: boolean; role?: string } | null
@@ -521,12 +522,18 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                   >
                     {/* User Avatar with Rarity glow */}
                     <div 
-                      className={`w-11 h-11 rounded-2xl flex items-center justify-center text-2xl border bg-slate-900 relative cursor-pointer flex-shrink-0 group-hover:scale-105 transition-transform duration-300 shadow-md ${
+                      className={`w-11 h-11 rounded-2xl flex items-center justify-center text-2xl border bg-slate-900 relative cursor-pointer flex-shrink-0 group-hover:scale-105 transition-transform duration-300 shadow-md overflow-hidden ${
                         isMe ? "border-purple-500/30 shadow-[0_0_10px_rgba(168,85,247,0.15)]" : "border-white/10"
                       }`}
                       onClick={() => !isSystem && onUsernameClick(msg.username)}
                     >
-                      <span>{avatar}</span>
+                      {isSystem ? (
+                        <span>🛡️</span>
+                      ) : (
+                        <div className="w-full h-full p-1 flex items-center justify-center">
+                          <BoomAvatar name={avatar} className="w-full h-full object-contain" />
+                        </div>
+                      )}
                       <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-white/5 to-transparent pointer-events-none" />
                     </div>
 

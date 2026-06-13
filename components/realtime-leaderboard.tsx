@@ -6,6 +6,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { TrophyIcon } from "lucide-react"
+import { BoomAvatar } from "./boom-avatar"
 
 interface LeaderboardUser {
   id: string
@@ -133,8 +134,8 @@ export default function RealtimeLeaderboard({ onPlayerClick, ...props }: Realtim
                 >
                   <div className="relative mb-4 group-hover:scale-105 transition-transform duration-300">
                     <div className="absolute -inset-1 bg-gradient-to-tr from-slate-400 to-slate-200 rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-500" />
-                    <div className="w-16 h-16 rounded-2xl bg-slate-900 border-2 border-slate-400 flex items-center justify-center text-3xl shadow-lg relative overflow-hidden">
-                      {users[1].profile_picture}
+                    <div className="w-16 h-16 rounded-2xl bg-slate-900 border-2 border-slate-400 flex items-center justify-center text-3xl shadow-lg relative overflow-hidden p-1.5">
+                      <BoomAvatar name={users[1].profile_picture} className="w-full h-full object-contain" />
                     </div>
                     <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-slate-400 text-black text-[9px] font-black px-2 py-0.5 rounded-full border border-slate-950 uppercase tracking-wider">
                       2nd
@@ -173,8 +174,8 @@ export default function RealtimeLeaderboard({ onPlayerClick, ...props }: Realtim
 
                   <div className="relative mb-4 group-hover:scale-105 transition-transform duration-300">
                     <div className="absolute -inset-2 bg-gradient-to-tr from-yellow-400 to-orange-500 rounded-3xl blur opacity-40 group-hover:opacity-75 transition duration-500" />
-                    <div className="w-20 h-20 rounded-3xl bg-slate-900 border-2 border-yellow-400 flex items-center justify-center text-4xl shadow-xl relative overflow-hidden">
-                      {users[0].profile_picture}
+                    <div className="w-20 h-20 rounded-3xl bg-slate-900 border-2 border-yellow-400 flex items-center justify-center text-4xl shadow-xl relative overflow-hidden p-2">
+                      <BoomAvatar name={users[0].profile_picture} className="w-full h-full object-contain" />
                     </div>
                     <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 bg-yellow-400 text-black text-[10px] font-black px-3 py-0.5 rounded-full border border-slate-950 uppercase tracking-wider shadow-lg">
                       1st
@@ -208,8 +209,8 @@ export default function RealtimeLeaderboard({ onPlayerClick, ...props }: Realtim
                 >
                   <div className="relative mb-4 group-hover:scale-105 transition-transform duration-300">
                     <div className="absolute -inset-1 bg-gradient-to-tr from-amber-600 to-amber-800 rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-500" />
-                    <div className="w-14 h-14 rounded-2xl bg-slate-900 border-2 border-amber-600 flex items-center justify-center text-2xl shadow-lg relative overflow-hidden">
-                      {users[2].profile_picture}
+                    <div className="w-14 h-14 rounded-2xl bg-slate-900 border-2 border-amber-600 flex items-center justify-center text-2xl shadow-lg relative overflow-hidden p-1">
+                      <BoomAvatar name={users[2].profile_picture} className="w-full h-full object-contain" />
                     </div>
                     <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-amber-600 text-black text-[9px] font-black px-2 py-0.5 rounded-full border border-slate-950 uppercase tracking-wider">
                       3rd
@@ -240,7 +241,7 @@ export default function RealtimeLeaderboard({ onPlayerClick, ...props }: Realtim
       )}
 
       {/* Roster list for remaining ranks */}
-      <div className="flex-1 flex flex-col space-y-4 min-h-0">
+      <div className="flex-grow flex flex-col space-y-4 min-h-0">
         <ScrollArea className="flex-1 min-h-[400px] pr-4 rounded-[2.5rem] border border-white/10 bg-slate-950/30 backdrop-blur-2xl shadow-2xl">
           <div className="space-y-3 p-6">
             {users.length === 0 ? (
@@ -272,7 +273,9 @@ export default function RealtimeLeaderboard({ onPlayerClick, ...props }: Realtim
 
                     <div className="relative shrink-0">
                       <Avatar className={`h-11 w-11 border transition-transform duration-300 group-hover:rotate-3 ${index < 3 ? "border-purple-500/40 shadow-md" : "border-white/10"}`}>
-                        <AvatarFallback className="text-2xl bg-black/40 backdrop-blur-md">{user.profile_picture}</AvatarFallback>
+                        <AvatarFallback className="text-2xl bg-black/40 backdrop-blur-md flex items-center justify-center p-1 overflow-hidden">
+                          <BoomAvatar name={user.profile_picture} className="w-full h-full object-contain" />
+                        </AvatarFallback>
                       </Avatar>
                     </div>
 

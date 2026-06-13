@@ -2432,6 +2432,16 @@ export function BoomAvatar({ name, className = "w-12 h-12" }: { name: string; cl
     return <img src={aiAvatarMap[name]} alt={name} className={`${className} object-contain`} />
   }
 
+  // If it is a registered vector boom
+  if (BLOOKS[name]) {
+    return <BlookSvg name={name} className={className} />
+  }
+
+  // Fallback for short emoji profile pictures
+  if (name.length <= 4) {
+    return <div className={`${className} flex items-center justify-center select-none text-2xl`}>{name}</div>
+  }
+
   // Otherwise, render cute vector Blook SVG
   return <BlookSvg name={name} className={className} />
 }
