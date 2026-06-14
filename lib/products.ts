@@ -16,7 +16,7 @@ export const PRODUCTS: Product[] = [
     id: "starter-tokens",
     name: "Starter Pack",
     description: "500 Tokens to get you started",
-    priceInCents: 99, // 0.99 AZN
+    priceInCents: 168, // 1.68 AZN (0.99 * 1.70)
     tokens: 500,
     type: "tokens",
     variantId: process.env.LEMON_SQUEEZY_STARTER_VARIANT_ID || "",
@@ -25,7 +25,7 @@ export const PRODUCTS: Product[] = [
     id: "popular-tokens",
     name: "Popular Pack",
     description: "1,500 Tokens + 10% bonus",
-    priceInCents: 499, // 4.99 AZN
+    priceInCents: 848, // 8.48 AZN (4.99 * 1.70)
     tokens: 1650,
     bonus: "+150 bonus",
     type: "tokens",
@@ -35,7 +35,7 @@ export const PRODUCTS: Product[] = [
     id: "mega-tokens",
     name: "Mega Pack",
     description: "5,000 Tokens + 20% bonus",
-    priceInCents: 999, // 9.99 AZN
+    priceInCents: 1698, // 16.98 AZN (9.99 * 1.70)
     tokens: 6000,
     bonus: "+1000 bonus",
     type: "tokens",
@@ -45,7 +45,7 @@ export const PRODUCTS: Product[] = [
     id: "ultimate-tokens",
     name: "Ultimate Pack",
     description: "15,000 Tokens + 30% bonus",
-    priceInCents: 2499, // 24.99 AZN
+    priceInCents: 4248, // 42.48 AZN (24.99 * 1.70)
     tokens: 19500,
     bonus: "+4500 bonus",
     type: "tokens",
@@ -55,7 +55,7 @@ export const PRODUCTS: Product[] = [
     id: "boomkit-plus",
     name: "Boomkit Plus",
     description: "Unlock premium features",
-    priceInCents: 499, // 4.99 AZN
+    priceInCents: 848, // 8.48 AZN (4.99 * 1.70)
     type: "subscription",
     features: ["Custom Banners", "Plus Role Badge", "Custom Name Colors"],
     variantId: process.env.LEMON_SQUEEZY_PLUS_VARIANT_ID || "",
