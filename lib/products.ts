@@ -5,7 +5,7 @@ export interface Product {
   priceInCents: number
   tokens?: number
   bonus?: string
-  type: "tokens" | "subscription"
+  type: "tokens" | "subscription" | "booster"
   features?: string[]
   variantId?: string
 }
@@ -57,7 +57,39 @@ export const PRODUCTS: Product[] = [
     description: "Unlock premium features",
     priceInCents: 848, // 8.48 AZN (4.99 * 1.70)
     type: "subscription",
-    features: ["Custom Banners", "Plus Role Badge", "Custom Name Colors"],
+    features: ["Custom Banners", "Plus Role Badge", "Custom Name Colors", "Free Booster on Purchase/Renewal", "+10,000 Tokens on Renewal"],
     variantId: process.env.LEMON_SQUEEZY_PLUS_VARIANT_ID || "",
+  },
+  {
+    id: "luck-charm-2x-1h",
+    name: "2x Luck Charm (1 Hour)",
+    description: "2x luck for Legendary, Chroma, Hidden, Mystical drop rates for 1 hour",
+    priceInCents: 850, // $5.00 * 1.70 = 8.50 AZN
+    type: "booster",
+    variantId: process.env.LEMON_SQUEEZY_LUCK_CHARM_2X_1H_VARIANT_ID || "",
+  },
+  {
+    id: "luck-charm-2x-2h",
+    name: "2x Luck Charm (2 Hours)",
+    description: "2x luck for Legendary, Chroma, Hidden, Mystical drop rates for 2 hours",
+    priceInCents: 1700, // $10.00 * 1.70 = 17.00 AZN
+    type: "booster",
+    variantId: process.env.LEMON_SQUEEZY_LUCK_CHARM_2X_2H_VARIANT_ID || "",
+  },
+  {
+    id: "luck-charm-2x-3h",
+    name: "2x Luck Charm (3 Hours)",
+    description: "2x luck for Legendary, Chroma, Hidden, Mystical drop rates for 3 hours",
+    priceInCents: 2550, // $15.00 * 1.70 = 25.50 AZN
+    type: "booster",
+    variantId: process.env.LEMON_SQUEEZY_LUCK_CHARM_2X_3H_VARIANT_ID || "",
+  },
+  {
+    id: "luck-charm-super-3x-1h",
+    name: "SUPER LUCK CHARM",
+    description: "3x luck for Legendary, Chroma, Hidden, Mystical drop rates for 1 hour",
+    priceInCents: 4250, // $25.00 * 1.70 = 42.50 AZN
+    type: "booster",
+    variantId: process.env.LEMON_SQUEEZY_SUPER_LUCK_CHARM_VARIANT_ID || "",
   },
 ]

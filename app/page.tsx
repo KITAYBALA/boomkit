@@ -47,6 +47,8 @@ import {
   ShoppingBagIcon,
   BeakerIcon,
   ClockIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
 } from "lucide-react"
 import { Textarea } from "@/components/ui/textarea"
 
@@ -255,6 +257,7 @@ interface GameUser {
   active_fusion_boom2?: string | null
   active_fusion_ends_at?: string | null
   active_fusion_started_at?: string | null
+  inventory?: any[]
 }
 
 interface UserRole {
@@ -271,7 +274,7 @@ interface Pack {
   booms: BoomItem[]
   color: string
   image: string
-  rarity: "uncommon" | "rare" | "epic" | "legendary"
+  rarity: "uncommon" | "rare" | "epic" | "legendary" | "chroma" | "mystical" | "hidden"
   emoji?: string // Added emoji property
   series?: number
   isNew?: boolean
@@ -430,7 +433,57 @@ const AVAILABLE_BADGES = [
   { id: "developer", name: "Developer", emoji: "💻", color: "bg-red-500" },
 ]
 
+const INVENTORY_SPECS: Record<string, { name: string; description: string; emoji: string; color: string }> = {
+  "luck-charm-2x-1h": {
+    name: "2x Luck Charm (1 Hour)",
+    description: "Applies a global 2x Luck Boost for legendary, chroma, hidden, and mystical drops for 1 hour.",
+    emoji: "🍀",
+    color: "from-green-500/20 to-emerald-500/20 border-green-500/30 text-green-400"
+  },
+  "luck-charm-2x-2h": {
+    name: "2x Luck Charm (2 Hours)",
+    description: "Applies a global 2x Luck Boost for legendary, chroma, hidden, and mystical drops for 2 hours.",
+    emoji: "🔮",
+    color: "from-blue-500/20 to-indigo-500/20 border-blue-500/30 text-blue-400"
+  },
+  "luck-charm-2x-3h": {
+    name: "2x Luck Charm (3 Hours)",
+    description: "Applies a global 2x Luck Boost for legendary, chroma, hidden, and mystical drops for 3 hours.",
+    emoji: "🧿",
+    color: "from-purple-500/20 to-violet-500/20 border-purple-500/30 text-purple-400"
+  },
+  "luck-charm-super-3x-1h": {
+    name: "SUPER LUCK CHARM (3x Luck, 1 Hour)",
+    description: "Applies a global 3x Luck Boost for legendary, chroma, hidden, and mystical drops for 1 hour.",
+    emoji: "🔥",
+    color: "from-orange-500/20 to-red-500/20 border-orange-500/30 text-orange-400"
+  }
+}
+
 const PACKS: Pack[] = [
+  {
+    id: "plus",
+    name: "Plus Pack",
+    price: 30,
+    booms: [
+      { name: "Plus Crown", rarity: "uncommon", avatar: "👑➕", description: "Exclusive crown for Plus members" },
+      { name: "Golden Plus", rarity: "uncommon", avatar: "✨➕", description: "A shiny symbol of premium status" },
+      { name: "Plus Shield", rarity: "uncommon", avatar: "🛡️➕", description: "Protects your premium reputation" },
+      { name: "Plus Star", rarity: "rare", avatar: "⭐➕", description: "Shining bright for Plus users" },
+      { name: "Neon Plus", rarity: "rare", avatar: "🌈➕", description: "Glowing neon symbol" },
+      { name: "Plus Diamond", rarity: "rare", avatar: "💎➕", description: "Premium precious gem" },
+      { name: "Plus Phoenix", rarity: "epic", avatar: "🔥➕", description: "Rises from the premium ashes" },
+      { name: "Plus Galaxy", rarity: "epic", avatar: "🌌➕", description: "Interstellar premium mark" },
+      { name: "Plus Dragon", rarity: "legendary", avatar: "🐉➕", description: "Legendary premium beast" },
+      { name: "Plus Key", rarity: "hidden", avatar: "🔑➕", description: "Unlocks secret premium doors" },
+      { name: "Plus Matrix", rarity: "chroma", avatar: "🌈👾➕", description: "Chroma shifting premium code" },
+      { name: "Plus Overlord", rarity: "mystical", avatar: "⚡🌌➕", description: "Absolute ruler of the Plus dimension" }
+    ],
+    color: "from-amber-500 via-yellow-600 to-orange-700",
+    image: "/images/plus-pack.png",
+    rarity: "mystical",
+    emoji: "⚡"
+  },
   {
     id: "og",
     name: "OG Pack",
@@ -916,6 +969,11 @@ const playPingSound = () => {
   }
 };
 
+const isStaffRole = (role: string | null | undefined): boolean => {
+  if (!role) return false
+  return ["owner", "admin", "senior_moderator", "moderator", "tester"].includes(role.toLowerCase())
+}
+
 export default function BoomkitGame() {
   const [currentView, setCurrentView] = useState<"register" | "login" | "game" | "owner-access">("owner-access")
   const [currentPage, setCurrentPage] = useState<
@@ -939,7 +997,37 @@ export default function BoomkitGame() {
     | "achievements"
     | "season"
     | "fusion"
+    | "inventory"
   >("stats")
+  const [moreOpen, setMoreOpen] = useState(false)
+  const [inventoryTab, setInventoryTab] = useState<"boosters" | "booms">("boosters")
+  const [activeBoost, setActiveBoost] = useState<{
+    activated_by: string
+    multiplier: number
+    ends_at: string
+  } | null>(null)
+  const [boostTimeLeft, setBoostTimeLeft] = useState<string>("")
+
+  useEffect(() => {
+    if (!activeBoost) {
+      setBoostTimeLeft("")
+      return
+    }
+    const updateTimeLeft = () => {
+      const diff = new Date(activeBoost.ends_at).getTime() - Date.now()
+      if (diff <= 0) {
+        setBoostTimeLeft("Expired")
+        setActiveBoost(null)
+      } else {
+        const mins = Math.floor(diff / 60000)
+        const secs = Math.floor((diff % 60000) / 1000)
+        setBoostTimeLeft(`${mins}m ${secs}s`)
+      }
+    }
+    updateTimeLeft()
+    const timer = setInterval(updateTimeLeft, 1000)
+    return () => clearInterval(timer)
+  }, [activeBoost])
   const [chatNotificationCount, setChatNotificationCount] = useState(0)
   const [deviceId, setDeviceId] = useState<string>("")
   const currentPageRef = useRef("stats")
@@ -948,6 +1036,9 @@ export default function BoomkitGame() {
     currentPageRef.current = currentPage
     if (currentPage === "chat") {
       setChatNotificationCount(0)
+    }
+    if (["settings", "achievements", "inventory"].includes(currentPage)) {
+      setMoreOpen(true)
     }
   }, [currentPage])
 
@@ -1576,7 +1667,7 @@ export default function BoomkitGame() {
       }
 
       // Only select safe fields; never expose password_hash, last_ip, or email to clients.
-      const safeColumns = "id, username, age, tokens, daily_tokens, packs, booms, is_owner, is_banned, is_muted, status, reason, role, join_date, boom_score, total_value, profile_picture, is_plus_user, name_color, banner_color, last_daily_spin, badges, mute_expiry, ban_expiry, last_seen, packs_opened, xp, level, login_streak, last_streak_claim, pinned_boom, season_xp, has_plus_pass, games_played, total_tokens_earned, discover_tokens_earned, correct_answers_count, questions_answered_count, clan_id, clan_role, clan_tag, clan_tag_color, fusion_cooldown_ends_at, consecutive_fusions, last_fusion_claim_time, active_fusion_boom1, active_fusion_boom2, active_fusion_ends_at, active_fusion_started_at"
+      const safeColumns = "id, username, age, tokens, daily_tokens, packs, booms, is_owner, is_banned, is_muted, status, reason, role, join_date, boom_score, total_value, profile_picture, is_plus_user, name_color, banner_color, last_daily_spin, badges, mute_expiry, ban_expiry, last_seen, packs_opened, xp, level, login_streak, last_streak_claim, pinned_boom, season_xp, has_plus_pass, games_played, total_tokens_earned, discover_tokens_earned, correct_answers_count, questions_answered_count, clan_id, clan_role, clan_tag, clan_tag_color, fusion_cooldown_ends_at, consecutive_fusions, last_fusion_claim_time, active_fusion_boom1, active_fusion_boom2, active_fusion_ends_at, active_fusion_started_at, inventory"
       const { data, error } = await supabase.from("users").select(safeColumns)
 
       if (error) {
@@ -1585,61 +1676,65 @@ export default function BoomkitGame() {
       }
 
       if (data && data.length > 0) {
-        const mappedUsers: GameUser[] = data.map((u: any) => ({
-          id: u.id,
-          username: u.username,
-          email: u.email,
-          password: "", // Ensure password is not leaked
-          age: u.age || 0,
-          tokens: u.tokens || 0,
-          dailyTokens: u.daily_tokens || 0,
-          packs: u.packs || [],
-          booms: u.booms || {}, // Initialize booms as an object
-          isOwner: u.is_owner || false,
-          isBanned: u.is_banned || false,
-          isMuted: u.is_muted || false,
-          status: u.status || "approved",
-          reason: u.reason || "",
-          role: u.role || "player",
-          joinDate: u.join_date || new Date().toISOString(),
-          boomScore: u.boom_score || 0,
-          totalValue: u.total_value || 0,
-          profilePicture: u.profile_picture || "",
-          isPlusUser: u.is_plus_user || false,
-          nameColor: u.name_color || "",
-          bannerColor: u.banner_color || "from-purple-600 to-pink-600",
-          lastDailySpin: u.last_daily_spin || null,
-          badges: u.badges || [],
-          muteExpiry: u.mute_expiry || null,
-          banExpiry: u.ban_expiry || null,
-          banReason: u.ban_reason || "",
-          lastSeen: u.last_seen || Date.now(),
-          packsOpened: u.packs_opened || 0,
-          lastIp: u.last_ip || "",
-          xp: u.xp || 0,
-          level: u.level || 1,
-          pinned_boom: u.pinned_boom || null,
-          loginStreak: u.login_streak || 0,
-          lastStreakClaim: u.last_streak_claim || null,
-          season_xp: u.season_xp || 0,
-          has_plus_pass: u.has_plus_pass || false,
-          games_played: u.games_played || 0,
-          total_tokens_earned: u.total_tokens_earned || 0,
-          discover_tokens_earned: u.discover_tokens_earned || 0,
-          correct_answers_count: u.correct_answers_count || 0,
-          questions_answered_count: u.questions_answered_count || 0,
-          clan_id: u.clan_id || null,
-          clan_role: u.clan_role || null,
-          clan_tag: u.clan_tag || null,
-          clan_tag_color: u.clan_tag_color || null,
-          fusion_cooldown_ends_at: u.fusion_cooldown_ends_at || null,
-          consecutive_fusions: u.consecutive_fusions || 0,
-          last_fusion_claim_time: u.last_fusion_claim_time || null,
-          active_fusion_boom1: u.active_fusion_boom1 || null,
-          active_fusion_boom2: u.active_fusion_boom2 || null,
-          active_fusion_ends_at: u.active_fusion_ends_at || null,
-          active_fusion_started_at: u.active_fusion_started_at || null,
-        }))
+        const mappedUsers: GameUser[] = data.map((u: any) => {
+          const isStaff = isStaffRole(u.role)
+          return {
+            id: u.id,
+            username: u.username,
+            email: u.email,
+            password: "", // Ensure password is not leaked
+            age: u.age || 0,
+            tokens: u.tokens || 0,
+            dailyTokens: u.daily_tokens || 0,
+            packs: u.packs || [],
+            booms: u.booms || {}, // Initialize booms as an object
+            isOwner: u.is_owner || false,
+            isBanned: u.is_banned || false,
+            isMuted: u.is_muted || false,
+            status: u.status || "approved",
+            reason: u.reason || "",
+            role: u.role || "player",
+            joinDate: u.join_date || new Date().toISOString(),
+            boomScore: u.boom_score || 0,
+            totalValue: u.total_value || 0,
+            profilePicture: u.profile_picture || "",
+            isPlusUser: isStaff ? true : (u.is_plus_user || false),
+            nameColor: u.name_color || "",
+            bannerColor: u.banner_color || "from-purple-600 to-pink-600",
+            lastDailySpin: u.last_daily_spin || null,
+            badges: u.badges || [],
+            muteExpiry: u.mute_expiry || null,
+            banExpiry: u.ban_expiry || null,
+            banReason: u.ban_reason || "",
+            lastSeen: u.last_seen || Date.now(),
+            packsOpened: u.packs_opened || 0,
+            lastIp: u.last_ip || "",
+            xp: u.xp || 0,
+            level: u.level || 1,
+            pinned_boom: u.pinned_boom || null,
+            loginStreak: u.login_streak || 0,
+            lastStreakClaim: u.last_streak_claim || null,
+            season_xp: u.season_xp || 0,
+            has_plus_pass: isStaff ? true : (u.has_plus_pass || false),
+            inventory: u.inventory || [],
+            games_played: u.games_played || 0,
+            total_tokens_earned: u.total_tokens_earned || 0,
+            discover_tokens_earned: u.discover_tokens_earned || 0,
+            correct_answers_count: u.correct_answers_count || 0,
+            questions_answered_count: u.questions_answered_count || 0,
+            clan_id: u.clan_id || null,
+            clan_role: u.clan_role || null,
+            clan_tag: u.clan_tag || null,
+            clan_tag_color: u.clan_tag_color || null,
+            fusion_cooldown_ends_at: u.fusion_cooldown_ends_at || null,
+            consecutive_fusions: u.consecutive_fusions || 0,
+            last_fusion_claim_time: u.last_fusion_claim_time || null,
+            active_fusion_boom1: u.active_fusion_boom1 || null,
+            active_fusion_boom2: u.active_fusion_boom2 || null,
+            active_fusion_ends_at: u.active_fusion_ends_at || null,
+            active_fusion_started_at: u.active_fusion_started_at || null,
+          }
+        })
 
         setUsers(mappedUsers)
         localStorage.setItem("boomkit_approved_users", JSON.stringify(mappedUsers))
@@ -1707,6 +1802,7 @@ export default function BoomkitGame() {
             if (needsOverride) {
               console.warn("[v0] LocalStorage tampering detected or severe desync. Overwriting with server truth.")
 
+              const isStaff = isStaffRole(data.user.role)
               const authoritativeUser: GameUser = {
                 id: data.user.id,
                 username: data.user.username,
@@ -1726,7 +1822,7 @@ export default function BoomkitGame() {
                 boomScore: data.user.boom_score || 0,
                 totalValue: data.user.total_value || 0,
                 profilePicture: data.user.profile_picture || "🎯",
-                isPlusUser: data.user.is_plus_user || false,
+                isPlusUser: isStaff ? true : (data.user.is_plus_user || false),
                 nameColor: data.user.name_color || "",
                 bannerColor: data.user.banner_color || "",
                 lastDailySpin: data.user.last_daily_spin || null,
@@ -1740,7 +1836,7 @@ export default function BoomkitGame() {
                 level: data.user.level || 1,
                 pinned_boom: data.user.pinned_boom || null,
                 season_xp: data.user.season_xp || 0,
-                has_plus_pass: data.user.has_plus_pass || false,
+                has_plus_pass: isStaff ? true : (data.user.has_plus_pass || false),
                 games_played: data.user.games_played || 0,
                 total_tokens_earned: data.user.total_tokens_earned || 0,
                 loginStreak: data.user.login_streak || 0,
@@ -1756,6 +1852,7 @@ export default function BoomkitGame() {
                 active_fusion_boom2: data.user.active_fusion_boom2 || null,
                 active_fusion_ends_at: data.user.active_fusion_ends_at || null,
                 active_fusion_started_at: data.user.active_fusion_started_at || null,
+                inventory: data.user.inventory || [],
               }
 
               if (authoritativeUser.isBanned) {
@@ -1812,8 +1909,18 @@ export default function BoomkitGame() {
       fetchUsersFromSupabase(true)
       fetchCraftRecipes()
       fetchActiveSeason()
+      fetchActiveBoost()
     }
   }, [supabase, fetchUsersFromSupabase])
+
+  // Poll active booster status every 15 seconds
+  useEffect(() => {
+    fetchActiveBoost()
+    const interval = setInterval(() => {
+      fetchActiveBoost()
+    }, 15000)
+    return () => clearInterval(interval)
+  }, [])
 
   // Fetch claimed rewards when currentUser becomes available
   useEffect(() => {
@@ -2367,6 +2474,7 @@ export default function BoomkitGame() {
 
       // Server returns user data - map it to GameUser format
       const user = data.user
+      const isStaff = isStaffRole(user.role)
       const newUser: GameUser = {
         id: user.id,
         username: user.username,
@@ -2391,7 +2499,7 @@ export default function BoomkitGame() {
         boomScore: user.boom_score || 0,
         totalValue: user.total_value || 0,
         profilePicture: user.profile_picture || "🎯",
-        isPlusUser: user.is_plus_user || false,
+        isPlusUser: isStaff ? true : (user.is_plus_user || false),
         nameColor: user.name_color || "text-white",
         bannerColor: user.banner_color || "from-purple-600 to-pink-600",
         lastDailySpin: user.last_daily_spin || "",
@@ -2405,7 +2513,7 @@ export default function BoomkitGame() {
         level: user.level || 1,
         pinned_boom: user.pinned_boom || null,
         season_xp: user.season_xp || 0,
-        has_plus_pass: user.has_plus_pass || false,
+        has_plus_pass: isStaff ? true : (user.has_plus_pass || false),
         games_played: user.games_played || 0,
         total_tokens_earned: user.total_tokens_earned || 0,
         loginStreak: user.login_streak || 0,
@@ -2414,6 +2522,7 @@ export default function BoomkitGame() {
         clan_role: user.clan_role || null,
         clan_tag: user.clan_tag || null,
         clan_tag_color: user.clan_tag_color || null,
+        inventory: user.inventory || [],
       }
 
       if (newUser.status === "pending") {
@@ -2465,6 +2574,7 @@ export default function BoomkitGame() {
 
       // Server returns user data - map it to GameUser format
       const user = data.user
+      const isStaff = isStaffRole(user.role)
       const foundUser: GameUser = {
         id: user.id,
         username: user.username,
@@ -2484,7 +2594,7 @@ export default function BoomkitGame() {
         boomScore: user.boom_score || 0,
         totalValue: user.total_value || 0,
         profilePicture: user.profile_picture || "🎯",
-        isPlusUser: user.is_plus_user || false,
+        isPlusUser: isStaff ? true : (user.is_plus_user || false),
         nameColor: user.name_color || "text-white",
         bannerColor: user.banner_color || "from-purple-600 to-pink-600",
         lastDailySpin: user.last_daily_spin || "",
@@ -2498,7 +2608,7 @@ export default function BoomkitGame() {
         level: user.level || 1,
         pinned_boom: user.pinned_boom || null,
         season_xp: user.season_xp || 0,
-        has_plus_pass: user.has_plus_pass || false,
+        has_plus_pass: isStaff ? true : (user.has_plus_pass || false),
         games_played: user.games_played || 0,
         total_tokens_earned: user.total_tokens_earned || 0,
         loginStreak: user.login_streak || 0,
@@ -2507,6 +2617,7 @@ export default function BoomkitGame() {
         clan_role: user.clan_role || null,
         clan_tag: user.clan_tag || null,
         clan_tag_color: user.clan_tag_color || null,
+        inventory: user.inventory || [],
       }
 
       // Check if user is banned (double-check from server response)
@@ -2529,8 +2640,42 @@ export default function BoomkitGame() {
     }
   }
 
+  // Calculate dynamic boosted rarity chances based on active global boost
+  const getBoostedRarityChances = (): typeof RARITY_CHANCES => {
+    const multiplier = activeBoost ? activeBoost.multiplier : 1
+    if (multiplier <= 1) return RARITY_CHANCES
+
+    const luckyRarities = ["mystical", "hidden", "chroma", "legendary"]
+    let luckyTotal = 0
+    const boostedChances = { ...RARITY_CHANCES }
+
+    // Apply multiplier to lucky rarities
+    luckyRarities.forEach((rarity) => {
+      const base = RARITY_CHANCES[rarity as keyof typeof RARITY_CHANCES]
+      boostedChances[rarity as keyof typeof RARITY_CHANCES] = base * multiplier
+      luckyTotal += base * multiplier
+    })
+
+    // Adjust other rarities proportionally to fill the remaining budget up to 100%
+    const otherRarities = ["epic", "rare", "uncommon"]
+    const baseOtherTotal = otherRarities.reduce(
+      (sum, r) => sum + RARITY_CHANCES[r as keyof typeof RARITY_CHANCES],
+      0
+    )
+    const remainingBudget = Math.max(0, 100 - luckyTotal)
+
+    otherRarities.forEach((rarity) => {
+      const base = RARITY_CHANCES[rarity as keyof typeof RARITY_CHANCES]
+      boostedChances[rarity as keyof typeof RARITY_CHANCES] =
+        baseOtherTotal > 0 ? base * (remainingBudget / baseOtherTotal) : 0
+    })
+
+    return boostedChances
+  }
+
   // Get boom based on rarity chances
   const getRandomBoomFromPack = (pack: Pack): BoomItem => {
+    const chances = getBoostedRarityChances()
     const random = Math.random() * 100
 
     let cumulativeChance = 0
@@ -2545,7 +2690,7 @@ export default function BoomkitGame() {
     ]
 
     for (const rarity of rarityOrder) {
-      cumulativeChance += RARITY_CHANCES[rarity]
+      cumulativeChance += chances[rarity]
       if (random <= cumulativeChance) {
         const boomsOfRarity = pack.booms.filter((boom) => boom.rarity === rarity)
         if (boomsOfRarity.length > 0) {
@@ -2694,7 +2839,8 @@ export default function BoomkitGame() {
   const getBoomDropRate = (boomName: string, pack: Pack): number => {
     const boom = pack.booms.find((b) => b.name === boomName)
     if (!boom) return 0
-    const rarityChance = RARITY_CHANCES[boom.rarity as keyof typeof RARITY_CHANCES] || 0
+    const chances = getBoostedRarityChances()
+    const rarityChance = chances[boom.rarity as keyof typeof RARITY_CHANCES] || 0
     const boomsOfSameRarity = pack.booms.filter((b) => b.rarity === boom.rarity).length
     return boomsOfSameRarity > 0 ? Number((rarityChance / boomsOfSameRarity).toFixed(2)) : 0
   }
@@ -2786,6 +2932,11 @@ const handlePackAction = (packId: string) => {
 
     const pack = PACKS.find((p) => p.id === packId)
     if (!pack) return
+
+    if (packId === "plus" && !currentUser.isPlusUser) {
+      alert("This pack is only available to Boomkit Plus members!")
+      return
+    }
 
     if (currentUser.tokens < pack.price) {
       alert("Not enough tokens!")
@@ -4145,6 +4296,48 @@ const handlePackAction = (packId: string) => {
     } catch (e) { console.error(e) }
   }
 
+  const fetchActiveBoost = async () => {
+    try {
+      const response = await fetch("/api/boosts/active")
+      const data = await parseApiResponse(response)
+      if (response.ok && data.success) {
+        setActiveBoost(data.activeBoost)
+      } else {
+        setActiveBoost(null)
+      }
+    } catch (err) {
+      console.error("Fetch active boost error:", err)
+    }
+  }
+
+  const activateBooster = async (boosterId: string) => {
+    if (!currentUser) return
+    try {
+      const response = await fetch("/api/boosts/activate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ boosterId }),
+      })
+      const data = await parseApiResponse(response)
+      if (response.ok && data.success) {
+        alert(data.message)
+        setCurrentUser((prev) => {
+          if (!prev) return prev
+          return {
+            ...prev,
+            inventory: data.inventory,
+          }
+        })
+        fetchActiveBoost()
+      } else {
+        alert(data.message || "Failed to activate booster.")
+      }
+    } catch (err) {
+      console.error("Activate booster error:", err)
+      alert("An error occurred while activating the booster.")
+    }
+  }
+
   const handleBuyShopItem = async (itemId: string) => {
     if (!currentUser || !supabase) return
     try {
@@ -4164,16 +4357,25 @@ const handlePackAction = (packId: string) => {
   }
 
   const handleClaimReward = async (rewardId: string) => {
-    if (!currentUser || !supabase) return
+    if (!currentUser) return
     try {
-      const { data, error } = await supabase.rpc('claim_season_reward', {
-        p_username: currentUser.username, p_reward_id: rewardId
+      const response = await fetch("/api/season/claim", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rewardId }),
       })
-      if (error) throw error
-      alert(data.message || "Reward claimed!")
-      fetchUsersFromSupabase(true)
-      fetchActiveSeason()
-    } catch (e: any) { alert(e.message || "Claim failed") }
+      const data = await parseApiResponse(response)
+      if (response.ok && data.success) {
+        alert(data.message || "Reward claimed!")
+        fetchUsersFromSupabase(true)
+        fetchActiveSeason()
+      } else {
+        alert(data.message || "Claim failed")
+      }
+    } catch (e: any) {
+      console.error("Claim reward error:", e)
+      alert("An error occurred while claiming the reward.")
+    }
   }
 
   const handleAddSeasonXp = async (amount: number) => {
@@ -4573,7 +4775,7 @@ const handlePackAction = (packId: string) => {
                 <p className="text-[10px] text-white/70 leading-relaxed font-medium">
                   Registering? Join our{" "}
                   <a
-                    href={process.env.NEXT_PUBLIC_DISCORD_INVITE_URL || "https://discord.gg/a8Q8Mm9X"}
+                    href={process.env.NEXT_PUBLIC_DISCORD_INVITE_URL || "https://discord.gg/uqbPsEpyhE"}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-cyan-400 hover:text-cyan-300 underline font-bold transition-colors"
@@ -4773,7 +4975,7 @@ const handlePackAction = (packId: string) => {
                 <p className="text-[10px] text-white/70 leading-relaxed font-medium">
                   Need an access key or looking for active promo codes? Join the{" "}
                   <a
-                    href={process.env.NEXT_PUBLIC_DISCORD_INVITE_URL || "https://discord.gg/a8Q8Mm9X"}
+                    href={process.env.NEXT_PUBLIC_DISCORD_INVITE_URL || "https://discord.gg/uqbPsEpyhE"}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-cyan-400 hover:text-cyan-300 underline font-bold transition-colors"
@@ -4888,9 +5090,7 @@ const handlePackAction = (packId: string) => {
             { id: "tournaments", label: "Tournaments", icon: TrophyIcon, fetch: fetchTournaments },
             { id: "shop", label: "Shop", icon: ShoppingBagIcon, fetch: fetchShopItems },
             { id: "season", label: "Season Pass", icon: FlameIcon, fetch: fetchActiveSeason },
-            { id: "achievements", label: "Achievements", icon: StarIcon, fetch: fetchAchievements },
             ...(currentUser?.role === "moderator" || currentUser?.role === "senior_moderator" || currentUser?.role === "admin" || currentUser?.role === "tester" || isOwner() ? [{ id: "staff", label: "Staff", icon: ShieldIcon }] : []),
-            { id: "settings", label: "Settings", icon: SettingsIcon },
           ].map((item) => {
             const Icon = item.icon
             const isActive = currentPage === item.id
@@ -4924,6 +5124,55 @@ const handlePackAction = (packId: string) => {
               </button>
             )
           })}
+
+          {/* More Collapsible Navigation */}
+          <div className="pt-2 border-t border-white/5">
+            <button
+              onClick={() => setMoreOpen(!moreOpen)}
+              className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-left transition-all duration-300 text-slate-400/80 hover:text-white hover:bg-white/5 font-bold gap-3"
+            >
+              <div className="flex items-center gap-3">
+                <SparklesIcon className="h-4 w-4 text-slate-500" />
+                <span className="text-xs uppercase tracking-wider text-slate-400">More</span>
+              </div>
+              {moreOpen ? (
+                <ChevronUpIcon className="h-4 w-4 text-slate-400" />
+              ) : (
+                <ChevronDownIcon className="h-4 w-4 text-slate-400" />
+              )}
+            </button>
+
+            {moreOpen && (
+              <div className="pl-3 mt-1 space-y-1 border-l border-white/5 ml-3">
+                {[
+                  { id: "inventory", label: "Inventory", icon: BoxIcon },
+                  { id: "achievements", label: "Achievements", icon: StarIcon, fetch: fetchAchievements },
+                  { id: "settings", label: "Settings", icon: SettingsIcon },
+                ].map((subItem) => {
+                  const SubIcon = subItem.icon
+                  const isSubActive = currentPage === subItem.id
+                  return (
+                    <button
+                      key={subItem.id}
+                      onClick={() => {
+                        setCurrentPage(subItem.id as any)
+                        setSidebarOpen(false)
+                        if (subItem.fetch) subItem.fetch()
+                      }}
+                      className={`w-full flex items-center px-4 py-2.5 rounded-lg text-left transition-all duration-300 group gap-3 relative overflow-hidden ${
+                        isSubActive
+                          ? "bg-purple-500/10 text-white font-black"
+                          : "text-slate-400/80 hover:text-white hover:bg-white/5 font-bold"
+                      }`}
+                    >
+                      <SubIcon className={`h-3.5 w-3.5 shrink-0 transition-transform duration-300 group-hover:scale-110 ${isSubActive ? "text-purple-400" : "text-slate-500"}`} />
+                      <span className="text-[11px] uppercase tracking-wider">{subItem.label}</span>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+          </div>
         </nav>
 
         {/* Discord Promo Widget */}
@@ -4944,7 +5193,7 @@ const handlePackAction = (packId: string) => {
             Join for giveaways, access keys & active promo codes!
           </p>
           <a
-            href={process.env.NEXT_PUBLIC_DISCORD_INVITE_URL || "https://discord.gg/a8Q8Mm9X"}
+            href={process.env.NEXT_PUBLIC_DISCORD_INVITE_URL || "https://discord.gg/uqbPsEpyhE"}
             target="_blank"
             rel="noopener noreferrer"
             className="w-full py-1.5 px-3 rounded-xl bg-[#5865F2] hover:bg-[#4752C4] text-white text-[11px] font-black uppercase tracking-wider text-center transition-all duration-300 shadow-md shadow-indigo-900/30 hover:shadow-indigo-500/20 active:scale-95 text-center block"
@@ -5036,6 +5285,29 @@ const handlePackAction = (packId: string) => {
         <div className="flex-1 flex">
           {/* Main Content Area */}
           <div className="flex-1 p-3 md:p-6 overflow-y-auto">
+            {/* Active Boost Banner */}
+            {activeBoost && (
+              <div className="mb-6 bg-gradient-to-r from-purple-600/30 via-pink-600/20 to-slate-950/40 border border-purple-500/30 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-[0_0_20px_rgba(168,85,247,0.15)]">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl text-white font-black text-xs animate-bounce shrink-0">
+                    ⚡ BOOSTED
+                  </div>
+                  <div>
+                    <div className="text-white font-black text-xs uppercase tracking-wider">
+                      Boomkit is boosted {activeBoost.multiplier}x by {activeBoost.activated_by}!
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-0.5">
+                      All legendary, chroma, hidden, and mystical drop rates are multiplied by {activeBoost.multiplier}x.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 bg-black/40 border border-white/5 py-1.5 px-3 rounded-xl shrink-0">
+                  <span className="text-slate-500 text-[9px] font-black uppercase tracking-wider">Time Left:</span>
+                  <span className="text-purple-400 font-black text-xs min-w-[70px] text-right">{boostTimeLeft}</span>
+                </div>
+              </div>
+            )}
+
             {/* Stats Page */}
             {currentPage === "stats" && (
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -5812,7 +6084,7 @@ const handlePackAction = (packId: string) => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {PACKS.map((pack) => (
+                  {PACKS.filter((p) => p.id !== "plus" || (currentUser && currentUser.isPlusUser)).map((pack) => (
                     <div key={pack.id} className="relative group perspective-1000">
                       {/* Label and Series */}
                       {pack.isNew && (
@@ -6431,6 +6703,239 @@ const handlePackAction = (packId: string) => {
                   )}
                 </div>
               )) : null}
+
+            {/* Inventory Page */}
+            {currentPage === "inventory" && (
+              <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
+                {/* Inventory Hero Banner */}
+                <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 border border-white/10 p-8 shadow-[0_12px_40px_rgba(0,0,0,0.6)]">
+                  <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-purple-500/5 rounded-full blur-[100px] pointer-events-none" />
+                  <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-blue-500/5 rounded-full blur-[100px] pointer-events-none" />
+
+                  <div className="relative flex flex-col md:flex-row justify-between items-center gap-6 z-10">
+                    <div className="space-y-2 text-center md:text-left">
+                      <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter">
+                        MY <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 drop-shadow-sm">INVENTORY</span>
+                      </h1>
+                      <p className="text-white/40 text-xs md:text-sm font-semibold uppercase tracking-wider">
+                        View, activate, and manage your boosters and charms
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-4 bg-slate-900/60 backdrop-blur-2xl border border-white/10 px-6 py-3 rounded-2xl">
+                      <span className="relative flex h-2 w-2">
+                        <span className={`relative inline-flex rounded-full h-2 w-2 ${activeBoost ? 'bg-green-500 shadow-[0_0_10px_green]' : 'bg-slate-500'}`} />
+                      </span>
+                      <span className="text-white/30 text-[9px] font-black uppercase tracking-widest">
+                        {activeBoost ? 'Booster Active' : 'No Boosters Active'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tabs */}
+                <div className="flex gap-4 border-b border-white/5 pb-2">
+                  <button
+                    onClick={() => setInventoryTab("boosters")}
+                    className={`pb-2 px-1 text-sm font-bold uppercase tracking-wider transition-all relative ${
+                      inventoryTab === "boosters"
+                        ? "text-white font-black"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    Boosters & Charms
+                    {inventoryTab === "boosters" && (
+                      <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-purple-500 to-pink-500" />
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setInventoryTab("booms")}
+                    className={`pb-2 px-1 text-sm font-bold uppercase tracking-wider transition-all relative ${
+                      inventoryTab === "booms"
+                        ? "text-white font-black"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    Owned Booms
+                    {inventoryTab === "booms" && (
+                      <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-purple-500 to-pink-500" />
+                    )}
+                  </button>
+                </div>
+
+                {inventoryTab === "boosters" ? (
+                  <div className="space-y-6">
+                    {/* Active booster status widget if active */}
+                    {activeBoost && (
+                      <div className="bg-gradient-to-r from-green-500/10 via-emerald-500/5 to-slate-950/40 border border-green-500/20 rounded-3xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div className="flex items-center gap-4">
+                          <div className="p-3 bg-green-500/15 rounded-2xl border border-green-500/20 text-green-400 text-2xl">
+                            ⚡
+                          </div>
+                          <div>
+                            <div className="text-white font-black text-sm uppercase tracking-wider">Active Global Boost</div>
+                            <p className="text-xs text-slate-400 mt-0.5">
+                              Activated by <span className="text-white font-bold">{activeBoost.activated_by}</span>. 
+                              All drops currently boosted by <span className="text-green-400 font-bold">{activeBoost.multiplier}x</span>!
+                            </p>
+                          </div>
+                        </div>
+                        <div className="bg-black/40 border border-white/5 px-4 py-2.5 rounded-2xl text-center">
+                          <div className="text-slate-500 text-[9px] uppercase tracking-widest font-black">Ends At</div>
+                          <div className="text-white font-black text-xs mt-0.5">
+                            {new Date(activeBoost.ends_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Boosters Grid */}
+                    {(!currentUser?.inventory || currentUser.inventory.length === 0) ? (
+                      <div className="bg-slate-900/20 border border-white/5 rounded-[2rem] p-12 text-center flex flex-col items-center gap-4">
+                        <div className="w-16 h-16 bg-slate-800/30 rounded-2xl flex items-center justify-center border border-white/5 text-4xl text-slate-600">
+                          📦
+                        </div>
+                        <div>
+                          <h3 className="text-white font-black text-lg">Your inventory is empty</h3>
+                          <p className="text-slate-400 text-xs mt-1 max-w-sm mx-auto">
+                            You don't own any booster items yet. Head over to the Shop to purchase Luck Charms!
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => setCurrentPage("shop")}
+                          className="mt-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-black text-xs uppercase tracking-wider px-6 py-3 rounded-xl shadow-lg transition-all"
+                        >
+                          Visit Shop
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {currentUser.inventory.map((item: any) => {
+                          const spec = INVENTORY_SPECS[item.id] || {
+                            name: item.id.replace(/-/g, " "),
+                            description: "Special inventory item",
+                            emoji: "📦",
+                            color: "from-slate-800/20 to-slate-950/20 border-slate-700/30 text-slate-400"
+                          }
+                          return (
+                            <div
+                              key={item.id}
+                              className={`bg-gradient-to-br ${spec.color} bg-slate-950 border rounded-3xl p-6 flex flex-col justify-between hover:-translate-y-1 transition-all duration-300 shadow-xl`}
+                            >
+                              <div className="flex justify-between items-start gap-4">
+                                <div className="flex items-center gap-4">
+                                  <div className="w-14 h-14 bg-black/40 rounded-2xl flex items-center justify-center text-3xl border border-white/5 shadow-inner">
+                                    {spec.emoji}
+                                  </div>
+                                  <div>
+                                    <h3 className="text-white font-black text-base uppercase tracking-wider">{spec.name}</h3>
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 block mt-0.5">
+                                      Booster Charm
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="bg-black/60 border border-white/5 px-3 py-1.5 rounded-xl text-center shrink-0">
+                                  <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Owned</div>
+                                  <div className="text-white font-black text-sm">{item.quantity}</div>
+                                </div>
+                              </div>
+
+                              <p className="text-slate-400 text-xs mt-4 leading-relaxed">
+                                {spec.description}
+                              </p>
+
+                              <div className="mt-6 flex gap-3">
+                                <button
+                                  onClick={() => activateBooster(item.id)}
+                                  className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 active:scale-95 text-white font-black text-xs uppercase tracking-widest py-3 px-4 rounded-xl shadow-lg transition-all"
+                                >
+                                  Activate Booster
+                                </button>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-6 animate-in fade-in duration-300">
+                    {/* Booms list grid */}
+                    {Object.keys(currentUser?.booms || {}).filter(k => (currentUser?.booms?.[k] || 0) > 0).length === 0 ? (
+                      <div className="bg-slate-900/20 border border-white/5 rounded-[2rem] p-12 text-center flex flex-col items-center gap-4">
+                        <div className="w-16 h-16 bg-slate-800/30 rounded-2xl flex items-center justify-center border border-white/5 text-4xl text-slate-600">
+                          💥
+                        </div>
+                        <div>
+                          <h3 className="text-white font-black text-lg">No Booms owned</h3>
+                          <p className="text-slate-400 text-xs mt-1 max-w-sm mx-auto">
+                            Open packs in the Market to start collecting unique Booms!
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => setCurrentPage("market")}
+                          className="mt-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-black text-xs uppercase tracking-wider px-6 py-3 rounded-xl shadow-lg transition-all"
+                        >
+                          Visit Market
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
+                        {Object.keys(currentUser?.booms || {})
+                          .filter((boomName) => (currentUser?.booms?.[boomName] || 0) > 0)
+                          .map((boomName) => {
+                            let boomDetails: any = null
+                            for (const pack of PACKS) {
+                              const found = pack.booms.find((b) => b.name === boomName)
+                              if (found) {
+                                boomDetails = found
+                                break
+                              }
+                            }
+                            const count = currentUser?.booms?.[boomName] || 0
+                            const emoji = boomDetails?.avatar || "💥"
+                            const rarity = boomDetails?.rarity || "uncommon"
+                            
+                            const rarityStyles: Record<string, string> = {
+                              uncommon: "border-green-500/20 bg-green-500/5 text-green-400",
+                              rare: "border-blue-500/20 bg-blue-500/5 text-blue-400",
+                              epic: "border-purple-500/20 bg-purple-500/5 text-purple-400",
+                              legendary: "border-orange-500/20 bg-orange-500/5 text-orange-400",
+                              chroma: "border-pink-500/20 bg-pink-500/5 text-pink-400",
+                              hidden: "border-slate-500/20 bg-slate-500/5 text-slate-400",
+                              mystical: "border-cyan-500/20 bg-cyan-500/5 text-cyan-400",
+                            }
+
+                            return (
+                              <div
+                                key={boomName}
+                                className={`border rounded-2xl p-4 flex flex-col items-center justify-between text-center relative overflow-hidden group hover:scale-105 transition-all duration-300 ${
+                                  rarityStyles[rarity] || "border-white/5 bg-white/5 text-white"
+                                }`}
+                              >
+                                <div className="absolute top-2 right-2 bg-black/60 border border-white/10 px-1.5 py-0.5 rounded-md text-[9px] font-black text-white">
+                                  x{count}
+                                </div>
+                                <div className="text-4xl my-2 select-none filter drop-shadow group-hover:scale-110 transition-transform duration-300">
+                                  {emoji}
+                                </div>
+                                <div className="w-full">
+                                  <div className="text-white font-bold text-[10px] truncate w-full" title={boomName}>
+                                    {boomName}
+                                  </div>
+                                  <div className="text-[8px] font-black uppercase tracking-widest opacity-60 mt-0.5">
+                                    {rarity}
+                                  </div>
+                                </div>
+                              </div>
+                            )
+                          })}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Settings Page */}
             {currentPage === "settings" && (
@@ -8618,7 +9123,7 @@ const handlePackAction = (packId: string) => {
 
                     // Grade-based Reward Logic
                     const currentDiscoverEarned = currentUser?.discover_tokens_earned || 0
-                    let actualTokenReward = Math.round(score / 10)
+                    let actualTokenReward = score
                     let actualXpReward = activeDiscoverGame.grade * (correctAnswers || 0)
 
                     const remaining = Math.max(0, 5000 - currentDiscoverEarned)
@@ -10501,7 +11006,9 @@ const handlePackAction = (packId: string) => {
             totalQuestions={activeDiscoverGame?.questions?.length || 0}
             highScore={currentUser?.boomScore || 0}
             tokensEarned={currentUser ? Math.min(
-              Math.round(gameScore / 10),
+              activeDiscoverGame?.gameMode === "fishing-frenzy"
+                ? Math.round(gameScore / 10)
+                : gameScore,
               Math.max(0, 5000 - (currentUser.discover_tokens_earned || 0))
             ) : 0}
             leaderboard={livePlayers.length > 0 ? [...livePlayers].filter(Boolean).sort((a, b) => (b.score || 0) - (a.score || 0)).map(p => {

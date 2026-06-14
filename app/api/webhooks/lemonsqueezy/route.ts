@@ -45,12 +45,16 @@ export async function POST(req: Request) {
 
   const supabase = supabaseServerClient()
 
-  // We handle order creation and subscription creation events
-  if (eventName === "order_created" || eventName === "subscription_created") {
-    // Retrieve the user to verify existence and get current tokens & username
+  // We handle order creation, subscription creation, and subscription payment success (renewal) events
+  if (
+    eventName === "order_created" ||
+    eventName === "subscription_created" ||
+    eventName === "subscription_payment_success"
+  ) {
+    // Retrieve the user to verify existence and get current tokens, username & inventory
     const { data: user, error: userError } = await supabase
       .from("users")
-      .select("username, tokens, is_plus_user, has_plus_pass")
+      .select("username, tokens, is_plus_user, has_plus_pass, inventory")
       .eq("id", userId)
       .single()
 
@@ -64,6 +68,37 @@ export async function POST(req: Request) {
     if (productId === "boomkit-plus") {
       updates.is_plus_user = true
       updates.has_plus_pass = true
+      updates.tokens = (user.tokens || 0) + 10000
+
+      // Award 1 2x Luck Charm (1 hour)
+      const currentInventory = Array.isArray(user.inventory) ? user.inventory : []
+      const updatedInventory = [...currentInventory]
+      const itemIndex = updatedInventory.findIndex((item: any) => item.id === "luck-charm-2x-1h")
+      if (itemIndex > -1) {
+        updatedInventory[itemIndex].quantity = (updatedInventory[itemIndex].quantity || 0) + 1
+      } else {
+        updatedInventory.push({ id: "luck-charm-2x-1h", quantity: 1 })
+      }
+      updates.inventory = updatedInventory
+    }
+
+    const boosterProducts = new Set([
+      "luck-charm-2x-1h",
+      "luck-charm-2x-2h",
+      "luck-charm-2x-3h",
+      "luck-charm-super-3x-1h"
+    ])
+
+    if (boosterProducts.has(productId)) {
+      const currentInventory = Array.isArray(user.inventory) ? user.inventory : []
+      const updatedInventory = [...currentInventory]
+      const itemIndex = updatedInventory.findIndex((item: any) => item.id === productId)
+      if (itemIndex > -1) {
+        updatedInventory[itemIndex].quantity = (updatedInventory[itemIndex].quantity || 0) + 1
+      } else {
+        updatedInventory.push({ id: productId, quantity: 1 })
+      }
+      updates.inventory = updatedInventory
     }
 
     if (parsedTokens > 0) {
@@ -83,10 +118,14 @@ export async function POST(req: Request) {
 
       // Log activity
       try {
+        let actDesc = `Purchased ${productId === "boomkit-plus" ? "Boomkit Plus" : `${parsedTokens} Tokens`}`
+        if (boosterProducts.has(productId)) {
+          actDesc = `Purchased Booster: ${productId}`
+        }
         await supabase.from("user_activity").insert({
           username: user.username,
           activity_type: "purchase",
-          description: `Purchased ${productId === "boomkit-plus" ? "Boomkit Plus" : `${parsedTokens} Tokens`}`,
+          description: actDesc,
           details: { productId, tokens: parsedTokens, provider: "lemonsqueezy" }
         })
       } catch (logErr) {
