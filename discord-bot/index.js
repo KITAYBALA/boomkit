@@ -210,6 +210,23 @@ const commands = [
     new SlashCommandBuilder()
         .setName('active-codes')
         .setDescription('View all currently active promo codes (Staff Only)'),
+
+    new SlashCommandBuilder()
+        .setName('auth')
+        .setDescription('Authentication administration commands (Staff Only)')
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('update')
+                .setDescription('Reset a player\'s password (Staff Only)')
+                .addStringOption(option =>
+                    option.setName('username')
+                        .setDescription('Boomkit username to update')
+                        .setRequired(true))
+                .addStringOption(option =>
+                    option.setName('new_password')
+                        .setDescription('The new password for the player')
+                        .setRequired(true))
+        ),
 ].map(command => command.toJSON());
 
 // Slash Command Registration Helper
@@ -501,6 +518,26 @@ async function verifyPassword(password, storedHash) {
     }
 
     return { valid: false };
+}
+
+// Hash password matching Next.js logic
+async function hashPassword(password) {
+    const ALGORITHM = 'scrypt';
+    const KEY_LENGTH = 64;
+    const SCRYPT_N = 16384;
+    const SCRYPT_R = 8;
+    const SCRYPT_P = 1;
+    const SCRYPT_MAXMEM = 64 * 1024 * 1024;
+
+    const salt = crypto.randomBytes(16).toString('hex');
+    const key = await scryptAsync(password, salt, KEY_LENGTH, {
+        N: SCRYPT_N,
+        r: SCRYPT_R,
+        p: SCRYPT_P,
+        maxmem: SCRYPT_MAXMEM,
+    });
+
+    return `${ALGORITHM}$${SCRYPT_N}$${SCRYPT_R}$${SCRYPT_P}$${salt}$${key.toString('hex')}`;
 }
 
 // Find Boomkit username linked to a Discord User ID
@@ -1200,6 +1237,61 @@ client.on('interactionCreate', async interaction => {
         } catch (err) {
             console.error('[Interaction check-alts] Error:', err);
             return interaction.editReply({ content: '⚠️ An unexpected error occurred while checking alts.' });
+        }
+    }
+
+    // --- AUTH COMMAND ---
+    if (commandName === 'auth') {
+        const subcommand = interaction.options.getSubcommand();
+        
+        if (subcommand === 'update') {
+            const targetUsername = interaction.options.getString('username').trim();
+            const newPassword = interaction.options.getString('new_password');
+            
+            const isOwner = interaction.guild?.ownerId === interaction.member.id;
+            const isAdmin = interaction.member.permissions?.has(PermissionFlagsBits.Administrator);
+            if (!isAdmin && !isOwner) {
+                return interaction.reply({ content: '🛑 **Permission Denied**: This is a staff-only command!', ephemeral: true });
+            }
+            
+            await interaction.deferReply({ ephemeral: true });
+            
+            try {
+                // Validate password length
+                if (newPassword.length < 8) {
+                    return interaction.editReply({ content: '🛑 **Invalid Password**: The password must be at least 8 characters long!' });
+                }
+                
+                // Fetch target user
+                const { data: userRecord, error: fetchErr } = await supabase
+                    .from('users')
+                    .select('id, username')
+                    .ilike('username', targetUsername)
+                    .maybeSingle();
+                    
+                if (fetchErr || !userRecord) {
+                    return interaction.editReply({ content: `❌ **User Not Found**: Boomkit user **${targetUsername}** does not exist.` });
+                }
+                
+                // Hash the new password
+                const newHash = await hashPassword(newPassword);
+                
+                // Update in database
+                const { error: updateErr } = await supabase
+                    .from('users')
+                    .update({ password_hash: newHash })
+                    .eq('id', userRecord.id);
+                    
+                if (updateErr) {
+                    console.error('[Auth Update DB] Error:', updateErr);
+                    return interaction.editReply({ content: `❌ Failed to update password for user **${userRecord.username}** in database.` });
+                }
+                
+                return interaction.editReply({ content: `🔒 **Password Reset Successful!**\n\nSuccessfully reset password for player **${userRecord.username}**.` });
+            } catch (err) {
+                console.error('[Interaction auth update] Error:', err);
+                return interaction.editReply({ content: '⚠️ An unexpected error occurred while resetting the password.' });
+            }
         }
     }
 

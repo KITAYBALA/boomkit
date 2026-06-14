@@ -54,13 +54,36 @@ export async function POST(req: Request) {
       - AVOID REPETITIVE QUESTIONS. Every single question in the set must be unique and different in structure and content.
       - EACH QUESTION MUST HAVE A TRULY UNIQUE ID format like: "topic_grade_randomstring"
       - GRADED CURRICULUM CONSTRAINTS:
-        * Grade 1: Focus on basic foundations. Math: Addition/subtraction within 20, telling time to the hour, basic shapes (circles, squares), counting by 2s/5s/10s. Reading: Phonics, high-frequency words, basic sentence structure.
-        * Grade 2: Math: Double-digit addition/subtraction, measuring length, money, telling time to 5 mins. Reading: Context clues, main idea, character traits.
-        * Grade 3: Math: Introduction to multiplication/division, fractions, area/perimeter. Reading: Informational text analysis, prefixes/suffixes, complex sentences.
-        * Grade 4: Math: Multi-digit multiplication, long division, adding/subtracting fractions, decimals. Reading: Figurative language (similes, metaphors), summarizing, inference.
-        * Grade 5: Math: Multiplying/dividing fractions, volume, coordinate planes. Reading: Analyzing themes, point of view, advanced vocabulary.
-        * Grade 6-8 (Middle): Focus on pre-algebra, ratios, Earth/Life science, world history, literary analysis, and argumentative writing.
-        * Grade 9-12 (High): Focus on Algebra I/II, Geometry, Calculus, Biology/Chemistry/Physics, American/European History, and advanced literature/poetry analysis.
+        * Grade 7:
+          - English Language Arts: Narrative and argumentative writing, character development, analyzing central themes, introductory research skills, and active vocabulary building.
+          - Mathematics (Pre-Algebra): Ratios and proportions, operations with rational numbers (fractions and decimals), expressions and multi-step linear equations, basic geometry (surface area and volume), and introductory probability.
+          - Science (Integrated/Life Science): Cellular structure and function, genetics and heredity, ecosystems and energy flow, earth systems (the rock cycle, plate tectonics), and weather/climate patterns.
+          - Social Studies (World Geography & Ancient Civilizations): Global geography and map skills, ancient civilizations (Mesopotamia, Egypt, Greece, Rome), cultural geography, and human-environment interaction.
+        * Grade 8:
+          - English Language Arts: Literary analysis essays, persuasive writing, identifying author bias and tone, advanced grammar (verb tenses, active/passive voice), and public speaking.
+          - Mathematics (8th Grade Math / Algebra I): Linear equations and inequalities, functions and graphing, systems of equations, exponents and scientific notation, the Pythagorean theorem, and geometric transformations.
+          - Science (Physical Science): Structure of atoms, states of matter, the periodic table, basic chemical reactions, Newton’s laws of motion, forces, and forms of energy (waves, electricity, magnetism).
+          - Social Studies (Early National History & Civics): Early history of the nation (colonization, the Revolution, founding documents), the structure of the three branches of government, and the Civil War era.
+        * Grade 9:
+          - English Language Arts (Intro to Literature): Analyzing diverse literary genres (epic poetry, drama, novels), the formal five-paragraph essay structure, research papers with citations (MLA/APA), and advanced context clues.
+          - Mathematics (Algebra I or Geometry): Algebra I (Quadratic functions, polynomials, factoring, radical expressions, and data analysis) or Geometry (Points, lines, planes, geometric proofs, triangle congruence/similarity, and basic trigonometry).
+          - Science (Biology or Earth Science): Biochemistry, cell division (mitosis and meiosis), DNA structure and protein synthesis, evolution and natural selection, and ecology.
+          - Social Studies (World History I / Human Geography): Pre-modern world history, global trade routes, the Renaissance, the Scientific Revolution, the Enlightenment, and global demographic patterns.
+        * Grade 10:
+          - English Language Arts (World Literature): Literature from diverse global cultures, analyzing archetypes and motifs, advanced expository writing, and rhetorical devices (ethos, pathos, logos).
+          - Mathematics (Geometry or Algebra II): Geometry (Circles, coordinate geometry, and the area/volume of complex geometric solids) or Algebra II (Complex numbers, rational and radical functions, exponential and logarithmic functions, and sequences/series).
+          - Science (Chemistry or Biology): Atomic structure and bonding, chemical nomenclature, stoichiometry (mole calculations), chemical reactions, gas laws, solutions, and acids/bases.
+          - Social Studies (Modern World History): The Industrial Revolution, Imperialism, World War I and World War II, the Cold War, and modern global conflicts or independence movements.
+        * Grade 11:
+          - English Language Arts (National Literature): Historical literary movements (e.g., Romanticism, Realism, Modernism), analyzing foundational historical and political texts, synthesis essays, and advanced research methodology.
+          - Mathematics (Algebra II, Pre-Calculus, or Statistics): Pre-Calculus (Trigonometric functions and identities, conic sections, matrices, and an introduction to limits) or Statistics (Data collection methods, probability distributions, hypothesis testing, and regression analysis).
+          - Science (Physics, Chemistry, or Environmental Science): Kinematics (motion), dynamics (forces), work, energy, momentum, thermodynamics, electricity, and wave optics.
+          - Social Studies (National History): In-depth national history, the Civil Rights movement, economic developments (the Great Depression), foreign policy, and domestic social changes of the 20th century.
+        * Grade 12:
+          - English Language Arts (British/Senior Lit & Composition): Masterworks of classic literature (e.g., Shakespeare, Chaucer), critical literary theory, college-level research writing, personal statements, and professional communication.
+          - Mathematics (Calculus, Statistics, or Financial Algebra): Calculus (Limits, continuity, derivatives and their applications, integrals, and the Fundamental Theorem of Calculus) or Financial Algebra (Personal finance math, logic, banking, taxes, and credit math).
+          - Science (Advanced/AP Sciences or Anatomy): Human anatomy and body systems, advanced laboratory techniques, environmental systems, or specialized topics like organic chemistry or astrophysics.
+          - Social Studies (Civics, Government, & Economics): Structure of national, state, and local governments; civil liberties and constitutional law; macroeconomics (GDP, inflation); microeconomics (supply and demand); and personal finance.
       
       - RANDOMIZATION SEED: ${Date.now()}_${Math.random()}
       - TOPIC VARIETY: Mix different aspects of the TOPIC specifically.
