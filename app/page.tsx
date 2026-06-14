@@ -238,6 +238,9 @@ interface GameUser {
   has_plus_pass: boolean
   games_played: number
   total_tokens_earned: number
+  discover_tokens_earned?: number
+  correct_answers_count?: number
+  questions_answered_count?: number
   loginStreak: number
   lastStreakClaim: string | null
   // password?: string; // Removed password from interface to avoid unintended exposure
@@ -1016,6 +1019,22 @@ export default function BoomkitGame() {
   const [hostingSubject, setHostingSubject] = useState<{ grade: number, subject: string } | null>(null)
   const [showGameResults, setShowGameResults] = useState(false)
   const [gameScore, setGameScore] = useState(0)
+  const [gameCorrectAnswers, setGameCorrectAnswersState] = useState(0)
+  const [gameTotalAnswered, setGameTotalAnsweredState] = useState(0)
+  const gameCorrectAnswersRef = useRef(0)
+  const gameTotalAnsweredRef = useRef(0)
+
+  const setGameCorrectAnswers = (val: number) => {
+    gameCorrectAnswersRef.current = val
+    setGameCorrectAnswersState(val)
+  }
+
+  const setGameTotalAnswered = (val: number) => {
+    gameTotalAnsweredRef.current = val
+    setGameTotalAnsweredState(val)
+  }
+
+  const [claimedRewards, setClaimedRewards] = useState<string[]>([])
   const [soloFlow, setSoloFlow] = useState<null | 'mode-select'>(null)
   const [soloSubject, setSoloSubject] = useState<{ grade: number, subject: string } | null>(null)
   const [livePlayers, setLivePlayers] = useState<any[]>([])
@@ -1394,6 +1413,9 @@ export default function BoomkitGame() {
           packs_opened: userWithActivity.packsOpened || 0,
           xp: userWithActivity.xp || 0,
           level: userWithActivity.level || 1,
+          discover_tokens_earned: userWithActivity.discover_tokens_earned || 0,
+          correct_answers_count: userWithActivity.correct_answers_count || 0,
+          questions_answered_count: userWithActivity.questions_answered_count || 0,
         }
 
         if (userWithActivity.email && userWithActivity.email.trim() !== "") {
@@ -1457,11 +1479,16 @@ export default function BoomkitGame() {
     }
 
     try {
+      const currentAccuracy = gameTotalAnsweredRef.current > 0
+        ? Math.round((gameCorrectAnswersRef.current / gameTotalAnsweredRef.current) * 100)
+        : 0
+
       const { error } = await supabase.rpc("update_game_score", {
         p_pin: activeGamePin,
         p_player_id: String(currentUser.id),
         p_player_username: currentUser.username,
-        p_score: sanitizedScore
+        p_score: sanitizedScore,
+        p_accuracy: currentAccuracy
       })
       if (error) {
         console.error("Score sync error:", error)
@@ -1549,7 +1576,7 @@ export default function BoomkitGame() {
       }
 
       // Only select safe fields; never expose password_hash, last_ip, or email to clients.
-      const safeColumns = "id, username, age, tokens, daily_tokens, packs, booms, is_owner, is_banned, is_muted, status, reason, role, join_date, boom_score, total_value, profile_picture, is_plus_user, name_color, banner_color, last_daily_spin, badges, mute_expiry, ban_expiry, last_seen, packs_opened, xp, level, login_streak, last_streak_claim, pinned_boom, season_xp, has_plus_pass, games_played, total_tokens_earned, clan_id, clan_role, clan_tag, clan_tag_color, fusion_cooldown_ends_at, consecutive_fusions, last_fusion_claim_time, active_fusion_boom1, active_fusion_boom2, active_fusion_ends_at, active_fusion_started_at"
+      const safeColumns = "id, username, age, tokens, daily_tokens, packs, booms, is_owner, is_banned, is_muted, status, reason, role, join_date, boom_score, total_value, profile_picture, is_plus_user, name_color, banner_color, last_daily_spin, badges, mute_expiry, ban_expiry, last_seen, packs_opened, xp, level, login_streak, last_streak_claim, pinned_boom, season_xp, has_plus_pass, games_played, total_tokens_earned, discover_tokens_earned, correct_answers_count, questions_answered_count, clan_id, clan_role, clan_tag, clan_tag_color, fusion_cooldown_ends_at, consecutive_fusions, last_fusion_claim_time, active_fusion_boom1, active_fusion_boom2, active_fusion_ends_at, active_fusion_started_at"
       const { data, error } = await supabase.from("users").select(safeColumns)
 
       if (error) {
@@ -1598,6 +1625,9 @@ export default function BoomkitGame() {
           has_plus_pass: u.has_plus_pass || false,
           games_played: u.games_played || 0,
           total_tokens_earned: u.total_tokens_earned || 0,
+          discover_tokens_earned: u.discover_tokens_earned || 0,
+          correct_answers_count: u.correct_answers_count || 0,
+          questions_answered_count: u.questions_answered_count || 0,
           clan_id: u.clan_id || null,
           clan_role: u.clan_role || null,
           clan_tag: u.clan_tag || null,
@@ -1781,8 +1811,16 @@ export default function BoomkitGame() {
     if (supabase) {
       fetchUsersFromSupabase(true)
       fetchCraftRecipes()
+      fetchActiveSeason()
     }
   }, [supabase, fetchUsersFromSupabase])
+
+  // Fetch claimed rewards when currentUser becomes available
+  useEffect(() => {
+    if (currentUser && supabase) {
+      fetchActiveSeason()
+    }
+  }, [currentUser?.username, supabase])
 
   const fetchCraftRecipes = async () => {
     if (!supabase) return
@@ -2149,7 +2187,7 @@ export default function BoomkitGame() {
 
 
   // XP and Leveling System
-  const awardXP = (amount: number) => {
+  const awardXP = (amount: number, additionalUpdates: Partial<GameUser> = {}) => {
     if (!currentUser) return
 
     let currentXP = currentUser.xp || 0
@@ -2209,7 +2247,8 @@ export default function BoomkitGame() {
       xp: newXP,
       level: newLevel,
       booms: updatedBooms,
-      boomScore: (currentUser.boomScore || 0) + (amount * 10) // Small boost to score too
+      boomScore: (currentUser.boomScore || 0) + (amount * 10), // Small boost to score too
+      ...additionalUpdates
     }
     updateAndPersistCurrentUser(updatedUser)
   }
@@ -4093,6 +4132,15 @@ const handlePackAction = (packId: string) => {
           .eq("season_id", season.id)
           .order("tier", { ascending: true })
         setSeasonRewards(rewards || [])
+
+        if (currentUser) {
+          const { data: claimed } = await supabase.from("user_activity")
+            .select("details")
+            .eq("username", currentUser.username)
+            .eq("activity_type", "season_claim")
+          const rewardIds = claimed?.map(act => act.details?.reward_id).filter(Boolean) || []
+          setClaimedRewards(rewardIds)
+        }
       }
     } catch (e) { console.error(e) }
   }
@@ -4124,6 +4172,7 @@ const handlePackAction = (packId: string) => {
       if (error) throw error
       alert(data.message || "Reward claimed!")
       fetchUsersFromSupabase(true)
+      fetchActiveSeason()
     } catch (e: any) { alert(e.message || "Claim failed") }
   }
 
@@ -5097,7 +5146,7 @@ const handlePackAction = (packId: string) => {
                             className="stroke-orange-500 transition-all duration-1000 ease-out"
                             strokeWidth="8"
                             strokeDasharray={2 * Math.PI * 48}
-                            strokeDashoffset={2 * Math.PI * 48 * (1 - Math.min(((currentUser?.xp || 0) / 100), 1))}
+                            strokeDashoffset={2 * Math.PI * 48 * (1 - (currentUser ? Math.min(1, Math.max(0, (currentUser.xp || 0) / ((currentUser.level || 1) * 100))) : 0))}
                             strokeLinecap="round"
                             fill="transparent"
                           />
@@ -5105,7 +5154,7 @@ const handlePackAction = (packId: string) => {
                         <div className="absolute flex flex-col items-center justify-center">
                           <span className="text-white/40 text-[9px] font-black uppercase tracking-widest">Level</span>
                           <span className="text-white text-3xl font-black leading-none">{currentUser?.level || 1}</span>
-                          <span className="text-orange-400 font-bold text-[9px] mt-0.5">{currentUser?.xp || 0}%</span>
+                          <span className="text-orange-400 font-bold text-[9px] mt-0.5">{currentUser ? Math.min(100, Math.max(0, Math.round(((currentUser.xp || 0) / ((currentUser.level || 1) * 100)) * 100))) : 0}%</span>
                         </div>
                       </div>
                     </div>
@@ -8242,7 +8291,7 @@ const handlePackAction = (packId: string) => {
 
                     {seasonRewards.map((r) => {
                       const isUnlocked = (currentUser?.season_xp || 0) >= r.xp_required;
-                      const isClaimed = userActivity.some(act => act.activity_type === 'season_claim' && act.details?.reward_id === r.id);
+                      const isClaimed = claimedRewards.includes(r.id);
 
                       return (
                         <div key={r.id} className="relative flex items-center gap-6 group">
@@ -8492,40 +8541,60 @@ const handlePackAction = (packId: string) => {
                     questions={activeDiscoverGame.questions}
                     durationSeconds={activeDiscoverGame.duration || 600}
                     startTimeOffset={gameStartOffset}
-                    onEnd={(score) => {
-                      // Final unthrottled sync
-                      handleScoreUpdate(score, true)
+                    onEnd={(score: number, correctAnswers?: number, questionsAnswered?: number) => {
                       setGameScore(score)
+                      setGameCorrectAnswers(correctAnswers || 0)
+                      setGameTotalAnswered(questionsAnswered || 0)
                       setIsMergingGameActive(false)
                       setShowGameResults(true)
 
                       // Award Rewards
-                      const tokenReward = Math.floor(score / 5)
-                      const xpReward = Math.floor(score / 2)
+                      const currentDiscoverEarned = currentUser?.discover_tokens_earned || 0
+                      let actualTokenReward = Math.round(score / 10)
+                      let actualXpReward = Math.floor(score / 2)
+
+                      const remaining = Math.max(0, 5000 - currentDiscoverEarned)
+                      if (remaining <= 0) {
+                        actualTokenReward = 0
+                        actualXpReward = 0
+                        alert("⚠️ You have reached the lifetime limit of 5,000 tokens from Discover minigames. No further tokens or XP will be awarded.")
+                      } else {
+                        if (actualTokenReward > remaining) {
+                          actualTokenReward = remaining
+                          alert(`⚠️ You reached the lifetime limit of 5,000 tokens from Discover minigames! Awarded capped tokens: +${actualTokenReward}`)
+                        }
+                      }
 
                       if (currentUser) {
-                        const updatedUser = {
-                          ...currentUser,
-                          tokens: (currentUser.tokens || 0) + tokenReward,
-                          xp: (currentUser.xp || 0) + xpReward
+                        const newCorrectCount = (currentUser.correct_answers_count || 0) + (correctAnswers || 0)
+                        const newAnsweredCount = (currentUser.questions_answered_count || 0) + (questionsAnswered || 0)
+
+                        // Sync final score and accuracy to database
+                        handleScoreUpdate(score, true)
+
+                        if (actualXpReward > 0) {
+                          awardBoomXP(Math.floor(score / 4)) // Bonus XP for the pinned boom
                         }
-                        // Leveling is handled inside awardXP but we can just update state here and let the next sync handle it
-                        // Or better yet, use awardXP logic
-                        awardXP(xpReward)
-                        awardBoomXP(Math.floor(score / 4)) // Bonus XP for the pinned boom
-                        updateAndPersistCurrentUser({
-                          ...updatedUser,
-                          // awardXP might have incremented level, let's just make sure we are consistent
-                          tokens: updatedUser.tokens
+
+                        awardXP(actualXpReward, {
+                          tokens: (currentUser.tokens || 0) + actualTokenReward,
+                          discover_tokens_earned: (currentUser.discover_tokens_earned || 0) + actualTokenReward,
+                          correct_answers_count: newCorrectCount,
+                          questions_answered_count: newAnsweredCount
                         })
                       }
                     }}
                     onScoreUpdate={handleScoreUpdate}
                     onAwardTokens={(amount) => {
                       if (currentUser) {
+                        const currentDiscoverEarned = currentUser.discover_tokens_earned || 0
+                        const remaining = Math.max(0, 5000 - currentDiscoverEarned)
+                        if (remaining <= 0) return
+                        const actualTokens = Math.min(amount, remaining)
                         updateAndPersistCurrentUser({
                           ...currentUser,
-                          tokens: (currentUser.tokens || 0) + amount
+                          tokens: (currentUser.tokens || 0) + actualTokens,
+                          discover_tokens_earned: currentDiscoverEarned + actualTokens
                         })
                       }
                     }}
@@ -8540,35 +8609,60 @@ const handlePackAction = (packId: string) => {
                   questions={activeDiscoverGame.questions}
                   durationSeconds={activeDiscoverGame.duration || 600}
                   startTimeOffset={gameStartOffset}
-                  onEnd={(score, correctAnswers) => {
-                    // Final unthrottled sync
-                    handleScoreUpdate(score, true)
+                  onEnd={(score: number, correctAnswers?: number, questionsAnswered?: number) => {
                     setGameScore(score)
+                    setGameCorrectAnswers(correctAnswers || 0)
+                    setGameTotalAnswered(questionsAnswered || 0)
                     setIsMergingGameActive(false)
                     setShowGameResults(true)
 
                     // Grade-based Reward Logic
-                    // Grade 1: 1 * correctAnswers
-                    // Grade 2: 2 * correctAnswers
-                    // ... etc
-                    const xpReward = activeDiscoverGame.grade * (correctAnswers || 0)
-                    const tokenReward = Math.floor(score / 5)
+                    const currentDiscoverEarned = currentUser?.discover_tokens_earned || 0
+                    let actualTokenReward = Math.round(score / 10)
+                    let actualXpReward = activeDiscoverGame.grade * (correctAnswers || 0)
+
+                    const remaining = Math.max(0, 5000 - currentDiscoverEarned)
+                    if (remaining <= 0) {
+                      actualTokenReward = 0
+                      actualXpReward = 0
+                      alert("⚠️ You have reached the lifetime limit of 5,000 tokens from Discover minigames. No further tokens or XP will be awarded.")
+                    } else {
+                      if (actualTokenReward > remaining) {
+                        actualTokenReward = remaining
+                        alert(`⚠️ You reached the lifetime limit of 5,000 tokens from Discover minigames! Awarded capped tokens: +${actualTokenReward}`)
+                      }
+                    }
 
                     if (currentUser) {
-                      awardXP(xpReward)
-                      awardBoomXP(Math.floor(score / 4)) // Bonus XP for the pinned boom
-                      updateAndPersistCurrentUser({
-                        ...currentUser,
-                        tokens: (currentUser.tokens || 0) + tokenReward
+                      const newCorrectCount = (currentUser.correct_answers_count || 0) + (correctAnswers || 0)
+                      const newAnsweredCount = (currentUser.questions_answered_count || 0) + (questionsAnswered || 0)
+
+                      // Sync final score and accuracy to database
+                      handleScoreUpdate(score, true)
+
+                      if (actualXpReward > 0) {
+                        awardBoomXP(Math.floor(score / 4)) // Bonus XP for the pinned boom
+                      }
+
+                      awardXP(actualXpReward, {
+                        tokens: (currentUser.tokens || 0) + actualTokenReward,
+                        discover_tokens_earned: (currentUser.discover_tokens_earned || 0) + actualTokenReward,
+                        correct_answers_count: newCorrectCount,
+                        questions_answered_count: newAnsweredCount
                       })
                     }
                   }}
                   onScoreUpdate={handleScoreUpdate}
                   onAwardTokens={(amount) => {
                     if (currentUser) {
+                      const currentDiscoverEarned = currentUser.discover_tokens_earned || 0
+                      const remaining = Math.max(0, 5000 - currentDiscoverEarned)
+                      if (remaining <= 0) return
+                      const actualTokens = Math.min(amount, remaining)
                       updateAndPersistCurrentUser({
                         ...currentUser,
-                        tokens: (currentUser.tokens || 0) + amount
+                        tokens: (currentUser.tokens || 0) + actualTokens,
+                        discover_tokens_earned: currentDiscoverEarned + actualTokens
                       })
                     }
                   }}
@@ -10406,16 +10500,32 @@ const handlePackAction = (packId: string) => {
             score={gameScore}
             totalQuestions={activeDiscoverGame?.questions?.length || 0}
             highScore={currentUser?.boomScore || 0}
-            leaderboard={livePlayers.length > 0 ? [...livePlayers].filter(Boolean).sort((a, b) => (b.score || 0) - (a.score || 0)).map(p => ({
-              id: p.id,
-              username: p.username,
-              score: p.score || 0,
-              avatar: p.profilePicture || p.profile_picture || "👤"
-            })) : (currentUser ? [{
+            tokensEarned={currentUser ? Math.min(
+              Math.round(gameScore / 10),
+              Math.max(0, 5000 - (currentUser.discover_tokens_earned || 0))
+            ) : 0}
+            leaderboard={livePlayers.length > 0 ? [...livePlayers].filter(Boolean).sort((a, b) => (b.score || 0) - (a.score || 0)).map(p => {
+              const userObj = users.find(u => u.id === p.id || u.username === p.username)
+              const careerAccuracy = (userObj && (userObj.questions_answered_count || 0) > 0)
+                ? Math.round(((userObj.correct_answers_count || 0) / (userObj.questions_answered_count || 0)) * 100)
+                : 0
+              return {
+                id: p.id,
+                username: p.username,
+                score: p.score || 0,
+                avatar: p.profilePicture || p.profile_picture || "👤",
+                accuracy: p.accuracy || 0,
+                careerAccuracy
+              }
+            }) : (currentUser ? [{
               id: currentUser.id,
               username: currentUser.username,
               score: gameScore,
-              avatar: currentUser.profilePicture
+              avatar: currentUser.profilePicture,
+              accuracy: gameTotalAnswered > 0 ? Math.round((gameCorrectAnswers / gameTotalAnswered) * 100) : 0,
+              careerAccuracy: (currentUser && (currentUser.questions_answered_count || 0) > 0)
+                ? Math.round(((currentUser.correct_answers_count || 0) / (currentUser.questions_answered_count || 0)) * 100)
+                : 0
             }] : [])}
             onExit={async () => {
               if (currentUser && gameScore > 0) {
@@ -10433,9 +10543,11 @@ const handlePackAction = (packId: string) => {
                   games_played: newGamesPlayed
                 }).eq("username", currentUser.username)
 
-                // Add Season XP (50 per game + dynamic score bonus!)
-                const seasonXpEarned = 50 + Math.floor(gameScore / 10)
-                await handleAddSeasonXp(seasonXpEarned)
+                // Add Season XP (50 per game + dynamic score bonus!) if not capped
+                if ((currentUser.discover_tokens_earned || 0) < 5000) {
+                  const seasonXpEarned = 50 + Math.floor(gameScore / 10)
+                  await handleAddSeasonXp(seasonXpEarned)
+                }
 
                 // Check achievements
                 await supabase?.rpc('check_achievements', {

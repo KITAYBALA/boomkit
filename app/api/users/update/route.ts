@@ -14,6 +14,12 @@ const SELF_ALLOWED_FIELDS = new Set([
   'banner_color',
   'last_seen',
   'last_daily_spin',
+  'tokens',
+  'xp',
+  'level',
+  'discover_tokens_earned',
+  'correct_answers_count',
+  'questions_answered_count',
 ])
 
 const STAFF_ALLOWED_FIELDS = new Set([

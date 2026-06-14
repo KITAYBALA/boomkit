@@ -22,7 +22,7 @@ interface FishingFrenzyProps {
     questions: Question[]
     durationSeconds: number
     startTimeOffset?: number
-    onEnd: (score: number) => void
+    onEnd: (score: number, correctAnswers?: number, questionsAnswered?: number) => void
     onScoreUpdate?: (score: number) => void
     onAwardTokens?: (amount: number) => void
 }
@@ -47,6 +47,8 @@ export default function FishingFrenzy({
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
     const [lastCatch, setLastCatch] = useState<{ name: string; weight: number; rarity: string; color?: string } | null>(null)
     const [isGameOver, setIsGameOver] = useState(false)
+    const [correctAnswers, setCorrectAnswers] = useState(0)
+    const [questionsAnswered, setQuestionsAnswered] = useState(0)
 
     // Crash Prevention
     if (!Array.isArray(questions) || questions.length === 0) {
@@ -78,9 +80,9 @@ export default function FishingFrenzy({
     useEffect(() => {
         if (timeLeft <= 0) {
             setIsGameOver(true)
-            onEnd(score)
+            onEnd(score, correctAnswers, questionsAnswered)
         }
-    }, [timeLeft, score, onEnd])
+    }, [timeLeft, score, onEnd, correctAnswers, questionsAnswered])
 
     const handleCast = () => {
         if (gameState !== "idle" && gameState !== "result") return
@@ -132,8 +134,10 @@ export default function FishingFrenzy({
 
     const handleAnswer = (index: number) => {
         const correct = index === (questions[currentQuestionIndex]?.correctIndex ?? -1)
+        setQuestionsAnswered(prev => prev + 1)
 
         if (correct) {
+            setCorrectAnswers(prev => prev + 1)
             const { tier, weight, color } = getTierAndWeight()
 
             const fishByTier: Record<string, string[]> = {
@@ -350,7 +354,7 @@ export default function FishingFrenzy({
                                 const tokens = Math.floor(score * 0.01)
                                 if (tokens > 0) onAwardTokens(tokens)
                             }
-                            onEnd(score)
+                            onEnd(score, correctAnswers, questionsAnswered)
                         }}
                         className="px-12 py-8 bg-white text-black text-3xl font-black rounded-3xl hover:bg-purple-400 hover:text-white transition-all transform hover:scale-110"
                     >

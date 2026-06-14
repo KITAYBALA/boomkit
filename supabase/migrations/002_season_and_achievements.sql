@@ -145,8 +145,8 @@ BEGIN
     INSERT INTO public.season_rewards (season_id, tier, xp_required, reward_type, reward_value, is_premium) VALUES
     (v_season_id, 1, 100, 'tokens', '1000', FALSE),
     (v_season_id, 1, 100, 'tokens', '5000', TRUE),
-    (v_season_id, 2, 250, 'boom', 'Rare Box', FALSE),
-    (v_season_id, 2, 250, 'boom', 'Epic Box', TRUE),
+    (v_season_id, 2, 250, 'boom', 'Dragon', FALSE),
+    (v_season_id, 2, 250, 'boom', 'Wizard', TRUE),
     (v_season_id, 3, 500, 'tokens', '2500', FALSE),
     (v_season_id, 3, 500, 'plus_days', '7', TRUE)
     ON CONFLICT DO NOTHING;

@@ -31,7 +31,7 @@ interface MergingGameProps {
     questions: Question[]
     durationSeconds: number
     startTimeOffset?: number
-    onEnd: (score: number, correctAnswers?: number) => void
+    onEnd: (score: number, correctAnswers?: number, questionsAnswered?: number) => void
     onScoreUpdate?: (score: number) => void
     onAwardTokens?: (amount: number) => void
 }
@@ -121,6 +121,7 @@ export default function MergingGame({
     const [feedback, setFeedback] = useState<"correct" | "incorrect" | null>(null)
     const [currentBoomX, setCurrentBoomX] = useState(50) // Horizontal position 0-100
     const [correctAnswers, setCorrectAnswers] = useState(0)
+    const [questionsAnswered, setQuestionsAnswered] = useState(0)
     const [shuffledOptions, setShuffledOptions] = useState<{ text: string, originalIndex: number }[]>([])
 
     const gameAreaRef = useRef<HTMLDivElement>(null)
@@ -170,7 +171,7 @@ export default function MergingGame({
 
     const handleGameOver = () => {
         setIsGameOver(true)
-        onEnd(score, correctAnswers)
+        onEnd(score, correctAnswers, questionsAnswered)
     }
 
     const getRandomRarity = () => {
@@ -192,6 +193,7 @@ export default function MergingGame({
 
     const handleAnswer = (shuffledIndex: number) => {
         const originalIndex = shuffledOptions[shuffledIndex].originalIndex
+        setQuestionsAnswered(prev => prev + 1)
 
         if (originalIndex === questions[currentQuestionIndex]?.correctIndex) {
             setFeedback("correct")
