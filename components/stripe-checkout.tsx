@@ -35,6 +35,9 @@ export default function StripeCheckout({ userId, onSuccess }: StripeCheckoutProp
   const handleClose = () => {
     setShowCheckout(false)
     setSelectedProduct(null)
+    if (typeof window !== "undefined") {
+      (window as any).refreshUserSession?.()
+    }
   }
 
   const tokenProducts = PRODUCTS.filter((p) => p.type === "tokens")

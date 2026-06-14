@@ -1742,13 +1742,16 @@ export default function BoomkitGame() {
       }
     }
 
-    if (isStorageLoaded && !(window as any).sessionValidated) {
-      validateSession()
-        ; (window as any).sessionValidated = true
+    if (isStorageLoaded) {
+      (window as any).refreshUserSession = validateSession
+      if (!(window as any).sessionValidated) {
+        validateSession()
+          ; (window as any).sessionValidated = true
 
-      // Also run validation periodically to ensure manipulation doesn't work long-term
-      const interval = setInterval(validateSession, 30000)
-      return () => clearInterval(interval)
+        // Also run validation periodically to ensure manipulation doesn't work long-term
+        const interval = setInterval(validateSession, 30000)
+        return () => clearInterval(interval)
+      }
     }
   }, [isStorageLoaded, currentUser, handleLogout, router])
 
@@ -8129,10 +8132,10 @@ const handlePackAction = (packId: string) => {
                   <div className="relative flex flex-col md:flex-row justify-between items-center gap-8 z-10">
                     <div className="space-y-4 text-center md:text-left">
                       <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter">
-                        VENDING <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-400 to-indigo-400 drop-shadow-sm">BAY</span>
+                        BOOMKIT <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-400 to-orange-400 drop-shadow-sm">SHOP</span>
                       </h1>
                       <p className="text-white/40 text-base md:text-lg max-w-md font-medium leading-relaxed">
-                        Direct procurement interface. Acquire premium assets, booster units, and energy credits instantly.
+                        Acquire game tokens, booster credits, and unlock premium Boomkit Plus privileges instantly.
                       </p>
                     </div>
 
@@ -8152,67 +8155,6 @@ const handlePackAction = (packId: string) => {
                       </div>
                     </div>
                   </div>
-                </div>
-
-                {/* Vending Bays Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                  {shopItems.length === 0 ? (
-                    <div className="col-span-full py-20 text-center text-white/20 italic bg-black/20 rounded-[2rem] border border-dashed border-white/10">
-                      The dispenser units are currently offline. Check back soon!
-                    </div>
-                  ) : (
-                    shopItems.map((item) => {
-                      const rarity = getBoomRarity(item.boom_name)
-                      const rarityColor = getRarityColor(rarity)
-                      return (
-                        <div key={item.id} className="bg-gradient-to-b from-slate-900/60 to-slate-950/80 border border-white/10 hover:border-blue-500/30 rounded-[2rem] p-6 flex flex-col items-center group transition-all duration-500 hover:shadow-[0_20px_50px_rgba(59,130,246,0.1)] hover:-translate-y-1.5 relative overflow-hidden shadow-xl">
-                          {/* Top lighting effect */}
-                          <div className={`absolute top-0 inset-x-0 h-1 bg-gradient-to-r ${rarityColor} opacity-50`} />
-
-                          {/* Bay number */}
-                          <div className="absolute top-4 left-4 text-[9px] font-black text-white/10 uppercase tracking-widest">Dispenser #{item.id.slice(0, 4)}</div>
-
-                          <div className="my-6 transform group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 select-none filter drop-shadow-2xl">
-                            <BoomAvatar name={item.boom_name} className="w-24 h-24 object-contain" />
-                          </div>
-                          
-                          <Badge className={`${rarityColor} mb-3 px-3.5 py-1 text-white border-none uppercase text-[9px] font-black tracking-widest rounded-lg shadow-md`}>
-                            {rarity}
-                          </Badge>
-                          
-                          <h4 className="text-2xl font-black text-white mb-1 tracking-tight">{item.boom_name}</h4>
-                          
-                          <div className="text-[10px] text-white/30 mb-4 font-black uppercase tracking-wider">
-                            {item.stock === -1 ? 'Dispenser Unlimited' : `${item.stock} Units Left`}
-                          </div>
-
-                          {/* Market Trend */}
-                          {item.base_price && item.current_price && (
-                            <div className="flex items-center gap-1.5 mb-6">
-                              <div className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-lg ${item.current_price >= item.base_price ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
-                                {item.current_price >= item.base_price ? '▲' : '▼'}
-                                {Math.abs(Math.round(((item.current_price - item.base_price) / item.base_price) * 100))}%
-                              </div>
-                              <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">Rate Fluctuations</span>
-                            </div>
-                          )}
-
-                          <Button
-                            onClick={() => handleBuyShopItem(item.id)}
-                            disabled={item.stock === 0 || (currentUser?.tokens || 0) < item.token_cost}
-                            className={`w-full h-13 rounded-2xl font-black transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 border-none text-xs uppercase tracking-wider ${
-                              item.stock === 0 || (currentUser?.tokens || 0) < item.token_cost
-                                ? 'bg-white/5 text-white/20 cursor-not-allowed'
-                                : 'bg-blue-600 hover:bg-blue-500 text-white shadow-lg shadow-blue-900/30'
-                            }`}
-                          >
-                            <CoinsIcon className="w-4 h-4" />
-                            Buy ({item.token_cost.toLocaleString()})
-                          </Button>
-                        </div>
-                      )
-                    })
-                  )}
                 </div>
 
                 {/* Token Store Section */}
