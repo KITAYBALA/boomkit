@@ -55,7 +55,7 @@ import PrivateChat from "@/components/private-chat"
 import RealtimeAuctions from "@/components/realtime-auctions"
 import RealtimeLeaderboard from "@/components/realtime-leaderboard"
 import { getSupabaseBrowserClient } from "@/lib/supabase-client"
-import StripeCheckout from "@/components/stripe-checkout"
+import LemonCheckout from "@/components/lemon-checkout"
 import TradingPage from "@/components/trading-page" // Import TradingPage
 import DiscoverPage from "@/components/discover-page"
 import GameModeSelector, { GameMode } from "@/components/game-mode-selector"
@@ -8167,12 +8167,12 @@ const handlePackAction = (packId: string) => {
                         SECURE CREDIT BRIDGE
                       </h3>
                       <p className="text-white/40 text-sm font-semibold max-w-lg leading-relaxed uppercase tracking-wider">
-                        Deposit fiat credits to acquire game tokens instantly. Direct secure Stripe integration with instant transaction settlement.
+                        Deposit fiat credits to acquire game tokens instantly. Secure Lemon Squeezy checkout integration supporting global credit cards and local payment methods.
                       </p>
                     </div>
                     <div className="w-full md:w-auto shrink-0">
                       {currentUser && (
-                        <StripeCheckout
+                        <LemonCheckout
                           userId={currentUser.id}
                           onSuccess={(tokens) => {
                             if (currentUser) {

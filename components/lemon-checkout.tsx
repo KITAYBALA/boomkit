@@ -1,42 +1,63 @@
 "use client"
 
-import { useCallback, useState } from "react"
-import { EmbeddedCheckout, EmbeddedCheckoutProvider } from "@stripe/react-stripe-js"
-import { loadStripe } from "@stripe/stripe-js"
-import { startCheckoutSession } from "@/app/actions/stripe"
+import { useEffect, useState } from "react"
+import { createLemonCheckout } from "@/app/actions/lemonsqueezy"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { PRODUCTS } from "@/lib/products"
-import { Coins, Sparkles, X, Crown, Palette, BadgeCheck } from "lucide-react"
+import { Coins, Sparkles, Crown, Palette, BadgeCheck } from "lucide-react"
+import { toast } from "sonner"
 
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
-
-interface StripeCheckoutProps {
+interface LemonCheckoutProps {
   userId: string
   onSuccess?: (tokens: number) => void
 }
 
-export default function StripeCheckout({ userId, onSuccess }: StripeCheckoutProps) {
-  const [selectedProduct, setSelectedProduct] = useState<string | null>(null)
-  const [showCheckout, setShowCheckout] = useState(false)
+export default function LemonCheckout({ userId }: LemonCheckoutProps) {
+  const [loadingProductId, setLoadingProductId] = useState<string | null>(null)
 
-  const startCheckoutSessionForProduct = useCallback(async () => {
-    if (!selectedProduct) return Promise.reject("No product selected")
-    const clientSecret = await startCheckoutSession(selectedProduct, userId)
-    if (!clientSecret) throw new Error("Stripe did not return a client secret")
-    return clientSecret
-  }, [selectedProduct, userId])
+  useEffect(() => {
+    // Load Lemon Squeezy script
+    const script = document.createElement("script")
+    script.src = "https://app.lemonsqueezy.com/js/lemon.js"
+    script.async = true
+    script.onload = () => {
+      if ((window as any).LemonSqueezy) {
+        (window as any).LemonSqueezy.Setup({
+          eventHandler: (event: any) => {
+            console.log("Lemon Squeezy Event:", event)
+            if (event.event === "Checkout.Success" || event.event === "Checkout.Close") {
+              if (typeof window !== "undefined") {
+                (window as any).refreshUserSession?.()
+              }
+            }
+          }
+        })
+      }
+    }
+    document.body.appendChild(script)
 
-  const handleSelectProduct = (productId: string) => {
-    setSelectedProduct(productId)
-    setShowCheckout(true)
-  }
+    return () => {
+      document.body.removeChild(script)
+    }
+  }, [])
 
-  const handleClose = () => {
-    setShowCheckout(false)
-    setSelectedProduct(null)
-    if (typeof window !== "undefined") {
-      (window as any).refreshUserSession?.()
+  const handleSelectProduct = async (productId: string) => {
+    setLoadingProductId(productId)
+    try {
+      const checkoutUrl = await createLemonCheckout(productId, userId)
+      
+      // Try to open using Lemon Squeezy overlay
+      if ((window as any).LemonSqueezy) {
+        (window as any).LemonSqueezy.Url.Open(checkoutUrl)
+      } else {
+        // Fallback: open in new tab
+        window.open(checkoutUrl, "_blank")
+      }
+    } catch (err: any) {
+      console.error(err)
+      toast.error(err.message || "Failed to initiate checkout")
+    } finally {
+      setLoadingProductId(null)
     }
   }
 
@@ -85,9 +106,10 @@ export default function StripeCheckout({ userId, onSuccess }: StripeCheckoutProp
               )}
               <Button
                 onClick={() => handleSelectProduct(product.id)}
+                disabled={loadingProductId !== null}
                 className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-black font-bold text-lg py-3"
               >
-                Get Plus - ${(product.priceInCents / 100).toFixed(2)}/month
+                {loadingProductId === product.id ? "Loading..." : `Get Plus - ₼${(product.priceInCents / 100).toFixed(2)} AZN/month`}
               </Button>
             </div>
           ))}
@@ -123,36 +145,14 @@ export default function StripeCheckout({ userId, onSuccess }: StripeCheckoutProp
             <p className="text-purple-200 text-sm mb-4">{product.description}</p>
             <Button
               onClick={() => handleSelectProduct(product.id)}
+              disabled={loadingProductId !== null}
               className="w-full bg-purple-600 hover:bg-purple-500 text-white"
             >
-              ${(product.priceInCents / 100).toFixed(2)}
+              {loadingProductId === product.id ? "Loading..." : `₼${(product.priceInCents / 100).toFixed(2)} AZN`}
             </Button>
           </div>
         ))}
       </div>
-
-      <Dialog open={showCheckout} onOpenChange={setShowCheckout}>
-        <DialogContent className="max-w-lg bg-white p-0 overflow-hidden">
-          <DialogHeader className="p-4 bg-purple-600 text-white">
-            <DialogTitle className="flex items-center justify-between">
-              <span>Complete Purchase</span>
-              <Button variant="ghost" size="sm" onClick={handleClose} className="text-white hover:bg-purple-500">
-                <X className="w-4 h-4" />
-              </Button>
-            </DialogTitle>
-          </DialogHeader>
-          <div className="p-4">
-            {selectedProduct && (
-              <EmbeddedCheckoutProvider
-                stripe={stripePromise}
-                options={{ fetchClientSecret: startCheckoutSessionForProduct }}
-              >
-                <EmbeddedCheckout />
-              </EmbeddedCheckoutProvider>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }
