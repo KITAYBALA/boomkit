@@ -1430,14 +1430,17 @@ export default function BoomkitGame() {
 
   // Handle logout
   const handleLogout = useCallback(() => {
-    // 1. Clear State
+    // 1. Clear cookie on server
+    fetch("/api/auth/logout", { method: "POST" }).catch((err) => console.error("Logout cookie clear failed:", err))
+
+    // 2. Clear State
     setCurrentUser(null)
     localStorage.removeItem("boomkit_current_user")
 
-    // 2. Redirect to landing
+    // 3. Redirect to landing
     setCurrentView("owner-access")
 
-    // 3. Clear Supabase session
+    // 4. Clear Supabase session
     const sb = getSupabaseBrowserClient()
     if (sb) {
       sb.auth.signOut()
