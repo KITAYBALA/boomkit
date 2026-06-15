@@ -9,10 +9,11 @@ import { toast } from "sonner"
 
 interface LemonCheckoutProps {
   userId: string
+  isStaff?: boolean
   onSuccess?: (tokens: number) => void
 }
 
-export default function LemonCheckout({ userId }: LemonCheckoutProps) {
+export default function LemonCheckout({ userId, isStaff }: LemonCheckoutProps) {
   const [loadingProductId, setLoadingProductId] = useState<string | null>(null)
 
   useEffect(() => {
@@ -193,69 +194,24 @@ export default function LemonCheckout({ userId }: LemonCheckoutProps) {
       )}
 
       {/* Sandbox Simulator Block */}
-      <div className="mt-8 p-6 bg-slate-950/60 border border-dashed border-red-500/30 rounded-2xl relative overflow-hidden">
-        <h4 className="text-red-400 font-bold text-sm mb-1.5 flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-red-400" />
-          🛠️ DEVELOPER SANDBOX
-        </h4>
-        <p className="text-white/40 text-xs mb-4">
-          Test purchase event handling and instantly credit your user account without active billing configurations.
-        </p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          <Button
-            size="sm"
-            onClick={async () => {
-              try {
-                const res = await fetch("/api/debug/purchase", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ productId: "tokens-10k" }),
-                });
-                const d = await res.json();
-                if (d.success) {
-                  toast.success(d.message);
-                  if (typeof window !== "undefined") (window as any).refreshUserSession?.();
-                } else toast.error(d.message);
-              } catch (e) {
-                toast.error("Sandbox simulation failed");
-              }
-            }}
-            className="bg-slate-900 border border-white/10 hover:bg-slate-800 text-white text-xs font-semibold"
-          >
-            +10k Tokens
-          </Button>
-          <Button
-            size="sm"
-            onClick={async () => {
-              try {
-                const res = await fetch("/api/debug/purchase", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ productId: "boomkit-plus" }),
-                });
-                const d = await res.json();
-                if (d.success) {
-                  toast.success(d.message);
-                  if (typeof window !== "undefined") (window as any).refreshUserSession?.();
-                } else toast.error(d.message);
-              } catch (e) {
-                toast.error("Sandbox simulation failed");
-              }
-            }}
-            className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/30 hover:border-yellow-400 text-yellow-400 text-xs font-semibold"
-          >
-            Buy Plus Sub
-          </Button>
-          {boosterProducts.map((bp) => (
+      {isStaff && (
+        <div className="mt-8 p-6 bg-slate-950/60 border border-dashed border-red-500/30 rounded-2xl relative overflow-hidden">
+          <h4 className="text-red-400 font-bold text-sm mb-1.5 flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-red-400" />
+            🛠️ DEVELOPER SANDBOX
+          </h4>
+          <p className="text-white/40 text-xs mb-4">
+            Test purchase event handling and instantly credit your user account without active billing configurations.
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             <Button
-              key={bp.id}
               size="sm"
               onClick={async () => {
                 try {
                   const res = await fetch("/api/debug/purchase", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ productId: bp.id }),
+                    body: JSON.stringify({ productId: "tokens-10k" }),
                   });
                   const d = await res.json();
                   if (d.success) {
@@ -266,13 +222,60 @@ export default function LemonCheckout({ userId }: LemonCheckoutProps) {
                   toast.error("Sandbox simulation failed");
                 }
               }}
-              className="bg-indigo-950/40 border border-indigo-500/20 hover:border-indigo-400 text-indigo-300 text-xs font-semibold"
+              className="bg-slate-900 border border-white/10 hover:bg-slate-800 text-white text-xs font-semibold"
             >
-              + {bp.name.split(" ")[0]} {bp.name.includes("SUPER") ? "Super" : bp.name.split(" ")[2]}
+              +10k Tokens
             </Button>
-          ))}
+            <Button
+              size="sm"
+              onClick={async () => {
+                try {
+                  const res = await fetch("/api/debug/purchase", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ productId: "boomkit-plus" }),
+                  });
+                  const d = await res.json();
+                  if (d.success) {
+                    toast.success(d.message);
+                    if (typeof window !== "undefined") (window as any).refreshUserSession?.();
+                  } else toast.error(d.message);
+                } catch (e) {
+                  toast.error("Sandbox simulation failed");
+                }
+              }}
+              className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border border-yellow-500/30 hover:border-yellow-400 text-yellow-400 text-xs font-semibold"
+            >
+              Buy Plus Sub
+            </Button>
+            {boosterProducts.map((bp) => (
+              <Button
+                key={bp.id}
+                size="sm"
+                onClick={async () => {
+                  try {
+                    const res = await fetch("/api/debug/purchase", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ productId: bp.id }),
+                    });
+                    const d = await res.json();
+                    if (d.success) {
+                      toast.success(d.message);
+                      if (typeof window !== "undefined") (window as any).refreshUserSession?.();
+                    } else toast.error(d.message);
+                  } catch (e) {
+                    toast.error("Sandbox simulation failed");
+                  }
+                }}
+                className="bg-indigo-950/40 border border-indigo-500/20 hover:border-indigo-400 text-indigo-300 text-xs font-semibold"
+              >
+                + {bp.name.split(" ")[0]} {bp.name.includes("SUPER") ? "Super" : bp.name.split(" ")[2]}
+              </Button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

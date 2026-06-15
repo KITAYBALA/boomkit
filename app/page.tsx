@@ -5068,7 +5068,13 @@ const handlePackAction = (packId: string) => {
   return (
     <div
       className="min-h-screen flex transition-colors duration-500 bg-[#050212] text-slate-100 font-sans relative overflow-hidden w-full z-10"
-      style={themeMode === "custom" ? { background: customThemeColor } : {}}
+      style={
+        themeMode === "custom"
+          ? { background: customThemeColor }
+          : themeMode === "light"
+          ? { background: "#181335" }
+          : {}
+      }
     >
       {/* Glowing Nebula Backgrounds */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
@@ -5091,7 +5097,13 @@ const handlePackAction = (packId: string) => {
           bg-[#0a071d]/60 backdrop-blur-xl border-r border-white/5 shadow-2xl relative
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
         `}
-        style={themeMode === "custom" ? { background: customThemeColor, filter: "brightness(0.8)" } : {}}
+        style={
+          themeMode === "custom"
+            ? { background: customThemeColor, filter: "brightness(0.8)" }
+            : themeMode === "light"
+            ? { background: "#221c4e" }
+            : {}
+        }
       >
         {/* Logo */}
         <div className="p-5 text-center flex items-center justify-between border-b border-white/5">
@@ -8763,6 +8775,7 @@ const handlePackAction = (packId: string) => {
                       {currentUser && (
                         <LemonCheckout
                           userId={currentUser.id}
+                          isStaff={isStaffRole(currentUser.role)}
                           onSuccess={(tokens) => {
                             if (currentUser) {
                               const updatedUser = { ...currentUser, tokens: currentUser.tokens + tokens }
