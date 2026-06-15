@@ -1816,7 +1816,18 @@ export default function BoomkitGame() {
               data.user.role !== currentUser.role ||
               data.user.is_owner !== currentUser.isOwner ||
               data.user.tokens !== currentUser.tokens ||
-              data.user.is_banned !== currentUser.isBanned;
+              data.user.is_banned !== currentUser.isBanned ||
+              JSON.stringify(data.user.inventory || []) !== JSON.stringify(currentUser.inventory || []) ||
+              JSON.stringify(data.user.booms || {}) !== JSON.stringify(currentUser.booms || {}) ||
+              JSON.stringify(data.user.packs || []) !== JSON.stringify(currentUser.packs || []) ||
+              data.user.xp !== currentUser.xp ||
+              data.user.level !== currentUser.level ||
+              data.user.is_plus_user !== currentUser.isPlusUser ||
+              data.user.has_plus_pass !== currentUser.has_plus_pass ||
+              data.user.pinned_boom !== currentUser.pinned_boom ||
+              data.user.season_xp !== currentUser.season_xp ||
+              data.user.clan_id !== currentUser.clan_id ||
+              data.user.clan_role !== currentUser.clan_role;
 
             if (needsOverride) {
               console.warn("[v0] LocalStorage tampering detected or severe desync. Overwriting with server truth.")
@@ -2109,7 +2120,7 @@ export default function BoomkitGame() {
                   playPingSound();
                   
                   const isGlobalPing = /@(everyone|here)\b/i.test(d.message);
-                  const toastTitle = isGlobalPing ? "📢 Global ping in chat!" : `🔔 @${currentUser.username} mentioned you in chat!`;
+                  const toastTitle = isGlobalPing ? "📢 Global ping in chat!" : `🔔 @${d.username} mentioned you in chat!`;
                   
                   // Show toast alert
                   toast(toastTitle, {
@@ -6077,29 +6088,34 @@ const handlePackAction = (packId: string) => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-                    {[
-                      { label: "Uncommon", rate: "60.849%", color: "bg-green-500", border: "border-green-500/20", glow: "hover:shadow-[0_0_20px_rgba(34,197,94,0.2)]" },
-                      { label: "Rare", rate: "30%", color: "bg-blue-500", border: "border-blue-500/20", glow: "hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]" },
-                      { label: "Epic", rate: "8%", color: "bg-purple-500", border: "border-purple-500/20", glow: "hover:shadow-[0_0_20px_rgba(168,85,247,0.2)]" },
-                      { label: "Legendary", rate: "1%", color: "bg-orange-500", border: "border-orange-500/20", glow: "hover:shadow-[0_0_20px_rgba(249,115,22,0.2)]" },
-                      { label: "Chroma", rate: "0.1%", color: "bg-gradient-to-r from-red-500 via-yellow-500 to-purple-500", border: "border-pink-500/20", glow: "hover:shadow-[0_0_25px_rgba(236,72,153,0.25)]" },
-                      { label: "Hidden", rate: "0.05%", color: "bg-slate-800 text-slate-100", border: "border-slate-700", glow: "hover:shadow-[0_0_20px_rgba(148,163,184,0.3)] animate-pulse" },
-                      { label: "Mystical", rate: "0.001%", color: "bg-gradient-to-r from-purple-900 via-pink-500 to-indigo-900", border: "border-cyan-500/20", glow: "hover:shadow-[0_0_30px_rgba(6,182,212,0.35)]" },
-                    ].map((rarity, i) => (
-                      <div key={i} className={`relative group overflow-hidden rounded-2xl border ${rarity.border} bg-black/40 p-4 transition-all duration-500 hover:bg-black/20 hover:-translate-y-0.5 ${rarity.glow}`}>
-                        <div className="relative z-10 flex flex-col items-center gap-2">
-                          <div className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider text-white ${rarity.color}`}>
-                            {rarity.label}
+                  {(() => {
+                    const chances = getBoostedRarityChances()
+                    return (
+                      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+                        {[
+                          { label: "Uncommon", rate: Number(chances.uncommon.toFixed(3)) + "%", color: "bg-green-500", border: "border-green-500/20", glow: "hover:shadow-[0_0_20px_rgba(34,197,94,0.2)]" },
+                          { label: "Rare", rate: Number(chances.rare.toFixed(3)) + "%", color: "bg-blue-500", border: "border-blue-500/20", glow: "hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]" },
+                          { label: "Epic", rate: Number(chances.epic.toFixed(3)) + "%", color: "bg-purple-500", border: "border-purple-500/20", glow: "hover:shadow-[0_0_20px_rgba(168,85,247,0.2)]" },
+                          { label: "Legendary", rate: Number(chances.legendary.toFixed(3)) + "%", color: "bg-orange-500", border: "border-orange-500/20", glow: "hover:shadow-[0_0_20px_rgba(249,115,22,0.2)]" },
+                          { label: "Chroma", rate: Number(chances.chroma.toFixed(3)) + "%", color: "bg-gradient-to-r from-red-500 via-yellow-500 to-purple-500", border: "border-pink-500/20", glow: "hover:shadow-[0_0_25px_rgba(236,72,153,0.25)]" },
+                          { label: "Hidden", rate: Number(chances.hidden.toFixed(3)) + "%", color: "bg-slate-800 text-slate-100", border: "border-slate-700", glow: "hover:shadow-[0_0_20px_rgba(148,163,184,0.3)] animate-pulse" },
+                          { label: "Mystical", rate: Number(chances.mystical.toFixed(3)) + "%", color: "bg-gradient-to-r from-purple-900 via-pink-500 to-indigo-900", border: "border-cyan-500/20", glow: "hover:shadow-[0_0_30px_rgba(6,182,212,0.35)]" },
+                        ].map((rarity, i) => (
+                          <div key={i} className={`relative group overflow-hidden rounded-2xl border ${rarity.border} bg-black/40 p-4 transition-all duration-500 hover:bg-black/20 hover:-translate-y-0.5 ${rarity.glow}`}>
+                            <div className="relative z-10 flex flex-col items-center gap-2">
+                              <div className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider text-white ${rarity.color}`}>
+                                {rarity.label}
+                              </div>
+                              <div className="text-3xl font-black text-white drop-shadow">{rarity.rate}</div>
+                            </div>
+                            <div className="absolute bottom-0 left-0 w-full h-1 bg-white/5 overflow-hidden">
+                              <div className={`h-full ${rarity.color} group-hover:animate-pulse`} style={{ width: rarity.rate }} />
+                            </div>
                           </div>
-                          <div className="text-3xl font-black text-white drop-shadow">{rarity.rate}</div>
-                        </div>
-                        <div className="absolute bottom-0 left-0 w-full h-1 bg-white/5 overflow-hidden">
-                          <div className={`h-full ${rarity.color} group-hover:animate-pulse`} style={{ width: rarity.rate }} />
-                        </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    )
+                  })()}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
