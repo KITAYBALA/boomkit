@@ -1134,7 +1134,23 @@ export default function BoomkitGame() {
   const [aiIsPublic, setAiIsPublic] = useState(false)
   const [aiGrade, setAiGrade] = useState(7)
   const [aiSubject, setAiSubject] = useState("Math")
-  const [currentUser, setCurrentUser] = useState<GameUser | null>(null)
+  const [currentUserState, setCurrentUserState] = useState<GameUser | null>(null)
+  const currentUser = useMemo(() => {
+    if (!currentUserState) return null
+    const isStaff = isStaffRole(currentUserState.role)
+    if (isStaff) {
+      return {
+        ...currentUserState,
+        isPlusUser: true,
+        has_plus_pass: true,
+      }
+    }
+    return currentUserState
+  }, [currentUserState])
+
+  const setCurrentUser = useCallback((val: GameUser | null | ((prev: GameUser | null) => GameUser | null)) => {
+    setCurrentUserState(val)
+  }, [])
   const [users, setUsers] = useState<GameUser[]>([])
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
   const [newMessage, setNewMessage] = useState("")

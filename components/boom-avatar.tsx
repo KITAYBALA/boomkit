@@ -18,6 +18,153 @@ interface BlookDesign {
 
 // Blook configurations for all 70+ Booms
 const BLOOKS: Record<string, BlookDesign> = {
+  // Plus Pack
+  "Plus Crown": {
+    bg: "from-yellow-400 to-amber-500",
+    border: "border-yellow-300",
+    eyes: "default",
+    mouth: "smile",
+    decorations: (
+      <>
+        <path d="M 22 75 L 28 35 L 42 55 L 50 25 L 58 55 L 72 35 L 78 75 Z" fill="#eab308" stroke="#ca8a04" strokeWidth="3" />
+        <text x="50" y="80" fontSize="14" fontWeight="bold" fill="white" textAnchor="middle">➕</text>
+      </>
+    )
+  },
+  "Golden Plus": {
+    bg: "from-yellow-500 via-amber-400 to-yellow-600",
+    border: "border-yellow-200",
+    eyes: "cute",
+    mouth: "smile",
+    decorations: (
+      <>
+        <text x="50" y="32" fontSize="22" fontWeight="bold" fill="#fef08a" textAnchor="middle">✨</text>
+        <text x="50" y="82" fontSize="18" fontWeight="bold" fill="#fef08a" textAnchor="middle">➕</text>
+      </>
+    )
+  },
+  "Plus Shield": {
+    bg: "from-blue-500 to-indigo-700",
+    border: "border-blue-300",
+    eyes: "default",
+    mouth: "smile",
+    decorations: (
+      <>
+        <path d="M 25 25 L 75 25 L 70 65 Q 50 82 30 65 Z" fill="#3b82f6" opacity="0.4" />
+        <text x="50" y="75" fontSize="16" fontWeight="bold" fill="white" textAnchor="middle">➕</text>
+      </>
+    )
+  },
+  "Plus Star": {
+    bg: "from-amber-400 to-yellow-500",
+    border: "border-amber-300",
+    eyes: "cute",
+    mouth: "smile",
+    decorations: (
+      <>
+        <polygon points="50,15 53,30 68,30 56,40 60,55 50,45 40,55 44,40 32,30 47,30" fill="#fef08a" stroke="#d97706" strokeWidth="2" />
+        <text x="50" y="80" fontSize="14" fontWeight="bold" fill="white" textAnchor="middle">➕</text>
+      </>
+    )
+  },
+  "Neon Plus": {
+    bg: "from-fuchsia-500 via-purple-600 to-indigo-700",
+    border: "border-fuchsia-400",
+    eyes: "cyborg",
+    mouth: "grin",
+    decorations: (
+      <>
+        <rect x="20" y="20" width="60" height="60" rx="8" fill="none" stroke="#f43f5e" strokeWidth="3" opacity="0.8" />
+        <text x="50" y="75" fontSize="16" fontWeight="bold" fill="#06b6d4" textAnchor="middle">➕</text>
+      </>
+    )
+  },
+  "Plus Diamond": {
+    bg: "from-cyan-400 to-blue-500",
+    border: "border-cyan-300",
+    eyes: "cute",
+    mouth: "smile",
+    decorations: (
+      <>
+        <polygon points="50,20 75,45 50,70 25,45" fill="#22d3ee" stroke="white" strokeWidth="2.5" />
+        <text x="50" y="80" fontSize="14" fontWeight="bold" fill="white" textAnchor="middle">➕</text>
+      </>
+    )
+  },
+  "Plus Phoenix": {
+    bg: "from-orange-500 via-red-500 to-rose-700",
+    border: "border-orange-400",
+    eyes: "default",
+    mouth: "grin",
+    decorations: (
+      <>
+        <path d="M 15 50 Q 5 -10 40 25 Q 50 10 60 25 Q 95 -10 85 50 Z" fill="#ef4444" opacity="0.6" />
+        <text x="50" y="80" fontSize="14" fontWeight="bold" fill="white" textAnchor="middle">➕</text>
+      </>
+    )
+  },
+  "Plus Galaxy": {
+    bg: "from-indigo-950 via-purple-900 to-pink-850",
+    border: "border-indigo-800",
+    eyes: "none",
+    mouth: "none",
+    decorations: (
+      <>
+        <circle cx="50" cy="50" r="28" fill="none" stroke="#db2777" strokeWidth="4" opacity="0.6" />
+        <circle cx="50" cy="50" r="14" fill="#a855f7" />
+        <text x="50" y="55" fontSize="16" fontWeight="bold" fill="white" textAnchor="middle">➕</text>
+      </>
+    )
+  },
+  "Plus Dragon": {
+    bg: "from-emerald-600 via-green-700 to-teal-900",
+    border: "border-emerald-500",
+    eyes: "default",
+    mouth: "grin",
+    decorations: (
+      <>
+        <polygon points="12,35 25,25 22,45" fill="#047857" />
+        <polygon points="88,35 75,25 78,45" fill="#047857" />
+        <text x="50" y="80" fontSize="14" fontWeight="bold" fill="white" textAnchor="middle">➕</text>
+      </>
+    )
+  },
+  "Plus Key": {
+    bg: "from-slate-600 to-slate-800",
+    border: "border-slate-500",
+    eyes: "cute",
+    mouth: "smile",
+    decorations: (
+      <>
+        <path d="M 50 20 C 44 20 40 24 40 30 C 40 34 43 38 47 39 L 47 65 L 53 65 L 53 58 L 57 58 L 57 52 L 53 52 L 53 39 C 57 38 60 34 60 30 C 60 24 56 20 50 20 Z" fill="#eab308" stroke="#ca8a04" strokeWidth="1.5" />
+        <text x="50" y="80" fontSize="14" fontWeight="bold" fill="white" textAnchor="middle">➕</text>
+      </>
+    )
+  },
+  "Plus Matrix": {
+    bg: "from-black to-zinc-900",
+    border: "border-zinc-800",
+    eyes: "cyborg",
+    mouth: "none",
+    decorations: (
+      <>
+        <text x="50" y="30" fontSize="10" fill="#22c55e" fontFamily="monospace" textAnchor="middle">010101</text>
+        <text x="50" y="78" fontSize="12" fill="#22c55e" fontFamily="monospace" textAnchor="middle">➕</text>
+      </>
+    )
+  },
+  "Plus Overlord": {
+    bg: "from-purple-900 via-pink-600 to-amber-500",
+    border: "border-purple-400",
+    eyes: "cyborg",
+    mouth: "grin",
+    decorations: (
+      <>
+        <path d="M 22 75 L 28 25 L 50 10 L 72 25 L 78 75 Z" fill="#7e22ce" stroke="#eab308" strokeWidth="2.5" opacity="0.4" />
+        <text x="50" y="82" fontSize="18" fontWeight="bold" fill="#eab308" textAnchor="middle">⚡➕</text>
+      </>
+    )
+  },
   // Bug Pack
   Butterfly: {
     bg: "from-pink-400 to-fuchsia-500",

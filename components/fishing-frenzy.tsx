@@ -86,6 +86,7 @@ export default function FishingFrenzy({
 
     const handleCast = () => {
         if (gameState !== "idle" && gameState !== "result") return
+        setLastCatch(null)
         setGameState("casting")
 
         // Random wait time before bite
@@ -155,7 +156,8 @@ export default function FishingFrenzy({
             if (onAwardTokens) onAwardTokens(tier === "S" ? 500 : Math.floor(weight / 5))
             setGameState("result")
         } else {
-            setGameState("result")
+            setLastCatch(null)
+            setGameState("idle")
         }
         setCurrentQuestionIndex((prev) => (prev + 1) % (questions?.length || 1))
     }
