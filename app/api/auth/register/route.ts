@@ -268,8 +268,10 @@ export async function POST(request: NextRequest) {
       success: true,
       user: safeUser,
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Registration error:', error)
-    return NextResponse.json({ success: false, message: 'An unexpected error occurred' }, { status: 500 })
+    const errMsg = error?.message || 'An unexpected error occurred'
+    const status = (errMsg.toLowerCase().includes('password') || errMsg.toLowerCase().includes('username') || errMsg.toLowerCase().includes('age')) ? 400 : 500
+    return NextResponse.json({ success: false, message: errMsg }, { status })
   }
 }
