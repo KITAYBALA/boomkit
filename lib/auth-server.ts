@@ -8,13 +8,10 @@ function getJwtSecret() {
 
     if (!secret) {
         if (process.env.NODE_ENV === 'production') {
-            console.warn('[SECURITY WARNING] JWT_SECRET is not set. Falling back to SUPABASE_SERVICE_ROLE_KEY. Please set JWT_SECRET in production environment variables!')
+            throw new Error('FATAL SECURITY ERROR: JWT_SECRET environment variable is required in production!')
         }
-        const fallback = process.env.SUPABASE_SERVICE_ROLE_KEY
-        if (!fallback) {
-            throw new Error('JWT_SECRET or SUPABASE_SERVICE_ROLE_KEY must be set for session signing')
-        }
-        return new TextEncoder().encode(fallback)
+        const devFallback = 'dev-fallback-only-use-for-local-testing-purposes-1234567890'
+        return new TextEncoder().encode(devFallback)
     }
 
     return new TextEncoder().encode(secret)

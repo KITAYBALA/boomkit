@@ -358,6 +358,20 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
 
       const data = await response.json()
       console.log("[v0] Message sent successfully:", data)
+      if (data && data.localOnly) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: 'local-' + Date.now(),
+            username: 'System 🛡️',
+            message: data.message,
+            role: 'admin',
+            inserted_at: new Date().toISOString(),
+            created_at: new Date().toISOString(),
+            timestamp: Date.now()
+          } as any
+        ])
+      }
       setText("")
     } catch (error) {
       console.error("[v0] Network error sending message:", error)

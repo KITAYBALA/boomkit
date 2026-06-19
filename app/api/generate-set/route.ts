@@ -114,8 +114,18 @@ export async function POST(req: Request) {
 
       try {
         console.log(`[AI API] Attempting generation with model: ${modelName}`)
-        const model = genAI.getGenerativeModel({ model: modelName })
-        const result = await model.generateContent(systemPrompt)
+        const model = genAI.getGenerativeModel({ 
+          model: modelName,
+          systemInstruction: systemPrompt
+        })
+        const userPrompt = `
+          Generate a set of EXACTLY ${count} multiple-choice questions for the following:
+          Grade: ${grade}
+          Subject: ${subject}
+          Topic: ${prompt}
+          RANDOMIZATION SEED: ${Date.now()}_${Math.random()}
+        `
+        const result = await model.generateContent(userPrompt)
         const res = await result.response
         const text = res.text()
 

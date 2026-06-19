@@ -1,57 +1,81 @@
-// Simple memory-based rate limiter for Serverless API routes.
-// NOTE: Vercel serverless functions are stateless and reset per instance.
-// This is a basic mitigation. For persistent rate limiting across instances,
-// a Redis store (e.g., Upstash) or a Supabase table is recommended.
-
-const rateLimitMap = new Map<string, { count: number, resetTime: number }>();
+import { supabaseServerClient } from './supabase-server-client'
 
 const MAX_REQUESTS = 5; // 5 login attempts
 const WINDOW_MS = 60 * 1000; // per minute
 const BLOCK_MS = 5 * 60 * 1000; // 5 minute block after MAX_REQUESTS
 
-export function checkRateLimiter(ip: string): { allowed: boolean; retryAfter?: number; message?: string } {
-    const now = Date.now();
-    const entry = rateLimitMap.get(ip);
+export async function checkRateLimiter(ip: string): Promise<{ allowed: boolean; retryAfter?: number; message?: string }> {
+    const supabase = supabaseServerClient()
+    const now = new Date()
 
-    if (!entry) {
-        rateLimitMap.set(ip, { count: 1, resetTime: now + WINDOW_MS });
-        return { allowed: true };
-    }
+    try {
+        // 1. Delete expired rate limits
+        await supabase
+            .from('rate_limits')
+            .delete()
+            .lt('reset_time', now.toISOString())
 
-    if (now > entry.resetTime) {
-        // Window expired or block expired, reset
-        rateLimitMap.set(ip, { count: 1, resetTime: now + WINDOW_MS });
-        return { allowed: true };
-    }
+        // 2. Fetch current entry for this IP
+        const { data: entry, error } = await supabase
+            .from('rate_limits')
+            .select('count, reset_time')
+            .eq('ip', ip)
+            .maybeSingle()
 
-    if (entry.count >= MAX_REQUESTS) {
-        // Enforce lock out
-        if (entry.resetTime - now < BLOCK_MS - WINDOW_MS) {
-            // We are already in block mode
-        } else {
-            // We just reached max requests, set the block penalty
-            entry.resetTime = now + BLOCK_MS;
+        if (error) {
+            console.error('[RateLimiter] Database fetch error:', error)
+            return { allowed: true }
         }
 
-        const waitSeconds = Math.ceil((entry.resetTime - now) / 1000);
-        return {
-            allowed: false,
-            retryAfter: waitSeconds,
-            message: `Too many attempts. Please try again in ${waitSeconds} seconds.`
-        };
-    }
+        if (!entry) {
+            // Create new entry
+            const resetTime = new Date(Date.now() + WINDOW_MS)
+            await supabase
+                .from('rate_limits')
+                .insert({
+                    ip,
+                    count: 1,
+                    reset_time: resetTime.toISOString()
+                })
+            return { allowed: true }
+        }
 
-    // On-demand randomized cleanup (5% chance per request) to prevent memory leak in serverless context
-    if (Math.random() < 0.05) {
-        for (const [key, val] of rateLimitMap.entries()) {
-            if (now > val.resetTime) {
-                rateLimitMap.delete(key);
+        const resetTimeVal = new Date(entry.reset_time).getTime()
+        const diffMs = resetTimeVal - Date.now()
+
+        if (entry.count >= MAX_REQUESTS) {
+            let waitSeconds = Math.ceil(diffMs / 1000)
+            if (waitSeconds <= 0) {
+                await supabase.from('rate_limits').delete().eq('ip', ip)
+                return { allowed: true }
+            }
+
+            // Check if we need to apply the block penalty
+            if (diffMs < BLOCK_MS - WINDOW_MS) {
+                const newResetTime = new Date(Date.now() + BLOCK_MS)
+                await supabase
+                    .from('rate_limits')
+                    .update({ reset_time: newResetTime.toISOString() })
+                    .eq('ip', ip)
+                waitSeconds = Math.ceil(BLOCK_MS / 1000)
+            }
+
+            return {
+                allowed: false,
+                retryAfter: waitSeconds,
+                message: `Too many attempts. Please try again in ${waitSeconds} seconds.`
             }
         }
+
+        // Increment count
+        await supabase
+            .from('rate_limits')
+            .update({ count: entry.count + 1 })
+            .eq('ip', ip)
+
+        return { allowed: true }
+    } catch (dbErr) {
+        console.error('[RateLimiter] Unexpected database error:', dbErr)
+        return { allowed: true }
     }
-
-    // Increment count
-    entry.count += 1;
-    return { allowed: true };
 }
-

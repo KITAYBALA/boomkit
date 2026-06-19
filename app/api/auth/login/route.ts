@@ -59,7 +59,7 @@ const DEBUG_AUTH = process.env.DEBUG_AUTH === 'true' || process.env.NODE_ENV !==
 export async function POST(request: NextRequest) {
   try {
     const ip = getClientIp(request)
-    const rateLimit = checkRateLimiter(ip)
+    const rateLimit = await checkRateLimiter(ip)
     if (!rateLimit.allowed) {
       return NextResponse.json(
         { success: false, message: rateLimit.message },
@@ -177,8 +177,12 @@ export async function POST(request: NextRequest) {
 }
 
 function getClientIp(request: NextRequest) {
+  const req = request as any
+  if (req.ip) return req.ip
+  const realIp = request.headers.get('x-real-ip')
+  if (realIp) return realIp.trim()
   const forwarded = request.headers.get('x-forwarded-for')
-  return forwarded ? forwarded.split(',')[0].trim() : request.headers.get('x-real-ip') || '127.0.0.1'
+  return forwarded ? forwarded.split(',')[0].trim() : '127.0.0.1'
 }
 
 async function findUserByUsernameOrEmail(

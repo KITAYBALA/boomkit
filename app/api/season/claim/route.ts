@@ -66,24 +66,20 @@ export async function POST(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // 5. Validation: Check if already claimed
-    const { data: claims, error: claimsErr } = await supabase
-      .from("user_activity")
-      .select("id, details")
-      .eq("username", user.username)
-      .eq("activity_type", "season_claim")
+    // 5. Validation: Check/register claim atomically in claimed_season_rewards
+    const { error: claimInsertErr } = await supabase
+      .from("claimed_season_rewards")
+      .insert({
+        user_id: session.userId,
+        reward_id: rewardId
+      })
 
-    if (claimsErr) {
-      console.error("[API/season/claim] Check claims error:", claimsErr)
-      return NextResponse.json({ success: false, message: "Verification failed" }, { status: 500 })
-    }
-
-    const alreadyClaimed = (claims || []).some(
-      (act: any) => act.details && act.details.reward_id === rewardId
-    )
-
-    if (alreadyClaimed) {
-      return NextResponse.json({ success: false, message: "Reward already claimed." }, { status: 400 })
+    if (claimInsertErr) {
+      if (claimInsertErr.code === "23505") {
+        return NextResponse.json({ success: false, message: "Reward already claimed." }, { status: 400 })
+      }
+      console.error("[API/season/claim] Claim registration error:", claimInsertErr)
+      return NextResponse.json({ success: false, message: "Verification failed or already claimed." }, { status: 500 })
     }
 
     // 6. Process Reward

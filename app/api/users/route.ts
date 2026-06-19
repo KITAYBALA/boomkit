@@ -42,6 +42,28 @@ const SAFE_USER_COLUMNS = [
   'active_fusion_started_at',
 ].join(', ')
 
+const PUBLIC_USER_COLUMNS = [
+  'id',
+  'username',
+  'is_owner',
+  'role',
+  'join_date',
+  'boom_score',
+  'total_value',
+  'profile_picture',
+  'is_plus_user',
+  'name_color',
+  'banner_color',
+  'badges',
+  'last_seen',
+  'clan_id',
+  'clan_role',
+  'clan_tag',
+  'clan_tag_color',
+].join(', ')
+
+const STAFF_ROLES = new Set(['owner', 'admin', 'senior_moderator', 'moderator', 'tester'])
+
 export async function GET() {
   try {
     const session = await verifySession()
@@ -49,9 +71,12 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const isStaff = session.isOwner || STAFF_ROLES.has(session.role)
+    const selectColumns = isStaff ? SAFE_USER_COLUMNS : PUBLIC_USER_COLUMNS
+
     const { data, error } = await supabaseServerClient()
       .from('users')
-      .select(SAFE_USER_COLUMNS)
+      .select(selectColumns)
       .limit(100)
 
     if (error) {

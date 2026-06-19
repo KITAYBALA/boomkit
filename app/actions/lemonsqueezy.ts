@@ -2,8 +2,13 @@
 
 import { PRODUCTS } from "@/lib/products"
 import { supabaseServerClient } from "@/lib/supabase-server-client"
+import { verifySession } from "@/lib/auth-server"
 
 export async function createLemonCheckout(productId: string, userId: string) {
+  const session = await verifySession()
+  if (!session || session.userId !== userId) {
+    throw new Error("Unauthorized: Session mismatch.")
+  }
   const product = PRODUCTS.find((p) => p.id === productId)
   if (!product) {
     throw new Error(`Product with id "${productId}" not found`)

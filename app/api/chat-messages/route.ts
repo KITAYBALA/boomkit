@@ -202,6 +202,7 @@ async function handleStaffCommand(
     } else {
       broadcastMessage = `System 🛡️: User ${targetUser.username} has no device ID or logged IP address. Cannot check alts.`;
     }
+    return NextResponse.json({ success: true, localOnly: true, message: broadcastMessage }, { status: 200 });
   }
   else if (cmd === "/gift-tokens") {
     const amountStr = commandParts[2];
@@ -217,40 +218,16 @@ async function handleStaffCommand(
       return NextResponse.json({ error: "You cannot gift tokens to yourself!" }, { status: 400 });
     }
 
-    // Check sender's tokens
-    const { data: senderUser, error: senderErr } = await supabase
-      .from("users")
-      .select("tokens")
-      .eq("id", userData.id)
-      .single();
+    // Call transfer_tokens RPC
+    const { error: rpcErr } = await supabase
+      .rpc('transfer_tokens', {
+        p_sender_username: userData.username,
+        p_receiver_username: targetUser.username,
+        p_amount: amount
+      });
 
-    if (senderErr || !senderUser) {
-      return NextResponse.json({ error: "Could not retrieve your account data." }, { status: 500 });
-    }
-
-    if (senderUser.tokens < amount) {
-      return NextResponse.json({ error: `Insufficient Balance: You only have ${senderUser.tokens} tokens (trying to gift ${amount}).` }, { status: 400 });
-    }
-
-    // Deduct from sender
-    const { error: deductErr } = await supabase
-      .from("users")
-      .update({ tokens: senderUser.tokens - amount })
-      .eq("id", userData.id);
-
-    if (deductErr) {
-      return NextResponse.json({ error: "Failed to deduct tokens from your balance." }, { status: 500 });
-    }
-
-    // Credit to receiver
-    const { error: creditErr } = await supabase
-      .from("users")
-      .update({ tokens: targetUser.tokens + amount })
-      .eq("id", targetUser.id);
-
-    if (creditErr) {
-      await supabase.from("users").update({ tokens: senderUser.tokens }).eq("id", userData.id);
-      return NextResponse.json({ error: "Failed to credit tokens to recipient. Reverted transaction." }, { status: 500 });
+    if (rpcErr) {
+      return NextResponse.json({ error: rpcErr.message || "Transfer failed." }, { status: 500 });
     }
 
     broadcastMessage = `System 🛡️: User ${userData.username} has gifted ${amount} tokens to ${targetUser.username}.`;
@@ -370,7 +347,7 @@ export async function POST(request: Request) {
     const { data: previousMessages }: { data: any[] | null } = await supabase
       .from("chat_messages")
       .select("inserted_at")
-      .eq("username", username)
+      .eq("user_id", session.userId)
       .order("inserted_at", { ascending: false })
       .limit(5)
 
@@ -422,6 +399,7 @@ export async function POST(request: Request) {
         username,
         message,
         role,
+        user_id: session.userId,
         // The DB will handle the timestamp (created_at or inserted_at) via defaults
       }
     ]).select()

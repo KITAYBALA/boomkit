@@ -6,7 +6,9 @@ export async function GET() {
   try {
     const { data, error } = await supabaseServerClient()
       .from('auction_items')
-      .select('id, boom_name, seller, current_bid, time_left, bidders');
+      .select('id, boom_name, seller, current_bid, ends_at, bidders, status')
+      .eq('status', 'active')
+      .order('ends_at', { ascending: true });
 
     if (error) {
       console.error("Error fetching auction items:", error);
@@ -25,27 +27,38 @@ export async function POST(request: Request) {
     const session = await verifySession()
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    const { boom_name, current_bid, time_left, bidders } = await request.json();
+    const body = await request.json().catch(() => ({}));
+    const { boom_name, current_bid, time_left } = body;
 
-    const { data: userData, error: userError } = await supabaseServerClient()
-      .from("users")
-      .select("username")
-      .eq("id", session.userId)
-      .single()
-
-    if (userError || !userData) return NextResponse.json({ error: "User not found" }, { status: 404 })
-
-    const { data, error } = await supabaseServerClient()
-      .from('auction_items')
-      .insert([{ boom_name, seller: userData.username, current_bid, time_left, bidders }])
-      .select('id, boom_name, seller, current_bid, time_left, bidders')
-
-    if (error) {
-      console.error("Error posting auction item:", error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    // Strict input validation (L-07)
+    if (typeof boom_name !== 'string' || !boom_name.trim()) {
+      return NextResponse.json({ error: "boom_name must be a non-empty string" }, { status: 400 })
+    }
+    if (typeof current_bid !== 'number' || isNaN(current_bid) || current_bid <= 0) {
+      return NextResponse.json({ error: "starting bid (current_bid) must be a positive number" }, { status: 400 })
+    }
+    const duration = Number(time_left);
+    if (isNaN(duration) || duration < 1 || duration > 72) {
+      return NextResponse.json({ error: "duration hours (time_left) must be between 1 and 72" }, { status: 400 })
     }
 
-    return NextResponse.json(data, { status: 201 });
+    const supabase = supabaseServerClient()
+
+    // Call atomic create_auction RPC which handles verification and item deduction
+    const { data, error } = await supabase
+      .rpc('create_auction', {
+        p_boom_name: boom_name.trim(),
+        p_starting_bid: current_bid,
+        p_duration_hours: duration,
+        p_user_id: session.userId
+      })
+
+    if (error) {
+      console.error("Error creating auction via RPC:", error);
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
+
+    return NextResponse.json({ success: true, data }, { status: 201 });
   } catch (error) {
     console.error("Unexpected error posting auction item:", error);
     return NextResponse.json({ error: "Failed to post auction item" }, { status: 500 });

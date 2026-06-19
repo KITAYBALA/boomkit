@@ -30,7 +30,10 @@ const {
     PermissionFlagsBits,
     ActionRowBuilder,
     ButtonBuilder,
-    ButtonStyle
+    ButtonStyle,
+    ModalBuilder,
+    TextInputBuilder,
+    TextInputStyle
 } = require('discord.js');
 const { createClient } = require('@supabase/supabase-js');
 const crypto = require('crypto');
@@ -222,10 +225,6 @@ const commands = [
                     option.setName('username')
                         .setDescription('Boomkit username to update')
                         .setRequired(true))
-                .addStringOption(option =>
-                    option.setName('new_password')
-                        .setDescription('The new password for the player')
-                        .setRequired(true))
         ),
 ].map(command => command.toJSON());
 
@@ -383,6 +382,18 @@ const TRIVIA_QUESTIONS = [
 // HELPERS
 // ==========================================
 
+function cleanAndParseJSObject(str) {
+    // 1. Remove comments
+    let cleaned = str.replace(/\/\*[\s\S]*?\*\/|([^\\:]|^)\/\/.*$/gm, '$1');
+    // 2. Convert single-quoted strings to double-quoted strings
+    cleaned = cleaned.replace(/'([^'\\]*(?:\\.[^'\\]*)*)'/g, '"$1"');
+    // 3. Quote keys
+    cleaned = cleaned.replace(/([{,]\s*)([a-zA-Z0-9_]+)\s*:/g, '$1"$2":');
+    // 4. Remove trailing commas
+    cleaned = cleaned.replace(/,\s*([}\]])/g, '$1');
+    return JSON.parse(cleaned);
+}
+
 // Parse live page.tsx for PACKS config
 function loadBoomsData() {
     try {
@@ -436,10 +447,10 @@ function loadBoomsData() {
                 if (objectBracketCount === 0) {
                     insideObject = false;
                     try {
-                        const packObj = eval(`(${currentPackStr})`);
+                        const packObj = cleanAndParseJSObject(currentPackStr);
                         packs.push(packObj);
                     } catch (err) {
-                        // ignore eval failure
+                        // ignore parse failure
                     }
                     currentPackStr = '';
                 }
@@ -582,6 +593,60 @@ client.once('ready', () => {
 
 // Handle Interactions
 client.on('interactionCreate', async interaction => {
+    if (interaction.isModalSubmit()) {
+        if (interaction.customId.startsWith('auth_update_modal:')) {
+            const targetUsername = interaction.customId.split(':')[1];
+            const newPassword = interaction.fields.getTextInputValue('new_password');
+
+            await interaction.deferReply({ ephemeral: true });
+            try {
+                // Validate password strength according to L-02 password rules
+                // Enforce minimum length, uppercase, lowercase, numbers, and special characters
+                if (newPassword.length < 8) {
+                    return interaction.editReply({ content: '🛑 **Invalid Password**: The password must be at least 8 characters long!' });
+                }
+                const hasUpper = /[A-Z]/.test(newPassword);
+                const hasLower = /[a-z]/.test(newPassword);
+                const hasNumber = /[0-9]/.test(newPassword);
+                const hasSpecial = /[^A-Za-z0-9]/.test(newPassword);
+                if (!hasUpper || !hasLower || !hasNumber || !hasSpecial) {
+                    return interaction.editReply({ content: '🛑 **Weak Password**: Password must contain uppercase, lowercase, numbers, and special characters.' });
+                }
+
+                // Fetch target user
+                const { data: userRecord, error: fetchErr } = await supabase
+                    .from('users')
+                    .select('id, username')
+                    .ilike('username', targetUsername)
+                    .maybeSingle();
+                    
+                if (fetchErr || !userRecord) {
+                    return interaction.editReply({ content: `❌ **User Not Found**: Boomkit user **${targetUsername}** does not exist.` });
+                }
+                
+                // Hash the new password
+                const newHash = await hashPassword(newPassword);
+                
+                // Update in database
+                const { error: updateErr } = await supabase
+                    .from('users')
+                    .update({ password_hash: newHash })
+                    .eq('id', userRecord.id);
+                    
+                if (updateErr) {
+                    console.error('[Auth Update DB] Error:', updateErr);
+                    return interaction.editReply({ content: `❌ Failed to update password for user **${userRecord.username}** in database.` });
+                }
+                
+                return interaction.editReply({ content: `🔒 **Password Reset Successful!**\n\nSuccessfully reset password for player **${userRecord.username}**.` });
+            } catch (err) {
+                console.error('[Interaction auth update modal] Error:', err);
+                return interaction.editReply({ content: '⚠️ An unexpected error occurred while resetting the password.' });
+            }
+        }
+        return;
+    }
+    
     if (!interaction.isChatInputCommand()) return;
 
     const { commandName, member, user } = interaction;
@@ -622,9 +687,10 @@ client.on('interactionCreate', async interaction => {
                 });
             }
 
-            const randomHex1 = crypto.randomBytes(2).toString('hex').toUpperCase();
-            const randomHex2 = crypto.randomBytes(2).toString('hex').toUpperCase();
-            const newKey = `BK-KEY-${randomHex1}-${randomHex2}`;
+            const part1 = crypto.randomBytes(4).toString('hex').toUpperCase();
+            const part2 = crypto.randomBytes(4).toString('hex').toUpperCase();
+            const part3 = crypto.randomBytes(4).toString('hex').toUpperCase();
+            const newKey = `BK-KEY-${part1}-${part2}-${part3}`;
 
             const { error: insertError } = await supabase
                 .from('access_keys')
@@ -920,49 +986,26 @@ client.on('interactionCreate', async interaction => {
                 return interaction.editReply({ content: '🛑 **Self-Gift**: You cannot gift tokens to yourself!' });
             }
             
-            const { data: senderRecord, error: senderErr } = await supabase
+            const { data: targetRecord, error: targetFetchErr } = await supabase
                 .from('users')
-                .select('tokens')
-                .eq('username', senderUsername)
-                .single();
-                
-            if (senderErr || !senderRecord) {
-                return interaction.editReply({ content: '🛑 **Error**: Could not retrieve your account data.' });
-            }
-            
-            if (senderRecord.tokens < amount) {
-                return interaction.editReply({ content: `🛑 **Insufficient Balance**: You only have **${senderRecord.tokens}** tokens (trying to gift **${amount}**).` });
-            }
-            
-            const { data: targetRecord, error: targetErr } = await supabase
-                .from('users')
-                .select('tokens, username')
+                .select('username')
                 .ilike('username', targetUsername)
                 .maybeSingle();
                 
-            if (targetErr || !targetRecord) {
+            if (targetFetchErr || !targetRecord) {
                 return interaction.editReply({ content: `🛑 **User Not Found**: Recipient **${targetUsername}** does not exist in Boomkit!` });
             }
-            
-            const { error: deductErr } = await supabase
-                .from('users')
-                .update({ tokens: senderRecord.tokens - amount })
-                .eq('username', senderUsername);
-                
-            if (deductErr) {
-                console.error('[Gift DB Deduct] Error:', deductErr);
-                return interaction.editReply({ content: '⚠️ Failed to complete transaction. Balance deduction failed.' });
-            }
-            
-            const { error: creditErr } = await supabase
-                .from('users')
-                .update({ tokens: targetRecord.tokens + amount })
-                .eq('username', targetRecord.username);
-                
-            if (creditErr) {
-                console.error('[Gift DB Credit] Error:', creditErr);
-                await supabase.from('users').update({ tokens: senderRecord.tokens }).eq('username', senderUsername);
-                return interaction.editReply({ content: '⚠️ Failed to complete transaction. Balance credit failed. Deduction reverted.' });
+
+            const { error: rpcErr } = await supabase
+                .rpc('transfer_tokens', {
+                    p_sender_username: senderUsername,
+                    p_receiver_username: targetRecord.username,
+                    p_amount: amount
+                });
+
+            if (rpcErr) {
+                console.error('[Gift DB RPC] Error:', rpcErr);
+                return interaction.editReply({ content: `🛑 **Error**: ${rpcErr.message || 'Transaction failed.'}` });
             }
             
             return interaction.editReply({ content: `💸 **Tokens Gifted!**\n\n**${senderUsername}** successfully gifted **${amount}** tokens to **${targetRecord.username}**!` });
@@ -1246,7 +1289,6 @@ client.on('interactionCreate', async interaction => {
         
         if (subcommand === 'update') {
             const targetUsername = interaction.options.getString('username').trim();
-            const newPassword = interaction.options.getString('new_password');
             
             const isOwner = interaction.guild?.ownerId === interaction.member.id;
             const isAdmin = interaction.member.permissions?.has(PermissionFlagsBits.Administrator);
@@ -1254,44 +1296,23 @@ client.on('interactionCreate', async interaction => {
                 return interaction.reply({ content: '🛑 **Permission Denied**: This is a staff-only command!', ephemeral: true });
             }
             
-            await interaction.deferReply({ ephemeral: true });
-            
-            try {
-                // Validate password length
-                if (newPassword.length < 8) {
-                    return interaction.editReply({ content: '🛑 **Invalid Password**: The password must be at least 8 characters long!' });
-                }
-                
-                // Fetch target user
-                const { data: userRecord, error: fetchErr } = await supabase
-                    .from('users')
-                    .select('id, username')
-                    .ilike('username', targetUsername)
-                    .maybeSingle();
-                    
-                if (fetchErr || !userRecord) {
-                    return interaction.editReply({ content: `❌ **User Not Found**: Boomkit user **${targetUsername}** does not exist.` });
-                }
-                
-                // Hash the new password
-                const newHash = await hashPassword(newPassword);
-                
-                // Update in database
-                const { error: updateErr } = await supabase
-                    .from('users')
-                    .update({ password_hash: newHash })
-                    .eq('id', userRecord.id);
-                    
-                if (updateErr) {
-                    console.error('[Auth Update DB] Error:', updateErr);
-                    return interaction.editReply({ content: `❌ Failed to update password for user **${userRecord.username}** in database.` });
-                }
-                
-                return interaction.editReply({ content: `🔒 **Password Reset Successful!**\n\nSuccessfully reset password for player **${userRecord.username}**.` });
-            } catch (err) {
-                console.error('[Interaction auth update] Error:', err);
-                return interaction.editReply({ content: '⚠️ An unexpected error occurred while resetting the password.' });
-            }
+            // Create and show password reset modal
+            const modal = new ModalBuilder()
+                .setCustomId(`auth_update_modal:${targetUsername}`)
+                .setTitle(`Reset Password for ${targetUsername}`);
+
+            const passwordInput = new TextInputBuilder()
+                .setCustomId('new_password')
+                .setLabel('New Password')
+                .setStyle(TextInputStyle.Short)
+                .setPlaceholder('Enter the new secure password')
+                .setMinLength(8)
+                .setRequired(true);
+
+            const firstActionRow = new ActionRowBuilder().addComponents(passwordInput);
+            modal.addComponents(firstActionRow);
+
+            await interaction.showModal(modal);
         }
     }
 

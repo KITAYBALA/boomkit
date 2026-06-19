@@ -15,11 +15,24 @@ import { checkRateLimiter } from '@/lib/rate-limiter'
 
 export async function POST(request: NextRequest) {
   try {
-    const forwarded = request.headers.get("x-forwarded-for")
-    const ip = forwarded ? forwarded.split(",")[0] : request.headers.get("x-real-ip") || "127.0.0.1"
+    let ip = "127.0.0.1"
+    const req = request as any
+    if (req.ip) {
+      ip = req.ip
+    } else {
+      const realIp = request.headers.get("x-real-ip")
+      if (realIp) {
+        ip = realIp.trim()
+      } else {
+        const forwarded = request.headers.get("x-forwarded-for")
+        if (forwarded) {
+          ip = forwarded.split(",")[0].trim()
+        }
+      }
+    }
 
     // 1. RATE LIMIT CHECK
-    const rateLimit = checkRateLimiter(ip)
+    const rateLimit = await checkRateLimiter(ip)
     if (!rateLimit.allowed) {
       return NextResponse.json({
         success: false,

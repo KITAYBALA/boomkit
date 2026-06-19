@@ -5,6 +5,9 @@ import { verifySession } from "@/lib/auth-server"
 export const dynamic = "force-dynamic"
 
 export async function POST(request: NextRequest) {
+  if (process.env.NODE_ENV === "production") {
+    return new NextResponse("Not Found", { status: 404 })
+  }
   try {
     const session = await verifySession()
     if (!session) {

@@ -14,6 +14,14 @@ export function validatePassword(password: unknown): string | null {
   if (password.length < MIN_PASSWORD_LENGTH) {
     return `Password must be at least ${MIN_PASSWORD_LENGTH} characters`
   }
+  const hasUpper = /[A-Z]/.test(password)
+  const hasLower = /[a-z]/.test(password)
+  const hasNumber = /[0-9]/.test(password)
+  const hasSpecial = /[^A-Za-z0-9]/.test(password)
+
+  if (!hasUpper || !hasLower || !hasNumber || !hasSpecial) {
+    return 'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character'
+  }
   return null
 }
 

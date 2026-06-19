@@ -194,19 +194,93 @@ async function normalizeAndValidateUpdates(
   targetUserId: string,
   updates: Record<string, unknown>
 ) {
-  // Fetch current user details to see if fields actually changed
+  // Fetch current user details to see if fields actually changed and to validate economy fields
   const { data: currentUser } = await supabase
     .from('users')
-    .select('username, email')
+    .select('username, email, role, is_owner, tokens, daily_tokens, booms, packs, xp, level, boom_score, total_value, inventory')
     .eq('id', targetUserId)
     .single()
+
+  if (!currentUser) {
+    return 'User not found'
+  }
+
+  // C-01: Standard User Economy Rate Limiting / Validation
+  const isStaff = STAFF_ROLES.has(currentUser.role) || currentUser.is_owner
+  if (!isStaff) {
+    if ('tokens' in updates) {
+      const newTokens = Number(updates.tokens)
+      const currentTokens = Number(currentUser.tokens || 0)
+      if (isNaN(newTokens) || newTokens < 0) return 'Invalid tokens value'
+      if (newTokens > currentTokens + 5000) return 'Token increase exceeds maximum limit per update'
+    }
+
+    if ('daily_tokens' in updates) {
+      const newDaily = Number(updates.daily_tokens)
+      const currentDaily = Number(currentUser.daily_tokens || 0)
+      if (isNaN(newDaily) || newDaily < 0) return 'Invalid daily_tokens value'
+      if (newDaily > currentDaily + 5000) return 'Daily token increase exceeds limit'
+    }
+
+    if ('xp' in updates) {
+      const newXp = Number(updates.xp)
+      const currentXp = Number(currentUser.xp || 0)
+      if (isNaN(newXp) || newXp < 0) return 'Invalid xp value'
+      if (newXp > currentXp + 2000) return 'XP increase exceeds limit'
+    }
+
+    if ('level' in updates) {
+      const newLvl = Number(updates.level)
+      const currentLvl = Number(currentUser.level || 1)
+      if (isNaN(newLvl) || newLvl < 0) return 'Invalid level value'
+      if (newLvl > currentLvl + 2) return 'Level increase exceeds limit'
+    }
+
+    if ('boom_score' in updates) {
+      const newScore = Number(updates.boom_score)
+      const currentScore = Number(currentUser.boom_score || 0)
+      if (isNaN(newScore) || newScore < 0) return 'Invalid boom_score value'
+      if (newScore > currentScore + 1000) return 'Boom score increase exceeds limit'
+    }
+
+    if ('total_value' in updates) {
+      const newValue = Number(updates.total_value)
+      const currentValue = Number(currentUser.total_value || 0)
+      if (isNaN(newValue) || newValue < 0) return 'Invalid total_value value'
+      if (newValue > currentValue + 20000) return 'Total value increase exceeds limit'
+    }
+
+    if ('packs' in updates) {
+      if (!Array.isArray(updates.packs)) return 'Invalid packs value'
+      const currentPacksCount = Array.isArray(currentUser.packs) ? currentUser.packs.length : 0
+      if (updates.packs.length > currentPacksCount + 5) return 'Pack count increase exceeds limit'
+    }
+
+    if ('booms' in updates) {
+      if (typeof updates.booms !== 'object' || updates.booms === null) return 'Invalid booms value'
+      const newBoomsCount = Object.values(updates.booms).reduce((sum: number, val: any) => sum + (Number(val) || 0), 0)
+      const currentBoomsCount = typeof currentUser.booms === 'object' && currentUser.booms !== null
+        ? Object.values(currentUser.booms).reduce((sum: number, val: any) => sum + (Number(val) || 0), 0)
+        : 0
+      if (newBoomsCount > currentBoomsCount + 5) return 'Boom count increase exceeds limit'
+    }
+
+    if ('inventory' in updates) {
+      if (!Array.isArray(updates.inventory)) return 'Invalid inventory value'
+      const newInvCount = updates.inventory.reduce((sum: number, item: any) => sum + (Number(item?.quantity) || 0), 0)
+      const currentInvCount = Array.isArray(currentUser.inventory)
+        ? currentUser.inventory.reduce((sum: number, item: any) => sum + (Number(item?.quantity) || 0), 0)
+        : 0
+      if (newInvCount > currentInvCount + 5) return 'Inventory item increase exceeds limit'
+    }
+  }
 
   if (typeof updates.username === 'string') {
     const username = updates.username.trim()
     updates.username = username
     
     // Only validate if the username has actually changed
-    if (!currentUser || username !== currentUser.username) {
+    if (username !== currentUser.username) {
       if (!/^[a-zA-Z0-9_ ]{3,32}$/.test(username)) {
         return 'Username must be 3-32 characters and only contain letters, numbers, spaces, or underscores'
       }
@@ -227,7 +301,7 @@ async function normalizeAndValidateUpdates(
     updates.email = email
     
     // Only validate if the email has actually changed
-    if (!currentUser || email !== currentUser.email) {
+    if (email !== currentUser.email) {
       if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         return 'Email is invalid'
       }

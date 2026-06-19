@@ -21,10 +21,11 @@ export async function generateGeminiResponse(prompt: string): Promise<string> {
     for (const modelName of modelsToTry) {
         try {
             console.log(`[GEMINI] Attempting chat response with model: ${modelName}`)
-            const model = genAI.getGenerativeModel({ model: modelName })
-            const fullPrompt = `${BOOMKIT_SYSTEM_INSTRUCTION}\n\nUser Question: ${prompt}`
-
-            const result = await model.generateContent(fullPrompt)
+            const model = genAI.getGenerativeModel({ 
+                model: modelName,
+                systemInstruction: BOOMKIT_SYSTEM_INSTRUCTION
+            })
+            const result = await model.generateContent(prompt)
             const response = await result.response
             const text = response.text()
 
