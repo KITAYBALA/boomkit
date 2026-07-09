@@ -232,17 +232,20 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
 
     // Fetch Users for "New Chat"
     useEffect(() => {
-        if (showNewChat && supabase) {
+        if (showNewChat) {
             const fetchUsers = async () => {
-                const { data } = await supabase
-                    .from('users')
-                    .select('id, username, profile_picture, role')
-                    .neq('id', currentUser?.id)
-                if (data) setAllUsers(data)
+                try {
+                    const res = await fetch('/api/users')
+                    if (!res.ok) throw new Error('Failed to fetch users')
+                    const data = await res.json()
+                    setAllUsers(data.filter((u: any) => u.id !== currentUser?.id))
+                } catch (e) {
+                    console.error(e)
+                }
             }
             fetchUsers()
         }
-    }, [showNewChat, supabase, currentUser?.id])
+    }, [showNewChat, currentUser?.id])
 
     const startConversation = async () => {
         if (!supabase || !currentUser || selectedUsers.length === 0) return
