@@ -1236,26 +1236,21 @@ client.on('interactionCreate', async interaction => {
             const mac = targetSecrets?.mac_address;
             const ip = targetSecrets?.last_ip;
             
-            let queryField = '';
-            let queryValue = '';
-            let matchType = '';
-            
-            if (mac && mac.trim() !== '' && mac !== 'null') {
-                queryField = 'mac_address';
-                queryValue = mac;
-                matchType = 'device ID';
-            } else if (ip && ip !== '127.0.0.1') {
-                queryField = 'last_ip';
-                queryValue = ip;
-                matchType = 'IP address';
-            } else {
+            if ((!mac || mac === 'null') && (!ip || ip === '127.0.0.1')) {
                 return interaction.editReply({ content: `ℹ️ User **${targetUser.username}** has no logged device ID or IP address (or is 127.0.0.1). Cannot check alts.` });
             }
             
-            const { data: matchedSecrets, error: secretsErr } = await supabase
-                .from('user_secrets')
-                .select('user_id')
-                .eq(queryField, queryValue);
+            let query = supabase.from('user_secrets').select('user_id');
+            
+            if (mac && mac !== 'null' && ip && ip !== '127.0.0.1') {
+                query = query.or(`mac_address.eq.${mac},last_ip.eq.${ip}`);
+            } else if (mac && mac !== 'null') {
+                query = query.eq('mac_address', mac);
+            } else {
+                query = query.eq('last_ip', ip);
+            }
+            
+            const { data: matchedSecrets, error: secretsErr } = await query;
                 
             if (secretsErr || !matchedSecrets) {
                 return interaction.editReply({ content: '⚠️ Error querying for alt accounts.' });
@@ -1274,12 +1269,10 @@ client.on('interactionCreate', async interaction => {
             const otherAlts = alts.filter(a => a.username.toLowerCase() !== targetUser.username.toLowerCase());
             
             if (otherAlts.length === 0) {
-                const redactedVal = queryField === 'last_ip' ? 'Redacted' : queryValue;
-                return interaction.editReply({ content: `✅ **No alts found** for **${targetUser.username}** (${matchType}: \`${redactedVal}\`).` });
+                return interaction.editReply({ content: `✅ **No alts found** for **${targetUser.username}**.` });
             }
             
-            const redactedVal = queryField === 'last_ip' ? 'Redacted' : queryValue;
-            let altsListText = `Other accounts registered/logged under the same ${matchType} (\`${redactedVal}\`):\n\n`;
+            let altsListText = `Other accounts registered/logged under the same Device ID or IP address:\n\n`;
             otherAlts.forEach(alt => {
                 const status = alt.is_banned ? '❌ Banned' : '✅ Active';
                 altsListText += `- **${alt.username}** [${alt.role}] - Status: ${status} (Joined: ${alt.join_date})\n`;
