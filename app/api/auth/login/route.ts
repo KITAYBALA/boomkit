@@ -170,8 +170,14 @@ export async function POST(request: NextRequest) {
       success: true,
       user: toSafeUser(userData),
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('[AUTH] Login error:', error)
+    
+    // If it's a configuration error (missing env vars), expose it to help the user debug
+    if (error instanceof Error && (error.message.includes('env vars') || error.message.includes('FATAL SECURITY ERROR'))) {
+      return NextResponse.json({ success: false, message: `Configuration Error: ${error.message}` }, { status: 500 })
+    }
+    
     return NextResponse.json({ success: false, message: 'An unexpected error occurred' }, { status: 500 })
   }
 }

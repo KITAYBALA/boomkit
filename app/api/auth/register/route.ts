@@ -270,6 +270,12 @@ export async function POST(request: NextRequest) {
     })
   } catch (error: any) {
     console.error('Registration error:', error)
+    
+    // If it's a configuration error (missing env vars), expose it to help the user debug
+    if (error instanceof Error && (error.message.includes('env vars') || error.message.includes('FATAL SECURITY ERROR'))) {
+      return NextResponse.json({ success: false, message: `Configuration Error: ${error.message}` }, { status: 500 })
+    }
+
     const errMsg = error?.message || 'An unexpected error occurred'
     const status = (errMsg.toLowerCase().includes('password') || errMsg.toLowerCase().includes('username') || errMsg.toLowerCase().includes('age')) ? 400 : 500
     return NextResponse.json({ success: false, message: errMsg }, { status })
