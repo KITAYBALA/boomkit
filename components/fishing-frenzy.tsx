@@ -322,7 +322,7 @@ export default function FishingFrenzy({
                     >
                         <div className="bg-white rounded-[40px] p-1 border-8 border-orange-500 shadow-[0_0_100px_rgba(249,115,22,0.6)] w-72 aspect-[3/4] flex flex-col items-center justify-center gap-6 animate-bounce">
                             <div className="font-heading text-center">
-                                <div className="font-heading text-slate-900 font-black text-2xl uppercase tracking-widest">{lastCatch.rarity}</div>
+                                <div className="font-heading text-white font-black text-2xl uppercase tracking-widest">{lastCatch.rarity}</div>
                                 <div className="font-heading text-slate-600 font-bold">{lastCatch.name}</div>
                             </div>
                             <div className="w-32 h-32 bg-orange-100 rounded-3xl flex items-center justify-center text-6xl">
@@ -337,7 +337,7 @@ export default function FishingFrenzy({
                                     }`}>
                                     {lastCatch.rarity} Tier
                                 </div>
-                                <div className="font-heading text-slate-900 font-black text-4xl">{lastCatch.weight} lbs</div>
+                                <div className="font-heading text-white font-black text-4xl">{lastCatch.weight} lbs</div>
                             </div>
                         </div>
                     </motion.div>

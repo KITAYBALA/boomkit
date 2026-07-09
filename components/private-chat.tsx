@@ -360,7 +360,7 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
                                         </button>
 
                                         {showChatActions === conv.id && (
-                                            <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 origin-top-right">
+                                            <div className="absolute right-0 top-full mt-2 w-48 blooket-panel rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 origin-top-right">
                                                 <div className="p-1.5 space-y-1">
                                                     {!conv.is_group && (
                                                         (() => {
@@ -522,7 +522,7 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
                             </ScrollArea>
 
                             {/* Message Input */}
-                            <div className="p-6 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/30 border-t border-white/10 backdrop-blur-md">
+                            <div className="p-6 blooket-panel border-t border-purple-800">
                                 <div className="relative group">
                                     <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/50 to-blue-600/50 rounded-3xl blur opacity-10 group-focus-within:opacity-20 transition duration-500" />
                                     <div className="relative flex items-center bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl p-2 pl-5 shadow-2xl">

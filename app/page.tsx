@@ -4720,7 +4720,7 @@ const handlePackAction = (packId: string) => {
         </div>
 
         {/* Navbar */}
-        <nav className="flex justify-between items-center p-6 px-10 backdrop-blur-md bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/20 border-b border-white/5 relative z-10">
+        <nav className="flex justify-between items-center p-6 px-10 backdrop-blur-md blooket-panel/20 border-b border-white/5 relative z-10">
           <h1 className="font-heading text-3xl font-black text-pink-600 dark:text-pink-400 font-black tracking-tight hover:scale-[1.02] transition-transform duration-300 cursor-pointer">
             Boomkit
           </h1>
@@ -4757,7 +4757,7 @@ const handlePackAction = (packId: string) => {
             <div className="pt-4 flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
               <Button
                 onClick={() => setCurrentView("register")}
-                className="blooket-button bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-black h-14 px-10 text-2xl"
+                className="blooket-button bg-yellow-500 hover:bg-yellow-400 text-white font-black h-14 px-10 text-2xl"
               >
                 Get Started
               </Button>
@@ -4765,7 +4765,7 @@ const handlePackAction = (packId: string) => {
           </div>
 
           {/* Right Content - Boom Grid */}
-          <div className="flex-1 grid grid-cols-4 gap-4 max-w-lg p-6 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/40 rounded-[2.5rem] backdrop-blur-xl border border-white/10 rotate-3 hover:rotate-0 transition-all duration-700 shadow-2xl shadow-purple-950/10">
+          <div className="flex-1 grid grid-cols-4 gap-4 max-w-lg p-6 blooket-panel rounded-[2.5rem] backdrop-blur-xl border border-white/10 rotate-3 hover:rotate-0 transition-all duration-700 shadow-2xl shadow-purple-950/10">
             {showcaseBooms.map((boom, idx) => (
               <div
                 key={idx}
@@ -4780,7 +4780,7 @@ const handlePackAction = (packId: string) => {
         </main>
 
         {/* Footer / Secret Access */}
-        <footer className="p-6 text-center text-slate-600 text-xs border-t border-white/5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/10 relative z-10">
+        <footer className="p-6 text-center text-slate-600 text-xs border-t border-white/5 blooket-panel/10 relative z-10">
           <p>&copy; 2026 Boomkit. All rights reserved.</p>
         </footer>
       </div>
@@ -5887,7 +5887,7 @@ const handlePackAction = (packId: string) => {
                           )}
                         </div>
 
-                        <div className="bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/40 backdrop-blur-xl rounded-[2rem] border border-white/10 p-8 shadow-2xl">
+                        <div className="blooket-panel backdrop-blur-xl rounded-[2rem] border border-white/10 p-8 shadow-2xl">
                           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                             {GAMEPASS_BOOMS.map((boom) => {
                               const quantity = currentUser?.booms[boom.name] || 0
@@ -6888,7 +6888,7 @@ const handlePackAction = (packId: string) => {
                           return (
                             <div
                               key={item.id}
-                              className={`bg-gradient-to-br ${spec.color} bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 border rounded-3xl p-6 flex flex-col justify-between hover:-translate-y-1 transition-all duration-300 shadow-xl`}
+                              className={`bg-gradient-to-br ${spec.color} blooket-panel border rounded-3xl p-6 flex flex-col justify-between hover:-translate-y-1 transition-all duration-300 shadow-xl`}
                             >
                               <div className="flex justify-between items-start gap-4">
                                 <div className="flex items-center gap-4">
@@ -8205,7 +8205,7 @@ const handlePackAction = (packId: string) => {
                       ONGOING CHAMPS
                     </h3>
                     {activeTournaments.length === 0 ? (
-                      <div className="bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/40 border border-dashed border-white/10 rounded-[2.5rem] p-16 text-center text-white/20">
+                      <div className="blooket-panel border border-dashed border-white/10 rounded-[2.5rem] p-16 text-center text-white/20">
                         <TrophyIcon className="w-16 h-16 mx-auto mb-4 opacity-10 animate-pulse" />
                         <p className="font-black uppercase text-sm tracking-widest mb-1">No active operations</p>
                         <p className="font-heading text-xs font-semibold text-white/30 uppercase tracking-wider">Operational schedules are currently down</p>
@@ -8981,7 +8981,7 @@ const handlePackAction = (packId: string) => {
                       <div key={ach.id} className={`relative p-7 rounded-[2rem] border transition-all duration-500 group shadow-xl overflow-hidden ${
                         isCompleted 
                           ? 'bg-gradient-to-br from-yellow-950/20 to-transparent border-yellow-500/40 shadow-[0_15px_30px_rgba(234,179,8,0.05)]' 
-                          : 'bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/40 border-white/5 grayscale opacity-55 hover:opacity-85 hover:border-white/10'
+                          : 'blooket-panel border-white/5 grayscale opacity-55 hover:opacity-85 hover:border-white/10'
                       }`}>
                         {/* Internal hover glow */}
                         {isCompleted && (
@@ -9377,7 +9377,7 @@ const handlePackAction = (packId: string) => {
                 </div>
               </CardContent>
 
-              <div className="p-6 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 border-t border-white/5">
+              <div className="p-6 blooket-panel border-t border-white/5">
                 <Button
                   onClick={() => setShowV2NewsModal(false)}
                   className="w-full h-12 bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-black text-base rounded-xl shadow-[0_5px_15px_rgba(168,85,247,0.3)] transition-all hover:-translate-y-0.5 active:translate-y-0"
@@ -9933,7 +9933,7 @@ const handlePackAction = (packId: string) => {
               return (
                 <div className="flex flex-col items-center justify-center w-full h-full relative z-10">
                   <div
-                    className={`relative w-[380px] h-[520px] rounded-[2.5rem] border-2 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/70 backdrop-blur-2xl overflow-hidden ${revealAnimationClass} ${borderGlowColor} ${
+                    className={`relative w-[380px] h-[520px] rounded-[2.5rem] border-2 blooket-panel/70 backdrop-blur-2xl overflow-hidden ${revealAnimationClass} ${borderGlowColor} ${
                       packAnimation.boom.rarity === "mystical" ? "animate-mystical-aura" : ""
                     }`}
                   >
@@ -10028,7 +10028,7 @@ const handlePackAction = (packId: string) => {
               
               <CardContent className="space-y-4">
                 {/* Custom Tabs Navigation */}
-                <div className="grid grid-cols-2 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/60 rounded-xl p-1 mb-2">
+                <div className="grid grid-cols-2 blooket-panel/60 rounded-xl p-1 mb-2">
                   <button
                     onClick={() => setProfilePickerTab("emojis")}
                     className={`py-2.5 rounded-lg font-black uppercase text-xs transition-all ${
@@ -10086,7 +10086,7 @@ const handlePackAction = (packId: string) => {
                                 updateProfilePicture(boomName)
                                 setShowProfilePicker(false)
                               }}
-                              className="aspect-square rounded-2xl bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/60 hover:bg-purple-600/20 hover:scale-105 active:scale-95 flex flex-col items-center justify-center p-2 transition-all duration-200 border border-white/5 hover:border-purple-500/30 group relative overflow-hidden"
+                              className="aspect-square rounded-2xl blooket-panel/60 hover:bg-purple-600/20 hover:scale-105 active:scale-95 flex flex-col items-center justify-center p-2 transition-all duration-200 border border-white/5 hover:border-purple-500/30 group relative overflow-hidden"
                               title={boomName}
                             >
                               <div className="w-12 h-12 flex items-center justify-center mb-1">

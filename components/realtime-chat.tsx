@@ -455,7 +455,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
               <div className="flex gap-3 w-full pt-2">
                 <Button
                   variant="ghost"
-                  className="flex-1 rounded-xl border border-white/5 hover:bg-white/5 text-white/60 hover:text-white"
+                  className="flex-1 rounded-xl border border-[#3b0764] bg-[#3b0764] text-white hover:bg-[#2e054e]"
                   onClick={() => setDeleteConfirmId(null)}
                 >
                   Cancel
@@ -500,7 +500,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
         </div>
       </div>
 
-      <div className="bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/40 backdrop-blur-2xl rounded-[2.5rem] p-6 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+      <div className="blooket-panel p-6">
         <ScrollArea className="h-[550px] w-full pr-4 mb-6">
           <div className="space-y-6">
             {messages.length === 0 ? (
@@ -690,7 +690,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                           <button className="opacity-0 group-hover:opacity-100 flex items-center justify-center w-6 h-6 rounded-full bg-white/5 hover:bg-white/10 text-white/40 hover:text-white text-xs border border-white/5 transition-all duration-300">
                             +
                           </button>
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/reactbtn:flex bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 border border-white/10 rounded-2xl p-1.5 gap-1.5 shadow-2xl z-40 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/reactbtn:flex blooket-panel rounded-2xl p-1.5 gap-1.5 shadow-2xl z-40 animate-in fade-in slide-in-from-bottom-2 duration-200">
                             {REACTION_EMOJIS.map(emoji => (
                               <button
                                 key={emoji}

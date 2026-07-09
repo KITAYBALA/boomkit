@@ -242,7 +242,7 @@ export default function RealtimeLeaderboard({ onPlayerClick, ...props }: Realtim
 
       {/* Roster list for remaining ranks */}
       <div className="flex-grow flex flex-col space-y-4 min-h-0">
-        <ScrollArea className="flex-1 min-h-[400px] pr-4 rounded-[2.5rem] border border-white/10 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/30 backdrop-blur-2xl shadow-2xl">
+        <ScrollArea className="flex-1 min-h-[400px] pr-4 rounded-[2.5rem] border border-white/10 blooket-panel">
           <div className="space-y-3 p-6">
             {users.length === 0 ? (
               <div className="font-heading text-center text-white/30 p-12 bg-white/5 rounded-2xl border border-dashed border-white/10">

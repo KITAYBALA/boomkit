@@ -195,7 +195,7 @@ export default function LemonCheckout({ userId, isStaff }: LemonCheckoutProps) {
 
       {/* Sandbox Simulator Block */}
       {isStaff && (
-        <div className="mt-8 p-6 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/60 border border-dashed border-red-500/30 rounded-2xl relative overflow-hidden">
+        <div className="mt-8 p-6 blooket-panel border border-dashed border-red-500/30 rounded-2xl relative overflow-hidden">
           <h4 className="font-heading text-red-400 font-bold text-sm mb-1.5 flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-red-400" />
             🛠️ DEVELOPER SANDBOX
