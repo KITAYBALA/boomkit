@@ -115,105 +115,58 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
     const fetchConversations = async () => {
         if (!supabase || !currentUser) return
 
-        // This is a heavy query because we need member info
-        const { data: memberRows, error: memberError } = await supabase
-            .from('conversation_members')
-            .select('conversation_id, conversations(*), user_id, users(username)')
-            .eq('user_id', currentUser.id)
-
-        if (memberError) {
-            console.error("Error fetching conversations:", memberError)
-            return
-        }
-
-        const conversationsMap = new Map<string, Conversation>()
-
-        // First pass: aggregate conversations
-        memberRows.forEach((row: any) => {
-            const conv = row.conversations
-            conversationsMap.set(conv.id, {
-                id: conv.id,
-                name: conv.name,
-                is_group: conv.is_group,
-                updated_at: conv.updated_at,
-                members: []
-            })
-        })
-
-        // Second pass: get all members for these conversations
-        if (conversationsMap.size > 0) {
-            const conversationIds = Array.from(conversationsMap.keys())
-
-            // Batch the member fetch but limit the size to avoid URL length issues
-            // (19 conversations is usually safe, but let's be robust)
-            const CHUNK_SIZE = 15
-            for (let i = 0; i < conversationIds.length; i += CHUNK_SIZE) {
-                const chunk = conversationIds.slice(i, i + CHUNK_SIZE)
-                const { data: allMembers } = await supabase
-                    .from('conversation_members')
-                    .select('conversation_id, users(username)')
-                    .in('conversation_id', chunk)
-
-                allMembers?.forEach((m: any) => {
-                    const conv = conversationsMap.get(m.conversation_id)
-                    if (conv) conv.members.push(m.users.username)
+        try {
+            const res = await fetch('/api/conversations')
+            if (!res.ok) throw new Error('Failed to fetch conversations')
+            const data = await res.json()
+            
+            setConversations((data || [])
+                .filter((c: any) => {
+                    // Filter hidden chats
+                    const hidden = JSON.parse(localStorage.getItem("boomkit_hidden_chats") || "[]")
+                    return !hidden.includes(c.id)
                 })
-            }
+                .sort((a: any, b: any) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+            )
+        } catch (e) {
+            console.error("Error fetching conversations:", e)
         }
-
-        setConversations(Array.from(conversationsMap.values())
-            .filter(c => {
-                // Filter hidden chats
-                const hidden = JSON.parse(localStorage.getItem("boomkit_hidden_chats") || "[]")
-                return !hidden.includes(c.id)
-            })
-            .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
-        )
     }
 
     // 2. Fetch Messages
     const fetchMessages = async (convId: string) => {
         if (!supabase) return
-        const { data, error } = await supabase
-            .from('direct_messages')
-            .select('id, conversation_id, sender_id, sender_username, message, inserted_at')
-            .eq('conversation_id', convId)
-            .order('inserted_at', { ascending: false })
-            .limit(50)
-
-        if (error) {
-            console.error("Error fetching messages:", error)
-        } else {
-            // Reverse to show in chronological order (oldest -> newest)
+        try {
+            const res = await fetch(`/api/messages?conversation_id=${convId}`)
+            if (!res.ok) throw new Error('Failed to fetch messages')
+            const data = await res.json()
             setMessages((data || []).reverse())
+        } catch (e) {
+            console.error("Error fetching messages:", e)
         }
     }
 
-    // 3. Realtime Subscription
+    // 3. Realtime Subscription (Broadcast)
     useEffect(() => {
         if (!supabase || !currentUser) return
 
         fetchConversations()
 
+        if (!activeConversation) return
+
+        const channelName = `private_chat_${activeConversation.id}`
         const channel = supabase
-            .channel('private_chats')
-            .on('postgres_changes', {
-                event: '*',
-                schema: 'public',
-                table: 'direct_messages'
-            }, (payload) => {
-                if (payload.eventType === 'INSERT') {
-                    const newMsg = payload.new as Message
-                    if (activeConversation?.id === newMsg.conversation_id) {
-                        // Check blocked
-                        const senderBlocked = blockedUsers.includes(newMsg.sender_username)
-                        if (!senderBlocked) {
-                            setMessages(prev => [...prev, newMsg])
-                        }
-                    }
-                    // Refresh list to update "last message" or order
-                    fetchConversations()
+            .channel(channelName)
+            .on('broadcast', { event: 'new_message' }, (payload) => {
+                const newMsg = payload.payload as Message
+                const senderBlocked = blockedUsers.includes(newMsg.sender_username)
+                if (!senderBlocked) {
+                    setMessages(prev => {
+                        if (prev.some(m => m.id === newMsg.id)) return prev
+                        return [...prev, newMsg]
+                    })
                 }
+                fetchConversations()
             })
             .subscribe()
 
@@ -252,49 +205,38 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
 
         const isGroup = selectedUsers.length > 1 || groupName.trim() !== ""
 
-        // 1. Create Conversation
-        const { data: conv, error: convError } = await supabase
-            .from('conversations')
-            .insert({
-                name: isGroup ? (groupName || "Group Chat") : null,
-                is_group: isGroup,
-                created_by: currentUser.id
+        try {
+            const res = await fetch('/api/conversations', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    selectedUsers,
+                    groupName: isGroup ? (groupName || "Group Chat") : null
+                })
             })
-            .select()
-            .single()
+            
+            if (!res.ok) {
+                const err = await res.json()
+                throw new Error(err.error || 'Failed to create conversation')
+            }
+            
+            const { conversation } = await res.json()
 
-        if (convError) {
-            alert("Failed to create conversation: " + convError.message)
-            return
+            setShowNewChat(false)
+            setSelectedUsers([])
+            setGroupName("")
+            fetchConversations()
+            setActiveConversation({
+                id: conversation.id,
+                name: conversation.name,
+                is_group: conversation.is_group,
+                updated_at: conversation.updated_at,
+                members: []
+            })
+            fetchMessages(conversation.id)
+        } catch (error: any) {
+            alert(error.message)
         }
-
-        // 2. Add Members
-        const membersToAdd = [...selectedUsers, currentUser.id].map(uid => ({
-            conversation_id: conv.id,
-            user_id: uid
-        }))
-
-        const { error: memberError } = await supabase
-            .from('conversation_members')
-            .insert(membersToAdd)
-
-        if (memberError) {
-            alert("Failed to add members: " + memberError.message)
-            return
-        }
-
-        setShowNewChat(false)
-        setSelectedUsers([])
-        setGroupName("")
-        fetchConversations()
-        setActiveConversation({
-            id: conv.id,
-            name: conv.name,
-            is_group: conv.is_group,
-            updated_at: conv.updated_at,
-            members: [] // Will be populated on next fetch
-        })
-        fetchMessages(conv.id)
     }
 
     const sendMessage = async () => {
@@ -303,16 +245,26 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
         const textToSend = inputText.trim()
         setInputText("")
 
-        const { error } = await supabase
-            .from('direct_messages')
-            .insert({
-                conversation_id: activeConversation.id,
-                sender_id: currentUser.id,
-                sender_username: currentUser.username,
-                message: textToSend
+        try {
+            const res = await fetch('/api/messages', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    conversationId: activeConversation.id,
+                    message: textToSend
+                })
             })
 
-        if (error) {
+            if (!res.ok) {
+                const err = await res.json()
+                if (err.error === 'MUTED') {
+                    alert('You are muted and cannot send messages.')
+                } else {
+                    throw new Error(err.error || 'Failed to send message')
+                }
+                setInputText(textToSend)
+            }
+        } catch (error: any) {
             alert("Failed to send: " + error.message)
             setInputText(textToSend)
         }
