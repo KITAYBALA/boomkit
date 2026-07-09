@@ -1275,7 +1275,7 @@ client.on('interactionCreate', async interaction => {
             
             if (otherAlts.length === 0) {
                 const redactedVal = queryField === 'last_ip' ? 'Redacted' : queryValue;
-                return interaction.editReply({ content: `✅ **No alts found** for **${targetRecord.username}** (${matchType}: \`${redactedVal}\`).` });
+                return interaction.editReply({ content: `✅ **No alts found** for **${targetUser.username}** (${matchType}: \`${redactedVal}\`).` });
             }
             
             const redactedVal = queryField === 'last_ip' ? 'Redacted' : queryValue;
@@ -1287,7 +1287,7 @@ client.on('interactionCreate', async interaction => {
             
             const embed = {
                 color: 0xff5500,
-                title: `🔍 Alt Account Check for ${targetRecord.username}`,
+                title: `🔍 Alt Account Check for ${targetUser.username}`,
                 description: altsListText,
                 timestamp: new Date().toISOString()
             };
