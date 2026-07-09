@@ -1351,6 +1351,8 @@ export default function BoomkitGame() {
     username: "",
     password: "",
   })
+  const [isAuthenticating, setIsAuthenticating] = useState(false)
+  const [authError, setAuthError] = useState<string | null>(null)
 
   // --- DATA PERSISTENCE AND SYNC HOOKS ---
 
@@ -2462,25 +2464,27 @@ export default function BoomkitGame() {
   // Handle registration - SERVER-SIDE AUTHENTICATION
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
+    setAuthError(null)
 
     if (!registerForm.username || !registerForm.password || !registerForm.age || !registerForm.accessKey) {
-      alert("Please fill in all required fields (including Access Key)")
+      setAuthError("Please fill in all required fields (including Access Key)")
       return
     }
 
     if (registerForm.password.length < 8) {
-      alert("Password must be at least 8 characters")
+      setAuthError("Password must be at least 8 characters")
       return
     }
 
     if (Number.parseInt(registerForm.age) < 13) {
-      alert("You must be at least 13 years old to register")
+      setAuthError("You must be at least 13 years old to register")
       return
     }
 
 
 
     try {
+      setIsAuthenticating(true)
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -2498,7 +2502,8 @@ export default function BoomkitGame() {
       const data = await parseApiResponse(response)
 
       if (!response.ok || !data.success) {
-        alert(data.message || "Registration failed. Please try again.")
+        setAuthError(data.message || "Registration failed. Please try again.")
+        setIsAuthenticating(false)
         return
       }
 
@@ -2558,28 +2563,33 @@ export default function BoomkitGame() {
       if (newUser.status === "pending") {
         alert("Registration successful! Your application is pending staff approval. Please wait for an admin to review your request.")
         setCurrentView("owner-access") // Return to start screen
+        setIsAuthenticating(false)
         return
       }
 
       updateAndPersistCurrentUser(newUser)
       setCurrentView("game")
       setShowV2NewsModal(true)
+      setIsAuthenticating(false)
     } catch (error) {
       console.error("Registration error:", error)
-      alert("Registration failed. Please try again.")
+      setAuthError("Registration failed. Please try again.")
+      setIsAuthenticating(false)
     }
   }
 
   // Handle login - SERVER-SIDE AUTHENTICATION
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
+    setAuthError(null)
 
     if (!loginForm.username || !loginForm.password) {
-      alert("Please enter both username and password")
+      setAuthError("Please enter both username and password")
       return
     }
 
     try {
+      setIsAuthenticating(true)
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -2595,10 +2605,12 @@ export default function BoomkitGame() {
       if (!response.ok || !data.success) {
         // Check if password reset is required
         if (data.requiresReset) {
+          setIsAuthenticating(false)
           router.push(`/reset-password?username=${encodeURIComponent(loginForm.username)}`)
           return
         }
-        alert(data.message || "Invalid username or password")
+        setAuthError(data.message || "Invalid username or password")
+        setIsAuthenticating(false)
         return
       }
 
@@ -4918,12 +4930,18 @@ const handlePackAction = (packId: string) => {
                 </label>
               </div>
 
+              {authError && (
+                <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-semibold p-3 rounded-xl text-center">
+                  {authError}
+                </div>
+              )}
+
               <Button
                 type="submit"
-                disabled={!tosAccepted}
+                disabled={!tosAccepted || isAuthenticating}
                 className="w-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white h-12 rounded-xl text-lg font-bold shadow-lg shadow-purple-900/40 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform active:scale-95 hover:scale-[1.02]"
               >
-                Let's Go! 🚀
+                {isAuthenticating ? "Loading..." : "Let's Go! 🚀"}
               </Button>
             </form>
 
@@ -5046,8 +5064,19 @@ const handlePackAction = (packId: string) => {
                   />
                 </div>
               </div>
-              <Button type="submit" className="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white h-12 rounded-xl text-lg font-bold shadow-lg shadow-blue-900/40 transition-all transform active:scale-95 hover:scale-[1.02]">
-                Login
+              
+              {authError && (
+                <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-semibold p-3 rounded-xl text-center">
+                  {authError}
+                </div>
+              )}
+
+              <Button 
+                type="submit" 
+                disabled={isAuthenticating}
+                className="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white h-12 rounded-xl text-lg font-bold shadow-lg shadow-blue-900/40 transition-all transform active:scale-95 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isAuthenticating ? "Loading..." : "Login"}
               </Button>
             </form>
             <div className="mt-6 text-center space-y-3">
