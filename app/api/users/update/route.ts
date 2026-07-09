@@ -120,11 +120,12 @@ export async function POST(request: NextRequest) {
 
     const { data: targetUser, error: targetError } = await supabase
       .from('users')
-      .select('id, role, is_owner, last_ip')
+      .select('id, role, is_owner')
       .eq('id', targetUserId)
       .single()
 
     if (targetError || !targetUser) {
+      console.error('[API/users/update] Target user not found. targetUserId:', targetUserId, 'Error:', targetError)
       return NextResponse.json({ success: false, message: 'Target user not found' }, { status: 404 })
     }
 
@@ -166,15 +167,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Failed to update user' }, { status: 500 })
     }
 
-    if (filteredUpdates.is_banned === false && targetUser && targetUser.last_ip) {
-      const { error: blacklistDeleteErr } = await supabase
-        .from('blacklisted_ips')
-        .delete()
-        .eq('ip', targetUser.last_ip)
-      if (blacklistDeleteErr) {
-        console.error('[API/users/update] Blacklist delete error:', blacklistDeleteErr)
-      } else {
-        console.log(`[API/users/update] Automatically unblacklisted IP ${targetUser.last_ip} for user ${targetUser.id}`)
+    if (filteredUpdates.is_banned === false && targetUser) {
+      // Fetch last_ip from user_secrets
+      const { data: userSecret } = await supabase
+        .from('user_secrets')
+        .select('last_ip')
+        .eq('user_id', targetUserId)
+        .maybeSingle()
+        
+      if (userSecret && userSecret.last_ip) {
+        const { error: blacklistDeleteErr } = await supabase
+          .from('blacklisted_ips')
+          .delete()
+          .eq('ip', userSecret.last_ip)
+        if (blacklistDeleteErr) {
+          console.error('[API/users/update] Blacklist delete error:', blacklistDeleteErr)
+        } else {
+          console.log(`[API/users/update] Automatically unblacklisted IP ${userSecret.last_ip} for user ${targetUserId}`)
+        }
       }
     }
 
