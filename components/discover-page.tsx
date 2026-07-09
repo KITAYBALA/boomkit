@@ -153,21 +153,21 @@ export default function DiscoverPage({
                                 >
                                     <ArrowLeftIcon className="w-6 h-6" />
                                 </Button>
-                                <span className="text-4xl animate-bounce">{selectedSubject.emoji}</span>
-                                <h1 className="text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-purple-200 drop-shadow-lg">
+                                <span className="font-heading text-4xl animate-bounce">{selectedSubject.emoji}</span>
+                                <h1 className="font-heading text-5xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-purple-200 drop-shadow-lg">
                                     {selectedSubject.name}
                                 </h1>
                             </div>
                         ) : (
                             <div className="flex items-center gap-3 mb-2">
-                                <span className="text-4xl animate-bounce">🧭</span>
-                                <h1 className="text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-purple-200 drop-shadow-lg">
+                                <span className="font-heading text-4xl animate-bounce">🧭</span>
+                                <h1 className="font-heading text-6xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-purple-200 drop-shadow-lg">
                                     Discover
                                 </h1>
                             </div>
                         )}
 
-                        <p className="text-xl text-purple-200/70 font-medium max-w-lg leading-relaxed">
+                        <p className="font-heading text-xl text-purple-200/70 font-medium max-w-lg leading-relaxed">
                             {viewMode === "topics"
                                 ? "Select a topic to start your adventure!"
                                 : "Embark on an educational journey. Learn, play, and compete with next-gen games!"
@@ -200,7 +200,7 @@ export default function DiscoverPage({
                     <div className="p-2 bg-gradient-to-br from-purple-500/20 to-blue-500/20 rounded-xl border border-white/10">
                         <BookOpenIcon className="w-6 h-6 text-purple-300" />
                     </div>
-                    <h3 className="text-xl text-white font-bold tracking-tight">Select Grade Level</h3>
+                    <h3 className="font-heading text-xl text-white font-bold tracking-tight">Select Grade Level</h3>
                 </div>
                 <div className="flex flex-wrap gap-3">
                     {GRADES.map((grade) => {
@@ -225,7 +225,7 @@ export default function DiscoverPage({
                                     }
                                 `}
                             >
-                                <span className="text-lg">{grade.emoji}</span>
+                                <span className="font-heading text-lg">{grade.emoji}</span>
                                 {grade.label}
                                 {isSelected && (
                                     <span className="absolute inset-0 rounded-2xl bg-white/20 animate-pulse-slow pointer-events-none" />
@@ -255,7 +255,7 @@ export default function DiscoverPage({
                 <div className="space-y-4">
                     <div className="flex items-center gap-2">
                         <SparklesIcon className="w-6 h-6 text-pink-400" />
-                        <h3 className="text-white font-bold text-2xl tracking-tight">My AI Sets</h3>
+                        <h3 className="font-heading text-white font-bold text-2xl tracking-tight">My AI Sets</h3>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {discoveredSets.map((set, index) => (
@@ -271,8 +271,8 @@ export default function DiscoverPage({
                                                 🤖
                                             </div>
                                             <div>
-                                                <CardTitle className="text-white text-lg font-bold leading-tight">{set.title}</CardTitle>
-                                                <p className="text-pink-200/60 text-xs mt-1 font-medium">
+                                                <CardTitle className="font-heading text-white text-lg font-bold leading-tight">{set.title}</CardTitle>
+                                                <p className="font-heading text-pink-200/60 text-xs mt-1 font-medium">
                                                     Grade {set.grade} • {set.questions?.length || 0} Questions
                                                 </p>
                                             </div>
@@ -331,7 +331,7 @@ export default function DiscoverPage({
                                             {subject.emoji}
                                         </div>
                                         <div>
-                                            <CardTitle className="text-white text-xl font-bold">{subject.name}</CardTitle>
+                                            <CardTitle className="font-heading text-white text-xl font-bold">{subject.name}</CardTitle>
                                             <div className="flex items-center gap-2 mt-2">
                                                 <Badge variant="outline" className="bg-white/5 border-white/10 text-white/50 text-[10px] px-2 py-0.5 rounded-full">
                                                     {gradeInfo?.label}
@@ -347,7 +347,7 @@ export default function DiscoverPage({
                             </CardHeader>
 
                             <CardContent className="pt-2 relative z-10">
-                                <p className="text-white/40 text-sm line-clamp-2">
+                                <p className="font-heading text-white/40 text-sm line-clamp-2">
                                     Explore specific topics like
                                     {TOPICS_BY_GRADE_SUBJECT[selectedGrade]?.[subject.name]?.slice(0, 2).map((t: string) => ` ${t}`).join(", ")} and more.
                                 </p>
@@ -360,8 +360,8 @@ export default function DiscoverPage({
                             <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6 animate-pulse">
                                 <SearchIcon className="w-10 h-10 text-white/30" />
                             </div>
-                            <h3 className="text-white font-bold text-2xl mb-2">No subjects found</h3>
-                            <p className="text-white/40">We couldn't find any subjects matching "{searchQuery}"</p>
+                            <h3 className="font-heading text-white font-bold text-2xl mb-2">No subjects found</h3>
+                            <p className="font-heading text-white/40">We couldn't find any subjects matching "{searchQuery}"</p>
                             <Button
                                 variant="link"
                                 onClick={() => setSearchQuery("")}
@@ -380,7 +380,7 @@ export default function DiscoverPage({
                     <div className="flex items-center justify-between gap-4 flex-wrap">
                         <div className="flex items-center gap-2">
                             <LayoutGridIcon className="w-5 h-5 text-purple-400" />
-                            <span className="text-white/60 font-medium">Available Topics ({filteredTopics.length})</span>
+                            <span className="font-heading text-white/60 font-medium">Available Topics ({filteredTopics.length})</span>
                         </div>
                         <Button
                             onClick={() => {
@@ -449,8 +449,8 @@ export default function DiscoverPage({
                             <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mb-6 animate-pulse">
                                 <SearchIcon className="w-10 h-10 text-white/30" />
                             </div>
-                            <h3 className="text-white font-bold text-2xl mb-2">No topics found</h3>
-                            <p className="text-white/40">We couldn't find any topics matching "{searchQuery}"</p>
+                            <h3 className="font-heading text-white font-bold text-2xl mb-2">No topics found</h3>
+                            <p className="font-heading text-white/40">We couldn't find any topics matching "{searchQuery}"</p>
                             <div className="flex gap-4 mt-6">
                                 <Button
                                     variant="outline"
@@ -475,14 +475,14 @@ export default function DiscoverPage({
             {showJoinModal && (
                 <div className="fixed inset-0 bg-black/90 backdrop-blur-xl flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
                     <Card className="w-full max-w-md bg-slate-900 border-white/10 shadow-2xl shadow-purple-500/20 scale-100 animate-in zoom-in-95 duration-300">
-                        <CardHeader className="text-center pb-2">
+                        <CardHeader className="font-heading text-center pb-2">
                             <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl mx-auto flex items-center justify-center mb-6 shadow-xl rotate-3">
                                 <UsersIcon className="w-10 h-10 text-white" />
                             </div>
-                            <CardTitle className="text-3xl font-black text-white">
+                            <CardTitle className="font-heading text-3xl font-black text-white">
                                 Join a Game
                             </CardTitle>
-                            <p className="text-white/50">Enter the 6-digit PIN to join the lobby</p>
+                            <p className="font-heading text-white/50">Enter the 6-digit PIN to join the lobby</p>
                         </CardHeader>
                         <CardContent className="space-y-6 pt-6">
                             <div className="relative group">

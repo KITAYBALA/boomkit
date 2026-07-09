@@ -399,8 +399,8 @@ export default function RealtimeAuctions({
             <GavelIcon className="h-10 w-10 text-white" />
           </div>
           <div>
-            <h1 className="text-5xl font-black text-white tracking-tighter">Auction House</h1>
-            <p className="text-purple-300/60 font-medium">Bid on rare Booms or start your own auction.</p>
+            <h1 className="font-heading text-5xl font-black text-white tracking-tighter">Auction House</h1>
+            <p className="font-heading text-purple-300/60 font-medium">Bid on rare Booms or start your own auction.</p>
           </div>
         </div>
         <Button
@@ -422,8 +422,8 @@ export default function RealtimeAuctions({
                     <PlusIcon className="h-8 w-8 text-purple-400" />
                   </div>
                   <div>
-                    <CardTitle className="text-3xl font-black text-white tracking-tight">Post Auction</CardTitle>
-                    <CardDescription className="text-purple-300/50 text-base">Select a Boom from your vault to auction off.</CardDescription>
+                    <CardTitle className="font-heading text-3xl font-black text-white tracking-tight">Post Auction</CardTitle>
+                    <CardDescription className="font-heading text-purple-300/50 text-base">Select a Boom from your vault to auction off.</CardDescription>
                   </div>
                 </div>
                 <Button variant="ghost" size="icon" onClick={() => setShowCreateModal(false)} className="rounded-full h-12 w-12 text-white/40 hover:text-white hover:bg-white/5 transition-colors">
@@ -433,7 +433,7 @@ export default function RealtimeAuctions({
             </CardHeader>
             <CardContent className="p-10 space-y-10">
               <div className="space-y-4">
-                <label className="text-xs font-black text-white/30 uppercase tracking-[0.2em] ml-2">Choose Item</label>
+                <label className="font-heading text-xs font-black text-white/30 uppercase tracking-[0.2em] ml-2">Choose Item</label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-56 overflow-y-auto pr-4 custom-scrollbar">
                   {currentUser?.booms && Object.keys(currentUser.booms).length > 0 ? (
                     Object.entries(currentUser.booms).map(([boom, qty]) => (
@@ -446,12 +446,12 @@ export default function RealtimeAuctions({
                           : 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/10'
                           }`}
                       >
-                        <div className="text-4xl group-hover:scale-110 transition-transform duration-300 flex items-center justify-center">
+                        <div className="font-heading text-4xl group-hover:scale-110 transition-transform duration-300 flex items-center justify-center">
                           <BoomAvatar name={boom} className="w-[1em] h-[1em]" />
                         </div>
-                        <div className="text-center">
+                        <div className="font-heading text-center">
                           <p className={`text-xs font-bold leading-tight ${selectedBoom === boom ? 'text-white' : 'text-white/70'}`}>{boom}</p>
-                          <p className="text-[10px] text-white/30 font-black mt-1">x{qty} OWNED</p>
+                          <p className="font-heading text-[10px] text-white/30 font-black mt-1">x{qty} OWNED</p>
                         </div>
                         {selectedBoom === boom && (
                           <div className="absolute top-2 right-2 h-2 w-2 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(139,92,246,1)]" />
@@ -460,7 +460,7 @@ export default function RealtimeAuctions({
                     ))
                   ) : (
                     <div className="col-span-full py-12 text-center bg-white/5 rounded-3xl border border-dashed border-white/10">
-                      <p className="text-white/20 font-bold">Your vault is empty</p>
+                      <p className="font-heading text-white/20 font-bold">Your vault is empty</p>
                     </div>
                   )}
                 </div>
@@ -468,7 +468,7 @@ export default function RealtimeAuctions({
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-4 text-center">
-                  <label className="text-xs font-black text-white/30 uppercase tracking-[0.2em]">Starting Bid</label>
+                  <label className="font-heading text-xs font-black text-white/30 uppercase tracking-[0.2em]">Starting Bid</label>
                   <div className="relative group">
                     <Input
                       type="number"
@@ -481,7 +481,7 @@ export default function RealtimeAuctions({
                   </div>
                 </div>
                 <div className="space-y-4 text-center">
-                  <label className="text-xs font-black text-white/30 uppercase tracking-[0.2em]">Duration (Hours)</label>
+                  <label className="font-heading text-xs font-black text-white/30 uppercase tracking-[0.2em]">Duration (Hours)</label>
                   <div className="relative group">
                     <Input
                       type="number"
@@ -528,7 +528,7 @@ export default function RealtimeAuctions({
 
         <div className="flex items-center gap-3 mb-10">
           <div className="h-2 w-2 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]" />
-          <h2 className="text-xl font-black text-white tracking-widest uppercase opacity-60">Live Listings</h2>
+          <h2 className="font-heading text-xl font-black text-white tracking-widest uppercase opacity-60">Live Listings</h2>
         </div>
 
         {items.length === 0 ? (
@@ -536,8 +536,8 @@ export default function RealtimeAuctions({
             <div className="p-6 bg-white/5 rounded-full mb-6 ring-1 ring-white/10">
               <TimerIcon className="h-10 w-10 text-white/20" />
             </div>
-            <p className="text-white/30 font-black text-xl">The market is currently quiet</p>
-            <p className="text-white/10 text-sm mt-2">Be the first to list a legendary Boom!</p>
+            <p className="font-heading text-white/30 font-black text-xl">The market is currently quiet</p>
+            <p className="font-heading text-white/10 text-sm mt-2">Be the first to list a legendary Boom!</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
@@ -574,7 +574,7 @@ export default function RealtimeAuctions({
                           ) : null}
                         </div>
                         <div>
-                          <h3 className="text-2xl font-black text-white tracking-tight">{item.boom_name}</h3>
+                          <h3 className="font-heading text-2xl font-black text-white tracking-tight">{item.boom_name}</h3>
                           <Badge className={`${rarityColor} text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 mt-1 border-none shadow-lg ring-1 ring-white/20`}>
                             {rarity}
                           </Badge>
@@ -584,7 +584,7 @@ export default function RealtimeAuctions({
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="bg-black/30 rounded-2xl p-4 border border-white/5">
-                        <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-1">Seller</p>
+                        <p className="font-heading text-[10px] font-black text-white/30 uppercase tracking-widest mb-1">Seller</p>
                         <div
                           className={`flex items-center gap-2 ${onPlayerClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
                           onClick={(e) => {
@@ -593,7 +593,7 @@ export default function RealtimeAuctions({
                           }}
                         >
                           <UserIcon className="h-3.5 w-3.5 text-purple-400" />
-                          <span className="text-sm font-bold text-white truncate flex items-center gap-1">
+                          <span className="font-heading text-sm font-bold text-white truncate flex items-center gap-1">
                              {(() => {
                                const u = users?.find((usr) => usr.username === item.seller)
                                return u?.clan_tag ? (
@@ -609,17 +609,17 @@ export default function RealtimeAuctions({
                         </div>
                       </div>
                       <div className="bg-black/30 rounded-2xl p-4 border border-white/5">
-                        <p className="text-[10px] font-black text-white/30 uppercase tracking-widest mb-1">Status</p>
+                        <p className="font-heading text-[10px] font-black text-white/30 uppercase tracking-widest mb-1">Status</p>
                         <div className="flex items-center gap-2">
                           {ended ? (
                             <div className="flex items-center gap-2 text-red-400">
                               <TimerIcon className="h-3.5 w-3.5" />
-                              <span className="text-sm font-black uppercase">Ended</span>
+                              <span className="font-heading text-sm font-black uppercase">Ended</span>
                             </div>
                           ) : (
                             <div className="flex items-center gap-2 text-green-400">
                               <ClockIcon className="h-3.5 w-3.5 animate-pulse" />
-                              <span className="text-sm font-black whitespace-nowrap">{timeLeftText(item.ends_at)}</span>
+                              <span className="font-heading text-sm font-black whitespace-nowrap">{timeLeftText(item.ends_at)}</span>
                             </div>
                           )}
                         </div>
@@ -628,16 +628,16 @@ export default function RealtimeAuctions({
 
                     <div className="bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-[1.5rem] p-6 border border-white/10 ring-1 ring-white/5 space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-black text-white/40 uppercase tracking-widest">Current Bid</span>
+                        <span className="font-heading text-xs font-black text-white/40 uppercase tracking-widest">Current Bid</span>
                         <div className="flex items-center gap-2">
                           <CoinsIcon className="h-5 w-5 text-yellow-500" />
-                          <span className="text-2xl font-black text-white tabular-nums tracking-tighter">{item.current_bid.toLocaleString()}</span>
+                          <span className="font-heading text-2xl font-black text-white tabular-nums tracking-tighter">{item.current_bid.toLocaleString()}</span>
                         </div>
                       </div>
 
                       {item.top_bidder ? (
                         <div className="flex items-center justify-between pt-3 border-t border-white/5">
-                          <span className="text-[10px] font-black text-white/30 uppercase tracking-widest">Top Bidder</span>
+                          <span className="font-heading text-[10px] font-black text-white/30 uppercase tracking-widest">Top Bidder</span>
                           <div
                             className={`flex items-center gap-2 ${onPlayerClick && !isWinner ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
                             onClick={(e) => {
@@ -666,7 +666,7 @@ export default function RealtimeAuctions({
                           </div>
                         </div>
                       ) : (
-                        <div className="text-center pt-2 italic text-[10px] font-bold text-white/20 uppercase tracking-widest">No bids placed yet</div>
+                        <div className="font-heading text-center pt-2 italic text-[10px] font-bold text-white/20 uppercase tracking-widest">No bids placed yet</div>
                       )}
                     </div>
 
@@ -731,25 +731,25 @@ export default function RealtimeAuctions({
           <Card className="w-full max-w-md bg-[#0a0a0c]/95 backdrop-blur-2xl border-purple-500/30 shadow-[0_0_80px_rgba(139,92,246,0.3)] rounded-[2.5rem] overflow-hidden">
             <CardHeader className="p-8 text-center">
               <div className="mx-auto w-24 h-24 bg-purple-600/10 rounded-full flex items-center justify-center mb-6 ring-1 ring-purple-500/30">
-                <span className="text-6xl drop-shadow-2xl flex items-center justify-center">
+                <span className="font-heading text-6xl drop-shadow-2xl flex items-center justify-center">
                   <BoomAvatar name={biddingItem.boom_name} className="w-[1em] h-[1em]" />
                 </span>
               </div>
-              <CardTitle className="text-3xl font-black text-white tracking-tight">Place Your Bid</CardTitle>
-              <CardDescription className="text-purple-300/40 mt-2">You are bidding on {biddingItem.boom_name}</CardDescription>
+              <CardTitle className="font-heading text-3xl font-black text-white tracking-tight">Place Your Bid</CardTitle>
+              <CardDescription className="font-heading text-purple-300/40 mt-2">You are bidding on {biddingItem.boom_name}</CardDescription>
             </CardHeader>
             <CardContent className="p-8 space-y-8">
               <div className="bg-white/5 rounded-3xl p-6 border border-white/10 space-y-4">
                 <div className="flex justify-between items-center px-2">
-                  <span className="text-xs font-black text-white/30 uppercase tracking-[0.2em]">Current Bid</span>
+                  <span className="font-heading text-xs font-black text-white/30 uppercase tracking-[0.2em]">Current Bid</span>
                   <div className="flex items-center gap-2">
                     <CoinsIcon className="h-4 w-4 text-yellow-500" />
-                    <span className="text-lg font-black text-white">{biddingItem.current_bid.toLocaleString()}</span>
+                    <span className="font-heading text-lg font-black text-white">{biddingItem.current_bid.toLocaleString()}</span>
                   </div>
                 </div>
 
                 <div className="space-y-4 pt-2">
-                  <Label className="text-xs font-black text-white/30 uppercase tracking-[0.2em] ml-2">Your New Bid</Label>
+                  <Label className="font-heading text-xs font-black text-white/30 uppercase tracking-[0.2em] ml-2">Your New Bid</Label>
                   <div className="relative">
                     <Input
                       type="number"
@@ -813,8 +813,8 @@ export default function RealtimeAuctions({
               </div>
 
               <div className="space-y-2">
-                <h3 className="text-2xl font-black text-white tracking-tight">{statusModal.title}</h3>
-                <p className="text-white/40 text-sm font-medium leading-relaxed">{statusModal.message}</p>
+                <h3 className="font-heading text-2xl font-black text-white tracking-tight">{statusModal.title}</h3>
+                <p className="font-heading text-white/40 text-sm font-medium leading-relaxed">{statusModal.message}</p>
               </div>
 
               <Button

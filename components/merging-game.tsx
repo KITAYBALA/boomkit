@@ -132,7 +132,7 @@ export default function MergingGame({
             <div className="flex flex-col items-center justify-center w-full h-full text-white bg-slate-900">
                 <div className="w-12 h-12 rounded-full border-4 border-purple-500 border-t-transparent animate-spin mb-4" />
                 <p className="font-bold text-lg">Loading Game Data...</p>
-                <p className="text-white/40 text-sm">Waiting for host to sync...</p>
+                <p className="font-heading text-white/40 text-sm">Waiting for host to sync...</p>
             </div>
         )
     }
@@ -353,20 +353,20 @@ export default function MergingGame({
         return (
             <div className="flex items-center justify-center min-h-[600px] animate-in zoom-in-95 duration-500">
                 <Card className="w-full max-w-lg bg-slate-900/90 border-purple-500 shadow-[0_0_50px_rgba(168,85,247,0.2)]">
-                    <CardHeader className="text-center">
+                    <CardHeader className="font-heading text-center">
                         <Trophy className="w-20 h-20 text-yellow-500 mx-auto mb-4" />
-                        <CardTitle className="text-4xl font-black text-white">GAME OVER!</CardTitle>
-                        <CardDescription className="text-purple-300 text-xl font-bold mt-2">
+                        <CardTitle className="font-heading text-4xl font-black text-white">GAME OVER!</CardTitle>
+                        <CardDescription className="font-heading text-purple-300 text-xl font-bold mt-2">
                             Final Score: {score} pts
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="bg-white/5 rounded-2xl p-6 border border-white/10 text-center">
-                            <p className="text-white/60 font-medium">You reached high tiers!</p>
+                            <p className="font-heading text-white/60 font-medium">You reached high tiers!</p>
                             <div className="flex justify-center gap-4 mt-4">
                                 {Object.entries(RARITY_DATA).map(([key, data]) => (
                                     <div key={key} className="flex flex-col items-center">
-                                        <span className="text-2xl">{data.emoji}</span>
+                                        <span className="font-heading text-2xl">{data.emoji}</span>
                                         <span className={`text-[10px] uppercase font-black ${data.color}`}>{key}</span>
                                     </div>
                                 ))}
@@ -390,8 +390,8 @@ export default function MergingGame({
                         <BookOpen className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                        <h2 className="text-xl font-black text-white uppercase tracking-tighter leading-tight">{subject}</h2>
-                        <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">Grade {grade}</p>
+                        <h2 className="font-heading text-xl font-black text-white uppercase tracking-tighter leading-tight">{subject}</h2>
+                        <p className="font-heading text-white/40 text-[10px] font-black uppercase tracking-widest">Grade {grade}</p>
                     </div>
                 </div>
 
@@ -401,22 +401,22 @@ export default function MergingGame({
                         <Zap className="w-5 h-5 text-white animate-pulse" />
                     </div>
                     <div>
-                        <p className="text-[10px] text-white/40 font-black uppercase tracking-widest leading-none">ACTIVE MODE</p>
-                        <p className="text-sm font-black text-white uppercase tracking-tight">{gameMode.replace(/-/g, ' ')}</p>
+                        <p className="font-heading text-[10px] text-white/40 font-black uppercase tracking-widest leading-none">ACTIVE MODE</p>
+                        <p className="font-heading text-sm font-black text-white uppercase tracking-tight">{gameMode.replace(/-/g, ' ')}</p>
                     </div>
                 </div>
 
                 {/* Right: Time & Score */}
                 <div className="flex items-center gap-8 pl-6 border-l border-white/10">
-                    <div className="text-center">
-                        <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">Time Left</p>
+                    <div className="font-heading text-center">
+                        <p className="font-heading text-white/40 text-[10px] font-black uppercase tracking-widest">Time Left</p>
                         <div className="flex items-center gap-2 text-2xl font-black text-white">
                             <Timer className={`w-5 h-5 ${timeLeft < 10 ? "text-red-500 animate-pulse" : "text-cyan-400"}`} />
                             {timeLeft}s
                         </div>
                     </div>
-                    <div className="text-center">
-                        <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">Score</p>
+                    <div className="font-heading text-center">
+                        <p className="font-heading text-white/40 text-[10px] font-black uppercase tracking-widest">Score</p>
                         <div className="flex items-center gap-2 text-2xl font-black text-yellow-500">
                             <Star className="w-5 h-5" />
                             {score}
@@ -437,7 +437,7 @@ export default function MergingGame({
 
                         <CardContent className="flex flex-col h-full pt-10">
                             <div className="flex-1 flex flex-col items-center justify-center text-center px-6">
-                                <h3 className="text-2xl md:text-3xl font-black text-white leading-tight mb-8">
+                                <h3 className="font-heading text-2xl md:text-3xl font-black text-white leading-tight mb-8">
                                     {questions.length > 0 ? questions[currentQuestionIndex]?.question : "Waiting for game start..."}
                                 </h3>
                             </div>
@@ -472,8 +472,8 @@ export default function MergingGame({
                 <div className="flex flex-col space-y-4">
                     <div className="bg-white/5 border border-white/10 rounded-2xl p-4">
                         <div className="flex items-center justify-between mb-2">
-                            <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">Next Booms</p>
-                            {!isAnswering && <div className="text-green-400 text-xs font-black animate-pulse flex items-center gap-1"><Zap size={12} /> READY TO DROP!</div>}
+                            <p className="font-heading text-white/40 text-[10px] font-black uppercase tracking-widest">Next Booms</p>
+                            {!isAnswering && <div className="font-heading text-green-400 text-xs font-black animate-pulse flex items-center gap-1"><Zap size={12} /> READY TO DROP!</div>}
                         </div>
                         <div className="flex gap-4 justify-center">
                             {nextBooms.map((rarity, i) => (

@@ -89,7 +89,7 @@ const renderMessageText = (text: string, userRoles: Record<string, string>) => {
         return (
           <span
             key={idx}
-            className="text-red-500 font-extrabold bg-red-500/15 px-1.5 py-0.5 rounded border border-red-500/20"
+            className="font-heading text-red-500 font-extrabold bg-red-500/15 px-1.5 py-0.5 rounded border border-red-500/20"
             title={`Mentioned ${actualUsername}`}
           >
             @{actualUsername}
@@ -447,8 +447,8 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                 <AlertTriangleIcon className="w-8 h-8 text-red-500 animate-pulse" />
               </div>
               <div className="space-y-2">
-                <h3 className="text-xl font-black text-white tracking-tight">Delete Message?</h3>
-                <p className="text-white/40 text-sm leading-relaxed">
+                <h3 className="font-heading text-xl font-black text-white tracking-tight">Delete Message?</h3>
+                <p className="font-heading text-white/40 text-sm leading-relaxed">
                   This action cannot be undone. Are you sure you want to remove this message from the arena?
                 </p>
               </div>
@@ -479,10 +479,10 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
 
         <div className="relative flex flex-col sm:flex-row justify-between items-center gap-4 z-10">
           <div className="space-y-1 text-center sm:text-left">
-            <h1 className="text-3xl md:text-5xl font-black text-white tracking-tighter">
-              COMMS <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 drop-shadow-sm">TERMINAL</span>
+            <h1 className="font-heading text-3xl md:text-5xl font-black text-white tracking-tighter">
+              COMMS <span className="font-heading text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 drop-shadow-sm">TERMINAL</span>
             </h1>
-            <p className="text-white/40 text-xs md:text-sm font-semibold uppercase tracking-wider">
+            <p className="font-heading text-white/40 text-xs md:text-sm font-semibold uppercase tracking-wider">
               Secure System Channel • Real-time Broadcast
             </p>
           </div>
@@ -492,22 +492,22 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
             </span>
-            <div className="text-left">
-              <div className="text-[10px] text-white/40 font-black uppercase tracking-wider">Network Status</div>
-              <div className="text-xs font-black text-emerald-400 uppercase tracking-widest">ONLINE</div>
+            <div className="font-heading text-left">
+              <div className="font-heading text-[10px] text-white/40 font-black uppercase tracking-wider">Network Status</div>
+              <div className="font-heading text-xs font-black text-emerald-400 uppercase tracking-widest">ONLINE</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="bg-slate-950/40 backdrop-blur-2xl rounded-[2.5rem] p-6 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+      <div className="bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/40 backdrop-blur-2xl rounded-[2.5rem] p-6 border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
         <ScrollArea className="h-[550px] w-full pr-4 mb-6">
           <div className="space-y-6">
             {messages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-white/20 p-20 border border-dashed border-white/10 rounded-[2rem] bg-black/20">
                 <MessageCircleIcon className="w-12 h-12 mb-4 opacity-20 text-purple-400 animate-pulse" />
                 <p className="font-bold uppercase tracking-widest text-sm text-white/60">No Transmissions Found</p>
-                <p className="text-xs text-white/30 mt-1">Initiate conversation to establish downlink.</p>
+                <p className="font-heading text-xs text-white/30 mt-1">Initiate conversation to establish downlink.</p>
               </div>
             ) : (
               messages.map((msg) => {
@@ -659,7 +659,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                             </div>
                           </div>
                         ) : (
-                          <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
+                          <p className="font-heading text-sm leading-relaxed whitespace-pre-wrap break-words">
                             {renderMessageText(msg.message, userRoles)}
                           </p>
                         )}
@@ -690,7 +690,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                           <button className="opacity-0 group-hover:opacity-100 flex items-center justify-center w-6 h-6 rounded-full bg-white/5 hover:bg-white/10 text-white/40 hover:text-white text-xs border border-white/5 transition-all duration-300">
                             +
                           </button>
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/reactbtn:flex bg-slate-950 border border-white/10 rounded-2xl p-1.5 gap-1.5 shadow-2xl z-40 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/reactbtn:flex bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 border border-white/10 rounded-2xl p-1.5 gap-1.5 shadow-2xl z-40 animate-in fade-in slide-in-from-bottom-2 duration-200">
                             {REACTION_EMOJIS.map(emoji => (
                               <button
                                 key={emoji}
@@ -704,7 +704,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                         </div>
                       </div>
 
-                      <span className="text-[9px] text-white/20 mt-1 px-1 font-bold">
+                      <span className="font-heading text-[9px] text-white/20 mt-1 px-1 font-bold">
                         {new Date(isNaN(Number(msg.timestamp)) ? msg.timestamp : Number(msg.timestamp)).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                       </span>
                     </div>

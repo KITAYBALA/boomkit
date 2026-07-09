@@ -70,7 +70,7 @@ export default function LemonCheckout({ userId, isStaff }: LemonCheckoutProps) {
     <div className="space-y-6">
       {subscriptionProducts.length > 0 && (
         <div className="mb-6">
-          <h4 className="text-white font-bold text-lg mb-3 flex items-center gap-2">
+          <h4 className="font-heading text-white font-bold text-lg mb-3 flex items-center gap-2">
             <Crown className="w-5 h-5 text-yellow-400" />
             Premium Membership
           </h4>
@@ -88,7 +88,7 @@ export default function LemonCheckout({ userId, isStaff }: LemonCheckoutProps) {
                 </div>
                 <div>
                   <h3 className="font-bold text-white text-xl">{product.name}</h3>
-                  <p className="text-yellow-200 text-sm">{product.description}</p>
+                  <p className="font-heading text-yellow-200 text-sm">{product.description}</p>
                 </div>
               </div>
               {product.features && (
@@ -119,7 +119,7 @@ export default function LemonCheckout({ userId, isStaff }: LemonCheckoutProps) {
       )}
 
       {/* Token Products Section */}
-      <h4 className="text-white font-bold text-lg mb-3 flex items-center gap-2">
+      <h4 className="font-heading text-white font-bold text-lg mb-3 flex items-center gap-2">
         <Coins className="w-5 h-5 text-yellow-400" />
         Token Packs
       </h4>
@@ -141,10 +141,10 @@ export default function LemonCheckout({ userId, isStaff }: LemonCheckoutProps) {
               </div>
               <div>
                 <h3 className="font-bold text-white">{product.name}</h3>
-                <p className="text-purple-300 text-sm">{product.tokens?.toLocaleString()} Tokens</p>
+                <p className="font-heading text-purple-300 text-sm">{product.tokens?.toLocaleString()} Tokens</p>
               </div>
             </div>
-            <p className="text-purple-200 text-sm mb-4">{product.description}</p>
+            <p className="font-heading text-purple-200 text-sm mb-4">{product.description}</p>
             <Button
               onClick={() => handleSelectProduct(product.id)}
               disabled={loadingProductId !== null}
@@ -159,7 +159,7 @@ export default function LemonCheckout({ userId, isStaff }: LemonCheckoutProps) {
       {/* Booster Products Section */}
       {boosterProducts.length > 0 && (
         <div className="mt-6">
-          <h4 className="text-white font-bold text-lg mb-3 flex items-center gap-2">
+          <h4 className="font-heading text-white font-bold text-lg mb-3 flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-purple-400" />
             Luck Boosters
           </h4>
@@ -176,7 +176,7 @@ export default function LemonCheckout({ userId, isStaff }: LemonCheckoutProps) {
                     </div>
                     <div>
                       <h3 className="font-bold text-white text-sm">{product.name}</h3>
-                      <p className="text-indigo-300/80 text-xs mt-1 leading-relaxed">{product.description}</p>
+                      <p className="font-heading text-indigo-300/80 text-xs mt-1 leading-relaxed">{product.description}</p>
                     </div>
                   </div>
                 </div>
@@ -195,12 +195,12 @@ export default function LemonCheckout({ userId, isStaff }: LemonCheckoutProps) {
 
       {/* Sandbox Simulator Block */}
       {isStaff && (
-        <div className="mt-8 p-6 bg-slate-950/60 border border-dashed border-red-500/30 rounded-2xl relative overflow-hidden">
-          <h4 className="text-red-400 font-bold text-sm mb-1.5 flex items-center gap-2">
+        <div className="mt-8 p-6 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/60 border border-dashed border-red-500/30 rounded-2xl relative overflow-hidden">
+          <h4 className="font-heading text-red-400 font-bold text-sm mb-1.5 flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-red-400" />
             🛠️ DEVELOPER SANDBOX
           </h4>
-          <p className="text-white/40 text-xs mb-4">
+          <p className="font-heading text-white/40 text-xs mb-4">
             Test purchase event handling and instantly credit your user account without active billing configurations.
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">

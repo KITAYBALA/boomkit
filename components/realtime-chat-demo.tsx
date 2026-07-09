@@ -53,10 +53,10 @@ export default function RealtimeChatDemo() {
 
   return (
     <div className="space-y-3">
-      <div className="text-sm text-white/70">Realtime chat demo</div>
+      <div className="font-heading text-sm text-white/70">Realtime chat demo</div>
       <ul className="max-h-64 overflow-auto border border-white/20 rounded p-3 space-y-2 bg-black/20">
         {messages.map((m) => (
-          <li key={m.id} className="text-white">
+          <li key={m.id} className="font-heading text-white">
             <span className="font-semibold">{m.username}:</span> {m.message}
           </li>
         ))}

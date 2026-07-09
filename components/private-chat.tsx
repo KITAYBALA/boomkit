@@ -282,18 +282,18 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
     }
 
     return (
-        <div className="flex flex-col md:flex-row h-[650px] bg-slate-950/40 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-in slide-in-from-bottom-5 duration-700">
+        <div className="flex flex-col md:flex-row h-[650px] blooket-card overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-in slide-in-from-bottom-5 duration-700">
             <div className="flex flex-col md:flex-row grow overflow-hidden w-full">
 
                 {/* Sidebar: Chat List */}
                 <div className="w-full md:w-80 border-b md:border-b-0 md:border-r border-white/10 flex flex-col bg-black/30">
                     <div className="p-6 border-b border-white/10 flex items-center justify-between">
                         <div className="space-y-0.5">
-                            <h2 className="text-lg font-black text-white tracking-tight flex items-center gap-2">
+                            <h2 className="font-heading text-lg font-black text-white tracking-tight flex items-center gap-2">
                                 <MessageSquareIcon className="h-4 w-4 text-purple-400" />
                                 SECURE CHATS
                             </h2>
-                            <p className="text-[9px] text-white/30 font-black uppercase tracking-widest">Downlink channels</p>
+                            <p className="font-heading text-[9px] text-white/30 font-black uppercase tracking-widest">Downlink channels</p>
                         </div>
                         <Button
                             size="icon"
@@ -310,7 +310,7 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
                             {conversations.length === 0 ? (
                                 <div className="py-20 text-center space-y-3 opacity-20 bg-black/10 rounded-2xl border border-dashed border-white/5 m-2">
                                     <MessageCircleIcon className="h-8 w-8 mx-auto text-purple-400 animate-pulse" />
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-white">No active decodes</p>
+                                    <p className="font-heading text-[10px] font-black uppercase tracking-widest text-white">No active decodes</p>
                                 </div>
                             ) : (
                                 conversations.map(conv => (
@@ -340,7 +340,7 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
                                                 </div>
                                                 <div className="flex-1 min-w-0">
                                                     <p className="font-black text-sm truncate tracking-tight">{getChatTitle(conv)}</p>
-                                                    <p className="text-[9px] text-white/30 font-bold uppercase tracking-wider mt-0.5">
+                                                    <p className="font-heading text-[9px] text-white/30 font-bold uppercase tracking-wider mt-0.5">
                                                         {conv.members.length} operators
                                                     </p>
                                                 </div>
@@ -360,7 +360,7 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
                                         </button>
 
                                         {showChatActions === conv.id && (
-                                            <div className="absolute right-0 top-full mt-2 w-48 bg-slate-950 border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 origin-top-right">
+                                            <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 origin-top-right">
                                                 <div className="p-1.5 space-y-1">
                                                     {!conv.is_group && (
                                                         (() => {
@@ -385,7 +385,7 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
                                                                     {isBlocked ? (
                                                                         <>
                                                                             <ShieldCheckIcon className="h-3.5 w-3.5 text-green-400" />
-                                                                            <span className="text-green-400">Unblock User</span>
+                                                                            <span className="font-heading text-green-400">Unblock User</span>
                                                                         </>
                                                                     ) : (
                                                                         <>
@@ -428,8 +428,8 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
                                 <ShieldCheckIcon className="h-10 w-10 text-purple-400 animate-pulse" />
                             </div>
                             <div className="max-w-sm space-y-2 relative z-10">
-                                <h3 className="text-2xl font-black text-white tracking-tight">ENCRYPTED DOWNLINK</h3>
-                                <p className="text-xs text-white/40 font-semibold leading-relaxed uppercase tracking-wider max-w-xs mx-auto">
+                                <h3 className="font-heading text-2xl font-black text-white tracking-tight">ENCRYPTED DOWNLINK</h3>
+                                <p className="font-heading text-xs text-white/40 font-semibold leading-relaxed uppercase tracking-wider max-w-xs mx-auto">
                                     Private quantum links are completely encrypted. Peer-to-peer connection bypasses global logs.
                                 </p>
                             </div>
@@ -453,12 +453,12 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
                                         {activeConversation.is_group ? <UsersIcon className="h-5 w-5" /> : <MessageSquareIcon className="h-5 w-5" />}
                                     </div>
                                     <div>
-                                        <h3 className="text-base font-black text-white tracking-tight leading-none mb-1">
+                                        <h3 className="font-heading text-base font-black text-white tracking-tight leading-none mb-1">
                                             {getChatTitle(activeConversation)}
                                         </h3>
                                         <div className="flex items-center gap-2">
                                             <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                            <span className="text-[9px] font-black text-white/30 uppercase tracking-widest truncate max-w-xs">{activeConversation.members.join(', ')}</span>
+                                            <span className="font-heading text-[9px] font-black text-white/30 uppercase tracking-widest truncate max-w-xs">{activeConversation.members.join(', ')}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -506,11 +506,11 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
                                                             ? 'bg-gradient-to-br from-purple-900/20 to-indigo-950/20 border-purple-500/30 text-white rounded-tr-none shadow-[0_0_15px_rgba(168,85,247,0.05)]'
                                                             : 'bg-gradient-to-br from-slate-900/60 to-slate-950/80 border-white/10 text-white/90 rounded-tl-none'
                                                     }`}>
-                                                        <p className="text-sm leading-relaxed whitespace-pre-wrap break-words font-medium">
+                                                        <p className="font-heading text-sm leading-relaxed whitespace-pre-wrap break-words font-medium">
                                                             {msg.message}
                                                         </p>
                                                     </div>
-                                                    <span className="text-[8px] text-white/20 mt-1 font-bold">
+                                                    <span className="font-heading text-[8px] text-white/20 mt-1 font-bold">
                                                         {new Date(msg.inserted_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                                     </span>
                                                 </div>
@@ -522,7 +522,7 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
                             </ScrollArea>
 
                             {/* Message Input */}
-                            <div className="p-6 bg-slate-950/30 border-t border-white/10 backdrop-blur-md">
+                            <div className="p-6 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/30 border-t border-white/10 backdrop-blur-md">
                                 <div className="relative group">
                                     <div className="absolute -inset-1 bg-gradient-to-r from-purple-600/50 to-blue-600/50 rounded-3xl blur opacity-10 group-focus-within:opacity-20 transition duration-500" />
                                     <div className="relative flex items-center bg-black/60 backdrop-blur-xl border border-white/10 rounded-2xl p-2 pl-5 shadow-2xl">
@@ -559,8 +559,8 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
                         <div className="p-10 space-y-8">
                             <div className="flex items-center justify-between">
                                 <div>
-                                    <h3 className="text-3xl font-black text-white tracking-tight">Initiate Transmission</h3>
-                                    <p className="text-white/30 text-sm font-bold uppercase tracking-widest mt-1">Select recipients for private or group chat</p>
+                                    <h3 className="font-heading text-3xl font-black text-white tracking-tight">Initiate Transmission</h3>
+                                    <p className="font-heading text-white/30 text-sm font-bold uppercase tracking-widest mt-1">Select recipients for private or group chat</p>
                                 </div>
                                 <Button variant="ghost" size="icon" onClick={() => setShowNewChat(false)} className="rounded-full h-12 w-12 text-white/20 hover:text-white">
                                     <XIcon className="h-8 w-8" />
@@ -600,8 +600,8 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
                                                         {user.username[0].toUpperCase()}
                                                     </div>
                                                     <div>
-                                                        <p className="text-xs font-black text-white tracking-tight">{user.username}</p>
-                                                        <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{user.role || 'Player'}</span>
+                                                        <p className="font-heading text-xs font-black text-white tracking-tight">{user.username}</p>
+                                                        <span className="font-heading text-[10px] font-bold text-white/20 uppercase tracking-widest">{user.role || 'Player'}</span>
                                                     </div>
                                                 </div>
                                                 {selectedUsers.includes(user.id) && (
@@ -616,7 +616,7 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
 
                                 {selectedUsers.length > 1 && (
                                     <div className="space-y-3 animate-in fade-in slide-in-from-top-2">
-                                        <label className="text-xs font-black text-white/30 uppercase tracking-[0.2em] ml-1">Group Identifier (Optional)</label>
+                                        <label className="font-heading text-xs font-black text-white/30 uppercase tracking-[0.2em] ml-1">Group Identifier (Optional)</label>
                                         <Input
                                             placeholder="e.g. The Syndicate"
                                             value={groupName}

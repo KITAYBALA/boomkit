@@ -42,14 +42,14 @@ export function BlobUploader() {
         {isPending ? "Uploading..." : "Upload"}
       </Button>
       {ui.status === "success" ? (
-        <p className="text-sm">
+        <p className="font-heading text-sm">
           Uploaded:{" "}
           <a className="underline text-primary" href={ui.url} target="_blank" rel="noreferrer">
             {ui.url}
           </a>
         </p>
       ) : null}
-      {ui.status === "error" ? <p className="text-sm text-red-600">Error: {ui.message}</p> : null}
+      {ui.status === "error" ? <p className="font-heading text-sm text-red-600">Error: {ui.message}</p> : null}
     </form>
   )
 }

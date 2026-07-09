@@ -336,7 +336,7 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
           <Card className="bg-green-500 border-green-400 shadow-lg">
             <CardContent className="p-4 flex items-center gap-3">
               <BellIcon className="h-6 w-6 text-white animate-pulse" />
-              <span className="text-white font-bold text-lg">New Trade Offer!</span>
+              <span className="font-heading text-white font-bold text-lg">New Trade Offer!</span>
             </CardContent>
           </Card>
         </div>
@@ -344,13 +344,13 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
 
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-white/5 backdrop-blur-xl p-6 rounded-3xl border border-white/10 shadow-2xl">
         <div>
-          <h1 className="text-4xl font-black text-white flex items-center gap-3 tracking-tight">
+          <h1 className="font-heading text-4xl font-black text-white flex items-center gap-3 tracking-tight">
             <div className="p-2 bg-purple-600 rounded-xl shadow-lg shadow-purple-500/20">
               <ArrowRightLeftIcon className="h-8 w-8 text-white" />
             </div>
             Trading
           </h1>
-          <p className="text-purple-200/60 mt-2 font-medium">Exchange Booms and Tokens with the community</p>
+          <p className="font-heading text-purple-200/60 mt-2 font-medium">Exchange Booms and Tokens with the community</p>
         </div>
         <Button
           onClick={() => setShowNewTrade(true)}
@@ -367,7 +367,7 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
       {incomingTrades.length > 0 && (
         <Card className="bg-yellow-500/20 border-yellow-500">
           <CardContent className="py-3">
-            <p className="text-yellow-300 font-medium">
+            <p className="font-heading text-yellow-300 font-medium">
               You have {incomingTrades.length} incoming trade offer{incomingTrades.length > 1 ? "s" : ""}!
             </p>
           </CardContent>
@@ -487,13 +487,13 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
             <CardHeader className="border-b border-white/5 pb-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-2xl font-bold text-white flex items-center gap-3">
+                  <CardTitle className="font-heading text-2xl font-bold text-white flex items-center gap-3">
                     <div className="p-2 bg-purple-500/20 rounded-lg">
                       <PlusIcon className="h-6 w-6 text-purple-400" />
                     </div>
                     Create New Trade
                   </CardTitle>
-                  <CardDescription className="text-purple-300/60 mt-1">Select a player and choose items to swap</CardDescription>
+                  <CardDescription className="font-heading text-purple-300/60 mt-1">Select a player and choose items to swap</CardDescription>
                 </div>
                 <Button variant="ghost" size="icon" onClick={() => setShowNewTrade(false)} className="rounded-full text-white/40 hover:text-white hover:bg-white/5">
                   <XIcon className="h-6 w-6" />
@@ -505,7 +505,7 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
                 {/* User Selection */}
                 {!selectedUser ? (
                   <div className="animate-in slide-in-from-bottom-4 duration-500">
-                    <h3 className="text-lg font-bold text-white mb-4">Who are you trading with?</h3>
+                    <h3 className="font-heading text-lg font-bold text-white mb-4">Who are you trading with?</h3>
                     <div className="relative mb-6">
                       <Input
                         placeholder="Search by username..."
@@ -550,8 +550,8 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
                           <UserIcon className="h-6 w-6 text-white" />
                         </div>
                         <div>
-                          <p className="text-xs text-purple-300/60 uppercase font-bold tracking-widest">Trading Session</p>
-                          <p className="text-lg font-bold text-white flex items-center gap-1">
+                          <p className="font-heading text-xs text-purple-300/60 uppercase font-bold tracking-widest">Trading Session</p>
+                          <p className="font-heading text-lg font-bold text-white flex items-center gap-1">
                             {selectedUser.clan_tag && (
                               <span className="inline-block text-xs font-black tracking-tight">
                                 <span className={selectedUser.clan_tag_color || 'text-purple-400'}>
@@ -585,14 +585,14 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
 
                       {/* Your Offer */}
                       <div className="space-y-6 bg-white/5 p-6 rounded-3xl border border-white/5">
-                        <h3 className="text-sm font-black text-white/40 uppercase tracking-[0.2em] flex items-center gap-2">
+                        <h3 className="font-heading text-sm font-black text-white/40 uppercase tracking-[0.2em] flex items-center gap-2">
                           <div className="w-2 h-2 rounded-full bg-green-500" />
                           Your Offer
                         </h3>
 
                         <div className="space-y-4">
                           <div className="bg-black/20 rounded-2xl p-4 min-h-[120px]">
-                            <p className="text-xs text-white/60 mb-3 font-bold uppercase">Booms to give</p>
+                            <p className="font-heading text-xs text-white/60 mb-3 font-bold uppercase">Booms to give</p>
                             <div className="flex flex-wrap gap-2">
                               {Object.entries(myOfferedBooms).map(([boom, qty]) => (
                                 <Badge
@@ -604,7 +604,7 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
                                 </Badge>
                               ))}
                               {Object.keys(myOfferedBooms).length === 0 && (
-                                <p className="text-sm text-white/20 italic">No Booms selected</p>
+                                <p className="font-heading text-sm text-white/20 italic">No Booms selected</p>
                               )}
                             </div>
                           </div>
@@ -626,7 +626,7 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
                           </div>
 
                           <div className="p-4 bg-white/5 rounded-2xl">
-                            <p className="text-[10px] text-white/30 mb-3 font-black uppercase tracking-widest text-center">Tap inventory to add</p>
+                            <p className="font-heading text-[10px] text-white/30 mb-3 font-black uppercase tracking-widest text-center">Tap inventory to add</p>
                             <div className="flex flex-wrap gap-1.5 justify-center max-h-32 overflow-y-auto pr-2">
                               {Object.entries(currentUser.booms || {}).map(([boom, qty]) => (
                                 <button
@@ -648,14 +648,14 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
 
                       {/* Their Request */}
                       <div className="space-y-6 bg-white/5 p-6 rounded-3xl border border-white/5">
-                        <h3 className="text-sm font-black text-white/40 uppercase tracking-[0.2em] flex items-center md:flex-row-reverse gap-2">
+                        <h3 className="font-heading text-sm font-black text-white/40 uppercase tracking-[0.2em] flex items-center md:flex-row-reverse gap-2">
                           <div className="w-2 h-2 rounded-full bg-blue-500" />
                           Their Give
                         </h3>
 
                         <div className="space-y-4">
                           <div className="bg-black/20 rounded-2xl p-4 min-h-[120px]">
-                            <p className="text-xs text-white/60 mb-3 font-bold uppercase md:text-right">Booms you receive</p>
+                            <p className="font-heading text-xs text-white/60 mb-3 font-bold uppercase md:text-right">Booms you receive</p>
                             <div className="flex flex-wrap md:justify-end gap-2">
                               {Object.entries(theirRequestedBooms).map(([boom, qty]) => (
                                 <Badge
@@ -667,7 +667,7 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
                                 </Badge>
                               ))}
                               {Object.keys(theirRequestedBooms).length === 0 && (
-                                <p className="text-sm text-white/20 italic">No Booms requested</p>
+                                <p className="font-heading text-sm text-white/20 italic">No Booms requested</p>
                               )}
                             </div>
                           </div>
@@ -689,7 +689,7 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
                           </div>
 
                           <div className="p-4 bg-white/5 rounded-2xl">
-                            <p className="text-[10px] text-white/30 mb-3 font-black uppercase tracking-widest text-center">{selectedUser.username}&apos;s Inventory</p>
+                            <p className="font-heading text-[10px] text-white/30 mb-3 font-black uppercase tracking-widest text-center">{selectedUser.username}&apos;s Inventory</p>
                             <div className="flex flex-wrap gap-1.5 justify-center max-h-32 overflow-y-auto pr-2">
                               {Object.entries(selectedUser.booms || {}).map(([boom, qty]) => (
                                 <button
@@ -732,7 +732,7 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
                 <div className="flex items-center gap-6 text-white/40">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
-                    <span className="text-xs font-bold uppercase tracking-wider">Trading Securely</span>
+                    <span className="font-heading text-xs font-bold uppercase tracking-wider">Trading Securely</span>
                   </div>
                 </div>
                 <div className="flex w-full md:w-auto gap-3">
@@ -775,8 +775,8 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
               </div>
 
               <div className="space-y-2">
-                <h3 className="text-2xl font-black text-white tracking-tight">{statusModal.title}</h3>
-                <p className="text-white/40 text-sm font-medium leading-relaxed">{statusModal.message}</p>
+                <h3 className="font-heading text-2xl font-black text-white tracking-tight">{statusModal.title}</h3>
+                <p className="font-heading text-white/40 text-sm font-medium leading-relaxed">{statusModal.message}</p>
               </div>
 
               <Button
@@ -913,7 +913,7 @@ function TradeCard({
                     })()}
                     {trade.sender_username}
                   </span>
-                  <span className="text-xs text-purple-200 ml-auto font-bold tracking-tighter">GIVES</span>
+                  <span className="font-heading text-xs text-purple-200 ml-auto font-bold tracking-tighter">GIVES</span>
                 </div>
 
                 <div className="flex flex-wrap gap-1.5 min-h-[2rem]">
@@ -929,7 +929,7 @@ function TradeCard({
                     </Badge>
                   )}
                   {Object.keys(trade.sender_booms).length === 0 && trade.sender_tokens === 0 && (
-                    <span className="text-gray-500 text-xs italic py-1 px-2">Nothing offered</span>
+                    <span className="font-heading text-gray-500 text-xs italic py-1 px-2">Nothing offered</span>
                   )}
                 </div>
               </div>
@@ -960,7 +960,7 @@ function TradeCard({
                     })()}
                     {trade.receiver_username}
                   </span>
-                  <span className="text-xs text-blue-200 mr-auto md:ml-auto md:mr-0 font-bold tracking-tighter">RECEIVES</span>
+                  <span className="font-heading text-xs text-blue-200 mr-auto md:ml-auto md:mr-0 font-bold tracking-tighter">RECEIVES</span>
                 </div>
                 <div className="flex flex-wrap md:justify-end gap-1.5 min-h-[2rem]">
                   {Object.entries(trade.receiver_booms).map(([boom, qty]) => (
@@ -975,7 +975,7 @@ function TradeCard({
                     </Badge>
                   )}
                   {Object.keys(trade.receiver_booms).length === 0 && trade.receiver_tokens === 0 && (
-                    <span className="text-gray-500 text-xs italic py-1 px-2">Nothing requested</span>
+                    <span className="font-heading text-gray-500 text-xs italic py-1 px-2">Nothing requested</span>
                   )}
                 </div>
               </div>
@@ -983,9 +983,9 @@ function TradeCard({
 
             {trade.message && (
               <div className="mt-4 flex items-start gap-2 text-purple-200/80 bg-purple-500/5 p-3 rounded-xl border border-purple-500/10">
-                <span className="text-purple-400 mt-0.5">“</span>
-                <p className="text-sm italic flex-1 leading-relaxed">{trade.message}</p>
-                <span className="text-purple-400 self-end">”</span>
+                <span className="font-heading text-purple-400 mt-0.5">“</span>
+                <p className="font-heading text-sm italic flex-1 leading-relaxed">{trade.message}</p>
+                <span className="font-heading text-purple-400 self-end">”</span>
               </div>
             )}
           </div>

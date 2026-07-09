@@ -129,10 +129,10 @@ export default function DailySpinWheel({ onWin, isSpinning, setIsSpinning, canSp
 
             {result && (
                 <div className="animate-bounce flex flex-col items-center gap-2">
-                    <p className="text-white/60 font-bold uppercase tracking-widest text-sm">You won</p>
+                    <p className="font-heading text-white/60 font-bold uppercase tracking-widest text-sm">You won</p>
                     <div className="flex items-center gap-3">
                         <CoinsIcon className="w-8 h-8 text-yellow-500" />
-                        <span className="text-5xl font-black text-white">{result}</span>
+                        <span className="font-heading text-5xl font-black text-white">{result}</span>
                     </div>
                 </div>
             )}

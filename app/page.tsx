@@ -4712,7 +4712,7 @@ const handlePackAction = (packId: string) => {
     const showcaseBooms = PACKS.flatMap(p => p.booms).slice(0, 16) // Take first 16 for grid
 
     return (
-      <div className="min-h-screen bg-[#050212] flex flex-col font-sans relative overflow-hidden">
+      <div className="min-h-screen blooket-bg bg-sky-50 dark:bg-slate-900 flex flex-col  relative overflow-hidden">
         {/* Glowing Nebula Backgrounds */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-purple-600/10 blur-[130px] nebula-float-1" />
@@ -4720,8 +4720,8 @@ const handlePackAction = (packId: string) => {
         </div>
 
         {/* Navbar */}
-        <nav className="flex justify-between items-center p-6 px-10 backdrop-blur-md bg-slate-950/20 border-b border-white/5 relative z-10">
-          <h1 className="text-3xl font-black text-gradient-purple-pink tracking-tight hover:scale-[1.02] transition-transform duration-300 cursor-pointer">
+        <nav className="flex justify-between items-center p-6 px-10 backdrop-blur-md bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/20 border-b border-white/5 relative z-10">
+          <h1 className="font-heading text-3xl font-black text-pink-600 dark:text-pink-400 font-black tracking-tight hover:scale-[1.02] transition-transform duration-300 cursor-pointer">
             Boomkit
           </h1>
           <div className="space-x-4">
@@ -4745,13 +4745,13 @@ const handlePackAction = (packId: string) => {
 
           {/* Left Content */}
           <div className="flex-1 space-y-6 text-center md:text-left max-w-xl">
-            <h1 className="text-6xl md:text-8xl font-black text-white leading-tight tracking-tighter">
+            <h1 className="font-heading text-6xl md:text-8xl font-black text-white leading-tight tracking-tighter">
               Boomkit
             </h1>
-            <p className="text-3xl md:text-5xl font-black text-gradient-purple-pink">
+            <p className="font-heading text-3xl md:text-5xl font-black text-pink-600 dark:text-pink-400 font-black">
               The Ultimate Emoji Trading Arena
             </p>
-            <p className="text-slate-400 text-lg md:text-xl max-w-md mx-auto md:mx-0 leading-relaxed">
+            <p className="font-heading text-slate-400 text-lg md:text-xl max-w-md mx-auto md:mx-0 leading-relaxed">
               Collect rare emojis, dominate the market, and climb the ranks in the world's premier emoji-based trading experience.
             </p>
             <div className="pt-4 flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
@@ -4765,7 +4765,7 @@ const handlePackAction = (packId: string) => {
           </div>
 
           {/* Right Content - Boom Grid */}
-          <div className="flex-1 grid grid-cols-4 gap-4 max-w-lg p-6 bg-slate-950/40 rounded-[2.5rem] backdrop-blur-xl border border-white/10 rotate-3 hover:rotate-0 transition-all duration-700 shadow-2xl shadow-purple-950/10">
+          <div className="flex-1 grid grid-cols-4 gap-4 max-w-lg p-6 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/40 rounded-[2.5rem] backdrop-blur-xl border border-white/10 rotate-3 hover:rotate-0 transition-all duration-700 shadow-2xl shadow-purple-950/10">
             {showcaseBooms.map((boom, idx) => (
               <div
                 key={idx}
@@ -4780,7 +4780,7 @@ const handlePackAction = (packId: string) => {
         </main>
 
         {/* Footer / Secret Access */}
-        <footer className="p-6 text-center text-slate-600 text-xs border-t border-white/5 bg-slate-950/10 relative z-10">
+        <footer className="p-6 text-center text-slate-600 text-xs border-t border-white/5 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/10 relative z-10">
           <p>&copy; 2026 Boomkit. All rights reserved.</p>
         </footer>
       </div>
@@ -4789,20 +4789,20 @@ const handlePackAction = (packId: string) => {
 
   if (currentView === "register") {
     return (
-      <div className="min-h-screen bg-[#050212] flex items-center justify-center p-4 relative overflow-hidden font-sans">
+      <div className="min-h-screen blooket-bg bg-sky-50 dark:bg-slate-900 flex items-center justify-center p-4 relative overflow-hidden ">
         {/* Glowing Nebula Backgrounds */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-purple-600/10 blur-[130px] nebula-float-1" />
           <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full bg-pink-600/10 blur-[130px] nebula-float-2" />
         </div>
 
-        <Card className="w-full max-w-md bg-slate-950/45 backdrop-blur-xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-[2rem] overflow-hidden relative z-10">
-          <CardHeader className="text-center relative overflow-hidden pb-8">
+        <Card className="w-full max-w-md blooket-card overflow-hidden relative z-10">
+          <CardHeader className="font-heading text-center relative overflow-hidden pb-8">
             <div className="absolute inset-0 bg-gradient-to-b from-purple-600/10 to-transparent" />
-            <CardTitle className="text-4xl font-black text-gradient-purple-pink relative z-10 drop-shadow-md pb-1">
+            <CardTitle className="font-heading text-4xl font-black text-pink-600 dark:text-pink-400 font-black relative z-10 drop-shadow-md pb-1">
               Join Boomkit!
             </CardTitle>
-            <CardDescription className="text-white/60 font-medium relative z-10">Start your adventure today</CardDescription>
+            <CardDescription className="font-heading text-white/60 font-medium relative z-10">Start your adventure today</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 pt-0 relative z-10">
             {/* Promo Code / Discord Key Notice */}
@@ -4813,24 +4813,24 @@ const handlePackAction = (packId: string) => {
                 </svg>
               </div>
               <div className="space-y-1 text-left">
-                <div className="text-[11px] font-black tracking-wider text-indigo-400 uppercase">Need an Access Key?</div>
-                <p className="text-[10px] text-white/70 leading-relaxed font-medium">
+                <div className="font-heading text-[11px] font-black tracking-wider text-indigo-400 uppercase">Need an Access Key?</div>
+                <p className="font-heading text-[10px] text-white/70 leading-relaxed font-medium">
                   Registering? Join our{" "}
                   <a
                     href={process.env.NEXT_PUBLIC_DISCORD_INVITE_URL || "https://discord.gg/uqbPsEpyhE"}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-cyan-400 hover:text-cyan-300 underline font-bold transition-colors"
+                    className="font-heading text-cyan-400 hover:text-cyan-300 underline font-bold transition-colors"
                   >
                     Discord server
                   </a>{" "}
-                  to generate your access key via <code className="text-pink-400 bg-black/40 px-1 py-0.5 rounded font-mono text-[9px]">/getkey</code> and claim active promo codes!
+                  to generate your access key via <code className="font-heading text-pink-400 bg-black/40 px-1 py-0.5 rounded font-mono text-[9px]">/getkey</code> and claim active promo codes!
                 </p>
               </div>
             </div>
             <form onSubmit={handleRegister} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="username" className="text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Username</Label>
+                <Label htmlFor="username" className="font-heading text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Username</Label>
                 <div className="relative group">
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl blur opacity-20 group-focus-within:opacity-100 transition duration-500" />
                   <Input
@@ -4844,7 +4844,7 @@ const handlePackAction = (packId: string) => {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Password</Label>
+                <Label htmlFor="password" className="font-heading text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Password</Label>
                 <div className="relative group">
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl blur opacity-20 group-focus-within:opacity-100 transition duration-500" />
                   <Input
@@ -4860,7 +4860,7 @@ const handlePackAction = (packId: string) => {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="age" className="text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Age (Minimum 10)</Label>
+                <Label htmlFor="age" className="font-heading text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Age (Minimum 10)</Label>
                 <div className="relative group">
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl blur opacity-20 group-focus-within:opacity-100 transition duration-500" />
                   <Input
@@ -4877,7 +4877,7 @@ const handlePackAction = (packId: string) => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="reason" className="text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Application Reason</Label>
+                <Label htmlFor="reason" className="font-heading text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Application Reason</Label>
                 <div className="relative group">
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl blur opacity-20 group-focus-within:opacity-100 transition duration-500" />
                   <textarea
@@ -4892,7 +4892,7 @@ const handlePackAction = (packId: string) => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="accessKey" className="text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Discord Access Key</Label>
+                <Label htmlFor="accessKey" className="font-heading text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Discord Access Key</Label>
                 <div className="relative group">
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl blur opacity-20 group-focus-within:opacity-100 transition duration-500" />
                   <Input
@@ -4918,12 +4918,12 @@ const handlePackAction = (packId: string) => {
                   />
                   <CheckIcon className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
                 </div>
-                <label htmlFor="tos" className="text-sm font-medium text-white/90 cursor-pointer select-none">
+                <label htmlFor="tos" className="font-heading text-sm font-medium text-white/90 cursor-pointer select-none">
                   I accept the{' '}
                   <button
                     type="button"
                     onClick={() => setShowTosModal(true)}
-                    className="text-cyan-300 hover:text-cyan-200 underline underline-offset-2 font-bold transition-colors"
+                    className="font-heading text-cyan-300 hover:text-cyan-200 underline underline-offset-2 font-bold transition-colors"
                   >
                     Terms of Service
                   </button>
@@ -4946,11 +4946,11 @@ const handlePackAction = (packId: string) => {
             </form>
 
             <div className="mt-6 text-center space-y-3">
-              <Button variant="link" className="text-white/60 hover:text-white" onClick={() => setCurrentView("login")}>
+              <Button variant="link" className="font-heading text-white/60 hover:text-white" onClick={() => setCurrentView("login")}>
                 Already have an account? Login
               </Button>
               <div className="w-full h-px bg-white/10" />
-              <Button variant="link" className="text-white/40 hover:text-white/80 text-xs" onClick={() => setCurrentView("owner-access")}>
+              <Button variant="link" className="font-heading text-white/40 hover:text-white/80 text-xs" onClick={() => setCurrentView("owner-access")}>
                 Back to Main Menu
               </Button>
             </div>
@@ -4962,17 +4962,17 @@ const handlePackAction = (packId: string) => {
           <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
             <Card className="w-full max-w-2xl bg-[#0e0a22]/95 border-white/10 shadow-2xl max-h-[80vh] flex flex-col rounded-[2rem] overflow-hidden">
               <CardHeader className="border-b border-white/10 bg-white/5">
-                <CardTitle className="text-2xl font-black text-white flex items-center gap-2">
+                <CardTitle className="font-heading text-2xl font-black text-white flex items-center gap-2">
                   <FileTextIcon className="w-6 h-6 text-purple-400" />
                   Terms of Service
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex-1 overflow-y-auto p-6 space-y-4 text-white/80 leading-relaxed text-sm premium-scrollbar">
-                <p><strong className="text-white">1. Respect Required:</strong> Treat all players with kindness. No bullying, hate speech, or harassment.</p>
-                <p><strong className="text-white">2. No Cheating:</strong> Using bots, scripts, or unfair advantages will result in an immediate ban.</p>
-                <p><strong className="text-white">3. Safety First:</strong> Do not share personal information (real name, address, phone number) in public chats.</p>
-                <p><strong className="text-white">4. Appropriate Content:</strong> No inappropriate language or themes. This is a game for everyone.</p>
-                <p><strong className="text-white">5. Account Responsibility:</strong> You are responsible for your account security. Do not share your password.</p>
+                <p><strong className="font-heading text-white">1. Respect Required:</strong> Treat all players with kindness. No bullying, hate speech, or harassment.</p>
+                <p><strong className="font-heading text-white">2. No Cheating:</strong> Using bots, scripts, or unfair advantages will result in an immediate ban.</p>
+                <p><strong className="font-heading text-white">3. Safety First:</strong> Do not share personal information (real name, address, phone number) in public chats.</p>
+                <p><strong className="font-heading text-white">4. Appropriate Content:</strong> No inappropriate language or themes. This is a game for everyone.</p>
+                <p><strong className="font-heading text-white">5. Account Responsibility:</strong> You are responsible for your account security. Do not share your password.</p>
                 <p className="pt-4 text-xs text-white/40 italic">Last updated: January 2026</p>
               </CardContent>
               <div className="p-6 border-t border-white/10 bg-white/5 flex justify-end">
@@ -4995,20 +4995,20 @@ const handlePackAction = (packId: string) => {
 
   if (currentView === "login") {
     return (
-      <div className="min-h-screen bg-[#050212] flex items-center justify-center p-4 relative overflow-hidden font-sans">
+      <div className="min-h-screen blooket-bg bg-sky-50 dark:bg-slate-900 flex items-center justify-center p-4 relative overflow-hidden ">
         {/* Glowing Nebula Backgrounds */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
           <div className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-purple-600/10 blur-[130px] nebula-float-1" />
           <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full bg-pink-600/10 blur-[130px] nebula-float-2" />
         </div>
 
-        <Card className="w-full max-w-md bg-slate-950/45 backdrop-blur-xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-[2rem] overflow-hidden relative z-10">
-          <CardHeader className="text-center relative overflow-hidden pb-8">
+        <Card className="w-full max-w-md blooket-card overflow-hidden relative z-10">
+          <CardHeader className="font-heading text-center relative overflow-hidden pb-8">
             <div className="absolute inset-0 bg-gradient-to-b from-blue-600/10 to-transparent" />
-            <CardTitle className="text-4xl font-black text-gradient-cyan-blue relative z-10 drop-shadow-md pb-1">
+            <CardTitle className="font-heading text-4xl font-black text-blue-600 dark:text-blue-400 font-black relative z-10 drop-shadow-md pb-1">
               Welcome Back!
             </CardTitle>
-            <CardDescription className="text-white/60 font-medium relative z-10">Continue your quiz journey</CardDescription>
+            <CardDescription className="font-heading text-white/60 font-medium relative z-10">Continue your quiz journey</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6 pt-0 relative z-10">
             {/* Promo Code / Discord Key Notice */}
@@ -5019,14 +5019,14 @@ const handlePackAction = (packId: string) => {
                 </svg>
               </div>
               <div className="space-y-1 text-left">
-                <div className="text-[11px] font-black tracking-wider text-indigo-400 uppercase">Join our Discord</div>
-                <p className="text-[10px] text-white/70 leading-relaxed font-medium">
+                <div className="font-heading text-[11px] font-black tracking-wider text-indigo-400 uppercase">Join our Discord</div>
+                <p className="font-heading text-[10px] text-white/70 leading-relaxed font-medium">
                   Need an access key or looking for active promo codes? Join the{" "}
                   <a
                     href={process.env.NEXT_PUBLIC_DISCORD_INVITE_URL || "https://discord.gg/uqbPsEpyhE"}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-cyan-400 hover:text-cyan-300 underline font-bold transition-colors"
+                    className="font-heading text-cyan-400 hover:text-cyan-300 underline font-bold transition-colors"
                   >
                     Discord community
                   </a>{" "}
@@ -5036,7 +5036,7 @@ const handlePackAction = (packId: string) => {
             </div>
             <form onSubmit={handleLogin} className="space-y-5">
               <div className="space-y-2">
-                <Label htmlFor="loginUsername" className="text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Username</Label>
+                <Label htmlFor="loginUsername" className="font-heading text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Username</Label>
                 <div className="relative group">
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl blur opacity-20 group-focus-within:opacity-100 transition duration-500" />
                   <Input
@@ -5050,7 +5050,7 @@ const handlePackAction = (packId: string) => {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="loginPassword" className="text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Password</Label>
+                <Label htmlFor="loginPassword" className="font-heading text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Password</Label>
                 <div className="relative group">
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl blur opacity-20 group-focus-within:opacity-100 transition duration-500" />
                   <Input
@@ -5080,11 +5080,11 @@ const handlePackAction = (packId: string) => {
               </Button>
             </form>
             <div className="mt-6 text-center space-y-3">
-              <Button variant="link" className="text-white/60 hover:text-white" onClick={() => setCurrentView("register")}>
+              <Button variant="link" className="font-heading text-white/60 hover:text-white" onClick={() => setCurrentView("register")}>
                 Need an account? Register
               </Button>
               <div className="w-full h-px bg-white/10" />
-              <Button variant="link" className="text-white/40 hover:text-white/80 text-xs" onClick={() => setCurrentView("owner-access")}>
+              <Button variant="link" className="font-heading text-white/40 hover:text-white/80 text-xs" onClick={() => setCurrentView("owner-access")}>
                 Back to Main Menu
               </Button>
             </div>
@@ -5096,7 +5096,7 @@ const handlePackAction = (packId: string) => {
 
   return (
     <div
-      className="min-h-screen flex transition-colors duration-500 bg-[#050212] text-slate-100 font-sans relative overflow-hidden w-full z-10"
+      className="min-h-screen blooket-bg flex transition-colors duration-500 bg-sky-50 dark:bg-slate-900 text-slate-100  relative overflow-hidden w-full z-10"
       style={
         themeMode === "custom"
           ? { background: customThemeColor }
@@ -5136,7 +5136,7 @@ const handlePackAction = (packId: string) => {
       >
         {/* Logo */}
         <div className="p-5 text-center flex items-center justify-between border-b border-white/5">
-          <h1 className="text-2xl font-black text-gradient-purple-pink tracking-tight">Boomkit</h1>
+          <h1 className="font-heading text-2xl font-black text-pink-600 dark:text-pink-400 font-black tracking-tight">Boomkit</h1>
           {/* Close button on mobile */}
           <button onClick={() => setSidebarOpen(false)} className="md:hidden p-1 rounded-lg hover:bg-white/10">
             <XIcon className="h-5 w-5" />
@@ -5186,7 +5186,7 @@ const handlePackAction = (packId: string) => {
                   <div className="absolute right-0 top-0 bottom-0 w-1 bg-gradient-to-b from-purple-500 to-pink-500 animate-pulse" />
                 )}
                 <Icon className={`h-4 w-4 shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6 ${isActive ? "text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]" : "text-slate-500"}`} />
-                <span className="text-xs uppercase tracking-wider">{item.label}</span>
+                <span className="font-heading text-xs uppercase tracking-wider">{item.label}</span>
                 {item.id === "chat" && chatNotificationCount > 0 && (
                   <span className="ml-auto w-5 h-5 bg-red-600 border border-red-500 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-[0_0_8px_rgba(220,38,38,0.6)] animate-pulse shrink-0">
                     {chatNotificationCount}
@@ -5204,7 +5204,7 @@ const handlePackAction = (packId: string) => {
             >
               <div className="flex items-center gap-3">
                 <SparklesIcon className="h-4 w-4 text-slate-500" />
-                <span className="text-xs uppercase tracking-wider text-slate-400">More</span>
+                <span className="font-heading text-xs uppercase tracking-wider text-slate-400">More</span>
               </div>
               {moreOpen ? (
                 <ChevronUpIcon className="h-4 w-4 text-slate-400" />
@@ -5237,7 +5237,7 @@ const handlePackAction = (packId: string) => {
                       }`}
                     >
                       <SubIcon className={`h-3.5 w-3.5 shrink-0 transition-transform duration-300 group-hover:scale-110 ${isSubActive ? "text-purple-400" : "text-slate-500"}`} />
-                      <span className="text-[11px] uppercase tracking-wider">{subItem.label}</span>
+                      <span className="font-heading text-[11px] uppercase tracking-wider">{subItem.label}</span>
                     </button>
                   )
                 })}
@@ -5255,12 +5255,12 @@ const handlePackAction = (packId: string) => {
                 <path d="M107.7,8.07A105.15,105.15,0,0,0,77.26,0a77.19,77.19,0,0,0-3.3,6.83A96.67,96.67,0,0,0,53.22,6.83,77.19,77.19,0,0,0,49.88,0,105.15,105.15,0,0,0,19.44,8.07C3.66,31.58-1.86,54.65,1,77.53A105.73,105.73,0,0,0,32,96.36a77.7,77.7,0,0,0,6.63-10.85,68.43,68.43,0,0,1-10.4-5c.89-.65,1.76-1.34,2.58-2.06a75.22,75.22,0,0,0,72.57,0c.82.72,1.69,1.41,2.58,2.06a68.43,68.43,0,0,1-10.4,5,77.7,77.7,0,0,0,6.63,10.85,105.73,105.73,0,0,0,31-18.83C129,54.65,123.5,31.58,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53S36.18,40.36,42.45,40.36,53.83,46,53.83,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.24,60,73.24,53S78.41,40.36,84.69,40.36,96.07,46,96.07,53,91,65.69,84.69,65.69Z"/>
               </svg>
             </div>
-            <div className="text-left">
-              <div className="text-[10px] font-black tracking-widest text-[#5865F2] uppercase">Discord</div>
-              <div className="text-[11px] font-bold text-white/90 leading-none">Key Giveaways!</div>
+            <div className="font-heading text-left">
+              <div className="font-heading text-[10px] font-black tracking-widest text-[#5865F2] uppercase">Discord</div>
+              <div className="font-heading text-[11px] font-bold text-white/90 leading-none">Key Giveaways!</div>
             </div>
           </div>
-          <p className="text-[10px] text-white/40 font-medium text-left leading-relaxed">
+          <p className="font-heading text-[10px] text-white/40 font-medium text-left leading-relaxed">
             Join for giveaways, access keys & active promo codes!
           </p>
           <a
@@ -5298,9 +5298,9 @@ const handlePackAction = (packId: string) => {
             <div className="hidden md:flex items-center space-x-2 bg-purple-500/30 rounded-lg px-3 py-1 text-xs text-white">
               <span className="font-semibold">Credentials:</span>
               <span>Oktay Abdullazada (Owner)</span>
-              <span className="text-white/50">|</span>
+              <span className="font-heading text-white/50">|</span>
               <span>Ughur Akparli (Co-Owner - Developer)</span>
-              <span className="text-white/50">|</span>
+              <span className="font-heading text-white/50">|</span>
               <span>Turan Mecidov (Tester)</span>
             </div>
           </div>
@@ -5337,7 +5337,7 @@ const handlePackAction = (packId: string) => {
                 {(currentUser?.badges ?? []).slice(0, 3).map((badgeId) => {
                   const badge = AVAILABLE_BADGES.find((b) => b.id === badgeId)
                   return badge ? (
-                    <span key={badgeId} className="text-xs md:text-sm" title={badge.name}>
+                    <span key={badgeId} className="font-heading text-xs md:text-sm" title={badge.name}>
                       {badge.emoji}
                     </span>
                   ) : null
@@ -5364,17 +5364,17 @@ const handlePackAction = (packId: string) => {
                     ⚡ BOOSTED
                   </div>
                   <div>
-                    <div className="text-white font-black text-xs uppercase tracking-wider">
+                    <div className="font-heading text-white font-black text-xs uppercase tracking-wider">
                       Boomkit is boosted {activeBoost.multiplier}x by {activeBoost.activated_by}!
                     </div>
-                    <p className="text-[10px] text-slate-400 mt-0.5">
+                    <p className="font-heading text-[10px] text-slate-400 mt-0.5">
                       All legendary, chroma, hidden, and mystical drop rates are multiplied by {activeBoost.multiplier}x.
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 bg-black/40 border border-white/5 py-1.5 px-3 rounded-xl shrink-0">
-                  <span className="text-slate-500 text-[9px] font-black uppercase tracking-wider">Time Left:</span>
-                  <span className="text-purple-400 font-black text-xs min-w-[70px] text-right">{boostTimeLeft}</span>
+                  <span className="font-heading text-slate-500 text-[9px] font-black uppercase tracking-wider">Time Left:</span>
+                  <span className="font-heading text-purple-400 font-black text-xs min-w-[70px] text-right">{boostTimeLeft}</span>
                 </div>
               </div>
             )}
@@ -5388,7 +5388,7 @@ const handlePackAction = (packId: string) => {
                   <div
                     className={`flex-grow backdrop-blur-2xl rounded-[2.5rem] p-8 border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.8)] relative overflow-hidden group transition-all duration-500 hover:border-orange-500/30 ${currentUser?.bannerColor === "rainbow"
                       ? "bg-gradient-to-br from-red-500/10 via-yellow-500/10 via-green-500/10 via-blue-500/10 to-purple-500/10"
-                      : "bg-slate-950/40"
+                      : "bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/40"
                       }`}
                   >
                     {/* Glowing grid background */}
@@ -5413,7 +5413,7 @@ const handlePackAction = (packId: string) => {
                       </div>
 
                       {/* User Info Deck */}
-                      <div className="text-center md:text-left flex-1 space-y-3">
+                      <div className="font-heading text-center md:text-left flex-1 space-y-3">
                         <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
                           <Badge
                             className={`px-4 py-1.5 text-xs font-black uppercase tracking-wider rounded-xl ${currentUser?.role === "owner"
@@ -5495,9 +5495,9 @@ const handlePackAction = (packId: string) => {
                           />
                         </svg>
                         <div className="absolute flex flex-col items-center justify-center">
-                          <span className="text-white/40 text-[9px] font-black uppercase tracking-widest">Level</span>
-                          <span className="text-white text-3xl font-black leading-none">{currentUser?.level || 1}</span>
-                          <span className="text-orange-400 font-bold text-[9px] mt-0.5">{currentUser ? Math.min(100, Math.max(0, Math.round(((currentUser.xp || 0) / ((currentUser.level || 1) * 100)) * 100))) : 0}%</span>
+                          <span className="font-heading text-white/40 text-[9px] font-black uppercase tracking-widest">Level</span>
+                          <span className="font-heading text-white text-3xl font-black leading-none">{currentUser?.level || 1}</span>
+                          <span className="font-heading text-orange-400 font-bold text-[9px] mt-0.5">{currentUser ? Math.min(100, Math.max(0, Math.round(((currentUser.xp || 0) / ((currentUser.level || 1) * 100)) * 100))) : 0}%</span>
                         </div>
                       </div>
                     </div>
@@ -5534,17 +5534,17 @@ const handlePackAction = (packId: string) => {
                     </div>
                     <div className="relative z-10">
                       <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-2xl font-black text-white flex items-center gap-2">
+                        <h3 className="font-heading text-2xl font-black text-white flex items-center gap-2">
                           <FlameIcon className="h-6 w-6 text-orange-500 animate-pulse" />
                           Daily Streak
                         </h3>
-                        <span className="text-white/40 text-[9px] font-black uppercase tracking-wider">Log In Daily</span>
+                        <span className="font-heading text-white/40 text-[9px] font-black uppercase tracking-wider">Log In Daily</span>
                       </div>
                       
                       <div className="flex items-center gap-6 mb-6">
                         <div className="bg-black/50 backdrop-blur-md rounded-2xl p-4 flex flex-col items-center border border-orange-500/20 shadow-[0_0_20px_rgba(249,115,22,0.15)] w-24 shrink-0">
-                          <span className="text-5xl font-black text-orange-400 drop-shadow-[0_0_15px_rgba(249,115,22,0.4)]">{currentUser?.loginStreak || 0}</span>
-                          <span className="text-[9px] font-black text-white/40 uppercase tracking-widest mt-1">Days</span>
+                          <span className="font-heading text-5xl font-black text-orange-400 drop-shadow-[0_0_15px_rgba(249,115,22,0.4)]">{currentUser?.loginStreak || 0}</span>
+                          <span className="font-heading text-[9px] font-black text-white/40 uppercase tracking-widest mt-1">Days</span>
                         </div>
                         <div className="flex-grow space-y-3">
                           <div className="flex gap-1.5">
@@ -5563,7 +5563,7 @@ const handlePackAction = (packId: string) => {
                           </div>
                           <div className="flex justify-between text-[9px] text-white/30 font-black uppercase tracking-wider px-0.5">
                             <span>Day 1</span>
-                            <span className="text-yellow-500">Day 7 Bonus</span>
+                            <span className="font-heading text-yellow-500">Day 7 Bonus</span>
                           </div>
                         </div>
                       </div>
@@ -5579,16 +5579,16 @@ const handlePackAction = (packId: string) => {
 
                     <div className="mt-6 grid grid-cols-3 gap-2.5 text-center">
                       <div className="bg-black/40 border border-white/5 rounded-xl p-2.5 shadow-inner">
-                        <div className="text-orange-400 font-black text-sm">+50</div>
-                        <div className="text-[8px] text-white/30 font-black uppercase tracking-widest mt-0.5">DAILY</div>
+                        <div className="font-heading text-orange-400 font-black text-sm">+50</div>
+                        <div className="font-heading text-[8px] text-white/30 font-black uppercase tracking-widest mt-0.5">DAILY</div>
                       </div>
                       <div className="bg-black/40 border border-white/5 rounded-xl p-2.5 shadow-inner">
-                        <div className="text-yellow-400 font-black text-sm">+500</div>
-                        <div className="text-[8px] text-white/30 font-black uppercase tracking-widest mt-0.5">7-DAY</div>
+                        <div className="font-heading text-yellow-400 font-black text-sm">+500</div>
+                        <div className="font-heading text-[8px] text-white/30 font-black uppercase tracking-widest mt-0.5">7-DAY</div>
                       </div>
                       <div className="bg-black/40 border border-white/5 rounded-xl p-2.5 shadow-inner">
-                        <div className="text-pink-400 font-black text-sm">+5k</div>
-                        <div className="text-[8px] text-white/30 font-black uppercase tracking-widest mt-0.5">30-DAY</div>
+                        <div className="font-heading text-pink-400 font-black text-sm">+5k</div>
+                        <div className="font-heading text-[8px] text-white/30 font-black uppercase tracking-widest mt-0.5">30-DAY</div>
                       </div>
                     </div>
                   </div>
@@ -5622,7 +5622,7 @@ const handlePackAction = (packId: string) => {
                       />
 
                       {!canSpin && !spinning && (
-                        <p className="text-white/30 font-black uppercase tracking-[0.2em] text-[10px] mt-6 animate-pulse bg-white/5 border border-white/5 px-4 py-1.5 rounded-full">
+                        <p className="font-heading text-white/30 font-black uppercase tracking-[0.2em] text-[10px] mt-6 animate-pulse bg-white/5 border border-white/5 px-4 py-1.5 rounded-full">
                           Next Spin Tomorrow
                         </p>
                       )}
@@ -5637,17 +5637,17 @@ const handlePackAction = (packId: string) => {
                       <div className="bg-orange-500/10 text-orange-400 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border border-orange-400/20 shadow-inner">
                         Live Cockpit Feed
                       </div>
-                      <span className="text-white/20 text-[9px] font-black uppercase tracking-widest">System Synchronized</span>
+                      <span className="font-heading text-white/20 text-[9px] font-black uppercase tracking-widest">System Synchronized</span>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                       <div className="group relative bg-gradient-to-br from-purple-600/5 to-indigo-950/20 hover:from-purple-600/10 hover:to-indigo-950/40 border border-purple-500/10 hover:border-purple-500/30 rounded-3xl p-6 transition-all duration-500 hover:scale-[1.02] hover:-translate-y-0.5 shadow-lg">
                         <div className="absolute -top-4 -right-4 text-7xl opacity-5 group-hover:opacity-10 transition-opacity select-none group-hover:scale-110 duration-500">🪙</div>
                         <div className="flex flex-col relative z-10">
-                          <span className="text-purple-400 text-[10px] font-black uppercase tracking-[0.25em] mb-1">Available Tokens</span>
-                          <div className="text-white text-4xl font-black drop-shadow-md flex items-baseline gap-2 tabular-nums">
+                          <span className="font-heading text-purple-400 text-[10px] font-black uppercase tracking-[0.25em] mb-1">Available Tokens</span>
+                          <div className="font-heading text-white text-4xl font-black drop-shadow-md flex items-baseline gap-2 tabular-nums">
                             {currentUser?.tokens?.toLocaleString() || 0}
-                            <span className="text-yellow-500 text-xl">🪙</span>
+                            <span className="font-heading text-yellow-500 text-xl">🪙</span>
                           </div>
                           <div className="mt-4 h-1 w-12 bg-purple-500 rounded-full" />
                         </div>
@@ -5656,10 +5656,10 @@ const handlePackAction = (packId: string) => {
                       <div className="group relative bg-gradient-to-br from-pink-600/5 to-rose-950/20 hover:from-pink-600/10 hover:to-rose-950/40 border border-pink-500/10 hover:border-pink-500/30 rounded-3xl p-6 transition-all duration-500 hover:scale-[1.02] hover:-translate-y-0.5 shadow-lg">
                         <div className="absolute -top-4 -right-4 text-7xl opacity-5 group-hover:opacity-10 transition-opacity select-none group-hover:scale-110 duration-500">🌌</div>
                         <div className="flex flex-col relative z-10">
-                          <span className="text-pink-400 text-[10px] font-black uppercase tracking-[0.25em] mb-1">Collection Size</span>
-                          <div className="text-white text-4xl font-black drop-shadow-md flex items-baseline gap-2 tabular-nums">
+                          <span className="font-heading text-pink-400 text-[10px] font-black uppercase tracking-[0.25em] mb-1">Collection Size</span>
+                          <div className="font-heading text-white text-4xl font-black drop-shadow-md flex items-baseline gap-2 tabular-nums">
                             {Object.keys(getVirtualBooms(currentUser)).length || 0}
-                            <span className="text-pink-500 text-xl">✨</span>
+                            <span className="font-heading text-pink-500 text-xl">✨</span>
                           </div>
                           <div className="mt-4 h-1 w-12 bg-pink-500 rounded-full" />
                         </div>
@@ -5683,10 +5683,10 @@ const handlePackAction = (packId: string) => {
               <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
                 <div className="flex justify-between items-end flex-wrap gap-6 border-b border-white/10 pb-6">
                   <div>
-                    <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/50 mb-2">
+                    <h1 className="font-heading text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/50 mb-2">
                       My Collection
                     </h1>
-                    <p className="text-white/60 text-lg">Manage and view your discovered Booms</p>
+                    <p className="font-heading text-white/60 text-lg">Manage and view your discovered Booms</p>
                   </div>
                 </div>
 
@@ -5702,9 +5702,9 @@ const handlePackAction = (packId: string) => {
                           🏆
                         </div>
                         <div className="space-y-1">
-                          <h3 className="text-2xl font-black text-white tracking-tight">Milestone Rewards</h3>
-                          <p className="text-white/40 text-xs font-bold uppercase tracking-wider">Unlock exclusive custom titles and chests every 10 levels!</p>
-                          <div className="text-orange-400 font-black text-[9px] uppercase tracking-[0.2em] mt-1.5 flex items-center gap-1.5">
+                          <h3 className="font-heading text-2xl font-black text-white tracking-tight">Milestone Rewards</h3>
+                          <p className="font-heading text-white/40 text-xs font-bold uppercase tracking-wider">Unlock exclusive custom titles and chests every 10 levels!</p>
+                          <div className="font-heading text-orange-400 font-black text-[9px] uppercase tracking-[0.2em] mt-1.5 flex items-center gap-1.5">
                             <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-ping" />
                             Next Node: Level {Math.ceil((currentUser?.level || 1) / 10) * 10}
                           </div>
@@ -5737,8 +5737,8 @@ const handlePackAction = (packId: string) => {
                           <Star className="h-7 w-7 text-yellow-500 animate-pulse" />
                         </div>
                         <div>
-                          <div className="text-white/40 text-[9px] uppercase tracking-wider font-black">Vault Score</div>
-                          <div className="text-white text-2xl font-black tabular-nums">{currentUser?.boomScore || 0}</div>
+                          <div className="font-heading text-white/40 text-[9px] uppercase tracking-wider font-black">Vault Score</div>
+                          <div className="font-heading text-white text-2xl font-black tabular-nums">{currentUser?.boomScore || 0}</div>
                         </div>
                       </div>
 
@@ -5747,8 +5747,8 @@ const handlePackAction = (packId: string) => {
                           <PackageIcon className="h-7 w-7 text-purple-500" />
                         </div>
                         <div>
-                          <div className="text-white/40 text-[9px] uppercase tracking-wider font-black">Pack Inventory</div>
-                          <div className="text-white text-2xl font-black tabular-nums">{currentUser?.packs.length || 0}</div>
+                          <div className="font-heading text-white/40 text-[9px] uppercase tracking-wider font-black">Pack Inventory</div>
+                          <div className="font-heading text-white text-2xl font-black tabular-nums">{currentUser?.packs.length || 0}</div>
                         </div>
                       </div>
 
@@ -5757,8 +5757,8 @@ const handlePackAction = (packId: string) => {
                           <CoinsIcon className="h-7 w-7 text-emerald-500" />
                         </div>
                         <div>
-                          <div className="text-white/40 text-[9px] uppercase tracking-wider font-black">Total Asset Value</div>
-                          <div className="text-emerald-400 text-2xl font-black tabular-nums">🪙 {currentUser?.totalValue || 0}</div>
+                          <div className="font-heading text-white/40 text-[9px] uppercase tracking-wider font-black">Total Asset Value</div>
+                          <div className="font-heading text-emerald-400 text-2xl font-black tabular-nums">🪙 {currentUser?.totalValue || 0}</div>
                         </div>
                       </div>
                     </div>
@@ -5768,13 +5768,13 @@ const handlePackAction = (packId: string) => {
                       {PACKS.map((pack) => (
                         <div
                           key={pack.id}
-                          className="group bg-slate-950/40 backdrop-blur-xl border border-white/10 rounded-[2.5rem] overflow-hidden transition-all duration-500 hover:border-white/20 hover:shadow-[0_0_50px_rgba(0,0,0,0.8)] shadow-xl"
+                          className="group blooket-card overflow-hidden transition-all duration-500 hover:border-white/20 hover:shadow-[0_0_50px_rgba(0,0,0,0.8)] shadow-xl"
                         >
                           <div className={`h-2.5 w-full bg-gradient-to-r ${pack.color}`} />
                           <div className="p-8">
                             <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
-                              <h2 className="text-3xl font-black text-white flex items-center gap-4">
-                                <span className="text-5xl filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.4)] transform transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3 select-none">
+                              <h2 className="font-heading text-3xl font-black text-white flex items-center gap-4">
+                                <span className="font-heading text-5xl filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.4)] transform transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3 select-none">
                                   {pack.emoji}
                                 </span>
                                 {pack.name}
@@ -5876,23 +5876,23 @@ const handlePackAction = (packId: string) => {
                         <div className="flex items-center gap-4 mb-8">
                           <div className="w-2 h-12 bg-gradient-to-b from-purple-500 via-pink-500 to-yellow-500 rounded-full shadow-[0_0_20px_rgba(168,85,247,0.5)]" />
                           <div>
-                            <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-600 tracking-tighter">
+                            <h2 className="font-heading text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-600 tracking-tighter">
                               GAMEPASS BOOMS
                             </h2>
-                            <p className="text-white/40 text-xs font-bold uppercase tracking-widest mt-1">
+                            <p className="font-heading text-white/40 text-xs font-bold uppercase tracking-widest mt-1">
                               Exclusive rewards for reaching milestone levels
                             </p>
                           </div>
                           {(currentUser?.level || 1) >= 100 && (
                             <div className="ml-auto">
                               <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-full px-6 py-2 border border-white/20 shadow-md">
-                                <span className="text-white font-black text-xs uppercase tracking-wider">⚡ MAX LEVEL ⚡</span>
+                                <span className="font-heading text-white font-black text-xs uppercase tracking-wider">⚡ MAX LEVEL ⚡</span>
                               </div>
                             </div>
                           )}
                         </div>
 
-                        <div className="bg-slate-950/40 backdrop-blur-xl rounded-[2rem] border border-white/10 p-8 shadow-2xl">
+                        <div className="bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/40 backdrop-blur-xl rounded-[2rem] border border-white/10 p-8 shadow-2xl">
                           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                             {GAMEPASS_BOOMS.map((boom) => {
                               const quantity = currentUser?.booms[boom.name] || 0
@@ -5928,12 +5928,12 @@ const handlePackAction = (packId: string) => {
                                     {hasUnlocked ? (
                                       <div className="z-10 flex flex-col items-center gap-1.5">
                                         <BoomAvatar name={boom.name} className="w-16 h-16 object-contain drop-shadow-lg transform transition-transform duration-300 group-hover:scale-115" />
-                                        <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">LVL {boom.level}</span>
+                                        <span className="font-heading text-[9px] font-black text-white/40 uppercase tracking-widest">LVL {boom.level}</span>
                                       </div>
                                     ) : (
                                       <div className="flex flex-col items-center gap-1.5">
                                         <LockIcon className="h-7 w-7 opacity-20 text-white" />
-                                        <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">LVL {boom.level}</span>
+                                        <span className="font-heading text-[9px] font-black text-white/20 uppercase tracking-widest">LVL {boom.level}</span>
                                       </div>
                                     )}
 
@@ -5946,12 +5946,12 @@ const handlePackAction = (packId: string) => {
                                   </div>
 
                                   {/* Boom Name */}
-                                  <div className="text-center space-y-1">
+                                  <div className="font-heading text-center space-y-1">
                                     <p className={`text-sm font-black ${hasUnlocked ? "text-white" : "text-white/30"} line-clamp-2`}>
                                       {boom.name}
                                     </p>
                                     {hasUnlocked && (
-                                      <p className="text-[10px] text-white/40 line-clamp-1">
+                                      <p className="font-heading text-[10px] text-white/40 line-clamp-1">
                                         {String((boom as { description?: string }).description ?? "")}
                                       </p>
                                     )}
@@ -5970,10 +5970,10 @@ const handlePackAction = (packId: string) => {
                         <div className="flex items-center gap-4 mb-8">
                           <div className="w-2 h-12 bg-gradient-to-b from-red-600 via-pink-600 to-purple-600 rounded-full shadow-[0_0_30px_rgba(220,38,38,0.5)] animate-pulse" />
                           <div>
-                            <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-purple-500 to-indigo-600 tracking-tighter">
+                            <h2 className="font-heading text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-purple-500 to-indigo-600 tracking-tighter">
                               LIMITED SECTION
                             </h2>
-                            <p className="text-red-400/80 text-xs font-black mt-1 uppercase tracking-widest">
+                            <p className="font-heading text-red-400/80 text-xs font-black mt-1 uppercase tracking-widest">
                               The Vault of the Ancients has opened
                             </p>
                           </div>
@@ -6038,11 +6038,11 @@ const handlePackAction = (packId: string) => {
                                     )}
                                   </div>
 
-                                  <div className="text-center space-y-1">
+                                  <div className="font-heading text-center space-y-1">
                                     <p className={`text-lg font-black tracking-tight ${hasIt ? "text-cyan-400" : "text-white/40"}`}>
                                       {boom.name}
                                     </p>
-                                    <p className="text-[10px] text-white/30 font-bold uppercase tracking-widest">{boom.description}</p>
+                                    <p className="font-heading text-[10px] text-white/30 font-bold uppercase tracking-widest">{boom.description}</p>
                                   </div>
                                 </div>
                               )
@@ -6065,26 +6065,26 @@ const handlePackAction = (packId: string) => {
 
                   <div className="relative flex flex-col md:flex-row justify-between items-center gap-8 z-10">
                     <div className="space-y-4 text-center md:text-left">
-                      <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter">
-                        BOOM <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 drop-shadow-sm">MARKET</span>
+                      <h1 className="font-heading text-5xl md:text-7xl font-black text-white tracking-tighter">
+                        BOOM <span className="font-heading text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 drop-shadow-sm">MARKET</span>
                       </h1>
-                      <p className="text-white/40 text-base md:text-lg max-w-md font-medium leading-relaxed">
+                      <p className="font-heading text-white/40 text-base md:text-lg max-w-md font-medium leading-relaxed">
                         Unleash the power of the arena. Discover legendary Booms, collect rare series, and dominate the rankings.
                       </p>
                     </div>
 
                     <div className="shrink-0 transform hover:scale-[1.02] transition-transform duration-300">
                       <div className="bg-slate-900/60 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-8 shadow-2xl flex flex-col items-center gap-1.5 w-64 border-yellow-500/20">
-                        <div className="text-white/40 text-[9px] uppercase tracking-[0.3em] font-black">Your Balance</div>
+                        <div className="font-heading text-white/40 text-[9px] uppercase tracking-[0.3em] font-black">Your Balance</div>
                         <div className="flex items-center gap-3">
-                          <span className="text-4xl drop-shadow-md">🪙</span>
-                          <span className="text-5xl font-black text-yellow-400 tabular-nums drop-shadow-[0_0_15px_rgba(234,179,8,0.3)]">
+                          <span className="font-heading text-4xl drop-shadow-md">🪙</span>
+                          <span className="font-heading text-5xl font-black text-yellow-400 tabular-nums drop-shadow-[0_0_15px_rgba(234,179,8,0.3)]">
                             {currentUser?.tokens.toLocaleString() || 0}
                           </span>
                         </div>
                         <div className="mt-3 flex items-center gap-2 px-4 py-1.5 bg-yellow-500/10 rounded-full border border-yellow-500/20 shadow-inner">
                           <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-ping" />
-                          <span className="text-yellow-500 text-[9px] font-black uppercase tracking-widest">Ready to spend</span>
+                          <span className="font-heading text-yellow-500 text-[9px] font-black uppercase tracking-widest">Ready to spend</span>
                         </div>
                       </div>
                     </div>
@@ -6096,7 +6096,7 @@ const handlePackAction = (packId: string) => {
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                     <div className="flex items-center gap-3">
                       <div className="w-1.5 h-6 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full" />
-                      <h3 className="text-lg font-black text-white uppercase tracking-widest">Global Drop Rates</h3>
+                      <h3 className="font-heading text-lg font-black text-white uppercase tracking-widest">Global Drop Rates</h3>
                     </div>
                     
                     {/* Toggles for Instant & Auto Open */}
@@ -6111,7 +6111,7 @@ const handlePackAction = (packId: string) => {
                         <div className={`w-10 h-6 rounded-full p-1 transition-colors duration-300 ${isInstantOpen ? 'bg-purple-600' : 'bg-slate-800 border border-white/10'}`}>
                           <div className={`w-4 h-4 rounded-full bg-white transition-transform duration-300 ${isInstantOpen ? 'translate-x-4' : 'translate-x-0'}`} />
                         </div>
-                        <span className="text-[10px] font-black uppercase tracking-wider text-white/70 group-hover:text-white transition-colors">Instant Open (2x)</span>
+                        <span className="font-heading text-[10px] font-black uppercase tracking-wider text-white/70 group-hover:text-white transition-colors">Instant Open (2x)</span>
                       </label>
 
                       <label className="flex items-center gap-2.5 cursor-pointer select-none group">
@@ -6124,7 +6124,7 @@ const handlePackAction = (packId: string) => {
                         <div className={`w-10 h-6 rounded-full p-1 transition-colors duration-300 ${isAutoOpen ? 'bg-pink-600' : 'bg-slate-800 border border-white/10'}`}>
                           <div className={`w-4 h-4 rounded-full bg-white transition-transform duration-300 ${isAutoOpen ? 'translate-x-4' : 'translate-x-0'}`} />
                         </div>
-                        <span className="text-[10px] font-black uppercase tracking-wider text-white/70 group-hover:text-white transition-colors">Auto Open</span>
+                        <span className="font-heading text-[10px] font-black uppercase tracking-wider text-white/70 group-hover:text-white transition-colors">Auto Open</span>
                       </label>
                     </div>
                   </div>
@@ -6147,7 +6147,7 @@ const handlePackAction = (packId: string) => {
                               <div className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider text-white ${rarity.color}`}>
                                 {rarity.label}
                               </div>
-                              <div className="text-3xl font-black text-white drop-shadow">{rarity.rate}</div>
+                              <div className="font-heading text-3xl font-black text-white drop-shadow">{rarity.rate}</div>
                             </div>
                             <div className="absolute bottom-0 left-0 w-full h-1 bg-white/5 overflow-hidden">
                               <div className={`h-full ${rarity.color} group-hover:animate-pulse`} style={{ width: rarity.rate }} />
@@ -6203,11 +6203,11 @@ const handlePackAction = (packId: string) => {
                           {/* Inner card glow */}
                           <div className="absolute inset-x-8 inset-y-8 bg-white/5 rounded-3xl blur-2xl pointer-events-none" />
 
-                          <div className="text-9xl drop-shadow-[0_12px_15px_rgba(0,0,0,0.6)] transform-gpu transition-all duration-500 group-hover:scale-110 group-hover:-translate-y-2 select-none z-10">
+                          <div className="font-heading text-9xl drop-shadow-[0_12px_15px_rgba(0,0,0,0.6)] transform-gpu transition-all duration-500 group-hover:scale-110 group-hover:-translate-y-2 select-none z-10">
                             {pack.emoji}
                           </div>
                           <div className="mt-6 z-10 text-center">
-                            <h2 className="text-3xl font-black text-white tracking-tight drop-shadow-md">
+                            <h2 className="font-heading text-3xl font-black text-white tracking-tight drop-shadow-md">
                               {pack.name}
                             </h2>
                             <div className="mt-1 px-3 py-1 bg-black/30 rounded-full text-[9px] font-black text-white/50 uppercase tracking-widest inline-block backdrop-blur-md border border-white/5">
@@ -6219,10 +6219,10 @@ const handlePackAction = (packId: string) => {
                         {/* Footer / Price Area */}
                         <div className="bg-black/50 backdrop-blur-xl p-6 flex items-center justify-between border-t border-white/10">
                           <div className="flex flex-col">
-                            <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">Price tag</span>
+                            <span className="font-heading text-[9px] font-black text-white/30 uppercase tracking-widest">Price tag</span>
                             <div className="flex items-center gap-1.5 mt-0.5">
-                              <span className="text-xl">🪙</span>
-                              <span className="text-2xl font-black text-yellow-400 tabular-nums drop-shadow-[0_0_10px_rgba(234,179,8,0.2)]">{pack.price}</span>
+                              <span className="font-heading text-xl">🪙</span>
+                              <span className="font-heading text-2xl font-black text-yellow-400 tabular-nums drop-shadow-[0_0_10px_rgba(234,179,8,0.2)]">{pack.price}</span>
                             </div>
                           </div>
 
@@ -6266,7 +6266,7 @@ const handlePackAction = (packId: string) => {
               <div className="space-y-12">
                 <div className="flex items-center gap-3 mb-8">
                   <div className="w-1.5 h-8 bg-purple-500 rounded-full shadow-[0_0_15px_purple]" />
-                  <h2 className="text-4xl font-black text-white tracking-tighter">Private Quarters</h2>
+                  <h2 className="font-heading text-4xl font-black text-white tracking-tighter">Private Quarters</h2>
                 </div>
                 <PrivateChat currentUser={currentUser} onPlayerClick={openPlayerProfile} />
               </div>
@@ -6317,10 +6317,10 @@ const handlePackAction = (packId: string) => {
             {isOwner() || currentUser?.role === "moderator" || currentUser?.role === "senior_moderator" || currentUser?.role === "admin" || currentUser?.role === "tester" ? (
               currentPage === "staff" && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
-                  <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 bg-slate-950/40 border border-white/10 rounded-[2.5rem] p-8 shadow-xl">
+                  <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 blooket-card p-8 shadow-xl">
                     <div>
-                      <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter uppercase">OPERATIONS COMMAND DECK</h1>
-                      <p className="text-purple-300/60 font-semibold uppercase tracking-wider text-xs mt-1">Direct system configuration and operator enforcement directives.</p>
+                      <h1 className="font-heading text-4xl md:text-5xl font-black text-white tracking-tighter uppercase">OPERATIONS COMMAND DECK</h1>
+                      <p className="font-heading text-purple-300/60 font-semibold uppercase tracking-wider text-xs mt-1">Direct system configuration and operator enforcement directives.</p>
                     </div>
                     <div className="flex items-center gap-2">
                       {isOwner() && (
@@ -6446,7 +6446,7 @@ const handlePackAction = (packId: string) => {
                               </div>
                               <div className="flex flex-col">
                                 <div className="flex items-center gap-2">
-                                  <span className="text-white font-black tracking-tight">{user.username}</span>
+                                  <span className="font-heading text-white font-black tracking-tight">{user.username}</span>
                                   {user.status === "pending" ? (
                                     <Badge className="bg-orange-500/20 text-orange-400 text-[10px] font-black uppercase tracking-widest px-2 py-0.5 border border-orange-500/30 shadow-sm">
                                       Pending Approval
@@ -6461,18 +6461,18 @@ const handlePackAction = (packId: string) => {
                                 {user.status === "pending" ? (
                                   <div className="mt-2 text-xs text-white/80 bg-black/20 p-2 rounded-lg border border-white/5">
                                     <p className="flex items-center gap-2 mb-1">
-                                      <span className="text-orange-400 font-bold uppercase text-[10px] tracking-wider w-12">Age:</span>
+                                      <span className="font-heading text-orange-400 font-bold uppercase text-[10px] tracking-wider w-12">Age:</span>
                                       <span className="font-mono">{user.age || "N/A"}</span>
                                     </p>
                                     <p className="flex items-start gap-2">
-                                      <span className="text-orange-400 font-bold uppercase text-[10px] tracking-wider w-12 mt-0.5">Reason:</span>
+                                      <span className="font-heading text-orange-400 font-bold uppercase text-[10px] tracking-wider w-12 mt-0.5">Reason:</span>
                                       <span className="italic text-white/90">{user.reason || "No reason provided"}</span>
                                     </p>
                                   </div>
                                 ) : (
                                   <div className="flex items-center gap-2 mt-1">
-                                    {user.isMuted && <span className="text-yellow-500/80 text-[10px] font-black uppercase tracking-widest flex items-center gap-1">🔇 Muted</span>}
-                                    {user.isBanned && <span className="text-red-500/80 text-[10px] font-black uppercase tracking-widest flex items-center gap-1">🚫 Banned</span>}
+                                    {user.isMuted && <span className="font-heading text-yellow-500/80 text-[10px] font-black uppercase tracking-widest flex items-center gap-1">🔇 Muted</span>}
+                                    {user.isBanned && <span className="font-heading text-red-500/80 text-[10px] font-black uppercase tracking-widest flex items-center gap-1">🚫 Banned</span>}
                                   </div>
                                 )}
 
@@ -6549,7 +6549,7 @@ const handlePackAction = (packId: string) => {
                                             size="sm"
                                             variant="ghost"
                                             onClick={() => openMuteDialog(user)}
-                                            className="text-white/40 hover:text-yellow-500 hover:bg-yellow-500/10 rounded-xl font-bold h-9 px-4 transition-all"
+                                            className="font-heading text-white/40 hover:text-yellow-500 hover:bg-yellow-500/10 rounded-xl font-bold h-9 px-4 transition-all"
                                           >
                                             Mute
                                           </Button>
@@ -6568,7 +6568,7 @@ const handlePackAction = (packId: string) => {
                                             size="sm"
                                             variant="ghost"
                                             onClick={() => openBanDialog(user)}
-                                            className="text-white/40 hover:text-red-500 hover:bg-red-500/10 rounded-xl font-bold h-9 px-4 transition-all"
+                                            className="font-heading text-white/40 hover:text-red-500 hover:bg-red-500/10 rounded-xl font-bold h-9 px-4 transition-all"
                                           >
                                             Ban
                                           </Button>
@@ -6596,8 +6596,8 @@ const handlePackAction = (packId: string) => {
                           <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4">
                             <CheckIcon className="w-8 h-8 text-white/20" />
                           </div>
-                          <p className="text-white/40 font-bold">No users found.</p>
-                          <p className="text-white/10 text-xs">The arena is clear.</p>
+                          <p className="font-heading text-white/40 font-bold">No users found.</p>
+                          <p className="font-heading text-white/10 text-xs">The arena is clear.</p>
                         </div>
                       )}
                   </div>
@@ -6609,16 +6609,16 @@ const handlePackAction = (packId: string) => {
                       {/* Create Tournament Form */}
                       <Card className="bg-white/5 border-white/10 backdrop-blur-md rounded-3xl">
                         <CardHeader>
-                          <CardTitle className="text-2xl font-black text-white flex items-center gap-2">
+                          <CardTitle className="font-heading text-2xl font-black text-white flex items-center gap-2">
                             <TrophyIcon className="h-6 w-6 text-yellow-500" />
                             Create New Tournament
                           </CardTitle>
-                          <CardDescription className="text-slate-400">Host an arena competition with custom rewards.</CardDescription>
+                          <CardDescription className="font-heading text-slate-400">Host an arena competition with custom rewards.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                              <Label className="text-white font-bold text-sm">Tournament Title</Label>
+                              <Label className="font-heading text-white font-bold text-sm">Tournament Title</Label>
                               <Input
                                 placeholder="e.g. Weekly Trivia Clash #1"
                                 value={tourneyTitle}
@@ -6627,7 +6627,7 @@ const handlePackAction = (packId: string) => {
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label className="text-white font-bold text-sm">End Date & Time</Label>
+                              <Label className="font-heading text-white font-bold text-sm">End Date & Time</Label>
                               <Input
                                 type="datetime-local"
                                 value={tourneyEndTime}
@@ -6638,7 +6638,7 @@ const handlePackAction = (packId: string) => {
                           </div>
 
                           <div className="space-y-2">
-                            <Label className="text-white font-bold text-sm">Description</Label>
+                            <Label className="font-heading text-white font-bold text-sm">Description</Label>
                             <Input
                               placeholder="e.g. Compete for the top score in history trivia!"
                               value={tourneyDesc}
@@ -6649,7 +6649,7 @@ const handlePackAction = (packId: string) => {
 
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                              <Label className="text-white font-bold text-sm">Prize Tokens</Label>
+                              <Label className="font-heading text-white font-bold text-sm">Prize Tokens</Label>
                               <Input
                                 type="number"
                                 placeholder="10000"
@@ -6659,7 +6659,7 @@ const handlePackAction = (packId: string) => {
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label className="text-white font-bold text-sm">Prize Boom Name (Optional)</Label>
+                              <Label className="font-heading text-white font-bold text-sm">Prize Boom Name (Optional)</Label>
                               <select
                                 value={tourneyPrizeBoom}
                                 onChange={(e) => setTourneyPrizeBoom(e.target.value)}
@@ -6685,7 +6685,7 @@ const handlePackAction = (packId: string) => {
 
                       {/* Tournament List */}
                       <div className="space-y-4">
-                        <h3 className="text-xl font-black text-white flex items-center gap-2">
+                        <h3 className="font-heading text-xl font-black text-white flex items-center gap-2">
                           <TrophyIcon className="h-5 w-5 text-yellow-500" />
                           Tournaments Arena
                         </h3>
@@ -6694,12 +6694,12 @@ const handlePackAction = (packId: string) => {
                             <div key={t.id} className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                               <div>
                                 <div className="flex items-center gap-3 mb-1">
-                                  <h4 className="text-xl font-bold text-white">{t.title}</h4>
+                                  <h4 className="font-heading text-xl font-bold text-white">{t.title}</h4>
                                   <Badge className={`${t.status === 'active' ? 'bg-green-500' : 'bg-red-500'} text-white font-black uppercase text-[8px]`}>
                                     {t.status}
                                   </Badge>
                                 </div>
-                                <p className="text-slate-400 text-sm mb-3">{t.description}</p>
+                                <p className="font-heading text-slate-400 text-sm mb-3">{t.description}</p>
                                 <div className="flex flex-wrap gap-3 text-xs text-slate-400">
                                   <span className="flex items-center gap-1 font-bold text-white"><CoinsIcon className="w-3 h-3 text-yellow-400" /> {t.prize_tokens?.toLocaleString() || 0}</span>
                                   {t.prize_boom_name && <span className="font-bold text-white">🎁 {t.prize_boom_name}</span>}
@@ -6732,29 +6732,29 @@ const handlePackAction = (packId: string) => {
                       {/* Active Season Info */}
                       <Card className="bg-white/5 border-white/10 backdrop-blur-md rounded-3xl">
                         <CardHeader>
-                          <CardTitle className="text-2xl font-black text-white flex items-center gap-2">
+                          <CardTitle className="font-heading text-2xl font-black text-white flex items-center gap-2">
                             <FlameIcon className="h-6 w-6 text-orange-500 animate-pulse" />
                             Season Management
                           </CardTitle>
-                          <CardDescription className="text-slate-400">Start new seasons and manage active passes.</CardDescription>
+                          <CardDescription className="font-heading text-slate-400">Start new seasons and manage active passes.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
                           {activeSeason ? (
                             <div className="bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-500/20 rounded-2xl p-6">
-                              <span className="text-[10px] font-black text-orange-400 uppercase tracking-widest block mb-1">Currently Active Season</span>
-                              <h4 className="text-2xl font-black text-white mb-2">{activeSeason.name}</h4>
-                              <p className="text-xs text-slate-400">
+                              <span className="font-heading text-[10px] font-black text-orange-400 uppercase tracking-widest block mb-1">Currently Active Season</span>
+                              <h4 className="font-heading text-2xl font-black text-white mb-2">{activeSeason.name}</h4>
+                              <p className="font-heading text-xs text-slate-400">
                                 Started: {new Date(activeSeason.start_date).toLocaleDateString()} | Ends: {new Date(activeSeason.end_date).toLocaleDateString()}
                               </p>
                             </div>
                           ) : (
                             <div className="bg-red-950/20 border border-red-500/20 rounded-2xl p-6 text-center">
-                              <p className="text-red-300 font-bold">No active season pass currently running.</p>
+                              <p className="font-heading text-red-300 font-bold">No active season pass currently running.</p>
                             </div>
                           )}
 
                           <div className="space-y-3">
-                            <Label className="text-white font-bold text-sm">Start Next Season</Label>
+                            <Label className="font-heading text-white font-bold text-sm">Start Next Season</Label>
                             <div className="flex flex-col sm:flex-row gap-3">
                               <Input
                                 placeholder="e.g. Season 2: Legends Ascend"
@@ -6769,7 +6769,7 @@ const handlePackAction = (packId: string) => {
                                 Activate Season
                               </Button>
                             </div>
-                            <p className="text-[10px] text-slate-400">
+                            <p className="font-heading text-[10px] text-slate-400">
                               Activating a new season deactivates the current one and creates standard reward tiers (100 XP, 250 XP, 500 XP).
                             </p>
                           </div>
@@ -6790,10 +6790,10 @@ const handlePackAction = (packId: string) => {
 
                   <div className="relative flex flex-col md:flex-row justify-between items-center gap-6 z-10">
                     <div className="space-y-2 text-center md:text-left">
-                      <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter">
-                        MY <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 drop-shadow-sm">INVENTORY</span>
+                      <h1 className="font-heading text-4xl md:text-5xl font-black text-white tracking-tighter">
+                        MY <span className="font-heading text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 drop-shadow-sm">INVENTORY</span>
                       </h1>
-                      <p className="text-white/40 text-xs md:text-sm font-semibold uppercase tracking-wider">
+                      <p className="font-heading text-white/40 text-xs md:text-sm font-semibold uppercase tracking-wider">
                         View, activate, and manage your boosters and charms
                       </p>
                     </div>
@@ -6802,7 +6802,7 @@ const handlePackAction = (packId: string) => {
                       <span className="relative flex h-2 w-2">
                         <span className={`relative inline-flex rounded-full h-2 w-2 ${activeBoost ? 'bg-green-500 shadow-[0_0_10px_green]' : 'bg-slate-500'}`} />
                       </span>
-                      <span className="text-white/30 text-[9px] font-black uppercase tracking-widest">
+                      <span className="font-heading text-white/30 text-[9px] font-black uppercase tracking-widest">
                         {activeBoost ? 'Booster Active' : 'No Boosters Active'}
                       </span>
                     </div>
@@ -6849,16 +6849,16 @@ const handlePackAction = (packId: string) => {
                             ⚡
                           </div>
                           <div>
-                            <div className="text-white font-black text-sm uppercase tracking-wider">Active Global Boost</div>
-                            <p className="text-xs text-slate-400 mt-0.5">
-                              Activated by <span className="text-white font-bold">{activeBoost.activated_by}</span>. 
-                              All drops currently boosted by <span className="text-green-400 font-bold">{activeBoost.multiplier}x</span>!
+                            <div className="font-heading text-white font-black text-sm uppercase tracking-wider">Active Global Boost</div>
+                            <p className="font-heading text-xs text-slate-400 mt-0.5">
+                              Activated by <span className="font-heading text-white font-bold">{activeBoost.activated_by}</span>. 
+                              All drops currently boosted by <span className="font-heading text-green-400 font-bold">{activeBoost.multiplier}x</span>!
                             </p>
                           </div>
                         </div>
                         <div className="bg-black/40 border border-white/5 px-4 py-2.5 rounded-2xl text-center">
-                          <div className="text-slate-500 text-[9px] uppercase tracking-widest font-black">Ends At</div>
-                          <div className="text-white font-black text-xs mt-0.5">
+                          <div className="font-heading text-slate-500 text-[9px] uppercase tracking-widest font-black">Ends At</div>
+                          <div className="font-heading text-white font-black text-xs mt-0.5">
                             {new Date(activeBoost.ends_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </div>
                         </div>
@@ -6872,8 +6872,8 @@ const handlePackAction = (packId: string) => {
                           📦
                         </div>
                         <div>
-                          <h3 className="text-white font-black text-lg">Your inventory is empty</h3>
-                          <p className="text-slate-400 text-xs mt-1 max-w-sm mx-auto">
+                          <h3 className="font-heading text-white font-black text-lg">Your inventory is empty</h3>
+                          <p className="font-heading text-slate-400 text-xs mt-1 max-w-sm mx-auto">
                             You don't own any booster items yet. Head over to the Shop to purchase Luck Charms!
                           </p>
                         </div>
@@ -6896,7 +6896,7 @@ const handlePackAction = (packId: string) => {
                           return (
                             <div
                               key={item.id}
-                              className={`bg-gradient-to-br ${spec.color} bg-slate-950 border rounded-3xl p-6 flex flex-col justify-between hover:-translate-y-1 transition-all duration-300 shadow-xl`}
+                              className={`bg-gradient-to-br ${spec.color} bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 border rounded-3xl p-6 flex flex-col justify-between hover:-translate-y-1 transition-all duration-300 shadow-xl`}
                             >
                               <div className="flex justify-between items-start gap-4">
                                 <div className="flex items-center gap-4">
@@ -6904,19 +6904,19 @@ const handlePackAction = (packId: string) => {
                                     {spec.emoji}
                                   </div>
                                   <div>
-                                    <h3 className="text-white font-black text-base uppercase tracking-wider">{spec.name}</h3>
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 block mt-0.5">
+                                    <h3 className="font-heading text-white font-black text-base uppercase tracking-wider">{spec.name}</h3>
+                                    <span className="font-heading text-[10px] font-black uppercase tracking-widest text-slate-500 block mt-0.5">
                                       Booster Charm
                                     </span>
                                   </div>
                                 </div>
                                 <div className="bg-black/60 border border-white/5 px-3 py-1.5 rounded-xl text-center shrink-0">
-                                  <div className="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Owned</div>
-                                  <div className="text-white font-black text-sm">{item.quantity}</div>
+                                  <div className="font-heading text-[9px] font-bold text-slate-500 uppercase tracking-wider">Owned</div>
+                                  <div className="font-heading text-white font-black text-sm">{item.quantity}</div>
                                 </div>
                               </div>
 
-                              <p className="text-slate-400 text-xs mt-4 leading-relaxed">
+                              <p className="font-heading text-slate-400 text-xs mt-4 leading-relaxed">
                                 {spec.description}
                               </p>
 
@@ -6943,8 +6943,8 @@ const handlePackAction = (packId: string) => {
                           💥
                         </div>
                         <div>
-                          <h3 className="text-white font-black text-lg">No Booms owned</h3>
-                          <p className="text-slate-400 text-xs mt-1 max-w-sm mx-auto">
+                          <h3 className="font-heading text-white font-black text-lg">No Booms owned</h3>
+                          <p className="font-heading text-slate-400 text-xs mt-1 max-w-sm mx-auto">
                             Open packs in the Market to start collecting unique Booms!
                           </p>
                         </div>
@@ -6992,14 +6992,14 @@ const handlePackAction = (packId: string) => {
                                 <div className="absolute top-2 right-2 bg-black/60 border border-white/10 px-1.5 py-0.5 rounded-md text-[9px] font-black text-white">
                                   x{count}
                                 </div>
-                                <div className="text-4xl my-2 select-none filter drop-shadow group-hover:scale-110 transition-transform duration-300">
+                                <div className="font-heading text-4xl my-2 select-none filter drop-shadow group-hover:scale-110 transition-transform duration-300">
                                   {emoji}
                                 </div>
                                 <div className="w-full">
-                                  <div className="text-white font-bold text-[10px] truncate w-full" title={boomName}>
+                                  <div className="font-heading text-white font-bold text-[10px] truncate w-full" title={boomName}>
                                     {boomName}
                                   </div>
-                                  <div className="text-[8px] font-black uppercase tracking-widest opacity-60 mt-0.5">
+                                  <div className="font-heading text-[8px] font-black uppercase tracking-widest opacity-60 mt-0.5">
                                     {rarity}
                                   </div>
                                 </div>
@@ -7023,10 +7023,10 @@ const handlePackAction = (packId: string) => {
 
                   <div className="relative flex flex-col md:flex-row justify-between items-center gap-6 z-10">
                     <div className="space-y-2 text-center md:text-left">
-                      <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter">
-                        SYSTEMS <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 drop-shadow-sm">CONFIG</span>
+                      <h1 className="font-heading text-4xl md:text-5xl font-black text-white tracking-tighter">
+                        SYSTEMS <span className="font-heading text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 drop-shadow-sm">CONFIG</span>
                       </h1>
-                      <p className="text-white/40 text-xs md:text-sm font-semibold uppercase tracking-wider">
+                      <p className="font-heading text-white/40 text-xs md:text-sm font-semibold uppercase tracking-wider">
                         Configure terminal behavior, authorization protocols, and visuals
                       </p>
                     </div>
@@ -7035,7 +7035,7 @@ const handlePackAction = (packId: string) => {
                       <span className="relative flex h-2 w-2">
                         <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500 shadow-[0_0_10px_purple]" />
                       </span>
-                      <span className="text-white/30 text-[9px] font-black uppercase tracking-widest">Interface Node V1.0</span>
+                      <span className="font-heading text-white/30 text-[9px] font-black uppercase tracking-widest">Interface Node V1.0</span>
                     </div>
                   </div>
                 </div>
@@ -7045,27 +7045,27 @@ const handlePackAction = (packId: string) => {
                   <div className="group bg-gradient-to-br from-slate-900/60 to-slate-950/80 backdrop-blur-2xl rounded-[2rem] p-8 border border-white/10 hover:border-purple-500/30 transition-all duration-500 shadow-xl">
                     <div className="flex items-center mb-8">
                       <div className="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center mr-4 border border-purple-500/20 shadow-inner group-hover:scale-105 transition-transform duration-300">
-                        <UserIcon className="text-purple-400 w-5 h-5" />
+                        <UserIcon className="font-heading text-purple-400 w-5 h-5" />
                       </div>
-                      <h2 className="text-2xl font-black text-white tracking-tight">Identity Matrix</h2>
+                      <h2 className="font-heading text-2xl font-black text-white tracking-tight">Identity Matrix</h2>
                     </div>
                     <div className="space-y-5">
                       <div className="flex flex-col space-y-1 bg-black/20 p-4 rounded-xl border border-white/5">
-                        <span className="text-white/30 text-[9px] font-black uppercase tracking-widest">Sign Username</span>
-                        <p className="text-white font-bold">{currentUser?.username}</p>
+                        <span className="font-heading text-white/30 text-[9px] font-black uppercase tracking-widest">Sign Username</span>
+                        <p className="font-heading text-white font-bold">{currentUser?.username}</p>
                       </div>
                       <div className="flex flex-col space-y-1 bg-black/20 p-4 rounded-xl border border-white/5">
-                        <span className="text-white/30 text-[9px] font-black uppercase tracking-widest">Authorization Access</span>
-                        <p className="text-white font-bold">{currentUser ? getUserRoleName(currentUser) : "Player"}</p>
+                        <span className="font-heading text-white/30 text-[9px] font-black uppercase tracking-widest">Authorization Access</span>
+                        <p className="font-heading text-white font-bold">{currentUser ? getUserRoleName(currentUser) : "Player"}</p>
                       </div>
                       <div className="flex flex-col space-y-1 bg-black/20 p-4 rounded-xl border border-white/5">
-                        <span className="text-white/30 text-[9px] font-black uppercase tracking-widest">Deployment Date</span>
-                        <p className="text-white font-bold">{currentUser?.joinDate}</p>
+                        <span className="font-heading text-white/30 text-[9px] font-black uppercase tracking-widest">Deployment Date</span>
+                        <p className="font-heading text-white font-bold">{currentUser?.joinDate}</p>
                       </div>
                       {/* Display badges */}
                       {currentUser?.badges && currentUser.badges.length > 0 && (
                         <div className="pt-2">
-                          <span className="text-white/30 text-[9px] font-black uppercase tracking-widest ml-1">Acquired Badges</span>
+                          <span className="font-heading text-white/30 text-[9px] font-black uppercase tracking-widest ml-1">Acquired Badges</span>
                           <div className="flex flex-wrap gap-2 mt-2">
                             {currentUser.badges.map((badgeId) => {
                               const badge = AVAILABLE_BADGES.find((b) => b.id === badgeId)
@@ -7085,9 +7085,9 @@ const handlePackAction = (packId: string) => {
                   <div className="group bg-gradient-to-br from-slate-900/60 to-slate-950/80 backdrop-blur-2xl rounded-[2rem] p-8 border border-white/10 hover:border-red-500/30 transition-all duration-500 shadow-xl">
                     <div className="flex items-center mb-8">
                       <div className="w-12 h-12 bg-red-500/10 rounded-xl flex items-center justify-center mr-4 border border-red-500/20 shadow-inner group-hover:scale-105 transition-transform duration-300">
-                        <PencilIcon className="text-red-400 w-5 h-5" />
+                        <PencilIcon className="font-heading text-red-400 w-5 h-5" />
                       </div>
-                      <h2 className="text-2xl font-black text-white tracking-tight">Access Control</h2>
+                      <h2 className="font-heading text-2xl font-black text-white tracking-tight">Access Control</h2>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <Button
@@ -7113,9 +7113,9 @@ const handlePackAction = (packId: string) => {
                   <div className="group bg-gradient-to-br from-slate-900/60 to-slate-950/80 backdrop-blur-2xl rounded-[2rem] p-8 border border-white/10 hover:border-blue-500/30 transition-all duration-500 shadow-xl">
                     <div className="flex items-center mb-8">
                       <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center mr-4 border border-blue-500/20 shadow-inner group-hover:scale-105 transition-transform duration-300">
-                        <SparklesIcon className="text-blue-400 w-5 h-5" />
+                        <SparklesIcon className="font-heading text-blue-400 w-5 h-5" />
                       </div>
-                      <h2 className="text-2xl font-black text-white tracking-tight">Hologram Styles</h2>
+                      <h2 className="font-heading text-2xl font-black text-white tracking-tight">Hologram Styles</h2>
                     </div>
                     <div className="flex flex-col gap-6">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -7142,7 +7142,7 @@ const handlePackAction = (packId: string) => {
                       </div>
                       
                       <div className="space-y-3 bg-black/20 p-5 rounded-2xl border border-white/5">
-                        <Label className="text-white/30 text-[9px] font-black uppercase tracking-widest ml-1">Custom Plasma Accent</Label>
+                        <Label className="font-heading text-white/30 text-[9px] font-black uppercase tracking-widest ml-1">Custom Plasma Accent</Label>
                         <div className="flex gap-4">
                           <div className="relative h-12 flex-1 rounded-xl overflow-hidden border border-white/10 bg-black/30">
                             <input
@@ -7178,9 +7178,9 @@ const handlePackAction = (packId: string) => {
                   <div className="group bg-gradient-to-br from-slate-900/60 to-slate-950/80 backdrop-blur-2xl rounded-[2rem] p-8 border border-white/10 hover:border-slate-500/30 transition-all duration-500 shadow-xl">
                     <div className="flex items-center mb-8">
                       <div className="w-12 h-12 bg-slate-500/10 rounded-xl flex items-center justify-center mr-4 border border-slate-500/20 shadow-inner group-hover:scale-105 transition-transform duration-300">
-                        <FileTextIcon className="text-slate-400 w-5 h-5" />
+                        <FileTextIcon className="font-heading text-slate-400 w-5 h-5" />
                       </div>
-                      <h2 className="text-2xl font-black text-white tracking-tight">Legal Protocols</h2>
+                      <h2 className="font-heading text-2xl font-black text-white tracking-tight">Legal Protocols</h2>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <Button
@@ -7217,22 +7217,22 @@ const handlePackAction = (packId: string) => {
 
                   <div className="relative flex flex-col md:flex-row justify-between items-center gap-6 z-10">
                     <div className="space-y-2 text-center md:text-left">
-                      <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter">
-                        TACTICAL <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 drop-shadow-sm">ROSTER</span>
+                      <h1 className="font-heading text-4xl md:text-5xl font-black text-white tracking-tighter">
+                        TACTICAL <span className="font-heading text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 drop-shadow-sm">ROSTER</span>
                       </h1>
-                      <p className="text-white/40 text-xs md:text-sm font-semibold uppercase tracking-wider">
+                      <p className="font-heading text-white/40 text-xs md:text-sm font-semibold uppercase tracking-wider">
                         Manage your network coordinates, authorization nodes, and encrypted requests
                       </p>
                     </div>
 
                     <div className="flex items-center gap-6 bg-slate-900/60 backdrop-blur-2xl border border-white/10 px-6 py-4 rounded-3xl shadow-xl">
-                      <div className="text-center border-r border-white/5 pr-6">
-                        <div className="text-2xl font-black text-purple-400 tabular-nums">{friendsList.length}</div>
-                        <div className="text-[8px] text-white/30 font-black uppercase tracking-widest mt-0.5">Operatives</div>
+                      <div className="font-heading text-center border-r border-white/5 pr-6">
+                        <div className="font-heading text-2xl font-black text-purple-400 tabular-nums">{friendsList.length}</div>
+                        <div className="font-heading text-[8px] text-white/30 font-black uppercase tracking-widest mt-0.5">Operatives</div>
                       </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-black text-orange-400 tabular-nums">{friendRequests.length}</div>
-                        <div className="text-[8px] text-white/30 font-black uppercase tracking-widest mt-0.5">Incoming</div>
+                      <div className="font-heading text-center">
+                        <div className="font-heading text-2xl font-black text-orange-400 tabular-nums">{friendRequests.length}</div>
+                        <div className="font-heading text-[8px] text-white/30 font-black uppercase tracking-widest mt-0.5">Incoming</div>
                       </div>
                     </div>
                   </div>
@@ -7244,11 +7244,11 @@ const handlePackAction = (packId: string) => {
                     {/* Add Friend - Beacons */}
                     <div className="bg-gradient-to-b from-slate-900/60 to-slate-950/80 border border-white/10 rounded-[2rem] p-6 shadow-xl relative overflow-hidden group">
                       <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-2xl pointer-events-none" />
-                      <h3 className="text-lg font-black text-white mb-4 flex items-center gap-2 relative z-10">
+                      <h3 className="font-heading text-lg font-black text-white mb-4 flex items-center gap-2 relative z-10">
                         <Users2Icon className="h-5 w-5 text-purple-400" />
                         LINK BEACON
                       </h3>
-                      <p className="text-xs text-white/40 font-medium mb-4 uppercase tracking-wider">
+                      <p className="font-heading text-xs text-white/40 font-medium mb-4 uppercase tracking-wider">
                         Transmit friend invitation beacon to an operators code name
                       </p>
                       <div className="space-y-3 relative z-10">
@@ -7281,7 +7281,7 @@ const handlePackAction = (packId: string) => {
                     {/* Pending Relays */}
                     {friendRequests.length > 0 && (
                       <div className="bg-orange-950/20 border border-orange-500/30 rounded-[2rem] p-6 shadow-lg">
-                        <h3 className="text-sm font-black text-orange-400 mb-4 uppercase tracking-[0.2em] flex items-center gap-2">
+                        <h3 className="font-heading text-sm font-black text-orange-400 mb-4 uppercase tracking-[0.2em] flex items-center gap-2">
                           <span className="w-2 h-2 rounded-full bg-orange-500 animate-ping" />
                           Pending Beacons ({friendRequests.length})
                         </h3>
@@ -7289,8 +7289,8 @@ const handlePackAction = (packId: string) => {
                           {friendRequests.map((req) => (
                             <div key={req.id} className="flex items-center justify-between bg-black/40 rounded-xl p-4 border border-orange-500/10">
                               <div className="flex flex-col">
-                                <span className="text-white font-bold text-sm">{req.user_username}</span>
-                                <span className="text-[8px] text-orange-400 font-black uppercase tracking-wider mt-0.5">Incoming Request</span>
+                                <span className="font-heading text-white font-bold text-sm">{req.user_username}</span>
+                                <span className="font-heading text-[8px] text-orange-400 font-black uppercase tracking-wider mt-0.5">Incoming Request</span>
                               </div>
                               <div className="flex gap-1.5">
                                 <Button
@@ -7302,7 +7302,7 @@ const handlePackAction = (packId: string) => {
                                 <Button
                                   onClick={() => handleRemoveFriend(req.user_username)}
                                   variant="ghost"
-                                  className="text-red-400 hover:bg-red-500/20 rounded-lg px-2.5 h-8 text-xs"
+                                  className="font-heading text-red-400 hover:bg-red-500/20 rounded-lg px-2.5 h-8 text-xs"
                                 >
                                   Decline
                                 </Button>
@@ -7316,11 +7316,11 @@ const handlePackAction = (packId: string) => {
 
                   {/* Right Column: Operative List */}
                   <div className="lg:col-span-2 space-y-6">
-                    <div className="bg-slate-950/40 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-6 md:p-8 shadow-2xl relative overflow-hidden">
+                    <div className="blooket-card p-6 md:p-8 shadow-2xl relative overflow-hidden">
                       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:30px_30px]" />
                       
                       <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                        <h3 className="text-lg font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
+                        <h3 className="font-heading text-lg font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
                           <span className="w-2.5 h-2.5 rounded-full bg-purple-500 animate-pulse" />
                           Operator Network ({friendsList.length})
                         </h3>
@@ -7330,7 +7330,7 @@ const handlePackAction = (packId: string) => {
                         <div className="relative z-10 text-center py-20 text-white/20 border-2 border-dashed border-white/5 rounded-[2rem] bg-black/20">
                           <Users2Icon className="w-16 h-16 mx-auto mb-4 opacity-10 animate-pulse" />
                           <p className="font-black text-sm uppercase tracking-widest mb-1">No active links</p>
-                          <p className="text-xs font-semibold text-white/30 uppercase tracking-wider">Broadcast your beacon to enlist crew nodes</p>
+                          <p className="font-heading text-xs font-semibold text-white/30 uppercase tracking-wider">Broadcast your beacon to enlist crew nodes</p>
                         </div>
                       ) : (
                         <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -7369,10 +7369,10 @@ const handlePackAction = (packId: string) => {
                                           </span>
                                         </span>
                                       )}
-                                      <span className="text-white font-black text-sm truncate group-hover/card:text-purple-300 transition-colors">{friendName}</span>
+                                      <span className="font-heading text-white font-black text-sm truncate group-hover/card:text-purple-300 transition-colors">{friendName}</span>
                                     </div>
                                     <div className="flex items-center gap-2 mt-1">
-                                      <span className="text-[8px] bg-purple-500/10 text-purple-400 border border-purple-500/20 px-1.5 py-0.5 rounded font-black uppercase">LVL {friendUser?.level || 1}</span>
+                                      <span className="font-heading text-[8px] bg-purple-500/10 text-purple-400 border border-purple-500/20 px-1.5 py-0.5 rounded font-black uppercase">LVL {friendUser?.level || 1}</span>
                                       <span className={`text-[8px] font-black uppercase tracking-wider ${statusTextColor}`}>{statusLabel}</span>
                                     </div>
                                   </div>
@@ -7418,7 +7418,7 @@ const handlePackAction = (packId: string) => {
                 {currentUser?.clan_id ? (
                   // IN A CLAN VIEW
                   !clanDetails ? (
-                    <div className="flex flex-col items-center justify-center p-20 min-h-[400px] bg-slate-950/40 border border-white/10 rounded-[2.5rem]">
+                    <div className="flex flex-col items-center justify-center p-20 min-h-[400px] blooket-card">
                       <div className="w-12 h-12 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin" />
                       <p className="mt-4 text-purple-400 font-black text-xs uppercase tracking-[0.2em] animate-pulse">Establishing HQ Datastream...</p>
                     </div>
@@ -7437,28 +7437,28 @@ const handlePackAction = (packId: string) => {
                             </div>
                             <div className="space-y-2">
                               <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                                <h1 className="text-4xl font-black text-white tracking-tight">{clanDetails.name}</h1>
+                                <h1 className="font-heading text-4xl font-black text-white tracking-tight">{clanDetails.name}</h1>
                                 <Badge className="bg-black/60 border border-purple-500/30 text-lg font-black px-3.5 py-0.5 rounded-xl uppercase tracking-wider">
                                   <span className={clanDetails.tag_color}>
                                     [{clanDetails.tag}]
                                   </span>
                                 </Badge>
                               </div>
-                              <p className="text-white/50 font-semibold text-sm max-w-xl">
+                              <p className="font-heading text-white/50 font-semibold text-sm max-w-xl">
                                 {clanDetails.description || "Establish operational objectives for your division."}
                               </p>
                               <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 text-[10px] font-black uppercase tracking-wider text-white/40 pt-1">
                                 <span className="flex items-center gap-1.5 bg-white/5 px-3 py-1 rounded-xl border border-white/5">
                                   <CrownIcon className="w-3.5 h-3.5 text-yellow-500" />
-                                  HQ Commander: <span className="text-yellow-400 font-bold">{clanDetails.leader}</span>
+                                  HQ Commander: <span className="font-heading text-yellow-400 font-bold">{clanDetails.leader}</span>
                                 </span>
                                 <span className="flex items-center gap-1.5 bg-white/5 px-3 py-1 rounded-xl border border-white/5">
                                   <CoinsIcon className="w-3.5 h-3.5 text-yellow-500" />
-                                  Credits: <span className="text-white font-bold">{clanDetails.bank_tokens.toLocaleString()} tokens</span>
+                                  Credits: <span className="font-heading text-white font-bold">{clanDetails.bank_tokens.toLocaleString()} tokens</span>
                                 </span>
                                 <span className="flex items-center gap-1.5 bg-white/5 px-3 py-1 rounded-xl border border-white/5">
                                   <Users2Icon className="w-3.5 h-3.5 text-purple-400" />
-                                  Nodes: <span className="text-white font-bold">{clanDetails.members?.length || 0} / {clanDetails.member_limit || 15}</span>
+                                  Nodes: <span className="font-heading text-white font-bold">{clanDetails.members?.length || 0} / {clanDetails.member_limit || 15}</span>
                                 </span>
                               </div>
                             </div>
@@ -7468,8 +7468,8 @@ const handlePackAction = (packId: string) => {
                             {/* Clan Level & XP */}
                             <div className="bg-black/40 border border-white/5 rounded-2xl p-4 w-full sm:w-64 space-y-2">
                               <div className="flex justify-between items-end">
-                                <span className="text-xs font-black uppercase text-purple-400 tracking-wider">Tier {clanDetails.level}</span>
-                                <span className="text-[10px] text-white/45 font-black tabular-nums">
+                                <span className="font-heading text-xs font-black uppercase text-purple-400 tracking-wider">Tier {clanDetails.level}</span>
+                                <span className="font-heading text-[10px] text-white/45 font-black tabular-nums">
                                   {clanDetails.xp % 10000} / 10000 XP
                                 </span>
                               </div>
@@ -7479,7 +7479,7 @@ const handlePackAction = (packId: string) => {
                                   style={{ width: `${(clanDetails.xp % 10000) / 100}%` }}
                                 />
                               </div>
-                              <div className="text-[9px] font-black text-white/30 uppercase tracking-widest text-right">
+                              <div className="font-heading text-[9px] font-black text-white/30 uppercase tracking-widest text-right">
                                 {10000 - (clanDetails.xp % 10000)} XP to next upgrade
                               </div>
                             </div>
@@ -7487,7 +7487,7 @@ const handlePackAction = (packId: string) => {
                             <Button 
                               onClick={handleLeaveClan}
                               variant="ghost" 
-                              className="text-red-400 hover:bg-red-500/10 hover:text-white rounded-2xl w-full text-xs font-black uppercase tracking-wider h-10 border border-red-500/10 hover:border-transparent transition-all"
+                              className="font-heading text-red-400 hover:bg-red-500/10 hover:text-white rounded-2xl w-full text-xs font-black uppercase tracking-wider h-10 border border-red-500/10 hover:border-transparent transition-all"
                             >
                               DISCONNECT HQ LINK
                             </Button>
@@ -7500,10 +7500,10 @@ const handlePackAction = (packId: string) => {
                         {/* Member Roster & Settings (Col Span 2) */}
                         <div className="lg:col-span-2 space-y-8">
                           {/* Member Roster Card */}
-                          <div className="bg-slate-950/40 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-6 shadow-xl space-y-6">
+                          <div className="blooket-card p-6 shadow-xl space-y-6">
                             <div className="flex items-center gap-3">
                               <Users2Icon className="w-5 h-5 text-purple-400" />
-                              <h2 className="text-xl font-black text-white uppercase tracking-wider">HQ Personnel Roster</h2>
+                              <h2 className="font-heading text-xl font-black text-white uppercase tracking-wider">HQ Personnel Roster</h2>
                             </div>
 
                             <div className="overflow-x-auto">
@@ -7539,7 +7539,7 @@ const handlePackAction = (packId: string) => {
                                             >
                                               {member.username}
                                             </span>
-                                            {isSelf && <span className="text-[8px] text-purple-400 font-black ml-2 bg-purple-500/10 px-1.5 py-0.5 rounded border border-purple-500/20 tracking-wider">YOU</span>}
+                                            {isSelf && <span className="font-heading text-[8px] text-purple-400 font-black ml-2 bg-purple-500/10 px-1.5 py-0.5 rounded border border-purple-500/20 tracking-wider">YOU</span>}
                                           </div>
                                         </td>
                                         <td className="py-4">
@@ -7564,7 +7564,7 @@ const handlePackAction = (packId: string) => {
                                                     {member.clan_role === 'member' ? (
                                                       <button 
                                                         onClick={() => handlePromoteMember(member.username, 'co_leader')}
-                                                        className="text-[9px] bg-purple-600 hover:bg-purple-500 text-white px-2.5 py-1 rounded-lg font-black uppercase tracking-wider"
+                                                        className="font-heading text-[9px] bg-purple-600 hover:bg-purple-500 text-white px-2.5 py-1 rounded-lg font-black uppercase tracking-wider"
                                                         title="Promote to Co-Leader"
                                                       >
                                                         Promote
@@ -7572,7 +7572,7 @@ const handlePackAction = (packId: string) => {
                                                     ) : (
                                                       <button 
                                                         onClick={() => handlePromoteMember(member.username, 'member')}
-                                                        className="text-[9px] bg-slate-700 hover:bg-slate-600 text-white px-2.5 py-1 rounded-lg font-black uppercase tracking-wider"
+                                                        className="font-heading text-[9px] bg-slate-700 hover:bg-slate-600 text-white px-2.5 py-1 rounded-lg font-black uppercase tracking-wider"
                                                         title="Demote to Member"
                                                       >
                                                         Demote
@@ -7580,7 +7580,7 @@ const handlePackAction = (packId: string) => {
                                                     )}
                                                     <button 
                                                       onClick={() => handleTransferLeadership(member.username)}
-                                                      className="text-[9px] bg-yellow-600 hover:bg-yellow-500 text-white px-2.5 py-1 rounded-lg font-black uppercase tracking-wider"
+                                                      className="font-heading text-[9px] bg-yellow-600 hover:bg-yellow-500 text-white px-2.5 py-1 rounded-lg font-black uppercase tracking-wider"
                                                       title="Transfer Clan Leadership"
                                                     >
                                                       Leader
@@ -7589,14 +7589,14 @@ const handlePackAction = (packId: string) => {
                                                 )}
                                                 <button 
                                                   onClick={() => handleKickMember(member.username)}
-                                                  className="text-[9px] bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white px-2.5 py-1 rounded-lg font-black border border-red-500/20 hover:border-transparent transition-colors uppercase tracking-wider"
+                                                  className="font-heading text-[9px] bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white px-2.5 py-1 rounded-lg font-black border border-red-500/20 hover:border-transparent transition-colors uppercase tracking-wider"
                                                   title="Kick from Clan"
                                                 >
                                                   Kick
                                                 </button>
                                               </div>
                                             ) : (
-                                              <span className="text-xs text-white/20">-</span>
+                                              <span className="font-heading text-xs text-white/20">-</span>
                                             )}
                                           </td>
                                         )}
@@ -7610,15 +7610,15 @@ const handlePackAction = (packId: string) => {
 
                           {/* Clan Requirements & Settings */}
                           {(currentUser.clan_role === 'leader' || currentUser.clan_role === 'co_leader') && (
-                            <div className="bg-slate-950/40 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-6 shadow-xl space-y-6">
+                            <div className="blooket-card p-6 shadow-xl space-y-6">
                               <div className="flex items-center gap-3">
                                 <Settings2Icon className="w-5 h-5 text-purple-400" />
-                                <h2 className="text-xl font-black text-white uppercase tracking-wider">Protocol Adjustments</h2>
+                                <h2 className="font-heading text-xl font-black text-white uppercase tracking-wider">Protocol Adjustments</h2>
                               </div>
                               
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
-                                  <label className="text-[9px] font-black uppercase text-white/30 tracking-widest">Logo Emblem</label>
+                                  <label className="font-heading text-[9px] font-black uppercase text-white/30 tracking-widest">Logo Emblem</label>
                                   <select 
                                     id="clanEditLogo"
                                     defaultValue={clanDetails.logo}
@@ -7630,7 +7630,7 @@ const handlePackAction = (packId: string) => {
                                   </select>
                                 </div>
                                 <div className="space-y-1.5">
-                                  <label className="text-[9px] font-black uppercase text-white/30 tracking-widest">Tag Plasma Glow</label>
+                                  <label className="font-heading text-[9px] font-black uppercase text-white/30 tracking-widest">Tag Plasma Glow</label>
                                   <select 
                                     id="clanEditTagColor"
                                     defaultValue={clanDetails.tag_color}
@@ -7662,7 +7662,7 @@ const handlePackAction = (packId: string) => {
                               </div>
 
                               <div className="space-y-1.5">
-                                <label className="text-[9px] font-black uppercase text-white/30 tracking-widest">HQ Mission Log</label>
+                                <label className="font-heading text-[9px] font-black uppercase text-white/30 tracking-widest">HQ Mission Log</label>
                                 <textarea
                                   id="clanEditDescription"
                                   defaultValue={clanDetails.description || ""}
@@ -7673,11 +7673,11 @@ const handlePackAction = (packId: string) => {
                               </div>
 
                               <div className="border-t border-white/5 pt-4 space-y-4">
-                                <h3 className="text-xs font-black uppercase text-purple-400 tracking-wider">Division Enlistment Criteria</h3>
+                                <h3 className="font-heading text-xs font-black uppercase text-purple-400 tracking-wider">Division Enlistment Criteria</h3>
                                 
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                   <div className="space-y-1.5">
-                                    <label className="text-[9px] font-black uppercase text-white/30 tracking-widest">Min Credits</label>
+                                    <label className="font-heading text-[9px] font-black uppercase text-white/30 tracking-widest">Min Credits</label>
                                     <input 
                                       type="number"
                                       id="clanEditMinTokens"
@@ -7686,7 +7686,7 @@ const handlePackAction = (packId: string) => {
                                     />
                                   </div>
                                   <div className="space-y-1.5">
-                                    <label className="text-[9px] font-black uppercase text-white/30 tracking-widest">Min Boom rarity</label>
+                                    <label className="font-heading text-[9px] font-black uppercase text-white/30 tracking-widest">Min Boom rarity</label>
                                     <select 
                                       id="clanEditMinRarity"
                                       defaultValue={clanDetails.min_rarity || "uncommon"}
@@ -7698,7 +7698,7 @@ const handlePackAction = (packId: string) => {
                                     </select>
                                   </div>
                                   <div className="space-y-1.5">
-                                    <label className="text-[9px] font-black uppercase text-white/30 tracking-widest">Required count</label>
+                                    <label className="font-heading text-[9px] font-black uppercase text-white/30 tracking-widest">Required count</label>
                                     <input 
                                       type="number"
                                       id="clanEditMinRarityCount"
@@ -7732,15 +7732,15 @@ const handlePackAction = (packId: string) => {
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                               <div className="flex items-center gap-3">
                                 <SparklesIcon className="w-5 h-5 text-yellow-400" />
-                                <h2 className="text-xl font-black text-white uppercase tracking-wider">HQ Augmentations</h2>
+                                <h2 className="font-heading text-xl font-black text-white uppercase tracking-wider">HQ Augmentations</h2>
                               </div>
-                              <span className="text-xs bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 px-3.5 py-1 rounded-xl font-black flex items-center gap-1.5 uppercase tracking-wider">
+                              <span className="font-heading text-xs bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 px-3.5 py-1 rounded-xl font-black flex items-center gap-1.5 uppercase tracking-wider">
                                 <CoinsIcon className="w-3.5 h-3.5" />
                                 {clanDetails.bank_tokens.toLocaleString()} Vault Credits
                               </span>
                             </div>
                             
-                            <p className="text-white/40 text-xs font-semibold uppercase tracking-wider leading-relaxed">
+                            <p className="font-heading text-white/40 text-xs font-semibold uppercase tracking-wider leading-relaxed">
                               Procure tactical passives and holographic cosmetics utilizing treasury assets. Authorized command authorization required.
                             </p>
                             
@@ -7749,7 +7749,7 @@ const handlePackAction = (packId: string) => {
                               <div className="bg-black/40 border border-white/5 rounded-2xl p-4 flex flex-col justify-between gap-4">
                                 <div className="space-y-1">
                                   <h4 className="font-black text-white text-xs uppercase tracking-wider">OPERATIONAL NODE CAPACITY</h4>
-                                  <p className="text-xs text-white/40 font-semibold uppercase">Increase total operatives. Current: <span className="text-white font-black">{clanDetails.member_limit || 15} / 30</span></p>
+                                  <p className="font-heading text-xs text-white/40 font-semibold uppercase">Increase total operatives. Current: <span className="font-heading text-white font-black">{clanDetails.member_limit || 15} / 30</span></p>
                                 </div>
                                 <div>
                                   {clanDetails.member_limit >= 30 ? (
@@ -7770,7 +7770,7 @@ const handlePackAction = (packId: string) => {
                               <div className="bg-black/40 border border-white/5 rounded-2xl p-4 flex flex-col justify-between gap-4">
                                 <div className="space-y-1">
                                   <h4 className="font-black text-white text-xs uppercase tracking-wider">DATALINK XP ACCELERATOR</h4>
-                                  <p className="text-xs text-white/40 font-semibold uppercase">Passive score gains multiplier. Current: <span className="text-yellow-400 font-black">{clanDetails.xp_multiplier || "1.0"}x</span></p>
+                                  <p className="font-heading text-xs text-white/40 font-semibold uppercase">Passive score gains multiplier. Current: <span className="font-heading text-yellow-400 font-black">{clanDetails.xp_multiplier || "1.0"}x</span></p>
                                 </div>
                                 <div>
                                   {clanDetails.xp_multiplier >= 2.0 ? (
@@ -7790,7 +7790,7 @@ const handlePackAction = (packId: string) => {
 
                             {/* Premium Colors Shop Section */}
                             <div className="border-t border-white/5 pt-4 space-y-3">
-                              <h3 className="text-xs font-black uppercase text-purple-400 tracking-wider">Holographic Plasma Colors</h3>
+                              <h3 className="font-heading text-xs font-black uppercase text-purple-400 tracking-wider">Holographic Plasma Colors</h3>
                               
                               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
                                 {[
@@ -7803,12 +7803,12 @@ const handlePackAction = (packId: string) => {
                                   const isUnlocked = (clanDetails.unlocked_colors || []).includes(color.code);
                                   return (
                                     <div key={color.code} className="bg-black/40 border border-white/5 rounded-xl p-3 flex flex-col justify-between items-center text-center gap-3">
-                                      <span className="text-[10px] font-black px-2 py-0.5 rounded bg-black/60 border border-white/5 shrink-0">
+                                      <span className="font-heading text-[10px] font-black px-2 py-0.5 rounded bg-black/60 border border-white/5 shrink-0">
                                         <span className={color.code}>
                                           [{clanDetails.tag}]
                                         </span>
                                       </span>
-                                      <div className="text-[9px] text-white/40 font-black uppercase tracking-widest leading-tight">{color.name}</div>
+                                      <div className="font-heading text-[9px] text-white/40 font-black uppercase tracking-widest leading-tight">{color.name}</div>
                                       
                                       {isUnlocked ? (
                                         <Badge className="bg-green-500/10 border-green-500/20 text-green-400 text-[8px] font-black py-0.5 uppercase tracking-widest">Consolidated</Badge>
@@ -7836,9 +7836,9 @@ const handlePackAction = (packId: string) => {
                             <div className="absolute top-0 right-0 w-24 h-24 bg-yellow-500/5 rounded-full blur-2xl pointer-events-none" />
                             <div className="flex items-center gap-3">
                               <CoinsIcon className="w-5 h-5 text-yellow-500" />
-                              <h2 className="text-xl font-black text-white uppercase tracking-wider">Treasury Vault</h2>
+                              <h2 className="font-heading text-xl font-black text-white uppercase tracking-wider">Treasury Vault</h2>
                             </div>
-                            <p className="text-white/40 text-xs font-semibold uppercase tracking-wider leading-relaxed">
+                            <p className="font-heading text-white/40 text-xs font-semibold uppercase tracking-wider leading-relaxed">
                               Deposit tokens into the treasury division. 1 deposited token yields 1 XP. Helping division level-ups activates capacity expansions.
                             </p>
                             <div className="flex gap-2">
@@ -7868,28 +7868,28 @@ const handlePackAction = (packId: string) => {
                           </div>
 
                           {/* Real-time Clan Chat Box */}
-                          <div className="bg-slate-950/40 border border-white/10 rounded-[2rem] p-6 shadow-xl flex flex-col h-[480px]">
+                          <div className="blooket-card p-6 shadow-xl flex flex-col h-[480px]">
                             <div className="flex items-center gap-3 mb-4">
                               <div className="h-2.5 w-2.5 rounded-full bg-green-500 shadow-[0_0_10px_#22c55e] animate-pulse" />
-                              <h2 className="text-xl font-black text-white uppercase tracking-wider">HQ Comms Uplink</h2>
+                              <h2 className="font-heading text-xl font-black text-white uppercase tracking-wider">HQ Comms Uplink</h2>
                             </div>
                             
                             {/* Messages area */}
                             <ScrollArea className="flex-1 pr-2 mb-4 scrollbar-hide">
                               <div className="space-y-3">
                                 {clanChat.map((msg, idx) => (
-                                  <div key={msg.id || idx} className="text-xs bg-black/40 border border-white/5 rounded-xl p-3 space-y-1 relative">
+                                  <div key={msg.id || idx} className="font-heading text-xs bg-black/40 border border-white/5 rounded-xl p-3 space-y-1 relative">
                                     <div className="flex items-center justify-between">
                                       <span className="font-black text-purple-400 text-[10px] uppercase tracking-wider">{msg.username}</span>
-                                      <span className="text-[9px] text-white/30 font-bold">
+                                      <span className="font-heading text-[9px] text-white/30 font-bold">
                                         {msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Just now"}
                                       </span>
                                     </div>
-                                    <p className="text-white/80 leading-relaxed break-words font-medium">{msg.message}</p>
+                                    <p className="font-heading text-white/80 leading-relaxed break-words font-medium">{msg.message}</p>
                                   </div>
                                 ))}
                                 {clanChat.length === 0 && (
-                                  <div className="text-center py-20 text-white/20 italic text-xs uppercase tracking-widest">
+                                  <div className="font-heading text-center py-20 text-white/20 italic text-xs uppercase tracking-widest">
                                     No Uplink datalogs. Transmit a signal.
                                   </div>
                                 )}
@@ -7924,11 +7924,11 @@ const handlePackAction = (packId: string) => {
                   // BROWSE & JOIN / CREATE VIEW
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Browse Clans Column (Col Span 2) */}
-                    <div className="lg:col-span-2 bg-slate-950/40 border border-white/10 rounded-[2.5rem] p-8 shadow-xl space-y-6">
+                    <div className="lg:col-span-2 blooket-card p-8 shadow-xl space-y-6">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/5">
                         <div>
-                          <h2 className="text-3xl font-black text-white tracking-tight uppercase">Operational Divisions</h2>
-                          <p className="text-white/40 text-xs font-semibold uppercase tracking-wider">Browse active factions in the sector</p>
+                          <h2 className="font-heading text-3xl font-black text-white tracking-tight uppercase">Operational Divisions</h2>
+                          <p className="font-heading text-white/40 text-xs font-semibold uppercase tracking-wider">Browse active factions in the sector</p>
                         </div>
                         <input 
                           type="text"
@@ -7962,13 +7962,13 @@ const handlePackAction = (packId: string) => {
                                           </span>
                                         </span>
                                       </div>
-                                      <p className="text-[9px] text-white/45 font-black uppercase tracking-widest mt-0.5">
+                                      <p className="font-heading text-[9px] text-white/45 font-black uppercase tracking-widest mt-0.5">
                                         Tier {clan.level} • {clan.memberCount} / {clan.member_limit || 15} Nodes
                                       </p>
                                     </div>
                                   </div>
 
-                                  <p className="text-xs text-white/50 line-clamp-2 min-h-[2rem] leading-relaxed font-semibold">
+                                  <p className="font-heading text-xs text-white/50 line-clamp-2 min-h-[2rem] leading-relaxed font-semibold">
                                     {clan.description || "Establish operational objectives for this division."}
                                   </p>
 
@@ -8016,13 +8016,13 @@ const handlePackAction = (packId: string) => {
                     <div className="bg-gradient-to-b from-slate-900/60 to-slate-950/80 border border-white/10 rounded-[2.5rem] p-8 shadow-xl space-y-6 h-fit relative overflow-hidden group">
                       <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-2xl pointer-events-none" />
                       <div>
-                        <h2 className="text-2xl font-black text-white tracking-tight uppercase">Forge Faction</h2>
-                        <p className="text-white/40 text-xs font-semibold uppercase tracking-wider">Establish your own command authority</p>
+                        <h2 className="font-heading text-2xl font-black text-white tracking-tight uppercase">Forge Faction</h2>
+                        <p className="font-heading text-white/40 text-xs font-semibold uppercase tracking-wider">Establish your own command authority</p>
                       </div>
 
                       <div className="space-y-4">
                         <div className="space-y-1.5">
-                          <label className="text-[9px] font-black uppercase text-white/30 tracking-widest">Division Name</label>
+                          <label className="font-heading text-[9px] font-black uppercase text-white/30 tracking-widest">Division Name</label>
                           <input 
                             type="text"
                             value={createClanForm.name}
@@ -8033,7 +8033,7 @@ const handlePackAction = (packId: string) => {
                         </div>
 
                         <div className="space-y-1.5">
-                          <label className="text-[9px] font-black uppercase text-white/30 tracking-widest">Division Tag (3-6 chars)</label>
+                          <label className="font-heading text-[9px] font-black uppercase text-white/30 tracking-widest">Division Tag (3-6 chars)</label>
                           <input 
                             type="text"
                             value={createClanForm.tag}
@@ -8045,7 +8045,7 @@ const handlePackAction = (packId: string) => {
                         </div>
 
                         <div className="space-y-1.5">
-                          <label className="text-[9px] font-black uppercase text-white/30 tracking-widest">Division Mandate</label>
+                          <label className="font-heading text-[9px] font-black uppercase text-white/30 tracking-widest">Division Mandate</label>
                           <textarea
                             value={createClanForm.description}
                             onChange={(e) => setCreateClanForm(prev => ({ ...prev, description: e.target.value }))}
@@ -8057,7 +8057,7 @@ const handlePackAction = (packId: string) => {
 
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-1.5">
-                            <label className="text-[9px] font-black uppercase text-white/30 tracking-widest">Emblem</label>
+                            <label className="font-heading text-[9px] font-black uppercase text-white/30 tracking-widest">Emblem</label>
                             <select 
                               value={createClanForm.logo}
                               onChange={(e) => setCreateClanForm(prev => ({ ...prev, logo: e.target.value }))}
@@ -8070,7 +8070,7 @@ const handlePackAction = (packId: string) => {
                           </div>
                           
                           <div className="space-y-1.5">
-                            <label className="text-[9px] font-black uppercase text-white/30 tracking-widest">Tag Plasma</label>
+                            <label className="font-heading text-[9px] font-black uppercase text-white/30 tracking-widest">Tag Plasma</label>
                             <select 
                               value={createClanForm.tagColor}
                               onChange={(e) => setCreateClanForm(prev => ({ ...prev, tagColor: e.target.value }))}
@@ -8119,21 +8119,21 @@ const handlePackAction = (packId: string) => {
                   <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-yellow-500/5 rounded-full blur-[100px] pointer-events-none" />
                   <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-purple-500/5 rounded-full blur-[100px] pointer-events-none" />
 
-                  <div className="relative flex flex-col md:flex-row justify-between items-center gap-6 z-10 font-sans">
+                  <div className="relative flex flex-col md:flex-row justify-between items-center gap-6 z-10 ">
                     <div className="space-y-2 text-center md:text-left">
-                      <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter">
-                        ARENA <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-400 to-orange-400 drop-shadow-sm">CIRCUITS</span>
+                      <h1 className="font-heading text-4xl md:text-5xl font-black text-white tracking-tighter">
+                        ARENA <span className="font-heading text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-400 to-orange-400 drop-shadow-sm">CIRCUITS</span>
                       </h1>
-                      <p className="text-white/40 text-xs md:text-sm font-semibold uppercase tracking-wider">
+                      <p className="font-heading text-white/40 text-xs md:text-sm font-semibold uppercase tracking-wider">
                         Compete in sector championships to secure legendary assets and division recognition
                       </p>
                     </div>
 
                     <div className="shrink-0 flex items-center gap-4 bg-slate-900/60 backdrop-blur-2xl border border-white/10 px-6 py-4 rounded-3xl shadow-xl">
-                      <span className="text-3xl animate-bounce">🏆</span>
-                      <div className="text-left">
-                        <div className="text-[9px] text-white/40 font-black uppercase tracking-widest">Active division</div>
-                        <div className="text-sm font-black text-white">{currentUser?.clan_tag ? `[${currentUser.clan_tag}]` : "UNLISTED"}</div>
+                      <span className="font-heading text-3xl animate-bounce">🏆</span>
+                      <div className="font-heading text-left">
+                        <div className="font-heading text-[9px] text-white/40 font-black uppercase tracking-widest">Active division</div>
+                        <div className="font-heading text-sm font-black text-white">{currentUser?.clan_tag ? `[${currentUser.clan_tag}]` : "UNLISTED"}</div>
                       </div>
                     </div>
                   </div>
@@ -8142,21 +8142,21 @@ const handlePackAction = (packId: string) => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   {/* Leaderboard for selected tournament */}
                   <div className="space-y-6 lg:col-span-1">
-                    <h3 className="text-lg font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
+                    <h3 className="font-heading text-lg font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
                       <StarIcon className="h-5 w-5 text-purple-400 animate-pulse" />
                       CIRCUIT STANDINGS
                     </h3>
-                    <div className="bg-slate-950/40 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] overflow-hidden min-h-[480px] flex flex-col shadow-2xl relative">
+                    <div className="blooket-card overflow-hidden min-h-[480px] flex flex-col shadow-2xl relative">
                       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:20px_20px]" />
                       
                       {!selectedTournament ? (
                         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-white/20 italic text-xs uppercase tracking-widest relative z-10">
-                          <span className="text-3xl mb-3">📡</span>
+                          <span className="font-heading text-3xl mb-3">📡</span>
                           Select circuit bracket to tap standlings telemetry
                         </div>
                       ) : (
                         <div className="p-5 space-y-3 relative z-10 flex-1 overflow-y-auto">
-                          <div className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] px-2 mb-3 flex justify-between">
+                          <div className="font-heading text-[9px] font-black text-white/30 uppercase tracking-[0.2em] px-2 mb-3 flex justify-between">
                             <span>DIVISION / LOGS</span>
                             <span>SCORE</span>
                           </div>
@@ -8184,22 +8184,22 @@ const handlePackAction = (packId: string) => {
                                 </div>
                                 <div className="flex-grow flex flex-col font-medium min-w-0">
                                   <div className="flex items-center gap-2">
-                                    <span className="text-white font-black text-xs truncate max-w-[100px]">{clan?.name || "Unlisted Division"}</span>
+                                    <span className="font-heading text-white font-black text-xs truncate max-w-[100px]">{clan?.name || "Unlisted Division"}</span>
                                     <span className="inline-block text-[8px] font-black px-1.5 py-0.5 rounded bg-black/40 border border-white/5 shrink-0">
                                       <span className={clan?.tag_color || "text-purple-400"}>
                                         [{clan?.tag || "???"}]
                                       </span>
                                     </span>
                                   </div>
-                                  <div className="text-[8px] text-white/30 uppercase font-black tracking-wider mt-0.5">{p.games_played} Games played</div>
+                                  <div className="font-heading text-[8px] text-white/30 uppercase font-black tracking-wider mt-0.5">{p.games_played} Games played</div>
                                 </div>
-                                <div className="text-white font-black text-base tabular-nums pl-2 shrink-0">{p.score.toLocaleString()}</div>
+                                <div className="font-heading text-white font-black text-base tabular-nums pl-2 shrink-0">{p.score.toLocaleString()}</div>
                               </div>
                             );
                           })}
                           
                           {tournamentParticipants.length === 0 && (
-                            <div className="text-center py-20 text-white/20 text-xs font-black uppercase tracking-widest">No scores recorded for this sector.</div>
+                            <div className="font-heading text-center py-20 text-white/20 text-xs font-black uppercase tracking-widest">No scores recorded for this sector.</div>
                           )}
                         </div>
                       )}
@@ -8208,15 +8208,15 @@ const handlePackAction = (packId: string) => {
 
                   {/* Active Tournaments */}
                   <div className="lg:col-span-2 space-y-6">
-                    <h3 className="text-lg font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
+                    <h3 className="font-heading text-lg font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
                       <TrophyIcon className="h-5 w-5 text-yellow-400 animate-pulse" />
                       ONGOING CHAMPS
                     </h3>
                     {activeTournaments.length === 0 ? (
-                      <div className="bg-slate-950/40 border border-dashed border-white/10 rounded-[2.5rem] p-16 text-center text-white/20">
+                      <div className="bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/40 border border-dashed border-white/10 rounded-[2.5rem] p-16 text-center text-white/20">
                         <TrophyIcon className="w-16 h-16 mx-auto mb-4 opacity-10 animate-pulse" />
                         <p className="font-black uppercase text-sm tracking-widest mb-1">No active operations</p>
-                        <p className="text-xs font-semibold text-white/30 uppercase tracking-wider">Operational schedules are currently down</p>
+                        <p className="font-heading text-xs font-semibold text-white/30 uppercase tracking-wider">Operational schedules are currently down</p>
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 gap-6">
@@ -8236,8 +8236,8 @@ const handlePackAction = (packId: string) => {
                               
                               <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-5">
                                 <div className="space-y-1">
-                                  <h4 className="text-2xl font-black text-white group-hover:text-yellow-400 transition-colors uppercase tracking-tight">{t.title}</h4>
-                                  <p className="text-white/40 text-xs font-semibold uppercase tracking-wider leading-relaxed">{t.description}</p>
+                                  <h4 className="font-heading text-2xl font-black text-white group-hover:text-yellow-400 transition-colors uppercase tracking-tight">{t.title}</h4>
+                                  <p className="font-heading text-white/40 text-xs font-semibold uppercase tracking-wider leading-relaxed">{t.description}</p>
                                 </div>
                                 <Badge className={`px-3 py-1 font-black uppercase text-[8px] tracking-widest border-none shrink-0 ${t.status === 'active' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'bg-red-500'}`}>
                                   {t.status}
@@ -8247,17 +8247,17 @@ const handlePackAction = (packId: string) => {
                               <div className="flex flex-wrap items-center gap-4 border-t border-white/5 pt-4">
                                 <div className="flex items-center gap-2 bg-black/40 rounded-xl px-4 py-2 border border-white/5">
                                   <CoinsIcon className="w-4 h-4 text-yellow-500" />
-                                  <span className="text-yellow-400 text-xs font-black tabular-nums">{t.prize_tokens?.toLocaleString() || 0}</span>
+                                  <span className="font-heading text-yellow-400 text-xs font-black tabular-nums">{t.prize_tokens?.toLocaleString() || 0}</span>
                                 </div>
                                 {t.prize_boom_name && (
                                   <div className="flex items-center gap-2 bg-black/40 rounded-xl px-4 py-2 border border-white/5">
                                     <BoomAvatar name={t.prize_boom_name} className="w-5 h-5 object-contain" />
-                                    <span className="text-white font-black uppercase text-[10px] tracking-wider">{t.prize_boom_name}</span>
+                                    <span className="font-heading text-white font-black uppercase text-[10px] tracking-wider">{t.prize_boom_name}</span>
                                   </div>
                                 )}
                                 <div className="flex items-center gap-2 bg-black/40 rounded-xl px-4 py-2 border border-white/5 sm:ml-auto">
                                   <CalendarIcon className="w-3.5 h-3.5 text-white/30" />
-                                  <span className="text-white/40 text-[9px] font-black uppercase tracking-widest">Ends: {new Date(t.end_time).toLocaleDateString()}</span>
+                                  <span className="font-heading text-white/40 text-[9px] font-black uppercase tracking-widest">Ends: {new Date(t.end_time).toLocaleDateString()}</span>
                                 </div>
                               </div>
 
@@ -8310,36 +8310,36 @@ const handlePackAction = (packId: string) => {
                                         
                                         <div className="flex justify-between items-center relative z-10">
                                           <div>
-                                            <span className="text-[8px] font-black uppercase text-purple-400 tracking-widest">DATALINK CONNECTION STATUS</span>
-                                            <div className="text-xs font-black text-white flex items-center gap-1.5 mt-0.5 uppercase">
+                                            <span className="font-heading text-[8px] font-black uppercase text-purple-400 tracking-widest">DATALINK CONNECTION STATUS</span>
+                                            <div className="font-heading text-xs font-black text-white flex items-center gap-1.5 mt-0.5 uppercase">
                                               <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-ping" />
                                               Division Synchronized
                                             </div>
                                           </div>
-                                          <div className="text-right">
-                                            <span className="text-[8px] font-black uppercase text-white/30 tracking-widest">SECTOR RANK</span>
-                                            <div className="text-xl font-black text-yellow-400 tabular-nums">
+                                          <div className="font-heading text-right">
+                                            <span className="font-heading text-[8px] font-black uppercase text-white/30 tracking-widest">SECTOR RANK</span>
+                                            <div className="font-heading text-xl font-black text-yellow-400 tabular-nums">
                                               {myClanRank !== "Unranked" ? `#${myClanRank}` : myClanRank}
                                             </div>
                                           </div>
                                         </div>
 
                                         <div className="grid grid-cols-3 gap-2 py-3 border-t border-b border-white/5 relative z-10 font-mono">
-                                          <div className="text-center">
-                                            <div className="text-[8px] font-black text-white/30 uppercase">TOTAL SCORE</div>
-                                            <div className="text-sm font-black text-white tabular-nums mt-0.5">{totalScore.toLocaleString()}</div>
+                                          <div className="font-heading text-center">
+                                            <div className="font-heading text-[8px] font-black text-white/30 uppercase">TOTAL SCORE</div>
+                                            <div className="font-heading text-sm font-black text-white tabular-nums mt-0.5">{totalScore.toLocaleString()}</div>
                                           </div>
-                                          <div className="text-center border-l border-r border-white/5">
-                                            <div className="text-[8px] font-black text-white/30 uppercase">GAMES COMMITTED</div>
-                                            <div className="text-sm font-black text-white tabular-nums mt-0.5">{gamesPlayed}</div>
+                                          <div className="font-heading text-center border-l border-r border-white/5">
+                                            <div className="font-heading text-[8px] font-black text-white/30 uppercase">GAMES COMMITTED</div>
+                                            <div className="font-heading text-sm font-black text-white tabular-nums mt-0.5">{gamesPlayed}</div>
                                           </div>
-                                          <div className="text-center">
-                                            <div className="text-[8px] font-black text-white/30 uppercase">AVG YIELD</div>
-                                            <div className="text-sm font-black text-white tabular-nums mt-0.5">{avgScore}</div>
+                                          <div className="font-heading text-center">
+                                            <div className="font-heading text-[8px] font-black text-white/30 uppercase">AVG YIELD</div>
+                                            <div className="font-heading text-sm font-black text-white tabular-nums mt-0.5">{avgScore}</div>
                                           </div>
                                         </div>
 
-                                        <p className="text-[9px] text-white/40 font-semibold uppercase tracking-wider relative z-10 leading-relaxed">
+                                        <p className="font-heading text-[9px] text-white/40 font-semibold uppercase tracking-wider relative z-10 leading-relaxed">
                                           {motivation}
                                         </p>
 
@@ -8377,26 +8377,26 @@ const handlePackAction = (packId: string) => {
 
                   <div className="relative flex flex-col md:flex-row justify-between items-center gap-6 z-10">
                     <div className="space-y-2 text-center md:text-left">
-                      <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter">
-                        FUSION <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 drop-shadow-sm">LAB</span>
+                      <h1 className="font-heading text-4xl md:text-5xl font-black text-white tracking-tighter">
+                        FUSION <span className="font-heading text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 drop-shadow-sm">LAB</span>
                       </h1>
-                      <p className="text-white/40 text-xs md:text-sm font-semibold uppercase tracking-wider">
+                      <p className="font-heading text-white/40 text-xs md:text-sm font-semibold uppercase tracking-wider">
                         Reconstruct atomic bonds by fusing duplicate units. Molecular loss hazard present.
                       </p>
                     </div>
 
                     <div className="shrink-0 flex items-center gap-6 bg-slate-900/60 backdrop-blur-2xl border border-white/10 px-6 py-4 rounded-3xl shadow-xl">
-                      <div className="text-center border-r border-white/5 pr-6">
-                        <div className="text-2xl font-black text-blue-400 tabular-nums">
+                      <div className="font-heading text-center border-r border-white/5 pr-6">
+                        <div className="font-heading text-2xl font-black text-blue-400 tabular-nums">
                           {Object.values(currentUser?.booms || {}).reduce((a, b) => (a as number) + (b as number), 0)}
                         </div>
-                        <div className="text-[8px] text-white/30 font-black uppercase tracking-widest mt-0.5">Assets</div>
+                        <div className="font-heading text-[8px] text-white/30 font-black uppercase tracking-widest mt-0.5">Assets</div>
                       </div>
-                      <div className="text-center">
-                        <div className="text-2xl font-black text-purple-400 tabular-nums">
+                      <div className="font-heading text-center">
+                        <div className="font-heading text-2xl font-black text-purple-400 tabular-nums">
                           {currentUser?.consecutive_fusions || 0}
                         </div>
-                        <div className="text-[8px] text-white/30 font-black uppercase tracking-widest mt-0.5">Consecutive</div>
+                        <div className="font-heading text-[8px] text-white/30 font-black uppercase tracking-widest mt-0.5">Consecutive</div>
                       </div>
                     </div>
                   </div>
@@ -8405,7 +8405,7 @@ const handlePackAction = (packId: string) => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   {/* Fusion Slots */}
                   <div className="lg:col-span-2 space-y-8">
-                    <div className="bg-slate-950/40 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-12 flex flex-col items-center justify-center relative overflow-hidden group shadow-2xl min-h-[380px]">
+                    <div className="blooket-card p-12 flex flex-col items-center justify-center relative overflow-hidden group shadow-2xl min-h-[380px]">
                       <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.01)_1px,transparent_1px)] bg-[size:30px_30px]" />
                       <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/5 rounded-full blur-[80px] pointer-events-none" />
 
@@ -8430,7 +8430,7 @@ const handlePackAction = (packId: string) => {
 
                           return (
                             <div className="w-full flex flex-col items-center justify-center relative z-10 space-y-6">
-                              <h3 className="text-sm font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 uppercase tracking-[0.25em] animate-pulse">
+                              <h3 className="font-heading text-sm font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 uppercase tracking-[0.25em] animate-pulse">
                                 {activeFusionRemaining > 0 ? "Molecular restructuring in progress" : "Structure Stabilized"}
                               </h3>
 
@@ -8440,7 +8440,7 @@ const handlePackAction = (packId: string) => {
                                   <div className="absolute -inset-0.5 bg-blue-500 rounded-2xl blur opacity-25" />
                                   <div className="relative flex flex-col items-center bg-slate-900/80 border border-blue-500/30 rounded-2xl p-4 w-28 h-28 justify-center shadow-lg">
                                     <BoomAvatar name={boom1} className="w-16 h-16 object-contain drop-shadow-md" />
-                                    <span className="text-[8px] font-black text-white/50 mt-3 uppercase truncate w-full text-center tracking-wider">{boom1}</span>
+                                    <span className="font-heading text-[8px] font-black text-white/50 mt-3 uppercase truncate w-full text-center tracking-wider">{boom1}</span>
                                   </div>
                                 </div>
 
@@ -8464,7 +8464,7 @@ const handlePackAction = (packId: string) => {
                                     </div>
                                   ) : (
                                     <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500 flex items-center justify-center animate-bounce shadow-[0_0_20px_rgba(16,185,129,0.3)]">
-                                      <span className="text-2xl">✨</span>
+                                      <span className="font-heading text-2xl">✨</span>
                                     </div>
                                   )}
                                 </div>
@@ -8474,7 +8474,7 @@ const handlePackAction = (packId: string) => {
                                   <div className="absolute -inset-0.5 bg-purple-500 rounded-2xl blur opacity-25" />
                                   <div className="relative flex flex-col items-center bg-slate-900/80 border border-purple-500/30 rounded-2xl p-4 w-28 h-28 justify-center shadow-lg">
                                     <BoomAvatar name={boom2} className="w-16 h-16 object-contain drop-shadow-md" />
-                                    <span className="text-[8px] font-black text-white/50 mt-3 uppercase truncate w-full text-center tracking-wider">{boom2}</span>
+                                    <span className="font-heading text-[8px] font-black text-white/50 mt-3 uppercase truncate w-full text-center tracking-wider">{boom2}</span>
                                   </div>
                                 </div>
                               </div>
@@ -8510,7 +8510,7 @@ const handlePackAction = (packId: string) => {
                                       'RETRIEVE MOLECULAR RESULT'
                                     )}
                                   </Button>
-                                  <p className="text-emerald-400/80 text-[10px] font-black uppercase tracking-widest">
+                                  <p className="font-heading text-emerald-400/80 text-[10px] font-black uppercase tracking-widest">
                                     stabilization complete. ready for vault transfer.
                                   </p>
                                 </div>
@@ -8541,18 +8541,18 @@ const handlePackAction = (packId: string) => {
                                   {fusionSlot1 ? (
                                     <div className="flex flex-col items-center">
                                       <BoomAvatar name={fusionSlot1} className="w-16 h-16 object-contain drop-shadow-md" />
-                                      <span className="text-[9px] font-black text-white mt-2 uppercase max-w-[110px] truncate">{fusionSlot1}</span>
+                                      <span className="font-heading text-[9px] font-black text-white mt-2 uppercase max-w-[110px] truncate">{fusionSlot1}</span>
                                     </div>
                                   ) : (
                                     <div className="flex flex-col items-center text-white/20">
                                       <BeakerIcon className="w-7 h-7 mb-2" />
-                                      <span className="text-[9px] font-black uppercase tracking-wider">Slot A</span>
+                                      <span className="font-heading text-[9px] font-black uppercase tracking-wider">Slot A</span>
                                     </div>
                                   )}
                                 </div>
 
                                 {/* Plus Icon */}
-                                <div className="text-white/20 text-4xl font-black shrink-0">+</div>
+                                <div className="font-heading text-white/20 text-4xl font-black shrink-0">+</div>
 
                                 {/* Slot 2 */}
                                 <div
@@ -8562,12 +8562,12 @@ const handlePackAction = (packId: string) => {
                                   {fusionSlot2 ? (
                                     <div className="flex flex-col items-center">
                                       <BoomAvatar name={fusionSlot2} className="w-16 h-16 object-contain drop-shadow-md" />
-                                      <span className="text-[9px] font-black text-white mt-2 uppercase max-w-[110px] truncate">{fusionSlot2}</span>
+                                      <span className="font-heading text-[9px] font-black text-white mt-2 uppercase max-w-[110px] truncate">{fusionSlot2}</span>
                                     </div>
                                   ) : (
                                     <div className="flex flex-col items-center text-white/20">
                                       <BeakerIcon className="w-7 h-7 mb-2" />
-                                      <span className="text-[9px] font-black uppercase tracking-wider">Slot B</span>
+                                      <span className="font-heading text-[9px] font-black uppercase tracking-wider">Slot B</span>
                                     </div>
                                   )}
                                 </div>
@@ -8580,10 +8580,10 @@ const handlePackAction = (packId: string) => {
                                     <ClockIcon className="w-4 h-4 animate-pulse" />
                                     Reactor Overheated
                                   </div>
-                                  <div className="text-2xl font-black text-white tabular-nums">
+                                  <div className="font-heading text-2xl font-black text-white tabular-nums">
                                     {formatTime(cooldownRemaining)}
                                   </div>
-                                  <p className="text-[9px] text-white/40 text-center font-black uppercase tracking-wider">
+                                  <p className="font-heading text-[9px] text-white/40 text-center font-black uppercase tracking-wider">
                                     Next cooldown: {5 * Math.pow(2, currentUser?.consecutive_fusions || 0)}m
                                   </p>
                                 </div>
@@ -8616,9 +8616,9 @@ const handlePackAction = (packId: string) => {
                     </div>
 
                     {/* Inventory Helper for Fusion */}
-                    <div className="bg-slate-950/40 border border-white/10 rounded-[2.5rem] p-6 md:p-8 space-y-6 shadow-2xl relative overflow-hidden">
+                    <div className="blooket-card p-6 md:p-8 space-y-6 shadow-2xl relative overflow-hidden">
                       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:30px_30px]" />
-                      <h3 className="text-lg font-black text-white uppercase tracking-[0.15em] relative z-10">Vault Materials inventory</h3>
+                      <h3 className="font-heading text-lg font-black text-white uppercase tracking-[0.15em] relative z-10">Vault Materials inventory</h3>
                       
                       <div className="relative z-10 space-y-6">
                         {(() => {
@@ -8655,7 +8655,7 @@ const handlePackAction = (packId: string) => {
 
                           if (!hasAnyBooms) {
                             return (
-                              <div className="text-center py-12 text-white/20 italic text-xs uppercase tracking-widest">
+                              <div className="font-heading text-center py-12 text-white/20 italic text-xs uppercase tracking-widest">
                                 Vault currently depleted. Procure assets first.
                               </div>
                             );
@@ -8695,8 +8695,8 @@ const handlePackAction = (packId: string) => {
                                       <div className="mb-2 group-hover/item:scale-110 transition-transform duration-300 select-none">
                                         <BoomAvatar name={name} className="w-10 h-10 object-contain" />
                                       </div>
-                                      <div className="text-[9px] font-black text-white text-center uppercase truncate w-full tracking-wider">{name}</div>
-                                      <div className="text-[8px] font-black text-white/30 mt-1 uppercase tracking-widest">Qty: {count}</div>
+                                      <div className="font-heading text-[9px] font-black text-white text-center uppercase truncate w-full tracking-wider">{name}</div>
+                                      <div className="font-heading text-[8px] font-black text-white/30 mt-1 uppercase tracking-widest">Qty: {count}</div>
                                     </div>
                                   ))}
                                 </div>
@@ -8711,39 +8711,39 @@ const handlePackAction = (packId: string) => {
                   {/* Fusion History / Info Case */}
                   <div className="space-y-8 lg:col-span-1">
                     <div className="bg-gradient-to-br from-indigo-950/20 to-purple-950/20 border border-purple-500/20 rounded-[2rem] p-6 shadow-xl space-y-4">
-                      <h3 className="text-sm font-black text-blue-400 uppercase tracking-widest">Reactor logs</h3>
+                      <h3 className="font-heading text-sm font-black text-blue-400 uppercase tracking-widest">Reactor logs</h3>
                       <ScrollArea className="h-44 pr-2 scrollbar-hide">
                         <div className="space-y-4">
                           {userActivity.filter(a => a.activity_type === 'fusion').slice(0, 5).map(a => (
                             <div key={a.id} className="flex gap-3 text-[10px] bg-black/20 p-2.5 rounded-xl border border-white/5">
                               <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 bg-blue-500 shadow-[0_0_8px_#3b82f6]" />
                               <div>
-                                <p className="text-white/80 font-bold leading-normal">{a.description}</p>
-                                <p className="text-white/20 font-black uppercase text-[8px] tracking-wider mt-0.5">{new Date(a.created_at).toLocaleTimeString()}</p>
+                                <p className="font-heading text-white/80 font-bold leading-normal">{a.description}</p>
+                                <p className="font-heading text-white/20 font-black uppercase text-[8px] tracking-wider mt-0.5">{new Date(a.created_at).toLocaleTimeString()}</p>
                               </div>
                             </div>
                           ))}
                           {userActivity.filter(a => a.activity_type === 'fusion').length === 0 && (
-                            <p className="text-white/20 italic text-xs uppercase tracking-widest text-center py-6">No reaction records.</p>
+                            <p className="font-heading text-white/20 italic text-xs uppercase tracking-widest text-center py-6">No reaction records.</p>
                           )}
                         </div>
                       </ScrollArea>
                     </div>
 
-                    <div className="bg-slate-950/40 border border-white/10 rounded-[2rem] p-6 shadow-2xl">
-                      <h4 className="text-[10px] font-black text-white/50 mb-4 uppercase tracking-[0.2em]">Fusing Probability Matrix</h4>
+                    <div className="blooket-card p-6 shadow-2xl">
+                      <h4 className="font-heading text-[10px] font-black text-white/50 mb-4 uppercase tracking-[0.2em]">Fusing Probability Matrix</h4>
                       <ul className="space-y-3 font-mono text-xs">
                         <li className="flex justify-between items-center bg-black/20 p-2.5 rounded-xl border border-white/5">
-                          <span className="text-white/40 uppercase text-[9px] font-black tracking-widest">Ascend Tier</span>
-                          <span className="text-green-400 font-black">30%</span>
+                          <span className="font-heading text-white/40 uppercase text-[9px] font-black tracking-widest">Ascend Tier</span>
+                          <span className="font-heading text-green-400 font-black">30%</span>
                         </li>
                         <li className="flex justify-between items-center bg-black/20 p-2.5 rounded-xl border border-white/5">
-                          <span className="text-white/40 uppercase text-[9px] font-black tracking-widest">Random Same Tier</span>
-                          <span className="text-blue-400 font-black">40%</span>
+                          <span className="font-heading text-white/40 uppercase text-[9px] font-black tracking-widest">Random Same Tier</span>
+                          <span className="font-heading text-blue-400 font-black">40%</span>
                         </li>
                         <li className="flex justify-between items-center bg-black/20 p-2.5 rounded-xl border border-white/5">
-                          <span className="text-white/40 uppercase text-[9px] font-black tracking-widest">Collateral Loss</span>
-                          <span className="text-red-400 font-black">30%</span>
+                          <span className="font-heading text-white/40 uppercase text-[9px] font-black tracking-widest">Collateral Loss</span>
+                          <span className="font-heading text-red-400 font-black">30%</span>
                         </li>
                       </ul>
                     </div>
@@ -8761,26 +8761,26 @@ const handlePackAction = (packId: string) => {
 
                   <div className="relative flex flex-col md:flex-row justify-between items-center gap-8 z-10">
                     <div className="space-y-4 text-center md:text-left">
-                      <h1 className="text-5xl md:text-7xl font-black text-white tracking-tighter">
-                        BOOMKIT <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-400 to-orange-400 drop-shadow-sm">SHOP</span>
+                      <h1 className="font-heading text-5xl md:text-7xl font-black text-white tracking-tighter">
+                        BOOMKIT <span className="font-heading text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-400 to-orange-400 drop-shadow-sm">SHOP</span>
                       </h1>
-                      <p className="text-white/40 text-base md:text-lg max-w-md font-medium leading-relaxed">
+                      <p className="font-heading text-white/40 text-base md:text-lg max-w-md font-medium leading-relaxed">
                         Acquire game tokens, booster credits, and unlock premium Boomkit Plus privileges instantly.
                       </p>
                     </div>
 
                     <div className="shrink-0 transform hover:scale-[1.02] transition-transform duration-300">
                       <div className="bg-slate-900/60 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-8 shadow-2xl flex flex-col items-center gap-1.5 w-64 border-blue-500/20">
-                        <div className="text-white/40 text-[9px] uppercase tracking-[0.3em] font-black">Procurement Credits</div>
+                        <div className="font-heading text-white/40 text-[9px] uppercase tracking-[0.3em] font-black">Procurement Credits</div>
                         <div className="flex items-center gap-3">
-                          <span className="text-4xl drop-shadow-md">🪙</span>
-                          <span className="text-5xl font-black text-yellow-400 tabular-nums drop-shadow-[0_0_15px_rgba(234,179,8,0.3)]">
+                          <span className="font-heading text-4xl drop-shadow-md">🪙</span>
+                          <span className="font-heading text-5xl font-black text-yellow-400 tabular-nums drop-shadow-[0_0_15px_rgba(234,179,8,0.3)]">
                             {currentUser?.tokens.toLocaleString() || 0}
                           </span>
                         </div>
                         <div className="mt-3 flex items-center gap-2 px-4 py-1.5 bg-blue-500/10 rounded-full border border-blue-500/20 shadow-inner">
                           <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping" />
-                          <span className="text-blue-400 text-[9px] font-black uppercase tracking-widest">Interface Synced</span>
+                          <span className="font-heading text-blue-400 text-[9px] font-black uppercase tracking-widest">Interface Synced</span>
                         </div>
                       </div>
                     </div>
@@ -8792,11 +8792,11 @@ const handlePackAction = (packId: string) => {
                   <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/5 rounded-full blur-[80px] pointer-events-none" />
                   <div className="relative flex flex-col md:flex-row justify-between items-center gap-8 z-10">
                     <div className="space-y-3 text-center md:text-left">
-                      <h3 className="text-3xl font-black text-white tracking-tight flex items-center gap-3 justify-center md:justify-start">
+                      <h3 className="font-heading text-3xl font-black text-white tracking-tight flex items-center gap-3 justify-center md:justify-start">
                         <CreditCardIcon className="h-7 w-7 text-blue-400" />
                         SECURE CREDIT BRIDGE
                       </h3>
-                      <p className="text-white/40 text-sm font-semibold max-w-lg leading-relaxed uppercase tracking-wider">
+                      <p className="font-heading text-white/40 text-sm font-semibold max-w-lg leading-relaxed uppercase tracking-wider">
                         Deposit fiat credits to acquire game tokens instantly. Secure Lemon Squeezy checkout integration supporting global credit cards and local payment methods.
                       </p>
                     </div>
@@ -8828,12 +8828,12 @@ const handlePackAction = (packId: string) => {
 
                   <div className="relative flex flex-col md:flex-row justify-between items-center gap-6 z-10">
                     <div className="space-y-2 text-center md:text-left">
-                      <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter">
+                      <h1 className="font-heading text-4xl md:text-5xl font-black text-white tracking-tighter">
                         {activeSeason.name.toUpperCase()}
                       </h1>
                       <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
                         <Badge className="bg-orange-500 text-black border-none text-[9px] font-black uppercase tracking-widest px-3 py-1">Active Now</Badge>
-                        <span className="text-white/40 text-xs font-black uppercase tracking-wider">Ends on {new Date(activeSeason.end_date).toLocaleDateString()}</span>
+                        <span className="font-heading text-white/40 text-xs font-black uppercase tracking-wider">Ends on {new Date(activeSeason.end_date).toLocaleDateString()}</span>
                       </div>
                     </div>
 
@@ -8841,20 +8841,20 @@ const handlePackAction = (packId: string) => {
                       <div className="w-12 h-12 rounded-xl bg-orange-500 flex items-center justify-center text-2xl font-black text-black shadow-lg shadow-orange-500/20">
                         {Math.floor((currentUser?.season_xp || 0) / 100)}
                       </div>
-                      <div className="text-left">
-                        <div className="text-[10px] text-white/40 font-black uppercase tracking-widest">Current Level</div>
-                        <div className="text-lg font-black text-orange-400">{currentUser?.season_xp || 0} XP</div>
+                      <div className="font-heading text-left">
+                        <div className="font-heading text-[10px] text-white/40 font-black uppercase tracking-widest">Current Level</div>
+                        <div className="font-heading text-lg font-black text-orange-400">{currentUser?.season_xp || 0} XP</div>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Linear Laser path timeline */}
-                <div className="bg-slate-950/40 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden">
+                <div className="blooket-card p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden">
                   <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:30px_30px]" />
                   
                   <div className="flex items-center justify-between mb-8 relative z-10">
-                    <h3 className="text-lg font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
+                    <h3 className="font-heading text-lg font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
                       Laser rewards track
                     </h3>
@@ -8906,12 +8906,12 @@ const handlePackAction = (packId: string) => {
                                   <CoinsIcon className="w-7 h-7 text-yellow-500 animate-pulse" />
                                 )}
                               </div>
-                              <div className="text-left">
+                              <div className="font-heading text-left">
                                 <div className="flex items-center gap-2">
-                                  <span className="text-base font-black text-white">{r.reward_value} {r.reward_type.toUpperCase()}</span>
+                                  <span className="font-heading text-base font-black text-white">{r.reward_value} {r.reward_type.toUpperCase()}</span>
                                   {r.is_premium && <Badge className="bg-purple-600 text-white text-[8px] font-black uppercase tracking-widest px-2 py-0.5 border-none shadow-[0_0_10px_purple]">Plus</Badge>}
                                 </div>
-                                <div className="text-[9px] font-black text-white/30 uppercase tracking-widest mt-1">Requires {r.xp_required} XP</div>
+                                <div className="font-heading text-[9px] font-black text-white/30 uppercase tracking-widest mt-1">Requires {r.xp_required} XP</div>
                               </div>
                             </div>
 
@@ -8936,12 +8936,12 @@ const handlePackAction = (packId: string) => {
                 </div>
               </div>
               ) : (
-                <div className="py-20 flex flex-col items-center justify-center bg-slate-950/40 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] max-w-xl mx-auto text-center animate-in fade-in duration-300">
+                <div className="py-20 flex flex-col items-center justify-center blooket-card max-w-xl mx-auto text-center animate-in fade-in duration-300">
                   <div className="w-20 h-20 bg-orange-500/10 rounded-3xl flex items-center justify-center mb-6 animate-pulse">
                     <FlameIcon className="w-10 h-10 text-orange-500" />
                   </div>
-                  <h3 className="text-2xl font-black text-white mb-2 uppercase tracking-widest">No Active Season Pass</h3>
-                  <p className="text-white/40 text-xs font-semibold uppercase tracking-wider max-w-xs mx-auto leading-relaxed">
+                  <h3 className="font-heading text-2xl font-black text-white mb-2 uppercase tracking-widest">No Active Season Pass</h3>
+                  <p className="font-heading text-white/40 text-xs font-semibold uppercase tracking-wider max-w-xs mx-auto leading-relaxed">
                     System operations for seasons are currently offline. Next sector window opens shortly.
                   </p>
                 </div>
@@ -8958,19 +8958,19 @@ const handlePackAction = (packId: string) => {
 
                   <div className="relative flex flex-col md:flex-row justify-between items-center gap-6 z-10">
                     <div className="space-y-3 text-center md:text-left">
-                      <h1 className="text-5xl font-black text-white tracking-tighter">
-                        LEGEND <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-600 drop-shadow-sm">ROSTER</span>
+                      <h1 className="font-heading text-5xl font-black text-white tracking-tighter">
+                        LEGEND <span className="font-heading text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-600 drop-shadow-sm">ROSTER</span>
                       </h1>
-                      <p className="text-white/40 text-sm font-semibold uppercase tracking-wider">
+                      <p className="font-heading text-white/40 text-sm font-semibold uppercase tracking-wider">
                         Track career benchmarks and quantum unlocks
                       </p>
                     </div>
 
                     <div className="flex items-center gap-6 bg-slate-900/60 backdrop-blur-2xl border border-white/10 px-8 py-4.5 rounded-3xl">
-                      <div className="text-center md:text-right">
-                        <div className="text-[10px] text-white/40 font-black uppercase tracking-widest mb-1">Roster Progress</div>
-                        <div className="text-3xl font-black text-white tabular-nums drop-shadow">
-                          {userAchievements.length} <span className="text-white/30 text-xl font-bold">/ {achievements.length}</span>
+                      <div className="font-heading text-center md:text-right">
+                        <div className="font-heading text-[10px] text-white/40 font-black uppercase tracking-widest mb-1">Roster Progress</div>
+                        <div className="font-heading text-3xl font-black text-white tabular-nums drop-shadow">
+                          {userAchievements.length} <span className="font-heading text-white/30 text-xl font-bold">/ {achievements.length}</span>
                         </div>
                       </div>
                       <div className="w-1 h-10 bg-white/10 rounded-full" />
@@ -8989,7 +8989,7 @@ const handlePackAction = (packId: string) => {
                       <div key={ach.id} className={`relative p-7 rounded-[2rem] border transition-all duration-500 group shadow-xl overflow-hidden ${
                         isCompleted 
                           ? 'bg-gradient-to-br from-yellow-950/20 to-transparent border-yellow-500/40 shadow-[0_15px_30px_rgba(234,179,8,0.05)]' 
-                          : 'bg-slate-950/40 border-white/5 grayscale opacity-55 hover:opacity-85 hover:border-white/10'
+                          : 'bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/40 border-white/5 grayscale opacity-55 hover:opacity-85 hover:border-white/10'
                       }`}>
                         {/* Internal hover glow */}
                         {isCompleted && (
@@ -8997,7 +8997,7 @@ const handlePackAction = (packId: string) => {
                         )}
 
                         <div className="flex items-start justify-between mb-5">
-                          <div className="text-6xl drop-shadow-xl group-hover:scale-110 transition-transform duration-300 select-none">{ach.icon}</div>
+                          <div className="font-heading text-6xl drop-shadow-xl group-hover:scale-110 transition-transform duration-300 select-none">{ach.icon}</div>
                           {isCompleted && (
                             <div className="bg-yellow-400 text-black rounded-xl p-1.5 shadow-md shadow-yellow-500/20">
                               <CheckIcon className="w-4 h-4 stroke-[3]" />
@@ -9005,13 +9005,13 @@ const handlePackAction = (packId: string) => {
                           )}
                         </div>
 
-                        <h4 className="text-xl font-black text-white mb-2 group-hover:text-yellow-400 transition-colors tracking-tight">{ach.name}</h4>
-                        <p className="text-sm text-white/50 mb-6 font-medium leading-relaxed min-h-[40px]">{ach.description}</p>
+                        <h4 className="font-heading text-xl font-black text-white mb-2 group-hover:text-yellow-400 transition-colors tracking-tight">{ach.name}</h4>
+                        <p className="font-heading text-sm text-white/50 mb-6 font-medium leading-relaxed min-h-[40px]">{ach.description}</p>
 
                         <div className="flex items-center justify-between pt-4 border-t border-white/5">
                           <div className="flex items-center gap-2">
                             <CoinsIcon className="w-4 h-4 text-yellow-500" />
-                            <span className="text-white font-black text-sm">{ach.reward_tokens.toLocaleString()}</span>
+                            <span className="font-heading text-white font-black text-sm">{ach.reward_tokens.toLocaleString()}</span>
                           </div>
                           <Badge className="bg-white/10 text-white/40 text-[8px] font-black uppercase">{ach.requirement_type.replace('_', ' ')}</Badge>
                         </div>
@@ -9257,7 +9257,7 @@ const handlePackAction = (packId: string) => {
               <div className="fixed top-24 right-8 z-[60] w-64 animate-in slide-in-from-right-10 duration-500 hidden lg:block">
                 <Card className="bg-black/40 backdrop-blur-xl border-white/10 shadow-2xl overflow-hidden">
                   <div className="bg-gradient-to-r from-purple-600/50 to-blue-600/50 p-3 border-b border-white/10">
-                    <h3 className="text-white font-black text-xs tracking-widest uppercase flex items-center gap-2">
+                    <h3 className="font-heading text-white font-black text-xs tracking-widest uppercase flex items-center gap-2">
                       <TrophyIcon className="w-3 h-3 text-yellow-400" />
                       Live Rankings
                     </h3>
@@ -9268,7 +9268,7 @@ const handlePackAction = (packId: string) => {
                         <div key={player.id} className="flex items-center justify-between p-3 border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
                           <div className="flex items-center gap-3">
                             <span className={`text-[10px] font-black ${idx === 0 ? "text-yellow-400" : "text-white/40"}`}>#{idx + 1}</span>
-                            <span className="text-white font-bold text-sm truncate w-24">{player.username}</span>
+                            <span className="font-heading text-white font-bold text-sm truncate w-24">{player.username}</span>
                           </div>
                           <Badge variant="outline" className="bg-white/5 text-cyan-400 border-cyan-500/20 font-black text-[10px]">
                             {player.score || 0}
@@ -9301,10 +9301,10 @@ const handlePackAction = (packId: string) => {
                     <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full mb-1">
                       Major Release
                     </Badge>
-                    <CardTitle className="text-2xl md:text-3xl font-black text-white tracking-tight flex items-center gap-3">
+                    <CardTitle className="font-heading text-2xl md:text-3xl font-black text-white tracking-tight flex items-center gap-3">
                       🚀 BOOMKIT V2 IS OUT!
                     </CardTitle>
-                    <CardDescription className="text-purple-300/80 font-semibold tracking-wide text-xs">
+                    <CardDescription className="font-heading text-purple-300/80 font-semibold tracking-wide text-xs">
                       The Ultimate Gamified Learning Adventure Upgrade
                     </CardDescription>
                   </div>
@@ -9321,63 +9321,63 @@ const handlePackAction = (packId: string) => {
 
               <CardContent className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide text-slate-200">
                 <div className="space-y-3">
-                  <p className="text-sm md:text-base font-medium leading-relaxed">
+                  <p className="font-heading text-sm md:text-base font-medium leading-relaxed">
                     Welcome to **Boomkit V2**! We have completely overhauled the platform to bring you a premium, secure, and feature-rich educational arena. Here are the major additions and changes you can explore starting today:
                   </p>
                 </div>
 
                 <div className="space-y-4">
-                  <h4 className="text-sm font-black uppercase tracking-widest text-purple-400">
+                  <h4 className="font-heading text-sm font-black uppercase tracking-widest text-purple-400">
                     🛠️ v2.0.0 Patch Notes & Features
                   </h4>
                   
                   <div className="grid gap-4">
                     <div className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-purple-500/20 transition-all">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-lg">🛡️</span>
+                        <span className="font-heading text-lg">🛡️</span>
                         <h5 className="font-bold text-white text-sm md:text-base">Clans & Teams</h5>
                       </div>
-                      <p className="text-xs md:text-sm text-slate-400 leading-relaxed pl-7">
+                      <p className="font-heading text-xs md:text-sm text-slate-400 leading-relaxed pl-7">
                         Create or join a Clan, set custom tag colors, manage recruitment requirements, chat in real-time with clan mates, and donate tokens to the shared bank to level up your clan!
                       </p>
                     </div>
 
                     <div className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-purple-500/20 transition-all">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-lg">🧪</span>
+                        <span className="font-heading text-lg">🧪</span>
                         <h5 className="font-bold text-white text-sm md:text-base">High-Tier Fusion Lab</h5>
                       </div>
-                      <p className="text-xs md:text-sm text-slate-400 leading-relaxed pl-7">
+                      <p className="font-heading text-xs md:text-sm text-slate-400 leading-relaxed pl-7">
                         Combine duplicate Booms (like *DeepSeek*, *Parrot*, or *Kraken*) in the upgraded Fusion Lab to roll for higher rarity tiers and clone rare items.
                       </p>
                     </div>
 
                     <div className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-purple-500/20 transition-all">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-lg">🤝</span>
+                        <span className="font-heading text-lg">🤝</span>
                         <h5 className="font-bold text-white text-sm md:text-base">Secure Peer-to-Peer Trading</h5>
                       </div>
-                      <p className="text-xs md:text-sm text-slate-400 leading-relaxed pl-7">
+                      <p className="font-heading text-xs md:text-sm text-slate-400 leading-relaxed pl-7">
                         Trade Booms safely with friends. Secure database RPC functions and UI blocks prevent trades with banned or rejected users.
                       </p>
                     </div>
 
                     <div className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-purple-500/20 transition-all">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-lg">🏆</span>
+                        <span className="font-heading text-lg">🏆</span>
                         <h5 className="font-bold text-white text-sm md:text-base">Staff Live Tournaments & Seasons</h5>
                       </div>
-                      <p className="text-xs md:text-sm text-slate-400 leading-relaxed pl-7">
+                      <p className="font-heading text-xs md:text-sm text-slate-400 leading-relaxed pl-7">
                         Staff members can now host live competitions and start new seasons complete with a custom Season Pass, powered by secure bypass-RLS operations.
                       </p>
                     </div>
 
                     <div className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-purple-500/20 transition-all">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-lg">🤖</span>
+                        <span className="font-heading text-lg">🤖</span>
                         <h5 className="font-bold text-white text-sm md:text-base">Gemini 2.5 Quiz Generation</h5>
                       </div>
-                      <p className="text-xs md:text-sm text-slate-400 leading-relaxed pl-7">
+                      <p className="font-heading text-xs md:text-sm text-slate-400 leading-relaxed pl-7">
                         Quizzes are now generated with Google's fast and smart `gemini-2.5-flash-lite` AI model for maximum topic relevance and progression.
                       </p>
                     </div>
@@ -9385,7 +9385,7 @@ const handlePackAction = (packId: string) => {
                 </div>
               </CardContent>
 
-              <div className="p-6 bg-slate-950 border-t border-white/5">
+              <div className="p-6 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 border-t border-white/5">
                 <Button
                   onClick={() => setShowV2NewsModal(false)}
                   className="w-full h-12 bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-black text-base rounded-xl shadow-[0_5px_15px_rgba(168,85,247,0.3)] transition-all hover:-translate-y-0.5 active:translate-y-0"
@@ -9406,7 +9406,7 @@ const handlePackAction = (packId: string) => {
               onClick={() => setShowNews(false)}
             />
 
-            <Card className="w-full max-w-4xl bg-slate-950/80 backdrop-blur-2xl border border-white/10 shadow-[0_0_80px_rgba(0,0,0,0.8)] relative z-10 overflow-hidden flex flex-col md:flex-row h-[80vh] rounded-[2.5rem]">
+            <Card className="w-full max-w-4xl blooket-card relative z-10 overflow-hidden flex flex-col md:flex-row h-[80vh] rounded-[2.5rem]">
               {/* Left Side: Featured News Image / Gradient */}
               <div className="md:w-1/3 shrink-0 relative bg-gradient-to-br from-purple-900 to-indigo-950 overflow-hidden hidden md:block border-r border-white/10">
                 <div className="absolute inset-0 opacity-40 mix-blend-overlay">
@@ -9416,10 +9416,10 @@ const handlePackAction = (packId: string) => {
                   <Badge className="w-fit mb-4 bg-purple-500/20 backdrop-blur-md border border-purple-500/30 text-[9px] font-black uppercase tracking-widest text-purple-300">
                     Community Updates
                   </Badge>
-                  <h3 className="text-2xl font-black leading-none tracking-tight mb-4 text-gradient-purple-pink">
+                  <h3 className="font-heading text-2xl font-black leading-none tracking-tight mb-4 text-pink-600 dark:text-pink-400 font-black">
                     WHAT'S NEW IN BOOMKIT
                   </h3>
-                  <p className="text-slate-300/80 font-medium text-xs leading-relaxed">
+                  <p className="font-heading text-slate-300/80 font-medium text-xs leading-relaxed">
                     Stay ahead of the game with our latest features, patches, and community highlights.
                   </p>
                 </div>
@@ -9433,11 +9433,11 @@ const handlePackAction = (packId: string) => {
                 <CardHeader className="border-b border-white/5 pb-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
+                      <CardTitle className="font-heading text-3xl font-black text-white tracking-tight flex items-center gap-3">
                         <NewspaperIcon className="w-8 h-8 text-purple-400" />
                         The Daily Boom
                       </CardTitle>
-                      <CardDescription className="text-white/40 font-bold uppercase tracking-widest text-[9px] mt-1">
+                      <CardDescription className="font-heading text-white/40 font-bold uppercase tracking-widest text-[9px] mt-1">
                         Latest updates from the arena
                       </CardDescription>
                     </div>
@@ -9457,12 +9457,12 @@ const handlePackAction = (packId: string) => {
                     <div key={news.id} className="group relative flex flex-col gap-4 bg-white/5 border border-white/5 hover:border-purple-500/20 hover:bg-white/10 rounded-2xl p-5 transition-all duration-300 animate-in slide-in-from-right-4">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
-                          <span className="text-2xl filter drop-shadow-md group-hover:scale-125 transition-transform duration-300">
+                          <span className="font-heading text-2xl filter drop-shadow-md group-hover:scale-125 transition-transform duration-300">
                             {news.image}
                           </span>
                           <div>
                             <div className="flex items-center gap-2 mb-1">
-                              <h4 className="text-xl font-black text-white tracking-tight group-hover:text-purple-400 transition-colors">
+                              <h4 className="font-heading text-xl font-black text-white tracking-tight group-hover:text-purple-400 transition-colors">
                                 {news.title}
                               </h4>
                               {news.badge && (
@@ -9471,7 +9471,7 @@ const handlePackAction = (packId: string) => {
                                 </Badge>
                               )}
                             </div>
-                            <p className="text-[10px] text-white/30 font-bold uppercase tracking-widest">
+                            <p className="font-heading text-[10px] text-white/30 font-bold uppercase tracking-widest">
                               {news.date}
                             </p>
                           </div>
@@ -9489,7 +9489,7 @@ const handlePackAction = (packId: string) => {
                         </div>
                       )}
 
-                      <p className="text-slate-300/80 text-sm leading-relaxed font-medium pl-4 border-l-2 border-purple-500/20 group-hover:border-purple-500/50 transition-all duration-300">
+                      <p className="font-heading text-slate-300/80 text-sm leading-relaxed font-medium pl-4 border-l-2 border-purple-500/20 group-hover:border-purple-500/50 transition-all duration-300">
                         {news.content}
                       </p>
                     </div>
@@ -9518,8 +9518,8 @@ const handlePackAction = (packId: string) => {
             <div className="relative z-10 w-full max-w-5xl h-[85vh] flex flex-col">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-4xl font-black text-white tracking-tighter">Choose Your Solo Challenge</h2>
-                  <p className="text-purple-300/60 font-medium">
+                  <h2 className="font-heading text-4xl font-black text-white tracking-tighter">Choose Your Solo Challenge</h2>
+                  <p className="font-heading text-purple-300/60 font-medium">
                     Playing: {soloSubject.subject} (Grade {soloSubject.grade})
                   </p>
                 </div>
@@ -9602,7 +9602,7 @@ const handlePackAction = (packId: string) => {
                 {/* Avatar Outline */}
                 <div className="rounded-full p-1.5 bg-slate-900 relative">
                   <Avatar className="h-28 w-28 border-4 border-slate-800 shadow-xl" style={{ backgroundColor: '#1a1d27' }}>
-                    <AvatarFallback className="text-5xl flex items-center justify-center p-3 overflow-hidden">
+                    <AvatarFallback className="font-heading text-5xl flex items-center justify-center p-3 overflow-hidden">
                       {renderProfilePicture(selectedProfileUser.profilePicture || "🎮", "w-full h-full object-contain")}
                     </AvatarFallback>
                   </Avatar>
@@ -9616,10 +9616,10 @@ const handlePackAction = (packId: string) => {
                 </div>
 
                 {/* Name & Role */}
-                <div className="text-center mt-3 mb-6">
+                <div className="font-heading text-center mt-3 mb-6">
                   <h2 className={`text-2xl font-black ${selectedProfileUser.nameColor || "text-white"} flex items-center justify-center gap-2`}>
                     {selectedProfileUser.username}
-                    {selectedProfileUser.isPlusUser && <SparklesIcon className="text-yellow-400 h-5 w-5 fill-yellow-400/20" />}
+                    {selectedProfileUser.isPlusUser && <SparklesIcon className="font-heading text-yellow-400 h-5 w-5 fill-yellow-400/20" />}
                   </h2>
 
                   <div className="flex flex-wrap justify-center gap-2 mt-2">
@@ -9642,26 +9642,26 @@ const handlePackAction = (packId: string) => {
                 <div className="w-full grid grid-cols-2 gap-3">
                   <div className="bg-slate-800/80 rounded-xl p-4 flex flex-col items-center border border-white/5 hover:bg-slate-800 transition-colors">
                     <CoinsIcon className="h-6 w-6 text-yellow-500 mb-2" />
-                    <span className="text-2xl font-black text-white">{selectedProfileUser.tokens.toLocaleString()}</span>
-                    <span className="text-[10px] uppercase font-bold text-slate-400">Tokens</span>
+                    <span className="font-heading text-2xl font-black text-white">{selectedProfileUser.tokens.toLocaleString()}</span>
+                    <span className="font-heading text-[10px] uppercase font-bold text-slate-400">Tokens</span>
                   </div>
 
                   <div className="bg-slate-800/80 rounded-xl p-4 flex flex-col items-center border border-white/5 hover:bg-slate-800 transition-colors">
                     <TrophyIcon className="h-6 w-6 text-purple-400 mb-2" />
-                    <span className="text-2xl font-black text-white">{selectedProfileUser.boomScore.toLocaleString()}</span>
-                    <span className="text-[10px] uppercase font-bold text-slate-400">Boom Score</span>
+                    <span className="font-heading text-2xl font-black text-white">{selectedProfileUser.boomScore.toLocaleString()}</span>
+                    <span className="font-heading text-[10px] uppercase font-bold text-slate-400">Boom Score</span>
                   </div>
 
                   <div className="bg-slate-800/80 rounded-xl p-4 flex flex-col items-center border border-white/5 hover:bg-slate-800 transition-colors">
                     <BoxIcon className="h-6 w-6 text-blue-400 mb-2" />
-                    <span className="text-2xl font-black text-white">{selectedProfileUser.packsOpened || 0}</span>
-                    <span className="text-[10px] uppercase font-bold text-slate-400">Packs Opened</span>
+                    <span className="font-heading text-2xl font-black text-white">{selectedProfileUser.packsOpened || 0}</span>
+                    <span className="font-heading text-[10px] uppercase font-bold text-slate-400">Packs Opened</span>
                   </div>
 
                   <div className="bg-slate-800/80 rounded-xl p-4 flex flex-col items-center border border-white/5 hover:bg-slate-800 transition-colors">
                     <MessageCircleIcon className="h-6 w-6 text-green-400 mb-2" />
-                    <span className="text-sm font-black text-slate-200 text-center uppercase truncate w-full">Level {selectedProfileUser.level || 1}</span>
-                    <span className="text-[10px] uppercase font-bold text-slate-400">Player Rank</span>
+                    <span className="font-heading text-sm font-black text-slate-200 text-center uppercase truncate w-full">Level {selectedProfileUser.level || 1}</span>
+                    <span className="font-heading text-[10px] uppercase font-bold text-slate-400">Player Rank</span>
                   </div>
                 </div>
 
@@ -9745,40 +9745,40 @@ const handlePackAction = (packId: string) => {
               </div>
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <h2 className="text-3xl font-black text-white tracking-tight">{showClanProfileModal.name}</h2>
+                  <h2 className="font-heading text-3xl font-black text-white tracking-tight">{showClanProfileModal.name}</h2>
                   <span className="inline-block text-sm font-black px-2 py-0.5 rounded-lg bg-black/40 border border-white/5">
                     <span className={showClanProfileModal.tag_color}>
                       [{showClanProfileModal.tag}]
                     </span>
                   </span>
                 </div>
-                <p className="text-[10px] text-white/40 font-bold uppercase tracking-wider">
+                <p className="font-heading text-[10px] text-white/40 font-bold uppercase tracking-wider">
                   Level {showClanProfileModal.level} Clan • {showClanProfileModal.members?.length || 0} members
                 </p>
               </div>
             </div>
 
             <div className="bg-white/5 rounded-2xl p-5 border border-white/5 space-y-2">
-              <span className="text-[10px] font-black uppercase text-purple-400 tracking-wider">Description</span>
-              <p className="text-white/70 text-xs leading-relaxed">
+              <span className="font-heading text-[10px] font-black uppercase text-purple-400 tracking-wider">Description</span>
+              <p className="font-heading text-white/70 text-xs leading-relaxed">
                 {showClanProfileModal.description || "This clan has no description yet."}
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4 text-xs">
               <div className="bg-black/30 border border-white/5 rounded-xl p-3.5 flex flex-col justify-center">
-                <span className="text-[10px] font-black uppercase text-white/30 tracking-wider mb-1">Leader</span>
+                <span className="font-heading text-[10px] font-black uppercase text-white/30 tracking-wider mb-1">Leader</span>
                 <span className="font-bold text-yellow-400">{showClanProfileModal.leader}</span>
               </div>
               <div className="bg-black/30 border border-white/5 rounded-xl p-3.5 flex flex-col justify-center">
-                <span className="text-[10px] font-black uppercase text-white/30 tracking-wider mb-1">XP Progression</span>
+                <span className="font-heading text-[10px] font-black uppercase text-white/30 tracking-wider mb-1">XP Progression</span>
                 <span className="font-bold text-purple-400">{showClanProfileModal.xp?.toLocaleString()} Total XP</span>
               </div>
             </div>
 
             {/* Roster Preview */}
             <div className="space-y-3">
-              <span className="text-[10px] font-black uppercase text-purple-400 tracking-wider ml-1">Members List</span>
+              <span className="font-heading text-[10px] font-black uppercase text-purple-400 tracking-wider ml-1">Members List</span>
               <ScrollArea className="h-44 pr-2 bg-black/20 rounded-2xl border border-white/5 p-4 scrollbar-hide">
                 <div className="space-y-2">
                   {showClanProfileModal.members?.map((member: any) => (
@@ -9827,9 +9827,9 @@ const handlePackAction = (packId: string) => {
                 <SparklesIcon className="w-8 h-8 text-purple-400 animate-pulse" />
               </div>
             </div>
-            <div className="text-center space-y-2">
-              <h2 className="text-3xl font-black text-white tracking-tight animate-pulse">GENERATING ARENA</h2>
-              <p className="text-white/60 font-medium">Using AI to craft unique questions...</p>
+            <div className="font-heading text-center space-y-2">
+              <h2 className="font-heading text-3xl font-black text-white tracking-tight animate-pulse">GENERATING ARENA</h2>
+              <p className="font-heading text-white/60 font-medium">Using AI to craft unique questions...</p>
             </div>
           </div>
         )
@@ -9882,24 +9882,24 @@ const handlePackAction = (packId: string) => {
 
             {/* Pack shaking stage - Web3 Capsule */}
             {packAnimation.stage === "shake" && (
-              <div className="text-center relative z-10">
+              <div className="font-heading text-center relative z-10">
                 <div className="animate-pack-shake relative">
                   {/* Rotating Outer Rings */}
                   <div className="absolute -inset-8 rounded-full border border-purple-500/20 animate-spin" style={{ animationDuration: '4s' }} />
                   <div className="absolute -inset-12 rounded-full border border-cyan-500/10 animate-spin" style={{ animationDuration: '8s', animationDirection: 'reverse' }} />
                   
-                  <div className="w-56 h-56 bg-slate-950/60 backdrop-blur-xl border border-white/10 rounded-full shadow-[0_0_50px_rgba(168,85,247,0.2)] flex flex-col items-center justify-center relative overflow-hidden group">
+                  <div className="w-56 h-56 blooket-card rounded-full shadow-[0_0_50px_rgba(168,85,247,0.2)] flex flex-col items-center justify-center relative overflow-hidden group">
                     <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-transparent pointer-events-none" />
                     
                     {/* Inner spinning core */}
                     <div className="absolute inset-4 rounded-full border border-dashed border-white/10 animate-spin" style={{ animationDuration: '12s' }} />
                     
-                    <div className="text-9xl drop-shadow-[0_8px_16px_rgba(168,85,247,0.3)] z-10 select-none animate-pulse">
+                    <div className="font-heading text-9xl drop-shadow-[0_8px_16px_rgba(168,85,247,0.3)] z-10 select-none animate-pulse">
                       {PACKS.find(p => p.name === packAnimation.packName)?.emoji || "📦"}
                     </div>
                   </div>
                 </div>
-                <h3 className="text-white text-2xl font-black mt-8 tracking-wider uppercase animate-pulse drop-shadow-[0_0_10px_purple]">
+                <h3 className="font-heading text-white text-2xl font-black mt-8 tracking-wider uppercase animate-pulse drop-shadow-[0_0_10px_purple]">
                   Decoding Database...
                 </h3>
               </div>
@@ -9907,11 +9907,11 @@ const handlePackAction = (packId: string) => {
 
             {/* Pack burst stage - Energy shockwave */}
             {packAnimation.stage === "burst" && (
-              <div className="text-center relative z-10">
+              <div className="font-heading text-center relative z-10">
                 <div className="animate-pack-burst relative">
                   <div className="w-64 h-64 rounded-full bg-white flex items-center justify-center shadow-[0_0_100px_#fff]">
                     <div className="absolute inset-0 rounded-full border-8 border-white animate-ping opacity-75" />
-                    <div className="text-7xl">💥</div>
+                    <div className="font-heading text-7xl">💥</div>
                   </div>
                 </div>
               </div>
@@ -9941,7 +9941,7 @@ const handlePackAction = (packId: string) => {
               return (
                 <div className="flex flex-col items-center justify-center w-full h-full relative z-10">
                   <div
-                    className={`relative w-[380px] h-[520px] rounded-[2.5rem] border-2 bg-slate-950/70 backdrop-blur-2xl overflow-hidden ${revealAnimationClass} ${borderGlowColor} ${
+                    className={`relative w-[380px] h-[520px] rounded-[2.5rem] border-2 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/70 backdrop-blur-2xl overflow-hidden ${revealAnimationClass} ${borderGlowColor} ${
                       packAnimation.boom.rarity === "mystical" ? "animate-mystical-aura" : ""
                     }`}
                   >
@@ -9953,8 +9953,8 @@ const handlePackAction = (packId: string) => {
 
                     <div className="absolute inset-x-6 top-6 bottom-6 flex flex-col justify-between items-center z-10">
                       {/* Name - Top */}
-                      <div className="text-center space-y-1">
-                        <h2 className="text-3xl font-black text-white tracking-tight drop-shadow-md">
+                      <div className="font-heading text-center space-y-1">
+                        <h2 className="font-heading text-3xl font-black text-white tracking-tight drop-shadow-md">
                           {packAnimation.boom.name}
                         </h2>
                         <Badge className={`uppercase font-black text-[9px] tracking-widest px-3 py-1 rounded-full ${
@@ -9980,10 +9980,10 @@ const handlePackAction = (packId: string) => {
                       </div>
 
                       {/* Drop rate + NEW stamp */}
-                      <div className="text-center space-y-3 w-full">
+                      <div className="font-heading text-center space-y-3 w-full">
                         <div className="flex justify-between items-center bg-white/5 border border-white/5 rounded-2xl px-5 py-3">
-                          <span className="text-white/40 text-[9px] font-black uppercase tracking-wider">Drop Rate</span>
-                          <span className="text-white font-black text-sm">{dropRate}%</span>
+                          <span className="font-heading text-white/40 text-[9px] font-black uppercase tracking-wider">Drop Rate</span>
+                          <span className="font-heading text-white font-black text-sm">{dropRate}%</span>
                         </div>
                         {isNew && (
                           <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white font-black border-none text-[9px] tracking-widest px-4 py-1.5 rounded-xl shadow-md uppercase animate-pulse">
@@ -10000,7 +10000,7 @@ const handlePackAction = (packId: string) => {
                   </div>
 
                   {packAnimation.stage === "done" && (
-                    <p className="text-white/30 text-xs font-black uppercase tracking-[0.25em] mt-8 animate-pulse">
+                    <p className="font-heading text-white/30 text-xs font-black uppercase tracking-[0.25em] mt-8 animate-pulse">
                       Click Anywhere to Continue
                     </p>
                   )}
@@ -10026,17 +10026,17 @@ const handlePackAction = (packId: string) => {
           <div className="fixed top-0 left-0 w-full h-full bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
             <Card className="w-full max-w-lg bg-slate-900 border border-white/10 rounded-3xl p-6 text-white overflow-hidden shadow-2xl relative">
               <CardHeader className="pb-4">
-                <CardTitle className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
+                <CardTitle className="font-heading text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
                   Select Profile Avatar
                 </CardTitle>
-                <CardDescription className="text-slate-400">
+                <CardDescription className="font-heading text-slate-400">
                   Express yourself by using a classic emoji or any Boom from your collection!
                 </CardDescription>
               </CardHeader>
               
               <CardContent className="space-y-4">
                 {/* Custom Tabs Navigation */}
-                <div className="grid grid-cols-2 bg-slate-950/60 rounded-xl p-1 mb-2">
+                <div className="grid grid-cols-2 bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/60 rounded-xl p-1 mb-2">
                   <button
                     onClick={() => setProfilePickerTab("emojis")}
                     className={`py-2.5 rounded-lg font-black uppercase text-xs transition-all ${
@@ -10079,9 +10079,9 @@ const handlePackAction = (packId: string) => {
                       if (owned.length === 0) {
                         return (
                           <div className="flex flex-col items-center justify-center h-48 text-center text-slate-500">
-                            <span className="text-3xl mb-2">📦</span>
-                            <p className="text-sm font-bold text-white/80">No Booms in your collection yet.</p>
-                            <p className="text-xs text-slate-400">Open some packs from the Market first!</p>
+                            <span className="font-heading text-3xl mb-2">📦</span>
+                            <p className="font-heading text-sm font-bold text-white/80">No Booms in your collection yet.</p>
+                            <p className="font-heading text-xs text-slate-400">Open some packs from the Market first!</p>
                           </div>
                         );
                       }
@@ -10094,13 +10094,13 @@ const handlePackAction = (packId: string) => {
                                 updateProfilePicture(boomName)
                                 setShowProfilePicker(false)
                               }}
-                              className="aspect-square rounded-2xl bg-slate-950/60 hover:bg-purple-600/20 hover:scale-105 active:scale-95 flex flex-col items-center justify-center p-2 transition-all duration-200 border border-white/5 hover:border-purple-500/30 group relative overflow-hidden"
+                              className="aspect-square rounded-2xl bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/60 hover:bg-purple-600/20 hover:scale-105 active:scale-95 flex flex-col items-center justify-center p-2 transition-all duration-200 border border-white/5 hover:border-purple-500/30 group relative overflow-hidden"
                               title={boomName}
                             >
                               <div className="w-12 h-12 flex items-center justify-center mb-1">
                                 <BoomAvatar name={boomName} className="w-full h-full object-contain" />
                               </div>
-                              <span className="text-[8px] font-black uppercase text-slate-400 truncate max-w-full group-hover:text-purple-300">
+                              <span className="font-heading text-[8px] font-black uppercase text-slate-400 truncate max-w-full group-hover:text-purple-300">
                                 {boomName}
                               </span>
                             </button>
@@ -10127,7 +10127,7 @@ const handlePackAction = (packId: string) => {
           <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
             <Card className="w-full max-w-md p-6">
               <CardHeader>
-                <CardTitle className="text-2xl font-bold">Change Username</CardTitle>
+                <CardTitle className="font-heading text-2xl font-bold">Change Username</CardTitle>
                 <CardDescription>Enter your new username</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -10154,7 +10154,7 @@ const handlePackAction = (packId: string) => {
           <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
             <Card className="w-full max-w-md p-6">
               <CardHeader>
-                <CardTitle className="text-2xl font-bold">Change Email</CardTitle>
+                <CardTitle className="font-heading text-2xl font-bold">Change Email</CardTitle>
                 <CardDescription>Enter your new email address</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -10186,7 +10186,7 @@ const handlePackAction = (packId: string) => {
           <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
             <Card className="w-full max-w-md p-6">
               <CardHeader>
-                <CardTitle className="text-2xl font-bold">Change Password</CardTitle>
+                <CardTitle className="font-heading text-2xl font-bold">Change Password</CardTitle>
                 <CardDescription>Enter your new password</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -10218,7 +10218,7 @@ const handlePackAction = (packId: string) => {
           <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
             <Card className="w-full max-w-md p-6">
               <CardHeader>
-                <CardTitle className="text-2xl font-bold text-red-500">Delete Account</CardTitle>
+                <CardTitle className="font-heading text-2xl font-bold text-red-500">Delete Account</CardTitle>
                 <CardDescription>
                   Are you sure you want to delete your account? This action cannot be undone.
                 </CardDescription>
@@ -10246,7 +10246,7 @@ const handlePackAction = (packId: string) => {
           <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-4">
             <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
               <CardHeader>
-                <CardTitle className="text-2xl font-bold">Privacy Policy</CardTitle>
+                <CardTitle className="font-heading text-2xl font-bold">Privacy Policy</CardTitle>
                 <CardDescription>Last updated: December 19, 2024</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 text-sm">
@@ -10327,7 +10327,7 @@ const handlePackAction = (packId: string) => {
           <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-4">
             <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
               <CardHeader>
-                <CardTitle className="text-2xl font-bold">Terms of Service</CardTitle>
+                <CardTitle className="font-heading text-2xl font-bold">Terms of Service</CardTitle>
                 <CardDescription>Last updated: December 19, 2024</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 text-sm">
@@ -10418,7 +10418,7 @@ const handlePackAction = (packId: string) => {
         showUserStats && selectedUserStats && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center z-[100] p-4 transition-all duration-300">
             <Card
-              className="w-full max-w-2xl bg-slate-950/80 backdrop-blur-2xl border border-white/10 shadow-[0_0_80px_rgba(168,85,247,0.15)] rounded-[2.5rem] overflow-hidden relative animate-in zoom-in-95 duration-300"
+              className="w-full max-w-2xl blooket-card overflow-hidden relative animate-in zoom-in-95 duration-300"
             >
               {/* Header Banner */}
               <div className={`h-32 w-full relative ${selectedUserStats.bannerColor === "rainbow"
@@ -10452,7 +10452,7 @@ const handlePackAction = (packId: string) => {
                       )}
                     </div>
 
-                    <div className="text-center md:text-left space-y-1.5 w-full">
+                    <div className="font-heading text-center md:text-left space-y-1.5 w-full">
                       <h2 className={`text-3xl font-black tracking-tight ${selectedUserStats.nameColor === "rainbow"
                         ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent animate-pulse"
                         : "text-white"
@@ -10477,20 +10477,20 @@ const handlePackAction = (packId: string) => {
 
                     <div className="w-full pt-2">
                       <div className="bg-black/40 rounded-2xl p-4 border border-white/5">
-                        <p className="text-white/40 text-[9px] font-black uppercase tracking-widest mb-3">Active Badges</p>
+                        <p className="font-heading text-white/40 text-[9px] font-black uppercase tracking-widest mb-3">Active Badges</p>
                         <div className="flex flex-wrap gap-2">
                           {(selectedUserStats.badges ?? []).length > 0 ? (
                             selectedUserStats.badges.map((badgeId) => {
                               const badge = AVAILABLE_BADGES.find((b) => b.id === badgeId)
                               return badge ? (
                                 <div key={badgeId} className="flex items-center gap-1 bg-black/60 px-2.5 py-1 rounded-xl border border-white/5" title={badge.name}>
-                                  <span className="text-sm">{badge.emoji}</span>
-                                  <span className="text-[9px] text-white/80 font-bold">{badge.name}</span>
+                                  <span className="font-heading text-sm">{badge.emoji}</span>
+                                  <span className="font-heading text-[9px] text-white/80 font-bold">{badge.name}</span>
                                 </div>
                               ) : null
                             })
                           ) : (
-                            <p className="text-white/20 text-xs italic">No badges earned yet</p>
+                            <p className="font-heading text-white/20 text-xs italic">No badges earned yet</p>
                           )}
                         </div>
                       </div>
@@ -10502,40 +10502,40 @@ const handlePackAction = (packId: string) => {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="bg-gradient-to-br from-yellow-500/5 to-orange-500/5 border border-yellow-500/10 rounded-2xl p-4 transition-all hover:scale-[1.02] cursor-default shadow-md">
                         <div className="flex items-center gap-2 mb-1.5">
-                          <span className="text-lg">💰</span>
-                          <span className="text-white/40 text-[9px] font-black uppercase tracking-widest">Tokens</span>
+                          <span className="font-heading text-lg">💰</span>
+                          <span className="font-heading text-white/40 text-[9px] font-black uppercase tracking-widest">Tokens</span>
                         </div>
-                        <div className="text-3xl font-black text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.2)]">
+                        <div className="font-heading text-3xl font-black text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.2)]">
                           {selectedUserStats.tokens.toLocaleString()}
                         </div>
                       </div>
 
                       <div className="bg-gradient-to-br from-purple-500/5 to-pink-500/5 border border-purple-500/10 rounded-2xl p-4 transition-all hover:scale-[1.02] cursor-default shadow-md">
                         <div className="flex items-center gap-2 mb-1.5">
-                          <span className="text-lg">⭐</span>
-                          <span className="text-white/40 text-[9px] font-black uppercase tracking-widest">Score</span>
+                          <span className="font-heading text-lg">⭐</span>
+                          <span className="font-heading text-white/40 text-[9px] font-black uppercase tracking-widest">Score</span>
                         </div>
-                        <div className="text-3xl font-black text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.2)]">
+                        <div className="font-heading text-3xl font-black text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.2)]">
                           {selectedUserStats.boomScore.toLocaleString()}
                         </div>
                       </div>
 
                       <div className="bg-gradient-to-br from-blue-500/5 to-cyan-500/5 border border-blue-500/10 rounded-2xl p-4 transition-all hover:scale-[1.02] cursor-default shadow-md">
                         <div className="flex items-center gap-2 mb-1.5">
-                          <span className="text-lg">📦</span>
-                          <span className="text-white/40 text-[9px] font-black uppercase tracking-widest">Opened</span>
+                          <span className="font-heading text-lg">📦</span>
+                          <span className="font-heading text-white/40 text-[9px] font-black uppercase tracking-widest">Opened</span>
                         </div>
-                        <div className="text-3xl font-black text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.2)]">
+                        <div className="font-heading text-3xl font-black text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.2)]">
                           {selectedUserStats.packsOpened || 0}
                         </div>
                       </div>
 
                       <div className="bg-gradient-to-br from-emerald-500/5 to-teal-500/5 border border-emerald-500/10 rounded-2xl p-4 transition-all hover:scale-[1.02] cursor-default shadow-md">
                         <div className="flex items-center gap-2 mb-1.5">
-                          <span className="text-lg">🎆</span>
-                          <span className="text-white/40 text-[9px] font-black uppercase tracking-widest">Unique</span>
+                          <span className="font-heading text-lg">🎆</span>
+                          <span className="font-heading text-white/40 text-[9px] font-black uppercase tracking-widest">Unique</span>
                         </div>
-                        <div className="text-3xl font-black text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.2)]">
+                        <div className="font-heading text-3xl font-black text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.2)]">
                           {Object.keys(selectedUserStats.booms).length}
                         </div>
                       </div>
@@ -10543,7 +10543,7 @@ const handlePackAction = (packId: string) => {
 
                     <div className="bg-black/40 rounded-2xl p-5 border border-white/5 space-y-4">
                       <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                        <p className="text-white/40 text-[9px] font-black uppercase tracking-widest">Timeline Registry</p>
+                        <p className="font-heading text-white/40 text-[9px] font-black uppercase tracking-widest">Timeline Registry</p>
                         <Badge className="bg-white/5 text-white/40 border-white/10 text-[8px] font-black tracking-widest uppercase">REALTIME SYNC</Badge>
                       </div>
                       <div className="space-y-4">
@@ -10552,13 +10552,13 @@ const handlePackAction = (packId: string) => {
                             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
                             <div className="w-0.5 h-6 bg-white/10 my-0.5" />
                           </div>
-                          <p className="text-white/60 text-xs font-medium">Joined the Arena on <span className="text-emerald-400 font-bold">{new Date(selectedUserStats.joinDate).toLocaleDateString()}</span></p>
+                          <p className="font-heading text-white/60 text-xs font-medium">Joined the Arena on <span className="font-heading text-emerald-400 font-bold">{new Date(selectedUserStats.joinDate).toLocaleDateString()}</span></p>
                         </div>
                         <div className="flex gap-3">
                           <div className="flex flex-col items-center">
                             <span className="w-2.5 h-2.5 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
                           </div>
-                          <p className="text-white/60 text-xs font-medium">Earned a total value of <span className="text-yellow-400 font-bold">{selectedUserStats.tokens.toLocaleString()}</span> tokens</p>
+                          <p className="font-heading text-white/60 text-xs font-medium">Earned a total value of <span className="font-heading text-yellow-400 font-bold">{selectedUserStats.tokens.toLocaleString()}</span> tokens</p>
                         </div>
                       </div>
                     </div>
@@ -10581,12 +10581,12 @@ const handlePackAction = (packId: string) => {
           <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
             <Card className="w-full max-w-md p-6 bg-slate-900 border-purple-500/50">
               <CardHeader>
-                <CardTitle className="text-2xl font-bold text-purple-400">Edit User: {userToEdit.username}</CardTitle>
-                <CardDescription className="text-slate-400">Manage user tokens and details.</CardDescription>
+                <CardTitle className="font-heading text-2xl font-bold text-purple-400">Edit User: {userToEdit.username}</CardTitle>
+                <CardDescription className="font-heading text-slate-400">Manage user tokens and details.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 pt-4">
                 <div className="space-y-2">
-                  <Label htmlFor="editTokens" className="text-white">User Tokens</Label>
+                  <Label htmlFor="editTokens" className="font-heading text-white">User Tokens</Label>
                   <Input
                     id="editTokens"
                     type="number"
@@ -10596,7 +10596,7 @@ const handlePackAction = (packId: string) => {
                   />
                 </div>
                 <div className="flex justify-end space-x-2 mt-4">
-                  <Button variant="ghost" onClick={() => setShowEditUserDialog(false)} className="text-slate-400 hover:text-white">
+                  <Button variant="ghost" onClick={() => setShowEditUserDialog(false)} className="font-heading text-slate-400 hover:text-white">
                     Cancel
                   </Button>
                   <Button onClick={handleSaveUserTokens} className="bg-purple-600 hover:bg-purple-700">
@@ -10613,7 +10613,7 @@ const handlePackAction = (packId: string) => {
           <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
             <Card className="w-full max-w-md p-6">
               <CardHeader>
-                <CardTitle className="text-2xl font-bold text-yellow-400">Mute {userToModerate.username}</CardTitle>
+                <CardTitle className="font-heading text-2xl font-bold text-yellow-400">Mute {userToModerate.username}</CardTitle>
                 <CardDescription>Set a duration for the mute.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -10641,7 +10641,7 @@ const handlePackAction = (packId: string) => {
           <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
             <Card className="w-full max-w-md p-6">
               <CardHeader>
-                <CardTitle className="text-2xl font-bold text-red-500">Ban {userToModerate.username}</CardTitle>
+                <CardTitle className="font-heading text-2xl font-bold text-red-500">Ban {userToModerate.username}</CardTitle>
                 <CardDescription>This action is permanent.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -10669,7 +10669,7 @@ const handlePackAction = (packId: string) => {
           <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
             <Card className="w-full max-w-md p-6">
               <CardHeader>
-                <CardTitle className="text-2xl font-bold">Manage Badges</CardTitle>
+                <CardTitle className="font-heading text-2xl font-bold">Manage Badges</CardTitle>
                 <CardDescription>Assign or remove badges from users</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -10717,7 +10717,7 @@ const handlePackAction = (packId: string) => {
       {
         showBoomAction && selectedBoom && (
           <div className="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
-            <Card className="w-full max-w-md bg-slate-950/80 backdrop-blur-2xl border border-white/10 shadow-[0_0_50px_rgba(168,85,247,0.15)] rounded-[2.5rem] overflow-hidden relative">
+            <Card className="w-full max-w-md blooket-card overflow-hidden relative">
               <div className="absolute top-0 right-0 p-4">
                 <Button
                   variant="ghost"
@@ -10729,9 +10729,9 @@ const handlePackAction = (packId: string) => {
                 </Button>
               </div>
 
-              <CardHeader className="text-center pb-2 pt-8">
-                <CardTitle className="text-3xl font-black text-white tracking-tight">Boom Actions</CardTitle>
-                <CardDescription className="text-white/40 font-medium">Manage your digital assets</CardDescription>
+              <CardHeader className="font-heading text-center pb-2 pt-8">
+                <CardTitle className="font-heading text-3xl font-black text-white tracking-tight">Boom Actions</CardTitle>
+                <CardDescription className="font-heading text-white/40 font-medium">Manage your digital assets</CardDescription>
               </CardHeader>
 
               <CardContent className="space-y-6 px-8 pb-8 pt-4">
@@ -10747,8 +10747,8 @@ const handlePackAction = (packId: string) => {
                       'border-cyan-500 animate-pulse'
                     }`} />
                   </div>
-                  <div className="text-center">
-                    <h3 className="text-2xl font-black text-white">{selectedBoom}</h3>
+                  <div className="font-heading text-center">
+                    <h3 className="font-heading text-2xl font-black text-white">{selectedBoom}</h3>
                     <Badge className={`mt-2 uppercase font-black text-[9px] tracking-widest border-none px-3.5 py-1.5 rounded-full ${
                       getBoomRarity(selectedBoom) === 'uncommon' ? 'bg-green-500' :
                       getBoomRarity(selectedBoom) === 'rare' ? 'bg-blue-500' :
@@ -10764,8 +10764,8 @@ const handlePackAction = (packId: string) => {
 
                 <div className="space-y-3">
                   <div className="flex justify-between items-center px-1">
-                    <Label className="text-white/60 font-black uppercase text-[10px] tracking-wider">Quantity to Sell</Label>
-                    <span className="text-white font-black text-sm">{sellQuantity} / {currentUser?.booms[selectedBoom] || 1}</span>
+                    <Label className="font-heading text-white/60 font-black uppercase text-[10px] tracking-wider">Quantity to Sell</Label>
+                    <span className="font-heading text-white font-black text-sm">{sellQuantity} / {currentUser?.booms[selectedBoom] || 1}</span>
                   </div>
                   <div className="flex items-center gap-4 bg-black/40 border border-white/5 rounded-2xl p-3">
                     <Button
@@ -10798,8 +10798,8 @@ const handlePackAction = (packId: string) => {
                 </div>
 
                 <div className="bg-purple-500/5 border border-purple-500/10 rounded-2xl p-4 text-center">
-                  <p className="text-white/40 text-[9px] font-black uppercase tracking-wider mb-1">Estimated Return Value</p>
-                  <p className="text-yellow-400 font-black text-3xl drop-shadow-[0_0_10px_rgba(234,179,8,0.2)] flex items-center justify-center gap-2">
+                  <p className="font-heading text-white/40 text-[9px] font-black uppercase tracking-wider mb-1">Estimated Return Value</p>
+                  <p className="font-heading text-yellow-400 font-black text-3xl drop-shadow-[0_0_10px_rgba(234,179,8,0.2)] flex items-center justify-center gap-2">
                     <span>🪙</span>
                     <span>{(getBoomSellPrice(selectedBoom) * sellQuantity).toLocaleString()}</span>
                   </p>
@@ -10847,11 +10847,11 @@ const handlePackAction = (packId: string) => {
           <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-4">
             <Card className="w-full max-w-md bg-slate-900 border-purple-500/50">
               <CardHeader>
-                <CardTitle className="text-2xl font-bold text-white flex items-center gap-2">
+                <CardTitle className="font-heading text-2xl font-bold text-white flex items-center gap-2">
                   <SparklesIcon className="w-6 h-6 text-purple-400" />
                   Create Set with AI
                 </CardTitle>
-                <CardDescription className="text-slate-400">
+                <CardDescription className="font-heading text-slate-400">
                   Tell the AI what you want to learn about, and it will create a question set for you!
                 </CardDescription>
               </CardHeader>
@@ -10874,7 +10874,7 @@ const handlePackAction = (packId: string) => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="text-white/70 text-sm font-bold block">Grade Level</label>
+                    <label className="font-heading text-white/70 text-sm font-bold block">Grade Level</label>
                     <select
                       value={aiGrade}
                       onChange={(e) => setAiGrade(parseInt(e.target.value))}
@@ -10886,7 +10886,7 @@ const handlePackAction = (packId: string) => {
                     </select>
                   </div>
                   <div className="space-y-2">
-                    <label className="text-white/70 text-sm font-bold block">Subject</label>
+                    <label className="font-heading text-white/70 text-sm font-bold block">Subject</label>
                     <select
                       value={aiSubject}
                       onChange={(e) => setAiSubject(e.target.value)}
@@ -10902,7 +10902,7 @@ const handlePackAction = (packId: string) => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-white/70 text-sm font-bold block">
+                  <label className="font-heading text-white/70 text-sm font-bold block">
                     Number of Questions
                   </label>
                   <Input
@@ -10913,13 +10913,13 @@ const handlePackAction = (packId: string) => {
                     onChange={(e) => setAiQuestionCount(parseInt(e.target.value) || 30)}
                     className="bg-black/50 border-purple-500/30 text-white"
                   />
-                  <p className="text-[10px] text-white/30 italic">Default is 30 questions (Recommended for best experience).</p>
+                  <p className="font-heading text-[10px] text-white/30 italic">Default is 30 questions (Recommended for best experience).</p>
                 </div>
 
                 <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10">
                   <div>
-                    <Label className="text-white font-bold block">Public Visibility</Label>
-                    <p className="text-[10px] text-white/50">Allow others to find and host this set.</p>
+                    <Label className="font-heading text-white font-bold block">Public Visibility</Label>
+                    <p className="font-heading text-[10px] text-white/50">Allow others to find and host this set.</p>
                   </div>
                   <input
                     type="checkbox"
@@ -11215,7 +11215,7 @@ const handlePackAction = (packId: string) => {
             </h3>
 
             {/* Message */}
-            <p className="text-sm text-slate-300 font-medium leading-relaxed px-2 mb-6 whitespace-pre-wrap break-words">
+            <p className="font-heading text-sm text-slate-300 font-medium leading-relaxed px-2 mb-6 whitespace-pre-wrap break-words">
               {modalNotification.message}
             </p>
 

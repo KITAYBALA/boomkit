@@ -154,16 +154,16 @@ export default function GameLobby({
     return (
         <div className="flex flex-col items-center justify-center min-h-[500px] space-y-8 animate-in fade-in zoom-in-95 duration-500">
             {/* Lobby Header */}
-            <div className="text-center space-y-4">
+            <div className="font-heading text-center space-y-4">
                 <Badge className="bg-purple-600 text-white px-4 py-1 rounded-full text-lg font-black tracking-widest animate-pulse">
                     {mode === "host" ? "HOSTING" : "WAITING"}
                 </Badge>
-                <h1 className="text-6xl font-black text-white tracking-widest flex items-center gap-4 justify-center">
+                <h1 className="font-heading text-6xl font-black text-white tracking-widest flex items-center gap-4 justify-center">
                     <Gamepad2Icon className="w-12 h-12 text-cyan-400" />
-                    PIN: <span className="text-yellow-400 bg-black/40 px-6 py-2 rounded-2xl border-2 border-white/20 select-all cursor-copy">{pin}</span>
+                    PIN: <span className="font-heading text-yellow-400 bg-black/40 px-6 py-2 rounded-2xl border-2 border-white/20 select-all cursor-copy">{pin}</span>
                 </h1>
-                <p className="text-white/60 font-bold uppercase tracking-widest flex items-center justify-center gap-2">
-                    {subject} <span className="text-white/20">•</span> Grade {grade}
+                <p className="font-heading text-white/60 font-bold uppercase tracking-widest flex items-center justify-center gap-2">
+                    {subject} <span className="font-heading text-white/20">•</span> Grade {grade}
                 </p>
             </div>
 
@@ -172,20 +172,20 @@ export default function GameLobby({
                 {mode === "host" ? (
                     <Card className="bg-white/5 border-white/10 backdrop-blur-xl">
                         <CardHeader>
-                            <CardTitle className="text-2xl font-black text-white flex items-center gap-2">
+                            <CardTitle className="font-heading text-2xl font-black text-white flex items-center gap-2">
                                 <Settings2Icon className="w-6 h-6 text-purple-400" />
                                 Game Settings
                             </CardTitle>
-                            <CardDescription className="text-white/40 font-medium">Customize your live session</CardDescription>
+                            <CardDescription className="font-heading text-white/40 font-medium">Customize your live session</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
                             <div className="space-y-4">
                                 <div className="flex justify-between items-center">
-                                    <p className="text-white/70 font-bold flex items-center gap-2">
+                                    <p className="font-heading text-white/70 font-bold flex items-center gap-2">
                                         <TimerIcon className="w-4 h-4 text-cyan-400" />
                                         Game Duration
                                     </p>
-                                    <Badge variant="outline" className="text-white border-white/20 px-3 py-1">
+                                    <Badge variant="outline" className="font-heading text-white border-white/20 px-3 py-1">
                                         {Math.floor(duration / 60)}m {duration % 60}s
                                     </Badge>
                                 </div>
@@ -213,7 +213,7 @@ export default function GameLobby({
                                     START GAME
                                 </Button>
                                 {players.length === 0 && (
-                                    <p className="text-yellow-400/60 text-xs font-bold text-center animate-pulse">
+                                    <p className="font-heading text-yellow-400/60 text-xs font-bold text-center animate-pulse">
                                         WAITING FOR PLAYERS TO JOIN...
                                     </p>
                                 )}
@@ -235,13 +235,13 @@ export default function GameLobby({
                                 <Users2Icon className="w-16 h-16 text-cyan-400 animate-bounce" />
                             </div>
                         </div>
-                        <h2 className="text-3xl font-black text-white mb-2">You're in!</h2>
-                        <p className="text-white/40 font-bold uppercase tracking-widest max-w-[200px]">
+                        <h2 className="font-heading text-3xl font-black text-white mb-2">You're in!</h2>
+                        <p className="font-heading text-white/40 font-bold uppercase tracking-widest max-w-[200px]">
                             Waiting for the host to start the game
                         </p>
                         <div className="mt-8 flex items-center gap-2 bg-black/40 px-4 py-2 rounded-full border border-white/10">
                             <InfoIcon className="w-4 h-4 text-cyan-400" />
-                            <p className="text-xs text-white/60 font-medium">Keep this tab open</p>
+                            <p className="font-heading text-xs text-white/60 font-medium">Keep this tab open</p>
                         </div>
                     </Card>
                 )}
@@ -250,11 +250,11 @@ export default function GameLobby({
                 <Card className="bg-white/5 border-white/10 backdrop-blur-xl">
                     <CardHeader className="flex flex-row items-center justify-between">
                         <div>
-                            <CardTitle className="text-2xl font-black text-white flex items-center gap-2">
+                            <CardTitle className="font-heading text-2xl font-black text-white flex items-center gap-2">
                                 <Users2Icon className="w-6 h-6 text-cyan-400" />
                                 Players
                             </CardTitle>
-                            <CardDescription className="text-white/40 font-medium tracking-tight">Everyone ready to play</CardDescription>
+                            <CardDescription className="font-heading text-white/40 font-medium tracking-tight">Everyone ready to play</CardDescription>
                         </div>
                         <Badge className="bg-white/10 text-white font-black text-lg h-10 w-10 flex items-center justify-center rounded-xl border border-white/10">
                             {players.length}
@@ -270,9 +270,9 @@ export default function GameLobby({
                                     <div className="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center text-xl shadow-lg border border-white/10 p-1 relative overflow-hidden">
                                         <BoomAvatar name={player.profilePicture || "👤"} className="w-full h-full object-contain" />
                                     </div>
-                                    <p className="text-white font-black text-sm truncate w-full text-center">{player.username}</p>
+                                    <p className="font-heading text-white font-black text-sm truncate w-full text-center">{player.username}</p>
                                     {player.username === currentUser.username && (
-                                        <Badge variant="outline" className="text-[8px] bg-green-500/20 text-green-400 border-green-500/20 uppercase font-black px-1 py-0">You</Badge>
+                                        <Badge variant="outline" className="font-heading text-[8px] bg-green-500/20 text-green-400 border-green-500/20 uppercase font-black px-1 py-0">You</Badge>
                                     )}
                                 </div>
                             ))}

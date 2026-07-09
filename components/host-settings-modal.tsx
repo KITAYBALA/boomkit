@@ -72,7 +72,7 @@ export default function HostSettingsModal({
                         <Button
                             variant="ghost"
                             onClick={onBack}
-                            className="text-white/40 hover:text-white hover:bg-white/5 transition-all group"
+                            className="font-heading text-white/40 hover:text-white hover:bg-white/5 transition-all group"
                         >
                             <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
                             Back to Modes
@@ -92,10 +92,10 @@ export default function HostSettingsModal({
                             </div>
                         </div>
                         <div>
-                            <h1 className="text-5xl font-black text-white tracking-tighter leading-tight drop-shadow-md">
+                            <h1 className="font-heading text-5xl font-black text-white tracking-tighter leading-tight drop-shadow-md">
                                 {modeName}
                             </h1>
-                            <p className="text-white/40 text-lg font-medium tracking-tight">Configure the ultimate arena</p>
+                            <p className="font-heading text-white/40 text-lg font-medium tracking-tight">Configure the ultimate arena</p>
                         </div>
                     </div>
                 </CardHeader>
@@ -106,9 +106,9 @@ export default function HostSettingsModal({
                             <div className="w-16 h-16 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 animate-pulse blur-xl absolute opacity-50" />
                             <Zap className="w-8 h-8 text-white relative z-10" />
                         </div>
-                        <div className="text-center space-y-2">
-                            <h3 className="text-2xl font-black text-white">Ready to Host?</h3>
-                            <p className="text-white/40 font-medium max-w-[300px] mx-auto">
+                        <div className="font-heading text-center space-y-2">
+                            <h3 className="font-heading text-2xl font-black text-white">Ready to Host?</h3>
+                            <p className="font-heading text-white/40 font-medium max-w-[300px] mx-auto">
                                 Create a lobby for <strong>{modeName}</strong> in <strong>{subject}</strong>. Players can join using the Game PIN.
                             </p>
                         </div>

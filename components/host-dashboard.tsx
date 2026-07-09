@@ -105,22 +105,22 @@ export default function HostDashboard({
                         <BarChart3 className="w-8 h-8" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-black tracking-tight">{subject}</h1>
-                        <p className="text-white/40 text-sm font-bold uppercase tracking-widest">{gameMode}</p>
+                        <h1 className="font-heading text-2xl font-black tracking-tight">{subject}</h1>
+                        <p className="font-heading text-white/40 text-sm font-bold uppercase tracking-widest">{gameMode}</p>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-12">
-                    <div className="text-center">
-                        <p className="text-white/30 text-[10px] font-black uppercase tracking-widest mb-1">Time Left</p>
+                    <div className="font-heading text-center">
+                        <p className="font-heading text-white/30 text-[10px] font-black uppercase tracking-widest mb-1">Time Left</p>
                         <div className="flex items-center gap-2 text-3xl font-black font-mono">
                             <Timer className="w-6 h-6 text-cyan-400" />
                             {formatTime(timeLeft)}
                         </div>
                     </div>
-                    <div className="text-center">
-                        <p className="text-white/30 text-[10px] font-black uppercase tracking-widest mb-1">Join PIN</p>
-                        <div className="text-4xl font-black text-purple-400 tracking-tighter">
+                    <div className="font-heading text-center">
+                        <p className="font-heading text-white/30 text-[10px] font-black uppercase tracking-widest mb-1">Join PIN</p>
+                        <div className="font-heading text-4xl font-black text-purple-400 tracking-tighter">
                             {pin}
                         </div>
                     </div>
@@ -150,11 +150,11 @@ export default function HostDashboard({
                 {/* Left: Live Leaderboard */}
                 <div className="flex-1 flex flex-col gap-6">
                     <div className="flex items-center justify-between">
-                        <h2 className="text-3xl font-black flex items-center gap-2">
+                        <h2 className="font-heading text-3xl font-black flex items-center gap-2">
                             <Trophy className="w-8 h-8 text-amber-400" />
                             Leaderboard
                         </h2>
-                        <Badge variant="outline" className="text-white/40 border-white/10">
+                        <Badge variant="outline" className="font-heading text-white/40 border-white/10">
                             {players.length} Players
                         </Badge>
                     </div>
@@ -183,12 +183,12 @@ export default function HostDashboard({
                                                 {player.username}
                                                 {index === 0 && <Crown className="w-4 h-4 text-amber-400" />}
                                             </p>
-                                            <p className="text-[10px] text-white/30 uppercase font-bold tracking-widest">Rank {index + 1}</p>
+                                            <p className="font-heading text-[10px] text-white/30 uppercase font-bold tracking-widest">Rank {index + 1}</p>
                                         </div>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="text-2xl font-black text-white">{(player.score || 0).toLocaleString()}</p>
-                                        <p className="text-[10px] text-purple-400 font-bold uppercase tracking-widest">
+                                    <div className="font-heading text-right">
+                                        <p className="font-heading text-2xl font-black text-white">{(player.score || 0).toLocaleString()}</p>
+                                        <p className="font-heading text-[10px] text-purple-400 font-bold uppercase tracking-widest">
                                             {gameMode === "fishing-frenzy" ? "LBS" : "Points"}
                                         </p>
                                     </div>
@@ -197,7 +197,7 @@ export default function HostDashboard({
                         ) : (
                             <div className="h-full flex flex-col items-center justify-center text-white/20 gap-4">
                                 <Users className="w-16 h-16 opacity-20" />
-                                <p className="text-xl font-bold">Waiting for players...</p>
+                                <p className="font-heading text-xl font-bold">Waiting for players...</p>
                             </div>
                         )}
                     </div>
@@ -206,16 +206,16 @@ export default function HostDashboard({
                 {/* Right: Stats & Overview */}
                 <div className="w-[350px] space-y-6">
                     <Card className="bg-gradient-to-br from-purple-600 to-indigo-700 border-none rounded-[2rem] p-8 text-white shadow-2xl">
-                        <p className="text-white/60 text-sm font-bold uppercase tracking-widest mb-1">In the Lead</p>
-                        <h3 className="text-4xl font-black truncate mb-4">{topPlayer?.username || "---"}</h3>
+                        <p className="font-heading text-white/60 text-sm font-bold uppercase tracking-widest mb-1">In the Lead</p>
+                        <h3 className="font-heading text-4xl font-black truncate mb-4">{topPlayer?.username || "---"}</h3>
                         <div className="flex items-center justify-between bg-white/10 rounded-xl p-4">
                             <div>
-                                <p className="text-[10px] text-white/60 font-bold uppercase">
+                                <p className="font-heading text-[10px] text-white/60 font-bold uppercase">
                                     {gameMode === "fishing-frenzy" ? "Current Weight" : "Current Score"}
                                 </p>
-                                <p className="text-2xl font-black">
+                                <p className="font-heading text-2xl font-black">
                                     {(topPlayer?.score || 0).toLocaleString()}
-                                    {gameMode === "fishing-frenzy" && <span className="text-sm ml-1 opacity-60">lbs</span>}
+                                    {gameMode === "fishing-frenzy" && <span className="font-heading text-sm ml-1 opacity-60">lbs</span>}
                                 </p>
                             </div>
                             <Trophy className="w-10 h-10 text-amber-300" />
@@ -228,8 +228,8 @@ export default function HostDashboard({
                                 <Zap className="w-6 h-6" />
                             </div>
                             <div>
-                                <p className="text-white/40 text-[10px] font-bold uppercase">Game Activity</p>
-                                <p className="text-lg font-black text-white">Normal</p>
+                                <p className="font-heading text-white/40 text-[10px] font-bold uppercase">Game Activity</p>
+                                <p className="font-heading text-lg font-black text-white">Normal</p>
                             </div>
                         </div>
                         <div className="h-[100px] flex items-end gap-1 px-2">
@@ -244,14 +244,14 @@ export default function HostDashboard({
                     </Card>
 
                     <div className="bg-white/5 border border-white/10 rounded-[2rem] p-6 flex-1 flex flex-col min-h-0">
-                        <h4 className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-4">Recent Activity</h4>
+                        <h4 className="font-heading text-white/40 text-[10px] font-black uppercase tracking-widest mb-4">Recent Activity</h4>
                         <div className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-hide">
                             {recentActivity.map((activity) => (
                                 <div key={activity.id} className="flex items-start gap-2 text-xs animate-in slide-in-from-right-2 duration-300">
                                     <div className="w-1.5 h-1.5 rounded-full bg-purple-500 mt-1 flex-shrink-0" />
                                     <div>
-                                        <p className="text-white/80 font-medium">{activity.message}</p>
-                                        <p className="text-white/20 text-[9px] uppercase font-bold">{activity.time}</p>
+                                        <p className="font-heading text-white/80 font-medium">{activity.message}</p>
+                                        <p className="font-heading text-white/20 text-[9px] uppercase font-bold">{activity.time}</p>
                                     </div>
                                 </div>
                             ))}
@@ -259,7 +259,7 @@ export default function HostDashboard({
                     </div>
 
                     <div className="bg-white/5 border border-white/10 rounded-[2rem] p-6">
-                        <h4 className="text-white/40 text-[10px] font-black uppercase tracking-widest mb-4">Host Controls</h4>
+                        <h4 className="font-heading text-white/40 text-[10px] font-black uppercase tracking-widest mb-4">Host Controls</h4>
                         <div className="grid grid-cols-2 gap-3">
                             <Button variant="outline" className="w-full bg-white/5 border-white/10 text-white text-xs h-10 rounded-xl">
                                 Hide PIN

@@ -106,7 +106,7 @@ export default function GameModeSelector({ onSelect, onBack, subjectName, isSolo
                                 className="w-full h-full object-cover"
                             />
                         ) : (
-                            <div className="text-[80px] [&_svg]:w-24 [&_svg]:h-24">
+                            <div className="font-heading text-[80px] [&_svg]:w-24 [&_svg]:h-24">
                                 {selectedMode.icon}
                             </div>
                         )}
@@ -114,15 +114,15 @@ export default function GameModeSelector({ onSelect, onBack, subjectName, isSolo
                     </div>
 
                     <div>
-                        <h1 className="text-4xl font-black text-white tracking-tight">{selectedMode.name}</h1>
-                        <p className="text-white/60 text-lg mt-2">{selectedMode.description}</p>
+                        <h1 className="font-heading text-4xl font-black text-white tracking-tight">{selectedMode.name}</h1>
+                        <p className="font-heading text-white/60 text-lg mt-2">{selectedMode.description}</p>
                     </div>
                 </div>
 
                 <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
                     <CardContent className="p-4 space-y-4">
                         <div className="flex justify-between items-center">
-                            <span className="text-white/40 text-sm font-bold uppercase tracking-wider">Difficulty</span>
+                            <span className="font-heading text-white/40 text-sm font-bold uppercase tracking-wider">Difficulty</span>
                             <Badge className={`${selectedMode.difficulty === "Simple" ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" :
                                 selectedMode.difficulty === "Moderate" ? "bg-amber-500/20 text-amber-400 border-amber-500/30" :
                                     "bg-rose-500/20 text-rose-400 border-rose-500/30"
@@ -131,7 +131,7 @@ export default function GameModeSelector({ onSelect, onBack, subjectName, isSolo
                             </Badge>
                         </div>
                         <div className="flex justify-between items-center">
-                            <span className="text-white/40 text-sm font-bold uppercase tracking-wider">Skills</span>
+                            <span className="font-heading text-white/40 text-sm font-bold uppercase tracking-wider">Skills</span>
                             <div className="flex gap-2">
                                 {selectedMode.skills.map(skill => (
                                     <Badge key={skill} variant="outline" className="border-white/10 text-white/80">{skill}</Badge>
@@ -139,8 +139,8 @@ export default function GameModeSelector({ onSelect, onBack, subjectName, isSolo
                             </div>
                         </div>
                         <div className="flex justify-between items-center">
-                            <span className="text-white/40 text-sm font-bold uppercase tracking-wider">Questions</span>
-                            <span className="text-white font-bold">{selectedMode.questionFrequency}</span>
+                            <span className="font-heading text-white/40 text-sm font-bold uppercase tracking-wider">Questions</span>
+                            <span className="font-heading text-white font-bold">{selectedMode.questionFrequency}</span>
                         </div>
                     </CardContent>
                 </Card>
@@ -148,7 +148,7 @@ export default function GameModeSelector({ onSelect, onBack, subjectName, isSolo
                 {isSolo && (
                     <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
                         <CardHeader className="p-4 pb-0">
-                            <CardTitle className="text-white/40 text-sm font-bold uppercase tracking-wider flex items-center gap-2">
+                            <CardTitle className="font-heading text-white/40 text-sm font-bold uppercase tracking-wider flex items-center gap-2">
                                 <Clock className="w-4 h-4 text-purple-400" />
                                 Game Duration
                             </CardTitle>
@@ -187,8 +187,8 @@ export default function GameModeSelector({ onSelect, onBack, subjectName, isSolo
                     >
                         {isSelecting ? "Initializing Arena..." : (selectedMode.isPlus ? "Unlock Mode" : (isSolo ? "Play Solo" : "Host Game"))}
                     </Button>
-                    <p className="text-center text-white/30 text-xs mt-4">
-                        Subject: <span className="text-purple-400 font-bold">{subjectName}</span>
+                    <p className="font-heading text-center text-white/30 text-xs mt-4">
+                        Subject: <span className="font-heading text-purple-400 font-bold">{subjectName}</span>
                     </p>
                 </div>
             </div>
@@ -196,11 +196,11 @@ export default function GameModeSelector({ onSelect, onBack, subjectName, isSolo
             {/* Main Content: Mode Grid */}
             <div className="flex-1 p-6 md:p-12 overflow-hidden flex flex-col gap-8 bg-[#1a1c2c]">
                 <div className="flex items-center justify-between">
-                    <h2 className="text-5xl font-black text-white">Select Mode</h2>
+                    <h2 className="font-heading text-5xl font-black text-white">Select Mode</h2>
                     <div className="flex items-center gap-4">
                         <div className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10">
                             <Users className="w-4 h-4 text-blue-400" />
-                            <span className="text-white font-bold">Live Lobby</span>
+                            <span className="font-heading text-white font-bold">Live Lobby</span>
                         </div>
                     </div>
                 </div>
@@ -240,10 +240,10 @@ export default function GameModeSelector({ onSelect, onBack, subjectName, isSolo
                                             {mode.difficulty}
                                         </Badge>
                                     </div>
-                                    <CardTitle className="text-2xl font-black text-white tracking-tight group-hover:text-purple-400 transition-colors">
+                                    <CardTitle className="font-heading text-2xl font-black text-white tracking-tight group-hover:text-purple-400 transition-colors">
                                         {mode.name}
                                     </CardTitle>
-                                    <CardDescription className="text-white/60 text-sm line-clamp-2 min-h-[40px] font-medium leading-relaxed">
+                                    <CardDescription className="font-heading text-white/60 text-sm line-clamp-2 min-h-[40px] font-medium leading-relaxed">
                                         {mode.description}
                                     </CardDescription>
                                 </CardHeader>
@@ -261,11 +261,11 @@ export default function GameModeSelector({ onSelect, onBack, subjectName, isSolo
                                         <div className="flex items-center gap-4">
                                             <div className="flex items-center gap-1.5">
                                                 <Clock className="w-3.5 h-3.5 text-blue-400" />
-                                                <span className="text-[10px] font-black text-white/40 uppercase tracking-tighter">{mode.idealTime}</span>
+                                                <span className="font-heading text-[10px] font-black text-white/40 uppercase tracking-tighter">{mode.idealTime}</span>
                                             </div>
                                             <div className="flex items-center gap-1.5">
                                                 <Zap className="w-3.5 h-3.5 text-yellow-500" />
-                                                <span className="text-[10px] font-black text-white/40 uppercase tracking-tighter">{mode.questionFrequency}</span>
+                                                <span className="font-heading text-[10px] font-black text-white/40 uppercase tracking-tighter">{mode.questionFrequency}</span>
                                             </div>
                                         </div>
                                         {selectedId === mode.id && (
@@ -301,9 +301,9 @@ export default function GameModeSelector({ onSelect, onBack, subjectName, isSolo
             {/* Selection Flash Overlay */}
             {isSelecting && (
                 <div className="fixed inset-0 z-[100] bg-white animate-flash-white flex items-center justify-center">
-                    <div className="text-center">
+                    <div className="font-heading text-center">
                         <Sparkles className="w-24 h-24 text-purple-600 animate-bounce mb-4" />
-                        <h2 className="text-4xl font-black text-purple-900 tracking-tighter">PREPARING ARENA</h2>
+                        <h2 className="font-heading text-4xl font-black text-purple-900 tracking-tighter">PREPARING ARENA</h2>
                     </div>
                 </div>
             )}

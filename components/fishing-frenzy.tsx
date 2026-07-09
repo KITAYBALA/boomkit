@@ -56,7 +56,7 @@ export default function FishingFrenzy({
             <div className="flex flex-col items-center justify-center w-full h-full text-white bg-slate-900">
                 <div className="w-12 h-12 rounded-full border-4 border-blue-500 border-t-transparent animate-spin mb-4" />
                 <p className="font-bold text-lg">Preparing Waters...</p>
-                <p className="text-white/40 text-sm">Waiting for host to sync...</p>
+                <p className="font-heading text-white/40 text-sm">Waiting for host to sync...</p>
             </div>
         )
     }
@@ -176,14 +176,14 @@ export default function FishingFrenzy({
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-3 bg-black/40 backdrop-blur-md px-5 py-2 rounded-2xl border border-white/10">
                         <Trophy className="w-6 h-6 text-yellow-500 fill-yellow-500" />
-                        <span className="text-2xl font-black text-white">{score} lbs</span>
+                        <span className="font-heading text-2xl font-black text-white">{score} lbs</span>
                     </div>
                 </div>
 
                 <div className="flex flex-col items-end gap-2">
                     <div className="flex items-center gap-3 bg-black/40 backdrop-blur-md px-5 py-2 rounded-2xl border border-white/10">
                         <Timer className={`w-6 h-6 ${timeLeft < 30 ? "text-red-500 animate-pulse" : "text-purple-400"}`} />
-                        <span className="text-2xl font-black text-white tabular-nums">
+                        <span className="font-heading text-2xl font-black text-white tabular-nums">
                             {Math.floor(timeLeft / 60)}:{(timeLeft % 60).toString().padStart(2, "0")}
                         </span>
                     </div>
@@ -287,7 +287,7 @@ export default function FishingFrenzy({
                                 />
                             </div>
                             <CardContent className="p-12 space-y-12">
-                                <h3 className="text-4xl font-black text-white text-center leading-tight">
+                                <h3 className="font-heading text-4xl font-black text-white text-center leading-tight">
                                     {questions && questions.length > 0 ? questions[currentQuestionIndex]?.question : "Waiting for players..."}
                                 </h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -321,14 +321,14 @@ export default function FishingFrenzy({
                         className="absolute inset-0 z-[60] flex items-center justify-center pointer-events-none"
                     >
                         <div className="bg-white rounded-[40px] p-1 border-8 border-orange-500 shadow-[0_0_100px_rgba(249,115,22,0.6)] w-72 aspect-[3/4] flex flex-col items-center justify-center gap-6 animate-bounce">
-                            <div className="text-center">
-                                <div className="text-slate-900 font-black text-2xl uppercase tracking-widest">{lastCatch.rarity}</div>
-                                <div className="text-slate-600 font-bold">{lastCatch.name}</div>
+                            <div className="font-heading text-center">
+                                <div className="font-heading text-slate-900 font-black text-2xl uppercase tracking-widest">{lastCatch.rarity}</div>
+                                <div className="font-heading text-slate-600 font-bold">{lastCatch.name}</div>
                             </div>
                             <div className="w-32 h-32 bg-orange-100 rounded-3xl flex items-center justify-center text-6xl">
                                 🐟
                             </div>
-                            <div className="text-center">
+                            <div className="font-heading text-center">
                                 <div className={`font-black text-6xl italic ${lastCatch.rarity === "S" ? "text-yellow-500 animate-pulse" :
                                     lastCatch.rarity === "A" ? "text-purple-500" :
                                         lastCatch.rarity === "B" ? "text-blue-500" :
@@ -337,7 +337,7 @@ export default function FishingFrenzy({
                                     }`}>
                                     {lastCatch.rarity} Tier
                                 </div>
-                                <div className="text-slate-900 font-black text-4xl">{lastCatch.weight} lbs</div>
+                                <div className="font-heading text-slate-900 font-black text-4xl">{lastCatch.weight} lbs</div>
                             </div>
                         </div>
                     </motion.div>
@@ -348,8 +348,8 @@ export default function FishingFrenzy({
             {isGameOver && (
                 <div className="absolute inset-0 z-[100] bg-black/90 backdrop-blur-2xl flex flex-col items-center justify-center p-12 text-center">
                     <Star className="w-24 h-24 text-yellow-500 fill-yellow-500 animate-bounce mb-8" />
-                    <h2 className="text-7xl font-black text-white mb-4 tracking-tighter">TIME'S UP!</h2>
-                    <p className="text-4xl text-purple-400 font-black mb-12">TOTAL WEIGHT: {score} lbs</p>
+                    <h2 className="font-heading text-7xl font-black text-white mb-4 tracking-tighter">TIME'S UP!</h2>
+                    <p className="font-heading text-4xl text-purple-400 font-black mb-12">TOTAL WEIGHT: {score} lbs</p>
                     <Button
                         onClick={() => {
                             if (onAwardTokens) {
