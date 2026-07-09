@@ -4757,7 +4757,7 @@ const handlePackAction = (packId: string) => {
             <div className="pt-4 flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
               <Button
                 onClick={() => setCurrentView("register")}
-                className="h-14 px-10 text-xl bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-black rounded-2xl shadow-[0_0_30px_rgba(168,85,247,0.4)] transition-all hover:scale-105 active:scale-[0.98]"
+                className="blooket-button bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-black h-14 px-10 text-2xl"
               >
                 Get Started
               </Button>
@@ -5123,7 +5123,7 @@ const handlePackAction = (packId: string) => {
           fixed md:relative inset-y-0 left-0 z-50
           w-52 text-white flex flex-col
           transform transition-transform duration-300 ease-in-out
-          bg-[#0a071d]/60 backdrop-blur-xl border-r border-white/5 shadow-2xl relative
+          bg-[#4c1d95] shadow-xl relative border-r border-[#3b0764]
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
         `}
         style={
@@ -5178,14 +5178,12 @@ const handlePackAction = (packId: string) => {
                 }}
                 className={`w-full flex items-center px-4 py-3 rounded-xl text-left transition-all duration-300 group gap-3 relative overflow-hidden ${
                   isActive
-                    ? "bg-gradient-to-r from-purple-500/10 to-pink-500/5 border-l-4 border-purple-500 text-white font-black shadow-[inset_0_0_12px_rgba(168,85,247,0.08)]"
-                    : "text-slate-400/80 hover:text-white hover:bg-white/5 border-l-4 border-transparent font-bold"
+                    ? "bg-[#6d28d9] text-white font-black"
+                    : "text-purple-300 hover:text-white hover:bg-[#5b21b6] font-bold"
                 }`}
               >
-                {isActive && (
-                  <div className="absolute right-0 top-0 bottom-0 w-1 bg-gradient-to-b from-purple-500 to-pink-500 animate-pulse" />
-                )}
-                <Icon className={`h-4 w-4 shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6 ${isActive ? "text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]" : "text-slate-500"}`} />
+                
+                <Icon className={`h-4 w-4 shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6 ${isActive ? "text-yellow-400" : "text-slate-500"}`} />
                 <span className="font-heading text-xs uppercase tracking-wider">{item.label}</span>
                 {item.id === "chat" && chatNotificationCount > 0 && (
                   <span className="ml-auto w-5 h-5 bg-red-600 border border-red-500 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-[0_0_8px_rgba(220,38,38,0.6)] animate-pulse shrink-0">
@@ -5386,22 +5384,19 @@ const handlePackAction = (packId: string) => {
                 <div className="flex flex-col xl:flex-row gap-8">
                   {/* Holographic Cockpit Profile Card */}
                   <div
-                    className={`flex-grow backdrop-blur-2xl rounded-[2.5rem] p-8 border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.8)] relative overflow-hidden group transition-all duration-500 hover:border-orange-500/30 ${currentUser?.bannerColor === "rainbow"
-                      ? "bg-gradient-to-br from-red-500/10 via-yellow-500/10 via-green-500/10 via-blue-500/10 to-purple-500/10"
-                      : "bg-white dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700/40"
-                      }`}
+                    className="flex-grow blooket-panel p-8 relative overflow-hidden group"
                   >
                     {/* Glowing grid background */}
-                    <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:20px_20px] pointer-events-none" />
-                    <div className="absolute -top-24 -right-24 w-56 h-56 bg-orange-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-orange-500/15 transition-all duration-700" />
+                    
+                    
                     
                     <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
                       {/* Avatar with cyber-glowing frame */}
                       <div className="relative group/avatar">
-                        <div className="absolute -inset-1 bg-gradient-to-tr from-orange-500 to-yellow-500 rounded-3xl blur opacity-30 group-hover/avatar:opacity-60 transition duration-500" />
-                        <div className="w-28 h-28 bg-gradient-to-br from-slate-900 to-slate-950 rounded-3xl flex items-center justify-center text-5xl border border-white/10 shadow-[0_8px_25px_rgba(0,0,0,0.5)] relative overflow-hidden transform transition-all duration-500 group-hover/avatar:scale-105 group-hover/avatar:rotate-2 p-2">
+                        
+                        <div className="w-28 h-28 bg-purple-900 rounded-[2rem] flex items-center justify-center text-5xl border-b-4 border-purple-950 relative overflow-hidden transform transition-all duration-500 p-2">
                           {renderProfilePicture(currentUser?.profilePicture || "🎯", "w-full h-full object-contain")}
-                          <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none" />
+                          
                         </div>
                         <Button
                           size="sm"
@@ -5919,10 +5914,7 @@ const handlePackAction = (packId: string) => {
                                     `}
                                     onClick={() => hasUnlocked && handleBoomClick(boom.name)}
                                   >
-                                    {/* Glow Effect */}
-                                    {hasUnlocked && (
-                                      <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none" />
-                                    )}
+                                    {/* Glow Effect Removed */}
 
                                     {/* Avatar/Image */}
                                     {hasUnlocked ? (
