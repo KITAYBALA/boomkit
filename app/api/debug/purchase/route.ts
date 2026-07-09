@@ -5,13 +5,14 @@ import { verifySession } from "@/lib/auth-server"
 export const dynamic = "force-dynamic"
 
 export async function POST(request: NextRequest) {
-  if (process.env.NODE_ENV === "production") {
-    return new NextResponse("Not Found", { status: 404 })
-  }
   try {
     const session = await verifySession()
     if (!session) {
       return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 })
+    }
+
+    if (process.env.NODE_ENV === "production" && !session.isOwner && session.role !== "owner" && session.role !== "admin") {
+      return NextResponse.json({ success: false, message: "Sandbox is disabled in production for non-staff users." }, { status: 403 })
     }
 
     const body = await request.json()

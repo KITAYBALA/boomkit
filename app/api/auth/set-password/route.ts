@@ -56,12 +56,12 @@ export async function POST(request: NextRequest) {
 
     const passwordHash = await hashPassword(password)
     const { error: updateError } = await supabase
-      .from('users')
+      .from('user_secrets')
       .update({
         password_hash: passwordHash,
         password_reset_required: false,
       })
-      .eq('id', targetUser.id)
+      .eq('user_id', targetUser.id)
 
     if (updateError) {
       console.error('[AUTH] Error setting password:', updateError)

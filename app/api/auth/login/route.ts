@@ -11,8 +11,6 @@ const AUTH_USER_COLUMNS = [
   'id',
   'username',
   'email',
-  'password_hash',
-  'password_reset_required',
   'is_banned',
   'is_owner',
   'role',
@@ -38,7 +36,6 @@ const AUTH_USER_COLUMNS = [
   'packs_opened',
   'age',
   'reason',
-  'last_ip',
   'xp',
   'level',
   'clan_id',
@@ -162,7 +159,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    await supabase.from('users').update(updatePayload).eq('id', userData.id)
+    await supabase.from('user_secrets').update(updatePayload).eq('user_id', userData.id)
 
     if (DEBUG_AUTH) console.log('[AUTH DEBUG] ===== LOGIN SUCCESS =====')
 
@@ -209,6 +206,11 @@ async function findUserByUsernameOrEmail(
 
   if (userByUsername) {
     if (DEBUG_AUTH) console.log('[AUTH DEBUG] User found by username lookup')
+    const { data: secrets } = await supabase.from('user_secrets').select('*').eq('user_id', userByUsername.id).maybeSingle()
+    if (secrets) {
+      userByUsername.password_hash = secrets.password_hash
+      userByUsername.password_reset_required = secrets.password_reset_required
+    }
     return userByUsername
   }
 
@@ -226,6 +228,11 @@ async function findUserByUsernameOrEmail(
 
   if (userByEmail) {
     if (DEBUG_AUTH) console.log('[AUTH DEBUG] User found by email lookup')
+    const { data: secrets } = await supabase.from('user_secrets').select('*').eq('user_id', userByEmail.id).maybeSingle()
+    if (secrets) {
+      userByEmail.password_hash = secrets.password_hash
+      userByEmail.password_reset_required = secrets.password_reset_required
+    }
   }
 
   return userByEmail

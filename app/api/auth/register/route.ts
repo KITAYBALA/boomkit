@@ -132,8 +132,6 @@ export async function POST(request: NextRequest) {
       username,
       email: email || `no_email_${username}_${Date.now()}@boomkit.local`,
       age: Number.parseInt(age),
-      password_hash: passwordHash,
-      password_reset_required: false,
       status: 'pending', // Default to pending for staff approval
       join_date: new Date().toLocaleDateString('en-US', {
         weekday: 'long',
@@ -159,12 +157,9 @@ export async function POST(request: NextRequest) {
       last_daily_spin: '',
       mute_expiry: 0,
       ban_expiry: 0,
-      ban_reason: '',
       last_seen: Date.now(),
       packs_opened: 0,
       reason: reason || '',
-      last_ip: ip,
-      mac_address: mac_address || null,
     }
 
     const { data: insertedUser, error: insertError } = await supabase
@@ -200,6 +195,19 @@ export async function POST(request: NextRequest) {
         success: false,
         message: `Registration failed: ${insertError.message || insertError.code || 'Unknown database error'}`
       }, { status: 500 })
+    }
+
+    // Insert secrets
+    const { error: secretsError } = await supabase.from('user_secrets').insert({
+      user_id: insertedUser.id,
+      password_hash: passwordHash,
+      password_reset_required: false,
+      last_ip: ip,
+      mac_address: mac_address || null,
+    })
+
+    if (secretsError) {
+      console.error('[AUTH] Secrets insert error:', secretsError)
     }
 
     // Mark key as used since user registration succeeded
