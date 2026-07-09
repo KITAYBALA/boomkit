@@ -14,7 +14,7 @@ export const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(
             onClick={() => onCheckedChange?.(!checked)}
         >
             <span
-                className={`pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform ${checked ? "translate-x-5" : "translate-x-1"}`}
+                className={`pointer-events-none block h-5 w-5 rounded-full bg-[#5b21b6] shadow-lg ring-0 transition-transform ${checked ? "translate-x-5" : "translate-x-1"}`}
             />
             <input
                 type="checkbox"

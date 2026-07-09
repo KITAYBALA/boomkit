@@ -299,7 +299,7 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
                             size="icon"
                             variant="ghost"
                             onClick={() => setShowNewChat(true)}
-                            className="rounded-xl hover:bg-white/5 text-purple-400 border border-purple-500/10 hover:border-purple-500/30 transition-all duration-300"
+                            className="rounded-xl hover:bg-[#5b21b6]/5 text-purple-400 border border-purple-500/10 hover:border-purple-500/30 transition-all duration-300"
                         >
                             <UserPlusIcon className="h-4 w-4" />
                         </Button>
@@ -327,7 +327,7 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
                                             className={`w-full p-4 rounded-2xl text-left transition-all duration-300 pr-10 border ${
                                                 activeConversation?.id === conv.id
                                                     ? 'bg-purple-900/20 border-purple-500/40 shadow-[0_0_15px_rgba(168,85,247,0.15)] text-white'
-                                                    : 'bg-black/10 hover:bg-white/5 border-white/5 hover:border-white/10 text-white/70 hover:text-white'
+                                                    : 'bg-black/10 hover:bg-[#5b21b6]/5 border-white/5 hover:border-white/10 text-white/70 hover:text-white'
                                             }`}
                                         >
                                             <div className="flex items-center gap-3">
@@ -380,7 +380,7 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
                                                                         }
                                                                         setShowChatActions(null)
                                                                     }}
-                                                                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-white hover:bg-white/10 rounded-xl"
+                                                                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-white hover:bg-[#5b21b6]/10 rounded-xl"
                                                                 >
                                                                     {isBlocked ? (
                                                                         <>
@@ -465,7 +465,7 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
                                 <Button 
                                     variant="ghost" 
                                     size="icon" 
-                                    className="rounded-xl text-white/40 hover:text-white border border-white/5 hover:bg-white/5" 
+                                    className="rounded-xl text-white/40 hover:text-white border border-white/5 hover:bg-[#5b21b6]/5" 
                                     onClick={() => setActiveConversation(null)}
                                 >
                                     <XIcon className="h-4 w-4" />
@@ -538,7 +538,7 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
                                             disabled={!inputText.trim()}
                                             className={`ml-2 h-10 w-10 p-0 rounded-xl transition-all duration-300 border-none ${
                                                 !inputText.trim() 
-                                                    ? "bg-white/5 text-white/20" 
+                                                    ? "bg-[#5b21b6]/5 text-white/20" 
                                                     : "bg-gradient-to-br from-purple-600 to-blue-600 text-white shadow-lg hover:scale-105 active:scale-95"
                                             }`}
                                         >
@@ -574,7 +574,7 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
                                         placeholder="Search characters by name..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="bg-white/5 border-white/10 h-14 pl-14 rounded-2xl text-white placeholder:text-white/20 focus:ring-purple-500/50"
+                                        className="bg-[#5b21b6]/5 border-white/10 h-14 pl-14 rounded-2xl text-white placeholder:text-white/20 focus:ring-purple-500/50"
                                     />
                                 </div>
 
@@ -592,11 +592,11 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
                                                 }}
                                                 className={`p-4 rounded-xl text-left border transition-all flex items-center justify-between group ${selectedUsers.includes(user.id)
                                                     ? 'bg-purple-600/20 border-purple-500/50'
-                                                    : 'bg-white/5 border-white/5 hover:bg-white/10'
+                                                    : 'bg-[#5b21b6]/5 border-white/5 hover:bg-[#5b21b6]/10'
                                                     }`}
                                             >
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center font-black text-[10px] text-white/40">
+                                                    <div className="w-8 h-8 rounded-lg bg-[#5b21b6]/10 flex items-center justify-center font-black text-[10px] text-white/40">
                                                         {user.username[0].toUpperCase()}
                                                     </div>
                                                     <div>
@@ -621,7 +621,7 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
                                             placeholder="e.g. The Syndicate"
                                             value={groupName}
                                             onChange={(e) => setGroupName(e.target.value)}
-                                            className="bg-white/5 border-white/10 h-14 rounded-2xl text-white focus:ring-blue-500/50"
+                                            className="bg-[#5b21b6]/5 border-white/10 h-14 rounded-2xl text-white focus:ring-blue-500/50"
                                         />
                                     </div>
                                 )}

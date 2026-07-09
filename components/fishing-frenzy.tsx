@@ -320,7 +320,7 @@ export default function FishingFrenzy({
                         exit={{ opacity: 0, scale: 1.5 }}
                         className="absolute inset-0 z-[60] flex items-center justify-center pointer-events-none"
                     >
-                        <div className="bg-white rounded-[40px] p-1 border-8 border-orange-500 shadow-[0_0_100px_rgba(249,115,22,0.6)] w-72 aspect-[3/4] flex flex-col items-center justify-center gap-6 animate-bounce">
+                        <div className="bg-[#5b21b6] rounded-[40px] p-1 border-8 border-orange-500 shadow-[0_0_100px_rgba(249,115,22,0.6)] w-72 aspect-[3/4] flex flex-col items-center justify-center gap-6 animate-bounce">
                             <div className="font-heading text-center">
                                 <div className="font-heading text-white font-black text-2xl uppercase tracking-widest">{lastCatch.rarity}</div>
                                 <div className="font-heading text-slate-600 font-bold">{lastCatch.name}</div>
@@ -358,7 +358,7 @@ export default function FishingFrenzy({
                             }
                             onEnd(score, correctAnswers, questionsAnswered)
                         }}
-                        className="px-12 py-8 bg-white text-black text-3xl font-black rounded-3xl hover:bg-purple-400 hover:text-white transition-all transform hover:scale-110"
+                        className="px-12 py-8 bg-yellow-500 text-white text-3xl font-black rounded-3xl hover:bg-purple-400 hover:text-white transition-all transform hover:scale-110"
                     >
                         RETURN TO LOBBY
                     </Button>

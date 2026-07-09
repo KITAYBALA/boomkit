@@ -5824,7 +5824,7 @@ const handlePackAction = (packId: string) => {
                                         <>
                                           {/* Quantity Badge */}
                                           {quantity > 1 && (
-                                            <div className="absolute top-2 right-2 bg-white text-black text-[9px] font-black rounded-lg px-1.5 py-0.5 flex items-center justify-center shadow-md border border-black/10 z-20">
+                                            <div className="absolute top-2 right-2 bg-yellow-500 text-white text-[9px] font-black rounded-lg px-1.5 py-0.5 flex items-center justify-center shadow-md border border-black/10 z-20">
                                               {quantity}x
                                             </div>
                                           )}
@@ -6101,7 +6101,7 @@ const handlePackAction = (packId: string) => {
                           className="sr-only"
                         />
                         <div className={`w-10 h-6 rounded-full p-1 transition-colors duration-300 ${isInstantOpen ? 'bg-purple-600' : 'bg-slate-800 border border-white/10'}`}>
-                          <div className={`w-4 h-4 rounded-full bg-white transition-transform duration-300 ${isInstantOpen ? 'translate-x-4' : 'translate-x-0'}`} />
+                          <div className={`w-4 h-4 rounded-full bg-[#5b21b6] transition-transform duration-300 ${isInstantOpen ? 'translate-x-4' : 'translate-x-0'}`} />
                         </div>
                         <span className="font-heading text-[10px] font-black uppercase tracking-wider text-white/70 group-hover:text-white transition-colors">Instant Open (2x)</span>
                       </label>
@@ -6114,7 +6114,7 @@ const handlePackAction = (packId: string) => {
                           className="sr-only"
                         />
                         <div className={`w-10 h-6 rounded-full p-1 transition-colors duration-300 ${isAutoOpen ? 'bg-pink-600' : 'bg-slate-800 border border-white/10'}`}>
-                          <div className={`w-4 h-4 rounded-full bg-white transition-transform duration-300 ${isAutoOpen ? 'translate-x-4' : 'translate-x-0'}`} />
+                          <div className={`w-4 h-4 rounded-full bg-[#5b21b6] transition-transform duration-300 ${isAutoOpen ? 'translate-x-4' : 'translate-x-0'}`} />
                         </div>
                         <span className="font-heading text-[10px] font-black uppercase tracking-wider text-white/70 group-hover:text-white transition-colors">Auto Open</span>
                       </label>
@@ -6226,7 +6226,7 @@ const handlePackAction = (packId: string) => {
                               transition-all duration-300 transform active:scale-95 border-none
                               ${(currentUser?.tokens || 0) < pack.price
                                 ? "bg-white/5 text-white/20 cursor-not-allowed"
-                                : "bg-white text-black hover:bg-yellow-400 hover:text-black hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] shadow-xl"
+                                : "bg-yellow-500 text-white hover:bg-yellow-400 hover:text-black hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] shadow-xl"
                               }
                             `}
                           >
@@ -7125,7 +7125,7 @@ const handlePackAction = (packId: string) => {
                           variant={themeMode === "light" ? "default" : "secondary"}
                           onClick={() => setThemeMode("light")}
                           className={`flex items-center justify-center gap-2 h-13 rounded-2xl transition-all font-black text-xs uppercase tracking-wider border-none ${themeMode === "light"
-                            ? "bg-white text-purple-950 hover:bg-white/90 shadow-lg"
+                            ? "bg-[#5b21b6] text-purple-950 hover:bg-white/90 shadow-lg"
                             : "bg-white/5 hover:bg-white/10 text-white"
                             }`}
                         >
@@ -8914,7 +8914,7 @@ const handlePackAction = (packId: string) => {
                                 isClaimed
                                   ? 'bg-green-600/10 text-green-500 cursor-not-allowed'
                                   : isUnlocked
-                                    ? 'bg-white text-black hover:bg-orange-400 hover:text-black shadow-lg shadow-white/10'
+                                    ? 'bg-yellow-500 text-white hover:bg-orange-400 hover:text-black shadow-lg shadow-white/10'
                                     : 'bg-white/5 text-white/20 cursor-not-allowed'
                               }`}
                             >
@@ -9901,7 +9901,7 @@ const handlePackAction = (packId: string) => {
             {packAnimation.stage === "burst" && (
               <div className="font-heading text-center relative z-10">
                 <div className="animate-pack-burst relative">
-                  <div className="w-64 h-64 rounded-full bg-white flex items-center justify-center shadow-[0_0_100px_#fff]">
+                  <div className="w-64 h-64 rounded-full bg-[#5b21b6] flex items-center justify-center shadow-[0_0_100px_#fff]">
                     <div className="absolute inset-0 rounded-full border-8 border-white animate-ping opacity-75" />
                     <div className="font-heading text-7xl">💥</div>
                   </div>

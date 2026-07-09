@@ -300,7 +300,7 @@ export default function GameModeSelector({ onSelect, onBack, subjectName, isSolo
             </div>
             {/* Selection Flash Overlay */}
             {isSelecting && (
-                <div className="fixed inset-0 z-[100] bg-white animate-flash-white flex items-center justify-center">
+                <div className="fixed inset-0 z-[100] bg-[#5b21b6] animate-flash-white flex items-center justify-center">
                     <div className="font-heading text-center">
                         <Sparkles className="w-24 h-24 text-purple-600 animate-bounce mb-4" />
                         <h2 className="font-heading text-4xl font-black text-purple-900 tracking-tighter">PREPARING ARENA</h2>

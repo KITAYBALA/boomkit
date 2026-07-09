@@ -71,7 +71,7 @@ export default function DailySpinWheel({ onWin, isSpinning, setIsSpinning, canSp
         <div className="flex flex-col items-center gap-8 py-10">
             <div className="relative w-80 h-80">
                 {/* Pointer */}
-                <div className="absolute top-[-10px] left-1/2 -translate-x-1/2 z-20 w-8 h-8 bg-white shadow-xl flex items-center justify-center rounded-b-full">
+                <div className="absolute top-[-10px] left-1/2 -translate-x-1/2 z-20 w-8 h-8 bg-[#5b21b6] shadow-xl flex items-center justify-center rounded-b-full">
                     <div className="w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[15px] border-t-slate-900 mb-1" />
                 </div>
 

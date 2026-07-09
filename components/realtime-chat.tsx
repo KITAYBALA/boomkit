@@ -599,7 +599,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                           {isMe && (
                             <button
                               onClick={() => startEditing(msg)}
-                              className="p-1 hover:bg-white/10 rounded-md text-white/40 hover:text-white transition-colors"
+                              className="p-1 hover:bg-[#5b21b6]/10 rounded-md text-white/40 hover:text-white transition-colors"
                               title="Edit Message"
                             >
                               <PencilIcon className="w-3.5 h-3.5" />
@@ -646,7 +646,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                             <div className="flex justify-end gap-2">
                               <button
                                 onClick={() => setEditingId(null)}
-                                className="p-1.5 hover:bg-white/10 rounded-lg text-white/40 hover:text-white transition-colors"
+                                className="p-1.5 hover:bg-[#5b21b6]/10 rounded-lg text-white/40 hover:text-white transition-colors"
                               >
                                 <XIcon className="w-4 h-4" />
                               </button>
@@ -676,7 +676,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                               className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs transition-all duration-300 ${
                                 reacted 
                                   ? 'bg-purple-500/20 border border-purple-500/40 text-purple-300 shadow-[0_0_10px_rgba(168,85,247,0.1)]' 
-                                  : 'bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 text-white/60'
+                                  : 'bg-[#5b21b6]/5 border border-white/5 hover:bg-[#5b21b6]/10 hover:border-white/10 text-white/60'
                               }`}
                             >
                               <span>{emoji}</span>
@@ -687,7 +687,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
 
                         {/* Floating mini-reaction popover */}
                         <div className="relative group/reactbtn">
-                          <button className="opacity-0 group-hover:opacity-100 flex items-center justify-center w-6 h-6 rounded-full bg-white/5 hover:bg-white/10 text-white/40 hover:text-white text-xs border border-white/5 transition-all duration-300">
+                          <button className="opacity-0 group-hover:opacity-100 flex items-center justify-center w-6 h-6 rounded-full bg-[#5b21b6]/5 hover:bg-[#5b21b6]/10 text-white/40 hover:text-white text-xs border border-white/5 transition-all duration-300">
                             +
                           </button>
                           <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/reactbtn:flex blooket-panel rounded-2xl p-1.5 gap-1.5 shadow-2xl z-40 animate-in fade-in slide-in-from-bottom-2 duration-200">
@@ -695,7 +695,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                               <button
                                 key={emoji}
                                 onClick={() => toggleReaction(msg.id, emoji)}
-                                className="hover:bg-white/10 rounded-xl w-8 h-8 flex items-center justify-center text-base transition-colors"
+                                className="hover:bg-[#5b21b6]/10 rounded-xl w-8 h-8 flex items-center justify-center text-base transition-colors"
                               >
                                 {emoji}
                               </button>
@@ -734,8 +734,8 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
               className={`
                 ml-3 rounded-2xl h-11 px-6 font-black uppercase tracking-wider text-xs transition-all duration-300
                 ${isMuted || !text.trim()
-                  ? "bg-white/5 text-white/20 cursor-not-allowed border-none"
-                  : "bg-white text-black hover:bg-gradient-to-r hover:from-purple-500 hover:to-indigo-500 hover:text-white shadow-xl hover:shadow-[0_0_20px_rgba(168,85,247,0.3)] active:scale-95 border-none"
+                  ? "bg-[#5b21b6]/5 text-white/20 cursor-not-allowed border-none"
+                  : "bg-[#5b21b6] text-white hover:bg-[#6d28d9] hover:bg-gradient-to-r hover:from-purple-500 hover:to-indigo-500 hover:text-white shadow-xl hover:shadow-[0_0_20px_rgba(168,85,247,0.3)] active:scale-95 border-none"
                 }
               `}
             >
