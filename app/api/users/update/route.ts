@@ -133,11 +133,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Only owners can modify owner accounts' }, { status: 403 })
     }
 
-    if ('is_owner' in filteredUpdates && !actorIsOwner) {
-      return NextResponse.json({ success: false, message: 'Only owners can modify owner status' }, { status: 403 })
+    if ('is_owner' in filteredUpdates && filteredUpdates.is_owner !== targetUser.is_owner) {
+      if (!actorIsOwner) {
+        return NextResponse.json({ success: false, message: 'Only owners can modify owner status' }, { status: 403 })
+      }
     }
 
-    if ('role' in filteredUpdates) {
+    if ('role' in filteredUpdates && filteredUpdates.role !== targetUser.role) {
       const nextRole = String(filteredUpdates.role)
       if (!actorIsOwner && !actorIsAdmin) {
         return NextResponse.json({ success: false, message: 'Only owners or admins can modify roles' }, { status: 403 })
