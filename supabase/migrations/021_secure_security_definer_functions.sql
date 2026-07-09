@@ -42,14 +42,17 @@ DROP POLICY IF EXISTS "Authenticated users can activate a boost" ON public.activ
 
 -- 7. Secure INSERT policies on core tables (M-01)
 DROP POLICY IF EXISTS "Anyone can insert friend requests" ON public.friends;
+DROP POLICY IF EXISTS "Authenticated users can insert friend requests" ON public.friends;
 CREATE POLICY "Authenticated users can insert friend requests" ON public.friends
   FOR INSERT WITH CHECK (auth.uid() IS NOT NULL AND user_username = (SELECT username FROM public.users WHERE id = auth.uid()::text));
 
 DROP POLICY IF EXISTS "Anyone can insert rentals" ON public.boom_rentals;
+DROP POLICY IF EXISTS "Authenticated users can list rentals" ON public.boom_rentals;
 CREATE POLICY "Authenticated users can list rentals" ON public.boom_rentals
   FOR INSERT WITH CHECK (auth.uid() IS NOT NULL AND owner_username = (SELECT username FROM public.users WHERE id = auth.uid()::text));
 
 DROP POLICY IF EXISTS "Anyone can post clan chat messages" ON public.clan_chat_messages;
+DROP POLICY IF EXISTS "Clan members can post messages" ON public.clan_chat_messages;
 CREATE POLICY "Clan members can post messages" ON public.clan_chat_messages
   FOR INSERT WITH CHECK (
     auth.uid() IS NOT NULL AND 
@@ -60,47 +63,58 @@ CREATE POLICY "Clan members can post messages" ON public.clan_chat_messages
 -- 8. Restrict SELECT policies to enforce authentication and privacy (M-02)
 -- public.tournaments
 DROP POLICY IF EXISTS "Anyone can view tournaments" ON public.tournaments;
+DROP POLICY IF EXISTS "Authenticated users can view tournaments" ON public.tournaments;
 CREATE POLICY "Authenticated users can view tournaments" ON public.tournaments FOR SELECT USING (auth.uid() IS NOT NULL);
 
 -- public.tournament_participants
 DROP POLICY IF EXISTS "Anyone can view participants" ON public.tournament_participants;
+DROP POLICY IF EXISTS "Authenticated users can view participants" ON public.tournament_participants;
 CREATE POLICY "Authenticated users can view participants" ON public.tournament_participants FOR SELECT USING (auth.uid() IS NOT NULL);
 
 -- public.achievements
 DROP POLICY IF EXISTS "Anyone can view achievements" ON public.achievements;
+DROP POLICY IF EXISTS "Authenticated users can view achievements" ON public.achievements;
 CREATE POLICY "Authenticated users can view achievements" ON public.achievements FOR SELECT USING (auth.uid() IS NOT NULL);
 
 -- public.user_achievements
 DROP POLICY IF EXISTS "Anyone can view user achievements" ON public.user_achievements;
+DROP POLICY IF EXISTS "Authenticated users can view user achievements" ON public.user_achievements;
 CREATE POLICY "Authenticated users can view user achievements" ON public.user_achievements FOR SELECT USING (auth.uid() IS NOT NULL);
 
 -- public.seasons
 DROP POLICY IF EXISTS "Anyone can view seasons" ON public.seasons;
+DROP POLICY IF EXISTS "Authenticated users can view seasons" ON public.seasons;
 CREATE POLICY "Authenticated users can view seasons" ON public.seasons FOR SELECT USING (auth.uid() IS NOT NULL);
 
 -- public.season_rewards
 DROP POLICY IF EXISTS "Anyone can view rewards" ON public.season_rewards;
+DROP POLICY IF EXISTS "Authenticated users can view rewards" ON public.season_rewards;
 CREATE POLICY "Authenticated users can view rewards" ON public.season_rewards FOR SELECT USING (auth.uid() IS NOT NULL);
 
 -- public.shop_items
 DROP POLICY IF EXISTS "Anyone can view shop items" ON public.shop_items;
+DROP POLICY IF EXISTS "Authenticated users can view shop items" ON public.shop_items;
 CREATE POLICY "Authenticated users can view shop items" ON public.shop_items FOR SELECT USING (auth.uid() IS NOT NULL);
 
 -- public.boom_rentals
 DROP POLICY IF EXISTS "Anyone can view rentals" ON public.boom_rentals;
+DROP POLICY IF EXISTS "Authenticated users can view rentals" ON public.boom_rentals;
 CREATE POLICY "Authenticated users can view rentals" ON public.boom_rentals FOR SELECT USING (auth.uid() IS NOT NULL);
 
 -- public.clans
 DROP POLICY IF EXISTS "Anyone can view clans" ON public.clans;
+DROP POLICY IF EXISTS "Authenticated users can view clans" ON public.clans;
 CREATE POLICY "Authenticated users can view clans" ON public.clans FOR SELECT USING (auth.uid() IS NOT NULL);
 
 -- public.tournament_clans
 DROP POLICY IF EXISTS "Anyone can view tournament clans" ON public.tournament_clans;
+DROP POLICY IF EXISTS "Authenticated users can view tournament clans" ON public.tournament_clans;
 CREATE POLICY "Authenticated users can view tournament clans" ON public.tournament_clans FOR SELECT USING (auth.uid() IS NOT NULL);
 
 -- Private SELECT policies
 -- public.friends
 DROP POLICY IF EXISTS "Anyone can view friends" ON public.friends;
+DROP POLICY IF EXISTS "Users can view their own friends" ON public.friends;
 CREATE POLICY "Users can view their own friends" ON public.friends
   FOR SELECT USING (
     auth.uid() IS NOT NULL AND (
@@ -111,6 +125,7 @@ CREATE POLICY "Users can view their own friends" ON public.friends
 
 -- public.clan_chat_messages
 DROP POLICY IF EXISTS "Anyone can view clan chat messages" ON public.clan_chat_messages;
+DROP POLICY IF EXISTS "Clan members can view clan chat messages" ON public.clan_chat_messages;
 CREATE POLICY "Clan members can view clan chat messages" ON public.clan_chat_messages
   FOR SELECT USING (
     auth.uid() IS NOT NULL AND
@@ -119,6 +134,7 @@ CREATE POLICY "Clan members can view clan chat messages" ON public.clan_chat_mes
 
 -- public.user_activity
 DROP POLICY IF EXISTS "Anyone can view activity" ON public.user_activity;
+DROP POLICY IF EXISTS "Users and staff can view activity" ON public.user_activity;
 CREATE POLICY "Users and staff can view activity" ON public.user_activity
   FOR SELECT USING (
     auth.uid() IS NOT NULL AND (
