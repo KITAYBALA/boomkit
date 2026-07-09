@@ -206,12 +206,13 @@ async function findUserByUsernameOrEmail(
 
   if (userByUsername) {
     if (DEBUG_AUTH) console.log('[AUTH DEBUG] User found by username lookup')
-    const { data: secrets } = await supabase.from('user_secrets').select('*').eq('user_id', userByUsername.id).maybeSingle()
+    const user = userByUsername as any
+    const { data: secrets } = await supabase.from('user_secrets').select('*').eq('user_id', user.id).maybeSingle()
     if (secrets) {
-      userByUsername.password_hash = secrets.password_hash
-      userByUsername.password_reset_required = secrets.password_reset_required
+      user.password_hash = secrets.password_hash
+      user.password_reset_required = secrets.password_reset_required
     }
-    return userByUsername
+    return user
   }
 
   if (DEBUG_AUTH) console.log('[AUTH DEBUG] Username not found, querying email:', identifier)
@@ -228,11 +229,13 @@ async function findUserByUsernameOrEmail(
 
   if (userByEmail) {
     if (DEBUG_AUTH) console.log('[AUTH DEBUG] User found by email lookup')
-    const { data: secrets } = await supabase.from('user_secrets').select('*').eq('user_id', userByEmail.id).maybeSingle()
+    const user = userByEmail as any
+    const { data: secrets } = await supabase.from('user_secrets').select('*').eq('user_id', user.id).maybeSingle()
     if (secrets) {
-      userByEmail.password_hash = secrets.password_hash
-      userByEmail.password_reset_required = secrets.password_reset_required
+      user.password_hash = secrets.password_hash
+      user.password_reset_required = secrets.password_reset_required
     }
+    return user
   }
 
   return userByEmail
