@@ -1217,18 +1217,24 @@ client.on('interactionCreate', async interaction => {
         await interaction.deferReply({ ephemeral: false });
         
         try {
-            const { data: targetRecord, error: targetErr } = await supabase
+            const { data: targetUser, error: targetErr } = await supabase
                 .from('users')
-                .select('username, last_ip, mac_address')
+                .select('id, username')
                 .ilike('username', targetUsername)
                 .maybeSingle();
                 
-            if (targetErr || !targetRecord) {
+            if (targetErr || !targetUser) {
                 return interaction.editReply({ content: `❌ **User Not Found**: Boomkit user **${targetUsername}** does not exist.` });
             }
+
+            const { data: targetSecrets } = await supabase
+                .from('user_secrets')
+                .select('last_ip, mac_address')
+                .eq('user_id', targetUser.id)
+                .maybeSingle();
             
-            const mac = targetRecord.mac_address;
-            const ip = targetRecord.last_ip;
+            const mac = targetSecrets?.mac_address;
+            const ip = targetSecrets?.last_ip;
             
             let queryField = '';
             let queryValue = '';
@@ -1243,19 +1249,29 @@ client.on('interactionCreate', async interaction => {
                 queryValue = ip;
                 matchType = 'IP address';
             } else {
-                return interaction.editReply({ content: `ℹ️ User **${targetRecord.username}** has no logged device ID or IP address (or is 127.0.0.1). Cannot check alts.` });
+                return interaction.editReply({ content: `ℹ️ User **${targetUser.username}** has no logged device ID or IP address (or is 127.0.0.1). Cannot check alts.` });
             }
             
-            const { data: alts, error: altsErr } = await supabase
-                .from('users')
-                .select('username, is_banned, role, join_date')
+            const { data: matchedSecrets, error: secretsErr } = await supabase
+                .from('user_secrets')
+                .select('user_id')
                 .eq(queryField, queryValue);
                 
-            if (altsErr || !alts) {
+            if (secretsErr || !matchedSecrets) {
                 return interaction.editReply({ content: '⚠️ Error querying for alt accounts.' });
             }
             
-            const otherAlts = alts.filter(a => a.username.toLowerCase() !== targetRecord.username.toLowerCase());
+            const matchedUserIds = matchedSecrets.map(s => s.user_id);
+            const { data: alts, error: altsErr } = await supabase
+                .from('users')
+                .select('username, is_banned, role, join_date')
+                .in('id', matchedUserIds);
+                
+            if (altsErr || !alts) {
+                return interaction.editReply({ content: '⚠️ Error fetching alt account details.' });
+            }
+            
+            const otherAlts = alts.filter(a => a.username.toLowerCase() !== targetUser.username.toLowerCase());
             
             if (otherAlts.length === 0) {
                 const redactedVal = queryField === 'last_ip' ? 'Redacted' : queryValue;
