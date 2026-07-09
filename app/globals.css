@@ -487,19 +487,19 @@
 }
 
 .blooket-card {
-  background-color: white;
-  border: 4px solid #e2e8f0;
+  background-color: #5b21b6; /* Match dark theme */
+  border: 4px solid #3b0764;
   border-radius: 1.5rem;
-  box-shadow: 0 8px 0 #cbd5e1;
-  color: #0f172a;
+  box-shadow: 0 8px 0 #3b0764;
+  color: white;
   transition: all 0.2s ease;
 }
 
 .dark .blooket-card {
-  background-color: #1e293b;
-  border-color: #0f172a;
-  box-shadow: 0 8px 0 #020617;
-  color: #f8fafc;
+  background-color: #4c1d95;
+  border-color: #2e054e;
+  box-shadow: 0 8px 0 #2e054e;
+  color: white;
 }
 
 .blooket-button {
@@ -518,24 +518,24 @@
 }
 
 .blooket-input {
-  background: white !important;
-  border: 4px solid #e2e8f0 !important;
-  color: #0f172a !important;
+  background: #3b0764 !important;
+  border: 4px solid #2e054e !important;
+  color: white !important;
   border-radius: 1rem !important;
   font-weight: 700 !important;
   transition: all 0.2s ease !important;
 }
 
 .dark .blooket-input {
-  background: #1e293b !important;
-  border-color: #334155 !important;
-  color: #f8fafc !important;
+  background: #2e054e !important;
+  border-color: #1a032e !important;
+  color: white !important;
 }
 
 .blooket-input:focus {
-  border-color: #3b82f6 !important;
+  border-color: #a855f7 !important;
   outline: none !important;
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2) !important;
+  box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.4) !important;
 }
 
 /* Scrollbars */
