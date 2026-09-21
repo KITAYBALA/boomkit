@@ -51,14 +51,16 @@ export default function RealtimeLeaderboard({ onPlayerClick, ...props }: Realtim
     }
 
     fetchLeaderboard()
+    const timer = setInterval(fetchLeaderboard, 15000)
 
-    if (!supabase) return
+    if (!supabase) return () => clearInterval(timer)
     const subscription = supabase
       .channel("leaderboard-updates")
       .on("postgres_changes", { event: "*", schema: "public", table: "users" }, () => fetchLeaderboard())
       .subscribe()
 
     return () => {
+      clearInterval(timer)
       supabase.removeChannel(subscription)
     }
   }, [])

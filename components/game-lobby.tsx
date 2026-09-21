@@ -1,6 +1,8 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
+import { sessionAction } from '@/lib/secure-rpc'
+import { pollRoom } from '@/lib/room-polling'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -42,113 +44,30 @@ export default function GameLobby({
     const [players, setPlayers] = useState<any[]>([])
     const [isGameStarted, setIsGameStarted] = useState(false)
     const [hostUsername, setHostUsername] = useState<string>("")
+    const startedRef=useRef(false)
+    const startRef=useRef(onStart)
+    startRef.current=onStart
 
     // Sync players and game state via Supabase
-    useEffect(() => {
-        if (!supabase) return
-
-        const syncLobby = async () => {
-            const { data: session, error } = await supabase
-                .from("game_sessions")
-                .select("*")
-                .eq("pin", pin)
-                .single()
-
-            if (error) {
-                console.error("Lobby sync error:", error)
-                return
-            }
-
-            if (session) {
-                setPlayers(session.players || [])
-                if (session.status === "started") {
-                    setIsGameStarted(true)
-                    onStart(session.duration || duration, session.questions)
-                }
-                if (session.host_username) {
-                    setHostUsername(session.host_username)
-                }
-            }
-        }
-
-        const registerSelf = async () => {
-            if (mode === "join") {
-                // Fetch current session
-                const { data: session } = await supabase
-                    .from("game_sessions")
-                    .select("players")
-                    .eq("pin", pin)
-                    .single()
-
-                if (session) {
-                    const currentPlayers = session.players || []
-                    if (!currentPlayers.find((p: any) => p.id === currentUser.id)) {
-                        const updatedPlayers = [...currentPlayers, {
-                            username: currentUser.username,
-                            profilePicture: currentUser.profilePicture,
-                            id: currentUser.id,
-                            score: 0
-                        }]
-
-                        await supabase
-                            .from("game_sessions")
-                            .update({ players: updatedPlayers })
-                            .eq("pin", pin)
-
-                        console.log("Registered self to Supabase lobby")
-                    }
-                }
-            }
-        }
-
-        registerSelf()
-        syncLobby()
-
-        // Removed interval polling - Realtime subscription below is sufficient
-        // const interval = setInterval(syncLobby, 2000)
-
-        // Setup realtime subscription
-        const channel = supabase.channel(`lobby-${pin}`)
-            .on('postgres_changes', {
-                event: 'UPDATE',
-                schema: 'public',
-                table: 'game_sessions',
-                filter: `pin=eq.${pin}`
-            }, (payload: any) => {
-                setPlayers(payload.new.players || [])
-                if (payload.new.status && payload.new.status.startsWith("started")) {
-                    setIsGameStarted(true)
-                    onStart(payload.new.duration || duration, payload.new.questions)
-                }
-            })
-            .subscribe()
-
-        return () => {
-            // clearInterval(interval)
-            supabase.removeChannel(channel)
-        }
-    }, [pin, mode, currentUser, supabase])
+    useEffect(() => pollRoom(pin, room => {
+      setPlayers(room.players || [])
+      setHostUsername(room.host_username || '')
+      if (room.status?.startsWith('started') && !startedRef.current) {
+        startedRef.current=true
+        setIsGameStarted(true)
+        startRef.current(room.duration,room.questions)
+      }
+    }), [pin])
 
     const handleStartGame = async () => {
-        if (!supabase) return
-
-        // Encoding start time in status for cross-player sync
-        const startTimestamp = Date.now()
-        const { error } = await supabase
-            .from("game_sessions")
-            .update({
-                status: `started:${startTimestamp}`,
-                duration: duration
-            })
-            .eq("pin", pin)
-
-        if (error) {
-            console.error("Failed to start game:", error)
-            alert("Error starting game. Please try again.")
-        } else {
-            // Then locally trigger start for host using LOCAL duration state
-            onStart(duration, null)
-        }
+      if (startedRef.current) return
+      const {data,error}=await sessionAction('start',{pin,duration})
+      if (error) { alert(error.message); return }
+      if (!startedRef.current) {
+        startedRef.current=true
+        setIsGameStarted(true)
+        startRef.current(data.duration,data.questions)
+      }
     }
 
     return (

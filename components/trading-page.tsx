@@ -1,5 +1,7 @@
 "use client"
 
+import { secureRpc } from "@/lib/secure-rpc"
+
 import { useState, useEffect, useCallback } from "react"
 import { createBrowserClient } from "@supabase/ssr"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
@@ -73,11 +75,7 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
   }>({ show: false, title: "", message: "", type: "info" })
 
   const fetchTrades = useCallback(async () => {
-    const { data, error } = await supabase
-      .from("trades")
-      .select("*")
-      .or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`)
-      .order("created_at", { ascending: false })
+    const { data, error } = await fetch('/api/trades').then(response => response.json()).catch(() => ({ data: null, error: { message: 'Unable to fetch trades' } }))
 
     if (!error && data) {
       console.log("[v0] Fetched trades:", data.length)
@@ -124,7 +122,9 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
         console.log("[v0] Trade subscription status:", status)
       })
 
+    const refreshTimer = setInterval(fetchTrades, 5000)
     return () => {
+      clearInterval(refreshTimer)
       supabase.removeChannel(channel)
     }
   }, [currentUser.id, fetchTrades])
@@ -232,7 +232,7 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
     }
 
     setLoading(true)
-    const { error } = await supabase.from("trades").insert({
+    const { error } = await fetch('/api/trades', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
       sender_id: currentUser.id,
       sender_username: currentUser.username,
       receiver_id: selectedUser.id,
@@ -243,7 +243,7 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
       receiver_tokens: theirRequestedTokens,
       message: tradeMessage || null,
       status: "pending",
-    })
+    }) }).then(response => response.json()).catch(() => ({ error: { message: 'Unable to send trade' } }))
 
     setLoading(false)
     if (error) {
@@ -280,7 +280,7 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
         throw new Error("This trade cannot be accepted because the sender is banned or rejected.")
       }
 
-      const { error } = await supabase.rpc('accept_trade', { trade_uuid: trade.id })
+      const { error } = await secureRpc('accept_trade', { trade_uuid: trade.id })
       if (error) throw error
 
       setLoading(false)
@@ -305,17 +305,18 @@ export function TradingPage({ currentUser, users, onTradeComplete }: TradingPage
   }
 
   const declineTrade = async (trade: Trade) => {
-    await supabase
-      .from("trades")
-      .update({ status: "declined", updated_at: new Date().toISOString() })
-      .eq("id", trade.id)
+    await updateTradeStatus(trade.id, 'declined')
   }
 
   const cancelTrade = async (trade: Trade) => {
-    await supabase
-      .from("trades")
-      .update({ status: "cancelled", updated_at: new Date().toISOString() })
-      .eq("id", trade.id)
+    await updateTradeStatus(trade.id, 'cancelled')
+  }
+
+  const updateTradeStatus = async (id: string, status: 'declined' | 'cancelled') => {
+    const { error } = await fetch('/api/trades', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, status }) })
+      .then(response => response.json()).catch(() => ({ error: { message: 'Unable to update trade' } }))
+    if (error) setStatusModal({ show: true, title: 'Trade update failed', message: error.message, type: 'error' })
+    else void fetchTrades()
   }
 
   const resetTradeForm = () => {

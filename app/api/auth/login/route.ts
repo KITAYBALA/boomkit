@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServerClient } from '@/lib/supabase-server-client'
 import { createSession } from '@/lib/auth-server'
 import { checkRateLimiter } from '@/lib/rate-limiter'
-import { hashPassword, verifyPassword } from '@/lib/password'
+import { hashPassword, verifyPassword, MAX_PASSWORD_LENGTH } from '@/lib/password'
+import { getClientIp, escapeLikeLiteral } from '@/lib/auth-input'
+import { createHash } from 'node:crypto'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -65,13 +67,17 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
+    if (!body || typeof body !== 'object' || Array.isArray(body)) return NextResponse.json({ success: false, message: 'Invalid login request' }, { status: 400 })
     const identifier = typeof body.username === 'string' ? body.username.trim() : ''
     const password = body.password
     const mac_address = body.mac_address
 
-    if (!identifier || typeof password !== 'string') {
+    if (!identifier || identifier.length > 254 || typeof password !== 'string' || !password.length || password.length > MAX_PASSWORD_LENGTH) {
       return NextResponse.json({ success: false, message: 'Username and password are required' }, { status: 400 })
     }
+
+    const accountLimit = await checkRateLimiter('account:' + createHash('sha256').update(identifier.toLowerCase()).digest('hex'))
+    if (!accountLimit.allowed) return NextResponse.json({success:false,message:accountLimit.message},{status:429,headers:{'Retry-After':String(accountLimit.retryAfter)}})
 
     if (DEBUG_AUTH) {
       console.log('[AUTH DEBUG] ===== LOGIN START =====')
@@ -81,11 +87,13 @@ export async function POST(request: NextRequest) {
 
     const supabase = getSupabaseServerClient()
 
-    const { data: blacklisted } = await supabase
+    const { data: blacklisted, error: blacklistError } = await supabase
       .from('blacklisted_ips')
       .select('ip')
       .eq('ip', ip)
       .maybeSingle()
+
+    if (blacklistError) throw blacklistError
 
     if (blacklisted) {
       if (DEBUG_AUTH) console.log('[AUTH DEBUG] IP is blacklisted:', ip)
@@ -108,7 +116,7 @@ export async function POST(request: NextRequest) {
       console.log('[AUTH DEBUG] Stored password_hash exists:', !!userData.password_hash)
     }
 
-    if (userData.is_banned) {
+    if (userData.is_banned && (!userData.ban_expiry || !(new Date(userData.ban_expiry).getTime() <= Date.now()))) {
       const reason = userData.ban_reason ? `Banned: ${userData.ban_reason}` : 'Account is banned'
       return NextResponse.json({ success: false, message: reason }, { status: 403 })
     }
@@ -133,7 +141,7 @@ export async function POST(request: NextRequest) {
       return invalidCredentials()
     }
 
-    await createSession(userData.id, userData.role || 'player', userData.is_owner || false)
+    await createSession(userData.id, userData.role || 'player', userData.is_owner || false, Boolean(userData.password_reset_required))
 
     if (userData.password_reset_required) {
       return NextResponse.json(
@@ -147,7 +155,7 @@ export async function POST(request: NextRequest) {
     }
 
     const updatePayload: Record<string, string> = { last_ip: ip }
-    if (mac_address) {
+    if (typeof mac_address === 'string' && mac_address.length <= 128) {
       updatePayload.mac_address = mac_address
     }
     if (passwordResult.needsRehash) {
@@ -168,6 +176,7 @@ export async function POST(request: NextRequest) {
       user: toSafeUser(userData),
     })
   } catch (error: any) {
+    if (error instanceof SyntaxError) return NextResponse.json({ success: false, message: 'Invalid JSON' }, { status: 400 })
     console.error('[AUTH] Login error:', error)
     
     // If it's a configuration error (missing env vars), expose it to help the user debug
@@ -179,15 +188,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function getClientIp(request: NextRequest) {
-  const req = request as any
-  if (req.ip) return req.ip
-  const realIp = request.headers.get('x-real-ip')
-  if (realIp) return realIp.trim()
-  const forwarded = request.headers.get('x-forwarded-for')
-  return forwarded ? forwarded.split(',')[0].trim() : '127.0.0.1'
-}
-
 async function findUserByUsernameOrEmail(
   supabase: ReturnType<typeof getSupabaseServerClient>,
   identifier: string
@@ -195,8 +195,8 @@ async function findUserByUsernameOrEmail(
   if (DEBUG_AUTH) console.log('[AUTH DEBUG] Querying username:', identifier)
   const { data: userByUsername, error: usernameError } = await supabase
     .from('users')
-    .select(AUTH_USER_COLUMNS)
-    .ilike('username', identifier)
+    .select('*')
+    .ilike('username', escapeLikeLiteral(identifier))
     .maybeSingle()
 
   if (usernameError) {
@@ -218,8 +218,8 @@ async function findUserByUsernameOrEmail(
   if (DEBUG_AUTH) console.log('[AUTH DEBUG] Username not found, querying email:', identifier)
   const { data: userByEmail, error: emailError } = await supabase
     .from('users')
-    .select(AUTH_USER_COLUMNS)
-    .ilike('email', identifier)
+    .select('*')
+    .ilike('email', escapeLikeLiteral(identifier))
     .maybeSingle()
 
   if (emailError) {
@@ -257,8 +257,8 @@ function toSafeUser(userData: any) {
     booms: userData.booms,
     role: userData.role,
     is_owner: userData.is_owner,
-    is_banned: userData.is_banned,
-    is_muted: userData.is_muted,
+    is_banned: userData.is_banned && !(userData.ban_expiry && new Date(userData.ban_expiry).getTime() <= Date.now()),
+    is_muted: userData.is_muted && !(userData.mute_expiry && new Date(userData.mute_expiry).getTime() <= Date.now()),
     status: userData.status,
     badges: userData.badges,
     name_color: userData.name_color,
@@ -267,7 +267,18 @@ function toSafeUser(userData: any) {
     join_date: userData.join_date,
     boom_score: userData.boom_score,
     total_value: userData.total_value,
-    is_plus_user: userData.is_plus_user,
+    is_plus_user: userData.is_plus_user || new Date(userData.plus_reward_expires_at || 0).getTime() > Date.now(),
+    has_plus_pass: userData.has_plus_pass || new Date(userData.plus_reward_expires_at || 0).getTime() > Date.now(),
+    inventory: userData.inventory || [],
+    season_xp: userData.season_xp || 0,
+    pinned_boom: userData.pinned_boom,
+    discover_tokens_earned: userData.discover_tokens_earned || 0,
+    correct_answers_count: userData.correct_answers_count || 0,
+    questions_answered_count: userData.questions_answered_count || 0,
+    clan_id: userData.clan_id,
+    clan_role: userData.clan_role,
+    clan_tag: userData.clan_tag,
+    clan_tag_color: userData.clan_tag_color,
     last_daily_spin: userData.last_daily_spin,
     mute_expiry: userData.mute_expiry,
     ban_expiry: userData.ban_expiry,

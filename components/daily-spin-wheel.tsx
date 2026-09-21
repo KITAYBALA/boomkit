@@ -1,10 +1,11 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { CoinsIcon } from 'lucide-react'
 
 interface DailySpinWheelProps {
+    onSpin: () => Promise<number>
     onWin: (amount: number) => void
     isSpinning: boolean
     setIsSpinning: (val: boolean) => void
@@ -22,19 +23,34 @@ const SECTORS = [
     { amount: 500, color: '#DC2626' }, // Red (Jackpot)
 ]
 
-export default function DailySpinWheel({ onWin, isSpinning, setIsSpinning, canSpin }: DailySpinWheelProps) {
+export default function DailySpinWheel({ onSpin, onWin, isSpinning, setIsSpinning, canSpin }: DailySpinWheelProps) {
     const [rotation, setRotation] = useState(0)
     const [result, setResult] = useState<number | null>(null)
+    const busy = useRef(false)
+    const timer = useRef<ReturnType<typeof setTimeout> | null>(null)
+    const mounted = useRef(true)
+    useEffect(() => {
+        mounted.current = true
+        return () => { mounted.current = false; if (timer.current) clearTimeout(timer.current); setIsSpinning(false) }
+    }, [setIsSpinning])
 
-    const handleSpin = () => {
-        if (isSpinning || !canSpin) return
+    const handleSpin = async () => {
+        if (busy.current || isSpinning || !canSpin) return
+        busy.current = true
 
         setIsSpinning(true)
         setResult(null)
 
         // 1. Pick result FIRST to ensure consistency
-        const winIndex = Math.floor(Math.random() * SECTORS.length)
-        const winAmount = SECTORS[winIndex].amount
+        let winAmount: number
+        try { winAmount = await onSpin() }
+        catch (error) {
+            busy.current = false
+            if (mounted.current) { setIsSpinning(false); alert(error instanceof Error ? error.message : 'Spin failed') }
+            return
+        }
+        if (!mounted.current) return
+        const winIndex = SECTORS.findIndex(s => s.amount === winAmount)
 
         // 2. Calculate rotation
         // Each sector is 45 degrees. Sector 0 is at -90deg (top)
@@ -54,13 +70,14 @@ export default function DailySpinWheel({ onWin, isSpinning, setIsSpinning, canSp
         // Sector i starts at i*45 degrees.
         // To put sector i at the top (which is 0 degrees in SVG -rotate-90 space),
         // we need to rotate the wheel by -(i * 45) degrees, or 360 - (i * 45).
-        const targetSectorAngle = 360 - (winIndex * sectorSize)
+        const targetSectorAngle = 360 - ((winIndex + 0.5) * sectorSize)
         const totalRotation = currentRotationBase + (extraSpins * 360) + targetSectorAngle
 
         setRotation(totalRotation)
 
         // 3. Set timer for the UI to catch up (8 seconds for slower feel)
-        setTimeout(() => {
+        timer.current = setTimeout(() => {
+            busy.current = false
             setResult(winAmount)
             setIsSpinning(false)
             onWin(winAmount)

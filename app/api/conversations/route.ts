@@ -81,7 +81,9 @@ export async function POST(request: NextRequest) {
         const body = await request.json()
         const { selectedUsers, groupName } = body
 
-        if (!selectedUsers || !Array.isArray(selectedUsers) || selectedUsers.length === 0) {
+        if (!Array.isArray(selectedUsers) || selectedUsers.length === 0 || selectedUsers.length > 20 ||
+            selectedUsers.some(id => typeof id !== 'string' || !id || id.length > 128) ||
+            (groupName != null && (typeof groupName !== 'string' || groupName.length > 100))) {
             return NextResponse.json({ error: 'Selected users are required' }, { status: 400 })
         }
 
@@ -116,6 +118,7 @@ export async function POST(request: NextRequest) {
             .insert(membersToAdd)
 
         if (memberError) {
+            await supabase.from('conversations').delete().eq('id', conv.id)
             console.error('Error adding members:', memberError)
             return NextResponse.json({ error: 'Failed to add members' }, { status: 500 })
         }

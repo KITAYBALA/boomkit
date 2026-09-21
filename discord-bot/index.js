@@ -487,25 +487,28 @@ function scryptAsync(password, salt, keyLength, options) {
 
 // Scrypt password verification matching Next.js logic
 async function verifyPassword(password, storedHash) {
-    if (!storedHash || typeof password !== 'string') {
+    if (typeof storedHash !== 'string' || typeof password !== 'string' || !password.length || password.length > 256) {
         return { valid: false };
     }
     const ALGORITHM = 'scrypt';
     const SCRYPT_MAXMEM = 64 * 1024 * 1024;
 
     if (storedHash.startsWith(`${ALGORITHM}$`)) {
-        const [algorithm, nRaw, rRaw, pRaw, salt, keyHex] = storedHash.split('$');
+        const parts = storedHash.split('$');
+        const [algorithm, nRaw, rRaw, pRaw, salt, keyHex] = parts;
         const n = Number(nRaw);
         const r = Number(rRaw);
         const p = Number(pRaw);
 
         if (
             algorithm !== ALGORITHM ||
+            parts.length !== 6 ||
             !Number.isInteger(n) ||
             !Number.isInteger(r) ||
             !Number.isInteger(p) ||
-            !salt ||
-            !/^[a-f0-9]+$/i.test(keyHex)
+            n < 1024 || n > 16384 || (n & (n - 1)) !== 0 || r < 1 || r > 8 || p !== 1 ||
+            !/^[a-f0-9]{32}$/i.test(salt || '') ||
+            !/^[a-f0-9]{128}$/i.test(keyHex || '')
         ) {
             return { valid: false };
         }
@@ -564,6 +567,26 @@ async function getLinkedUsername(discordUserId) {
     return data.used_by_username;
 }
 
+async function settleWallet(discordId, eventId, action, params = {}) {
+    const { data, error } = await supabase.rpc('discord_wallet_action', {
+        p_discord_id: discordId, p_event_id: eventId, p_action: action, ...params,
+    });
+    if (error) throw new Error(error.code === 'P0001' ? error.message : 'Wallet service unavailable.');
+    return data;
+}
+
+async function handleWalletCommand(interaction) {
+    await interaction.deferReply({ ephemeral: true });
+    try {
+        const command = interaction.commandName;
+        const action = command === 'claim-daily' ? 'daily' : command === 'claim-code' ? 'promo' : 'coinflip';
+        const params = action === 'coinflip' ? { p_amount: interaction.options.getInteger('amount'), p_win: crypto.randomInt(2) === 1 }
+            : action === 'promo' ? { p_code: interaction.options.getString('code').trim().toUpperCase() } : {};
+        const result = await settleWallet(interaction.user.id, interaction.id, action, params);
+        return interaction.editReply({ content: `${result.username}: ${result.reward >= 0 ? '+' : ''}${result.reward} tokens. Balance: ${result.balance}.` });
+    } catch (error) { return interaction.editReply({ content: error.message }); }
+}
+
 // ==========================================
 // INITIALIZE DISCORD CLIENT
 // ==========================================
@@ -593,8 +616,12 @@ client.once('ready', () => {
 
 // Handle Interactions
 client.on('interactionCreate', async interaction => {
+    if (interaction.guildId !== process.env.GUILD_ID) return;
     if (interaction.isModalSubmit()) {
         if (interaction.customId.startsWith('auth_update_modal:')) {
+            if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
+                return interaction.reply({ content: 'Administrator permission required.', ephemeral: true });
+            }
             const targetUsername = interaction.customId.split(':')[1];
             const newPassword = interaction.fields.getTextInputValue('new_password');
 
@@ -602,7 +629,7 @@ client.on('interactionCreate', async interaction => {
             try {
                 // Validate password strength according to L-02 password rules
                 // Enforce minimum length, uppercase, lowercase, numbers, and special characters
-                if (newPassword.length < 8) {
+                if (newPassword.length < 8 || newPassword.length > 256) {
                     return interaction.editReply({ content: '🛑 **Invalid Password**: The password must be at least 8 characters long!' });
                 }
                 const hasUpper = /[A-Z]/.test(newPassword);
@@ -617,7 +644,7 @@ client.on('interactionCreate', async interaction => {
                 const { data: userRecord, error: fetchErr } = await supabase
                     .from('users')
                     .select('id, username')
-                    .ilike('username', targetUsername)
+                    .ilike('username', targetUsername.replace(/[\\%_]/g, '\\$&'))
                     .maybeSingle();
                     
                 if (fetchErr || !userRecord) {
@@ -629,9 +656,8 @@ client.on('interactionCreate', async interaction => {
                 
                 // Update in database
                 const { error: updateErr } = await supabase
-                    .from('users')
-                    .update({ password_hash: newHash })
-                    .eq('id', userRecord.id);
+                    .from('user_secrets')
+                    .upsert({ user_id: userRecord.id, password_hash: newHash, password_reset_required: false, sessions_revoked_at: new Date().toISOString() });
                     
                 if (updateErr) {
                     console.error('[Auth Update DB] Error:', updateErr);
@@ -729,17 +755,22 @@ client.on('interactionCreate', async interaction => {
         await interaction.deferReply({ ephemeral: true });
         
         try {
+            const { data: rate, error: rateError } = await supabase.rpc('consume_auth_attempt', { p_key: `discord:${interaction.user.id}` });
+            if (rateError || !rate?.allowed) return interaction.editReply({ content: 'Please wait before trying to link again.' });
             const { data: userRecord, error } = await supabase
                 .from('users')
-                .select('id, username, password_hash')
-                .ilike('username', username)
+                .select('id, username, is_banned')
+                .ilike('username', username.replace(/[\\%_]/g, '\\$&'))
                 .maybeSingle();
                 
-            if (error || !userRecord) {
+            if (error || !userRecord || userRecord.is_banned) {
                 return interaction.editReply({ content: '🛑 **User Not Found**: A Boomkit user with that username does not exist!' });
             }
             
-            const passwordCheck = await verifyPassword(password, userRecord.password_hash);
+            const { data: secrets, error: secretsError } = await supabase.from('user_secrets')
+                .select('password_hash, password_reset_required').eq('user_id', userRecord.id).maybeSingle();
+            if (secretsError || !secrets || secrets.password_reset_required) return interaction.editReply({ content: 'Please reset your password on Boomkit before linking.' });
+            const passwordCheck = await verifyPassword(password, secrets.password_hash);
             if (!passwordCheck.valid) {
                 return interaction.editReply({ content: '🛑 **Invalid Password**: The password you entered is incorrect!' });
             }
@@ -1326,81 +1357,7 @@ client.on('interactionCreate', async interaction => {
     }
 
     // --- COINFLIP COMMAND ---
-    if (commandName === 'coinflip') {
-        const amount = interaction.options.getInteger('amount');
-        
-        if (amount < 100 || amount > 10000) {
-            return interaction.reply({
-                content: '🛑 **Invalid Wager**: Coinflip wager must be between **100** and **10,000** tokens!',
-                ephemeral: true
-            });
-        }
-        
-        const now = Date.now();
-        const cooldownTime = coinflipCooldowns.get(user.id);
-        if (cooldownTime && now < cooldownTime) {
-            const timeLeft = Math.ceil((cooldownTime - now) / 1000 / 60);
-            return interaction.reply({
-                content: `⏳ **Cooldown**: You must wait **${timeLeft} minutes** before flipping again! (1-hour cooldown)`,
-                ephemeral: true
-            });
-        }
-        
-        await interaction.deferReply({ ephemeral: false });
-        
-        try {
-            const boomkitUsername = await getLinkedUsername(user.id);
-            if (!boomkitUsername) {
-                return interaction.editReply({
-                    content: '🛑 **Not Linked**: Your Discord account is not linked to any Boomkit username. Link it using `/link [username] [password]` first!'
-                });
-            }
-            
-            const { data: player, error: playerErr } = await supabase
-                .from('users')
-                .select('tokens, username')
-                .eq('username', boomkitUsername)
-                .single();
-                
-            if (playerErr || !player) {
-                return interaction.editReply({
-                    content: '🛑 **Error**: Could not retrieve your account data.'
-                });
-            }
-            
-            if (player.tokens < amount) {
-                return interaction.editReply({
-                    content: `🛑 **Insufficient Balance**: You only have **${player.tokens}** tokens (trying to bet **${amount}**).`
-                });
-            }
-            
-            const isWin = Math.random() < 0.5;
-            const newBalance = isWin ? (player.tokens + amount) : (player.tokens - amount);
-            
-            const { error: updateErr } = await supabase
-                .from('users')
-                .update({ tokens: newBalance })
-                .eq('username', player.username);
-                
-            if (updateErr) {
-                console.error('[Coinflip DB Update] Error:', updateErr);
-                return interaction.editReply({
-                    content: '⚠️ Failed to record the coinflip in the database. Your balance was not changed.'
-                });
-            }
-            
-            coinflipCooldowns.set(user.id, now + 3600000); // 1 hour
-            
-            const resultText = isWin 
-                ? `🎉 **YOU WON!** Heads! 🪙\n\n**${player.username}** successfully flipped **Heads** and won **${amount}** tokens!\n💎 **New Balance**: **${newBalance}** tokens.`
-                : `💀 **YOU LOST!** Tails! 🪙\n\n**${player.username}** flipped **Tails** and lost **${amount}** tokens.\n💎 **New Balance**: **${newBalance}** tokens.`;
-                
-            return interaction.editReply({ content: resultText });
-        } catch (err) {
-            console.error('[Interaction coinflip] Error:', err);
-            return interaction.editReply({ content: '⚠️ An unexpected error occurred during the coinflip.' });
-        }
-    }
+    if (commandName === 'coinflip') { return handleWalletCommand(interaction); }
 
     // --- TRIVIA COMMAND ---
     if (commandName === 'trivia') {
@@ -1445,16 +1402,19 @@ client.on('interactionCreate', async interaction => {
         
         await interaction.reply({ embeds: [embed], components: [row] });
         
-        const filter = () => true;
-        const collector = interaction.channel.createMessageComponentCollector({
+        const filter = button => button.customId.startsWith('trivia_') && button.customId.endsWith(`_${now}`);
+        const triviaMessage = await interaction.fetchReply();
+        const collector = triviaMessage.createMessageComponentCollector({
             filter,
             time: 30000
         });
         
         let answered = false;
+        let settling = false;
         
         collector.on('collect', async buttonInteraction => {
             if (answered) return;
+            if (settling) return buttonInteraction.reply({ content: 'An answer is being verified. Please try again shortly.', ephemeral: true });
             
             const userId = buttonInteraction.user.id;
             if (wrongAttempts.has(userId)) {
@@ -1468,51 +1428,18 @@ client.on('interactionCreate', async interaction => {
             const selectedChoice = ['A', 'B', 'C', 'D'][selectedIdx];
             
             if (selectedChoice === triviaObj.correct) {
-                answered = true;
-                collector.stop('answered');
-                
-                await buttonInteraction.deferReply({ ephemeral: false });
-                
+                settling = true;
                 try {
-                    const winnerUsername = await getLinkedUsername(buttonInteraction.user.id);
-                    if (!winnerUsername) {
-                        return buttonInteraction.editReply({
-                            content: `🎉 **Correct!** **${buttonInteraction.user.username}** answered **${triviaObj.correctText}** first!\n\n⚠️ **Note**: Your Discord account is not linked to Boomkit. Link it using \`/link\` to claim rewards next time!`
-                        });
-                    }
-                    
-                    const { data: player, error: playerErr } = await supabase
-                         .from('users')
-                         .select('tokens, username')
-                         .eq('username', winnerUsername)
-                         .single();
-                         
-                    if (playerErr || !player) {
-                        return buttonInteraction.editReply({
-                            content: `🎉 **Correct!** **${buttonInteraction.user.username}** (Boomkit: **${winnerUsername}**) answered **${triviaObj.correctText}** first, but there was an error updating their balance.`
-                        });
-                    }
-                    
-                    const newBalance = player.tokens + 100;
-                    const { error: updateErr } = await supabase
-                         .from('users')
-                         .update({ tokens: newBalance })
-                         .eq('username', player.username);
-                         
-                    if (updateErr) {
-                        return buttonInteraction.editReply({
-                            content: `🎉 **Correct!** **${buttonInteraction.user.username}** (Boomkit: **${player.username}**) answered **${triviaObj.correctText}** first, but there was an error updating their balance.`
-                        });
-                    }
-                    
-                    return buttonInteraction.editReply({
-                        content: `🎉 **Correct Answer!**\n\n**${buttonInteraction.user.username}** (Boomkit: **${player.username}**) answered **${triviaObj.correctText}** first and won **100 tokens**!\n💎 **New Balance**: **${newBalance}** tokens.`
-                    });
+                    await buttonInteraction.deferReply({ ephemeral: true });
+                    const result = await settleWallet(buttonInteraction.user.id, interaction.id, 'trivia');
+                    answered = true;
+                    collector.stop('answered');
+                    return await buttonInteraction.editReply({content: result.username + ' answered correctly and earned 100 tokens. Balance: ' + result.balance});
                 } catch (err) {
                     console.error('[Trivia Winner Update] Error:', err);
-                    return buttonInteraction.editReply({
-                        content: `🎉 **Correct!** **${buttonInteraction.user.username}** answered **${triviaObj.correctText}** first, but an error occurred.`
-                    });
+                    if (buttonInteraction.deferred) await buttonInteraction.editReply({content: 'Unable to settle this answer. Check your account link and reward limits.'}).catch(console.error);
+                } finally {
+                    settling = false;
                 }
             } else {
                 wrongAttempts.add(userId);
@@ -1549,58 +1476,7 @@ client.on('interactionCreate', async interaction => {
     }
 
     // --- CLAIM-DAILY COMMAND ---
-    if (commandName === 'claim-daily') {
-        await interaction.deferReply({ ephemeral: false });
-        
-        try {
-            const boomkitUsername = await getLinkedUsername(user.id);
-            if (!boomkitUsername) {
-                return interaction.editReply({
-                    content: '🛑 **Not Linked**: Your Discord account is not linked to any Boomkit username. Link it using `/link [username] [password]` first!'
-                });
-            }
-            
-            // Fetch player's current data
-            const { data: player, error: playerErr } = await supabase
-                .from('users')
-                .select('tokens, last_daily_spin, username')
-                .eq('username', boomkitUsername)
-                .single();
-                
-            if (playerErr || !player) {
-                return interaction.editReply({ content: '🛑 **Error**: Could not retrieve your account data.' });
-            }
-            
-            const today = new Date().toDateString();
-            if (player.last_daily_spin === today) {
-                return interaction.editReply({ content: `⏳ **Already Claimed**: You have already claimed your daily reward today! Come back tomorrow.` });
-            }
-            
-            // Update balance and daily spin date
-            const dailyReward = 50; // Award 50 tokens
-            const newBalance = player.tokens + dailyReward;
-            
-            const { error: updateErr } = await supabase
-                .from('users')
-                .update({
-                    tokens: newBalance,
-                    last_daily_spin: today
-                })
-                .eq('username', player.username);
-                
-            if (updateErr) {
-                console.error('[Daily Claim DB Update] Error:', updateErr);
-                return interaction.editReply({ content: '⚠️ Failed to record your claim in the database. Please try again.' });
-            }
-            
-            return interaction.editReply({
-                content: `🎁 **Daily Reward Claimed!**\n\n**${player.username}** successfully claimed their daily reward of **${dailyReward} tokens**!\n💎 **New Balance**: **${newBalance}** tokens.`
-            });
-        } catch (err) {
-            console.error('[Interaction claim-daily] Error:', err);
-            return interaction.editReply({ content: '⚠️ An unexpected error occurred while claiming your daily reward.' });
-        }
-    }
+    if (commandName === 'claim-daily') { return handleWalletCommand(interaction); }
 
     // --- CREATE-CODE COMMAND ---
     if (commandName === 'create-code') {
@@ -1667,104 +1543,7 @@ client.on('interactionCreate', async interaction => {
     }
 
     // --- CLAIM-CODE COMMAND ---
-    if (commandName === 'claim-code') {
-        const code = interaction.options.getString('code').trim().toUpperCase();
-        
-        await interaction.deferReply({ ephemeral: true });
-        
-        try {
-            const boomkitUsername = await getLinkedUsername(user.id);
-            if (!boomkitUsername) {
-                return interaction.editReply({
-                    content: '🛑 **Not Linked**: Your Discord account is not linked to any Boomkit username. Link it using `/link [username] [password]` first!'
-                });
-            }
-            
-            // 1. Fetch code record
-            const { data: codeRecord, error: codeErr } = await supabase
-                .from('promo_codes')
-                .select('*')
-                .eq('code', code)
-                .maybeSingle();
-                
-            if (codeErr || !codeRecord) {
-                return interaction.editReply({ content: '❌ **Invalid Code**: That promo code does not exist.' });
-            }
-            
-            // 2. Check Expiry
-            if (codeRecord.expires_at && new Date(codeRecord.expires_at) < new Date()) {
-                return interaction.editReply({ content: '❌ **Code Expired**: This promo code has expired!' });
-            }
-            
-            // 3. Check Uses Limit
-            if (codeRecord.current_uses >= codeRecord.max_uses) {
-                return interaction.editReply({ content: '❌ **Limit Reached**: This promo code has already reached its maximum number of claims!' });
-            }
-            
-            // 4. Check if already claimed by user
-            const { data: redemptionRecord, error: redErr } = await supabase
-                .from('promo_redemptions')
-                .select('id')
-                .eq('code', code)
-                .eq('username', boomkitUsername)
-                .maybeSingle();
-                
-            if (redemptionRecord) {
-                return interaction.editReply({ content: '❌ **Already Claimed**: You have already redeemed this promo code!' });
-            }
-            
-            // 5. Insert redemption
-            const { error: redInsertErr } = await supabase
-                .from('promo_redemptions')
-                .insert({
-                    code: code,
-                    username: boomkitUsername
-                });
-                
-            if (redInsertErr) {
-                console.error('[Redemption DB Insert] Error:', redInsertErr);
-                return interaction.editReply({ content: '⚠️ Failed to claim. An error occurred saving your redemption.' });
-            }
-            
-            // 6. Update uses count on code
-            await supabase
-                .from('promo_codes')
-                .update({ current_uses: codeRecord.current_uses + 1 })
-                .eq('code', code);
-                
-            // 7. Update player tokens
-            const { data: player, error: playerErr } = await supabase
-                .from('users')
-                .select('tokens')
-                .eq('username', boomkitUsername)
-                .single();
-                
-            if (playerErr || !player) {
-                return interaction.editReply({ content: '🎉 **Code claimed**, but an error occurred checking your token balance.' });
-            }
-            
-            const newBalance = player.tokens + codeRecord.tokens_reward;
-            const { error: balanceErr } = await supabase
-                .from('users')
-                .update({ tokens: newBalance })
-                .eq('username', boomkitUsername);
-                
-            if (balanceErr) {
-                console.error('[Claim Tokens Update] Error:', balanceErr);
-                return interaction.editReply({ content: '🎉 **Code claimed**, but an error occurred adding tokens to your balance.' });
-            }
-            
-            // Post public success message in the channel so they can show off
-            await interaction.channel.send({
-                content: `🎉 **Promo Code Redeemed!**\n\n**${boomkitUsername}** successfully redeemed code \`${code}\` and received **${codeRecord.tokens_reward} tokens**!`
-            }).catch(console.error);
-            
-            return interaction.editReply({ content: `🎉 **Success!** You received **${codeRecord.tokens_reward} tokens**! Your new balance is **${newBalance}**.` });
-        } catch (err) {
-            console.error('[Interaction claim-code] Error:', err);
-            return interaction.editReply({ content: '⚠️ An unexpected error occurred while claiming the code.' });
-        }
-    }
+    if (commandName === 'claim-code') { return handleWalletCommand(interaction); }
 
     // --- ACTIVE-CODES COMMAND ---
     if (commandName === 'active-codes') {

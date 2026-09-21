@@ -1,104 +1,20 @@
 import { NextResponse } from 'next/server'
-import { supabaseServerClient } from '@/lib/supabase-server-client'
+import { getSupabaseServerClient } from '@/lib/supabase-server-client'
 import { verifySession } from '@/lib/auth-server'
+import { isModerator } from '@/lib/moderation-policy'
+import { serializeUser } from '@/lib/user-profile'
 
-interface Params {
-  id: string
-}
-
-const SAFE_USER_COLUMNS = [
-  'id',
-  'username',
-  'tokens',
-  'daily_tokens',
-  'packs',
-  'booms',
-  'is_owner',
-  'is_banned',
-  'is_muted',
-  'status',
-  'role',
-  'join_date',
-  'boom_score',
-  'total_value',
-  'profile_picture',
-  'is_plus_user',
-  'name_color',
-  'banner_color',
-  'last_daily_spin',
-  'badges',
-  'mute_expiry',
-  'ban_expiry',
-  'last_seen',
-  'packs_opened',
-  'xp',
-  'level',
-  'clan_id',
-  'clan_role',
-  'clan_tag',
-  'clan_tag_color',
-  'fusion_cooldown_ends_at',
-  'consecutive_fusions',
-  'last_fusion_claim_time',
-  'active_fusion_boom1',
-  'active_fusion_boom2',
-  'active_fusion_ends_at',
-  'active_fusion_started_at',
-].join(', ')
-
-const PUBLIC_USER_COLUMNS = [
-  'id',
-  'username',
-  'is_owner',
-  'role',
-  'join_date',
-  'boom_score',
-  'total_value',
-  'profile_picture',
-  'is_plus_user',
-  'name_color',
-  'banner_color',
-  'badges',
-  'last_seen',
-  'clan_id',
-  'clan_role',
-  'clan_tag',
-  'clan_tag_color',
-].join(', ')
-
-const STAFF_ROLES = new Set(['owner', 'admin', 'senior_moderator', 'moderator', 'tester'])
-
-export async function GET(_request: Request, { params }: { params: Promise<Params> }) {
-  const { id } = await params
-
-  if (!id) {
-    return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
-  }
-
+export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await verifySession()
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const isSelf = session.userId === id
-    const isStaff = session.isOwner || STAFF_ROLES.has(session.role)
-    const selectColumns = (isSelf || isStaff) ? SAFE_USER_COLUMNS : PUBLIC_USER_COLUMNS
-
-    const { data, error } = await supabaseServerClient()
-      .from('users')
-      .select(selectColumns)
-      .eq('id', id)
-      .single()
-
-    if (error) {
-      console.error(`Error fetching user with ID ${id}:`, error)
-      return NextResponse.json({ error: 'User not found' }, { status: 404 })
-    }
-
-    return NextResponse.json(data, { status: 200 })
-  } catch (error) {
-    console.error(`Unexpected error fetching user with ID ${id}:`, error)
-    return NextResponse.json({ error: 'Failed to fetch user' }, { status: 500 })
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    const { id } = await params
+    const { data, error } = await getSupabaseServerClient().from('users').select('*').eq('id', id).maybeSingle()
+    if (error) throw error
+    if (!data) return NextResponse.json({ error: 'User not found' }, { status: 404 })
+    const privateAccess = session.userId === id || isModerator({ role: session.role, is_owner: session.isOwner })
+    return NextResponse.json(serializeUser(data, privateAccess), { headers: { 'Cache-Control': 'private, no-store' } })
+  } catch {
+    return NextResponse.json({ error: 'Unable to load player' }, { status: 503 })
   }
 }

@@ -8,9 +8,11 @@ const SCRYPT_P = 1
 const SCRYPT_MAXMEM = 64 * 1024 * 1024
 
 export const MIN_PASSWORD_LENGTH = 8
+export const MAX_PASSWORD_LENGTH = 256
 
 export function validatePassword(password: unknown): string | null {
   if (typeof password !== 'string') return 'Password is required'
+  if (password.length > MAX_PASSWORD_LENGTH) return `Password must be at most ${MAX_PASSWORD_LENGTH} characters`
   if (password.length < MIN_PASSWORD_LENGTH) {
     return `Password must be at least ${MIN_PASSWORD_LENGTH} characters`
   }
@@ -26,8 +28,10 @@ export function validatePassword(password: unknown): string | null {
 }
 
 export async function hashPassword(password: string): Promise<string> {
-  const validationError = validatePassword(password)
-  if (validationError) throw new Error(validationError)
+  // Policy is checked when choosing a password, not when upgrading a verified legacy hash.
+  if (typeof password !== 'string' || !password.length || password.length > MAX_PASSWORD_LENGTH) {
+    throw new Error('Invalid password length')
+  }
 
   const salt = randomBytes(16).toString('hex')
   const key = await scryptAsync(password, salt, KEY_LENGTH, {
@@ -44,7 +48,7 @@ export async function verifyPassword(
   password: string,
   storedHash: string | null | undefined
 ): Promise<{ valid: boolean; needsRehash: boolean }> {
-  if (!storedHash || typeof password !== 'string') {
+  if (typeof storedHash !== 'string' || typeof password !== 'string' || !password.length || password.length > MAX_PASSWORD_LENGTH) {
     return { valid: false, needsRehash: false }
   }
 
@@ -65,18 +69,22 @@ async function verifyScryptPassword(
   password: string,
   storedHash: string
 ): Promise<{ valid: boolean; needsRehash: boolean }> {
-  const [algorithm, nRaw, rRaw, pRaw, salt, keyHex] = storedHash.split('$')
+  const parts = storedHash.split('$')
+  const [algorithm, nRaw, rRaw, pRaw, salt, keyHex] = parts
   const n = Number(nRaw)
   const r = Number(rRaw)
   const p = Number(pRaw)
 
   if (
     algorithm !== ALGORITHM ||
+    parts.length !== 6 ||
     !Number.isInteger(n) ||
     !Number.isInteger(r) ||
     !Number.isInteger(p) ||
-    !salt ||
-    !/^[a-f0-9]+$/i.test(keyHex)
+    n < 1024 || n > SCRYPT_N || (n & (n - 1)) !== 0 ||
+    r < 1 || r > SCRYPT_R || p < 1 || p > SCRYPT_P ||
+    !/^[a-f0-9]{32}$/i.test(salt ?? '') ||
+    !/^[a-f0-9]{128}$/i.test(keyHex ?? '')
   ) {
     return { valid: false, needsRehash: false }
   }

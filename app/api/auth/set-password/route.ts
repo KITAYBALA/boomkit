@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServerClient } from '@/lib/supabase-server-client'
-import { verifySession } from '@/lib/auth-server'
+import { verifySession, createSession } from '@/lib/auth-server'
 import { hashPassword, validatePassword } from '@/lib/password'
 
 export const dynamic = 'force-dynamic'
@@ -12,7 +12,7 @@ export const runtime = 'nodejs'
  */
 export async function POST(request: NextRequest) {
   try {
-    const session = await verifySession()
+    const session = await verifySession({ allowPasswordReset: true, allowPending: true })
     if (!session) {
       return NextResponse.json(
         { success: false, message: 'You must be signed in before setting a password.' },
@@ -37,12 +37,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 })
     }
 
-    const isPrivileged = actor.is_owner || actor.role === 'owner' || actor.role === 'admin'
+    const isPrivileged = !session.resetOnly && (actor.is_owner || actor.role === 'owner' || actor.role === 'admin')
     const targetUsername = typeof username === 'string' && username.trim() ? username.trim() : actor.username
 
     const { data: targetUser, error: userError } = await supabase
       .from('users')
-      .select('id, username')
+      .select('id, username, role, is_owner')
       .eq('username', targetUsername)
       .maybeSingle()
 
@@ -53,22 +53,26 @@ export async function POST(request: NextRequest) {
     if (targetUser.id !== actor.id && !isPrivileged) {
       return NextResponse.json({ success: false, message: 'Insufficient permission to set this password' }, { status: 403 })
     }
+    if (targetUser.id !== actor.id && (targetUser.is_owner || targetUser.role === 'owner') && !actor.is_owner && actor.role !== 'owner') {
+      return NextResponse.json({ success: false, message: 'Only owners may reset another owner.' }, { status: 403 })
+    }
 
     const passwordHash = await hashPassword(password)
     const { error: updateError } = await supabase
       .from('user_secrets')
-      .update({
+      .upsert({
+        user_id: targetUser.id,
         password_hash: passwordHash,
         password_reset_required: false,
+        sessions_revoked_at: new Date().toISOString(),
       })
-      .eq('user_id', targetUser.id)
 
     if (updateError) {
       console.error('[AUTH] Error setting password:', updateError)
       return NextResponse.json({ success: false, message: 'Failed to set password' }, { status: 500 })
     }
 
-    console.log(`[AUTH] Password set for user: ${targetUser.username} by ${actor.username}`)
+    if (targetUser.id === actor.id) await createSession(actor.id, actor.role, Boolean(actor.is_owner))
 
     return NextResponse.json({ success: true, message: 'Password set successfully' })
   } catch (error) {

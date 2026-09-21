@@ -1,5 +1,7 @@
 'use client'
 
+import { secureRpc } from '@/lib/secure-rpc'
+
 import { useEffect, useMemo, useState } from 'react'
 import { getSupabaseBrowserClient } from '@/lib/supabase-client'
 import { Badge } from '@/components/ui/badge'
@@ -49,6 +51,7 @@ type DbAuction = {
   boom_name: string
   seller: string
   current_bid: number
+  bid_escrow?: number
   ends_at: string
   top_bidder?: string | null
   status?: "active" | "ended" | "processed" // processed means winner claimed
@@ -115,7 +118,7 @@ export default function RealtimeAuctions({
       if (supabase) {
         const { data } = await supabase
           .from('auction_items')
-          .select('id, boom_name, seller, current_bid, ends_at, top_bidder, status, created_at')
+          .select('id, boom_name, seller, current_bid, bid_escrow, ends_at, top_bidder, status, created_at')
           .eq('status', 'active')
           .order('ends_at', { ascending: true })
         setItems((data as DbAuction[]) ?? [])
@@ -147,7 +150,7 @@ export default function RealtimeAuctions({
       if (!supabase) return
       const { data } = await supabase
         .from('auction_items')
-        .select('id, boom_name, seller, current_bid, ends_at, top_bidder, status, created_at')
+        .select('id, boom_name, seller, current_bid, bid_escrow, ends_at, top_bidder, status, created_at')
         .eq('status', 'active')
         .order('ends_at', { ascending: true })
       setItems((data as DbAuction[]) ?? [])
@@ -171,7 +174,7 @@ export default function RealtimeAuctions({
       return
     }
 
-    if (!currentUser || currentUser.tokens < bidAmount) {
+    if (!currentUser || currentUser.tokens + (biddingItem.top_bidder === currentUser.username ? (biddingItem.bid_escrow || 0) : 0) < bidAmount) {
       setStatusModal({
         show: true,
         title: "Insufficient Tokens",
@@ -183,7 +186,7 @@ export default function RealtimeAuctions({
 
     setLoading(true)
     if (supabase) {
-      const { data, error } = await supabase.rpc('place_bid', {
+      const { data, error } = await secureRpc('place_bid', {
         p_auction_id: biddingItem.id,
         p_amount: bidAmount,
         p_username: currentUser.username,
@@ -199,6 +202,7 @@ export default function RealtimeAuctions({
         })
       } else {
         setBiddingItem(null)
+        onAuctionCreated?.()
         setStatusModal({
           show: true,
           title: "Bid Confirmed",
@@ -251,7 +255,7 @@ export default function RealtimeAuctions({
 
     if (supabase) {
       // Use RPC for atomic deduction and creation
-      const { data, error } = await supabase.rpc('create_auction', {
+      const { data, error } = await secureRpc('create_auction', {
         p_boom_name: selectedBoom,
         p_starting_bid: startingBid,
         p_duration_hours: duration,
@@ -278,7 +282,7 @@ export default function RealtimeAuctions({
         // Force refresh items
         const { data: newItems } = await supabase
           .from('auction_items')
-          .select('id, boom_name, seller, current_bid, ends_at, top_bidder, status, created_at')
+          .select('id, boom_name, seller, current_bid, bid_escrow, ends_at, top_bidder, status, created_at')
           .order('ends_at', { ascending: true })
         setItems((newItems as DbAuction[]) ?? [])
       }
@@ -332,7 +336,7 @@ export default function RealtimeAuctions({
 
       if (isWinner) {
         // Winner pays tokens, gets boom via RPC for security and RLS bypass
-        const { error: claimError } = await supabase.rpc('claim_auction', {
+        const { error: claimError } = await secureRpc('claim_auction', {
           p_auction_id: item.id,
           p_user_id: currentUser.id
         })
@@ -353,7 +357,7 @@ export default function RealtimeAuctions({
       } else if (isSeller) {
         if (!item.top_bidder) {
           // Seller reclaims item (no bids)
-          const { error: rpcError } = await supabase.rpc('reclaim_auction_item', {
+          const { error: rpcError } = await secureRpc('reclaim_auction_item', {
             p_auction_id: item.id
           })
 

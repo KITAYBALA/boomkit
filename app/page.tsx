@@ -1,5 +1,10 @@
 "use client"
 
+import { PACKS, LIMITED_BOOMS, GAMEPASS_BOOMS, RARITY_CHANCES, type Pack, type BoomItem } from "@/lib/economy-catalog"
+
+import { secureRpc, updateProfile, economyAction, sessionAction, communityAction } from "@/lib/secure-rpc"
+import { pollRoom } from '@/lib/room-polling'
+
 import type React from "react"
 import { useState, useEffect, useCallback, useMemo, useRef } from "react"
 import { useRouter } from "next/navigation"
@@ -267,26 +272,9 @@ interface UserRole {
   permissions: string[]
 }
 
-interface Pack {
-  id: string
-  name: string
-  price: number
-  booms: BoomItem[]
-  color: string
-  image: string
-  rarity: "uncommon" | "rare" | "epic" | "legendary" | "chroma" | "mystical" | "hidden"
-  emoji?: string // Added emoji property
-  series?: number
-  isNew?: boolean
-}
 
-interface BoomItem {
-  name: string
-  rarity: "uncommon" | "rare" | "epic" | "legendary" | "chroma" | "mystical" | "hidden"
-  avatar: string
-  description: string
-  asset?: string // Path to SVG/PNG asset
-}
+
+
 
 interface ChatMessage {
   id: string
@@ -460,376 +448,15 @@ const INVENTORY_SPECS: Record<string, { name: string; description: string; emoji
   }
 }
 
-const PACKS: Pack[] = [
-  {
-    id: "plus",
-    name: "Plus Pack",
-    price: 30,
-    booms: [
-      { name: "Plus Crown", rarity: "uncommon", avatar: "👑➕", description: "Exclusive crown for Plus members" },
-      { name: "Golden Plus", rarity: "uncommon", avatar: "✨➕", description: "A shiny symbol of premium status" },
-      { name: "Plus Shield", rarity: "uncommon", avatar: "🛡️➕", description: "Protects your premium reputation" },
-      { name: "Plus Star", rarity: "rare", avatar: "⭐➕", description: "Shining bright for Plus users" },
-      { name: "Neon Plus", rarity: "rare", avatar: "🌈➕", description: "Glowing neon symbol" },
-      { name: "Plus Diamond", rarity: "rare", avatar: "💎➕", description: "Premium precious gem" },
-      { name: "Plus Phoenix", rarity: "epic", avatar: "🔥➕", description: "Rises from the premium ashes" },
-      { name: "Plus Galaxy", rarity: "epic", avatar: "🌌➕", description: "Interstellar premium mark" },
-      { name: "Plus Dragon", rarity: "legendary", avatar: "🐉➕", description: "Legendary premium beast" },
-      { name: "Plus Key", rarity: "hidden", avatar: "🔑➕", description: "Unlocks secret premium doors" },
-      { name: "Plus Matrix", rarity: "chroma", avatar: "🌈👾➕", description: "Chroma shifting premium code" },
-      { name: "Plus Overlord", rarity: "mystical", avatar: "⚡🌌➕", description: "Absolute ruler of the Plus dimension" }
-    ],
-    color: "from-amber-500 via-yellow-600 to-orange-700",
-    image: "/images/plus-pack.png",
-    rarity: "mystical",
-    emoji: "⚡"
-  },
-  {
-    id: "og",
-    name: "OG Pack",
-    price: 50,
-    booms: [
-      { name: "Nurik", rarity: "uncommon", avatar: "/images/booms/og/nurik.jpg", description: "Respected OG community member" },
-      { name: "Eok", rarity: "uncommon", avatar: "/images/booms/og/eok.png", description: "Respected OG community member" },
-      { name: "Yessir", rarity: "uncommon", avatar: "/images/booms/og/yessir.jpg", description: "Respected OG community member" },
-      { name: "OmarBoss", rarity: "rare", avatar: "/images/booms/og/omarboss.jpg", description: "Respected OG community member" },
-      { name: "Gunar69", rarity: "rare", avatar: "/images/booms/og/gunar69.jpg", description: "Respected OG community member" },
-      { name: "MrVortex", rarity: "rare", avatar: "/images/booms/og/mrvortex.png", description: "Respected OG community member" },
-      { name: "deniz", rarity: "epic", avatar: "/images/booms/og/deniz.png", description: "Respected OG community member" },
-      { name: "(●ˇ∀ˇ●)", rarity: "epic", avatar: "/images/booms/og/emoji_guy.jpg", description: "Respected OG community member" },
-      { name: "HadiGidek", rarity: "legendary", avatar: "/images/booms/og/hadigidek.jpg", description: "Respected OG community member" },
-      { name: "TUran1545", rarity: "hidden", avatar: "/images/booms/og/turan1545.jpg", description: "Respected OG community member" },
-      { name: "StrmY_YT", rarity: "chroma", avatar: "/images/booms/og/strmy_yt.jpg", description: "Respected OG community member" },
-      { name: "system", rarity: "mystical", avatar: "/images/booms/og/system.jpg", description: "Respected OG community member" }
-    ],
-    color: "from-purple-600 via-indigo-700 to-indigo-900",
-    image: "/images/og-pack.png",
-    rarity: "legendary",
-    emoji: "👑"
-  },
-  {
-    id: "ai",
-    name: "AI Pack",
-    price: 35,
-    series: 2,
-    isNew: true,
-    booms: [
-      { name: "DeepSeek", rarity: "uncommon", avatar: "/images/booms/deepseek.png", description: "Deep thinking AI" },
-      { name: "Midjourney", rarity: "uncommon", avatar: "🎨", description: "AI image generator" },
-      { name: "Stable Diffusion", rarity: "uncommon", avatar: "🖼️", description: "Open-source text-to-image generator" },
-      { name: "Microsoft Copilot", rarity: "rare", avatar: "/images/booms/copilot.png", description: "Your daily AI companion" },
-      { name: "Llama", rarity: "rare", avatar: "🦙", description: "Meta's open-source large language model" },
-      { name: "Mistral", rarity: "rare", avatar: "🌀", description: "Vibrant and efficient open model" },
-      { name: "Claude", rarity: "epic", avatar: "/images/booms/chatgpt.png", description: "Helpful and harmless AI" },
-      { name: "Anthropic", rarity: "epic", avatar: "🅰️", description: "AI safety and research company" },
-      { name: "ChatGPT", rarity: "legendary", avatar: "/images/booms/claude.png", description: "The pioneer of conversational AI" },
-      { name: "Sora", rarity: "hidden", avatar: "📹", description: "Revolutionary text-to-video AI" },
-      { name: "Vercel", rarity: "chroma", avatar: "/images/booms/vercel.png", description: "The platform for frontend developers" },
-      { name: "Google Gemini", rarity: "mystical", avatar: "/images/booms/gemini.png", description: "The most capable AI from Google" }
-    ],
-    color: "from-indigo-600 to-blue-900",
-    image: "/images/ai-pack.png",
-    rarity: "rare",
-    emoji: "🧠"
-  },
-  {
-    id: "bug",
-    name: "Bug Pack",
-    price: 25,
-    booms: [
-      { name: "Butterfly", rarity: "uncommon", avatar: "🦋", description: "Graceful winged beauty" },
-      { name: "Ladybug", rarity: "uncommon", avatar: "🐞", description: "Lucky red beetle with black spots" },
-      { name: "Caterpillar", rarity: "uncommon", avatar: "🐛", description: "Fuzzy green crawler" },
-      { name: "Bee", rarity: "rare", avatar: "🐝", description: "Busy honey maker" },
-      { name: "Ant", rarity: "rare", avatar: "🐜", description: "Strong colony worker" },
-      { name: "Snail", rarity: "rare", avatar: "🐌", description: "Slow shell dweller" },
-      { name: "Spider", rarity: "epic", avatar: "🕷️", description: "Eight-legged web weaver" },
-      { name: "Scorpion", rarity: "epic", avatar: "🦂", description: "Stinger-tailed desert arachnid" },
-      { name: "Golden Beetle", rarity: "legendary", avatar: "✨🪲", description: "Rare golden insect" },
-      { name: "Glowworm", rarity: "hidden", avatar: "💡", description: "Bioluminescent cavern dweller" },
-      { name: "Rainbow Dragonfly", rarity: "chroma", avatar: "🌈🪰", description: "Mystical rainbow wings" },
-      { name: "Cosmic Mantis", rarity: "mystical", avatar: "🌌🦗", description: "Interdimensional predator" }
-    ],
-    color: "from-green-600 to-green-800",
-    image: "/images/bug-pack.png",
-    rarity: "uncommon",
-    emoji: "🐛"
-  },
-  {
-    id: "pirate",
-    name: "Pirate Pack",
-    price: 25,
-    booms: [
-      { name: "Parrot", rarity: "uncommon", avatar: "🦜", description: "Colorful talking bird" },
-      { name: "Pirate Hat", rarity: "uncommon", avatar: "🏴‍☠️🎩", description: "Classic captain's headwear" },
-      { name: "Spyglass", rarity: "uncommon", avatar: "🔭", description: "Brass ocean telescope" },
-      { name: "Treasure Chest", rarity: "rare", avatar: "💰", description: "Full of gold coins" },
-      { name: "Cannon", rarity: "rare", avatar: "💣", description: "Heavy cast-iron ship defense" },
-      { name: "Anchor", rarity: "rare", avatar: "⚓", description: "Heavy steel seabed anchor" },
-      { name: "Ghost Ship", rarity: "epic", avatar: "👻⛵", description: "Haunted vessel" },
-      { name: "Pegleg Captain", rarity: "epic", avatar: "☠️🧔", description: "Scurvy ruler of the ship" },
-      { name: "Kraken", rarity: "legendary", avatar: "🐙", description: "Legendary sea monster" },
-      { name: "Blackbeard's Map", rarity: "hidden", avatar: "🗺️", description: "Unlocks the ultimate hidden treasure" },
-      { name: "Golden Compass", rarity: "chroma", avatar: "🌟🧭", description: "Magical navigation tool" },
-      { name: "Davy Jones", rarity: "mystical", avatar: "💀⚓", description: "Ruler of the seven seas" }
-    ],
-    color: "from-blue-600 to-blue-800",
-    image: "/images/pirate-pack.png",
-    rarity: "uncommon",
-    emoji: "🏴‍☠️"
-  },
-  {
-    id: "space",
-    name: "Space Pack",
-    price: 25,
-    booms: [
-      { name: "Alien", rarity: "uncommon", avatar: "👽", description: "Friendly extraterrestrial" },
-      { name: "Rocket", rarity: "uncommon", avatar: "🚀", description: "Interstellar travel vehicle" },
-      { name: "Astronaut", rarity: "uncommon", avatar: "🧑‍🚀", description: "Cosmic explorer" },
-      { name: "Planet", rarity: "rare", avatar: "🪐", description: "Mysterious world" },
-      { name: "Meteorite", rarity: "rare", avatar: "☄️", description: "Fiery space rock" },
-      { name: "Satellite", rarity: "rare", avatar: "📡", description: "Orbiting communications array" },
-      { name: "Black Hole", rarity: "epic", avatar: "🕳️", description: "Space-time anomaly" },
-      { name: "Supernova", rarity: "epic", avatar: "💥", description: "Exploding stellar giant" },
-      { name: "Galaxy", rarity: "legendary", avatar: "🌌", description: "Infinite star system" },
-      { name: "Dark Matter", rarity: "hidden", avatar: "🌀", description: "Invisible force holding galaxies together" },
-      { name: "Cosmic Dragon", rarity: "chroma", avatar: "🌈🐉", description: "Celestial beast" },
-      { name: "Universe Core", rarity: "mystical", avatar: "🌟🌌", description: "Origin of all existence" }
-    ],
-    color: "from-purple-600 to-purple-800",
-    image: "/images/space-pack.png",
-    rarity: "rare",
-    emoji: "🚀"
-  },
-  {
-    id: "medieval",
-    name: "Medieval Pack",
-    price: 25,
-    booms: [
-      { name: "Castle", rarity: "uncommon", avatar: "🏰", description: "Mighty stone fortress" },
-      { name: "Shield", rarity: "uncommon", avatar: "🛡️", description: "Iron-rimmed oak protection" },
-      { name: "Sword", rarity: "uncommon", avatar: "⚔️", description: "Knightly steel blade" },
-      { name: "Dragon", rarity: "rare", avatar: "🐲", description: "Fire-breathing beast" },
-      { name: "Knight", rarity: "rare", avatar: "🏇", description: "Armored horse rider" },
-      { name: "Jester", rarity: "rare", avatar: "🃏", description: "Royal court prankster" },
-      { name: "Wizard", rarity: "epic", avatar: "🧙‍♂️", description: "Master of ancient magic" },
-      { name: "Archmage", rarity: "epic", avatar: "✨🧙", description: "Supreme arcane controller" },
-      { name: "Crown Jewels", rarity: "legendary", avatar: "👑💎", description: "Royal treasure" },
-      { name: "Holy Grail", rarity: "hidden", avatar: "🏆", description: "Sacred cup of legend" },
-      { name: "Excalibur", rarity: "chroma", avatar: "🌟⚔️", description: "Legendary sword of kings" },
-      { name: "Merlin's Staff", rarity: "mystical", avatar: "🔮⚡", description: "Ultimate magical artifact" }
-    ],
-    color: "from-amber-600 to-amber-800",
-    image: "/images/medieval-pack.png",
-    rarity: "uncommon",
-    emoji: "🏰"
-  },
-  {
-    id: "safari",
-    name: "Safari Pack",
-    price: 25,
-    booms: [
-      { name: "Elephant", rarity: "uncommon", avatar: "🐘", description: "Gentle giant" },
-      { name: "Zebra", rarity: "uncommon", avatar: "🦓", description: "Striped savanna charger" },
-      { name: "Meerkat", rarity: "uncommon", avatar: "🦦", description: "Alert watch sentinel" },
-      { name: "Giraffe", rarity: "rare", avatar: "🦒", description: "Tallest animal" },
-      { name: "Cheetah", rarity: "rare", avatar: "🐆", description: "Fastest land hunter" },
-      { name: "Hippo", rarity: "rare", avatar: "🦛", description: "Submerged river giant" },
-      { name: "Rhino", rarity: "epic", avatar: "🦏", description: "Armored powerhouse" },
-      { name: "Gorilla", rarity: "epic", avatar: "🦍", description: "Mighty silverback leader" },
-      { name: "White Tiger", rarity: "legendary", avatar: "🐅✨", description: "Rare striped hunter" },
-      { name: "Albino Crocodile", rarity: "hidden", avatar: "🐊🤍", description: "Extremely rare colorless predator" },
-      { name: "Golden Leopard", rarity: "chroma", avatar: "🌟🐆", description: "Mystical spotted cat" },
-      { name: "Spirit Lion", rarity: "mystical", avatar: "👻🦁", description: "Guardian of the savanna" }
-    ],
-    color: "from-orange-600 to-orange-800",
-    image: "/images/safari-pack.png",
-    rarity: "uncommon",
-    emoji: "🦁"
-  },
-  {
-    id: "aquatic",
-    name: "Aquatic Pack",
-    price: 25,
-    booms: [
-      { name: "Dolphin", rarity: "uncommon", avatar: "🐬", description: "Intelligent sea mammal" },
-      { name: "Starfish", rarity: "uncommon", avatar: "⭐🌊", description: "Five-pointed seabed explorer" },
-      { name: "Crab", rarity: "uncommon", avatar: "🦀", description: "Pincer-wielding beach walker" },
-      { name: "Octopus", rarity: "rare", avatar: "🐙", description: "Eight-armed wonder" },
-      { name: "Shark", rarity: "rare", avatar: "🦈", description: "Apex ocean predator" },
-      { name: "Jellyfish", rarity: "rare", avatar: "🪼", description: "Floating drift-stinger" },
-      { name: "Whale", rarity: "epic", avatar: "🐋", description: "Gentle ocean giant" },
-      { name: "Stingray", rarity: "epic", avatar: "🪰🌊", description: "Flat sand glider" },
-      { name: "Mermaid", rarity: "legendary", avatar: "🧜‍♀️", description: "Mythical sea being" },
-      { name: "Atlantis Crown", rarity: "hidden", avatar: "👑🔱", description: "Deep-sea relics of the lost city" },
-      { name: "Poseidon's Trident", rarity: "chroma", avatar: "🌊🔱", description: "God of the sea's weapon" },
-      { name: "Leviathan", rarity: "mystical", avatar: "🌊🐉", description: "Ancient sea serpent" }
-    ],
-    color: "from-cyan-600 to-cyan-800",
-    image: "/images/aquatic-pack.png",
-    rarity: "uncommon",
-    emoji: "🌊"
-  },
-  {
-    id: "breakfast",
-    name: "Breakfast Pack",
-    price: 25,
-    booms: [
-      { name: "Bacon", rarity: "uncommon", avatar: "🥓", description: "Crispy strips" },
-      { name: "Pancake", rarity: "uncommon", avatar: "🥞", description: "Fluffy syrup stack" },
-      { name: "Toast", rarity: "uncommon", avatar: "🍞", description: "Perfectly browned slice" },
-      { name: "Waffle", rarity: "rare", avatar: "🧇", description: "Golden grid delight" },
-      { name: "Coffee Mug", rarity: "rare", avatar: "☕", description: "Morning energy brew" },
-      { name: "Orange Juice", rarity: "rare", avatar: "🍊", description: "Freshly squeezed vitamin boost" },
-      { name: "French Toast", rarity: "epic", avatar: "🍞✨", description: "Sweet bread perfection" },
-      { name: "Omelette", rarity: "epic", avatar: "🍳", description: "Cheese and herb egg fold" },
-      { name: "Golden Egg", rarity: "legendary", avatar: "🥚💛", description: "Perfect morning protein" },
-      { name: "Golden Syrup", rarity: "hidden", avatar: "🍯", description: "Refined liquid gold sweetness" },
-      { name: "Rainbow Cereal", rarity: "chroma", avatar: "🌈🥣", description: "Magical morning bowl" },
-      { name: "Ambrosia", rarity: "mystical", avatar: "🍯✨", description: "Food of the gods" }
-    ],
-    color: "from-yellow-600 to-yellow-800",
-    image: "/images/breakfast-pack.png",
-    rarity: "uncommon",
-    emoji: "🥞"
-  },
-  {
-    id: "dino",
-    name: "Dino Pack",
-    price: 25,
-    booms: [
-      { name: "Triceratops", rarity: "uncommon", avatar: "🦕", description: "Three-horned herbivore" },
-      { name: "Raptor", rarity: "uncommon", avatar: "🦖💨", description: "Swift pack hunter" },
-      { name: "Brachiosaurus", rarity: "uncommon", avatar: "🦕🌴", description: "Long-necked canopy eater" },
-      { name: "Pterodactyl", rarity: "rare", avatar: "🦅", description: "Flying reptile" },
-      { name: "T-Rex", rarity: "rare", avatar: "🦖", description: "Tyrant lizard king" },
-      { name: "Ankylosaurus", rarity: "rare", avatar: "🛡️🦖", description: "Club-tailed armored dinosaur" },
-      { name: "Stegosaurus", rarity: "epic", avatar: "🦴", description: "Spiked back defender" },
-      { name: "Spinosaurus", rarity: "epic", avatar: "🐊⛵", description: "Sail-backed wetland hunter" },
-      { name: "Fossil", rarity: "legendary", avatar: "🦴✨", description: "Ancient remains" },
-      { name: "Amber Mosquito", rarity: "hidden", avatar: "🦟", description: "DNA preserved in hardened tree sap" },
-      { name: "Meteor", rarity: "chroma", avatar: "☄️🌈", description: "Extinction event" },
-      { name: "Primordial Beast", rarity: "mystical", avatar: "🌋🦖", description: "First of its kind" }
-    ],
-    color: "from-stone-600 to-stone-800",
-    image: "/images/dino-pack.png",
-    rarity: "epic",
-    emoji: "🦖"
-  },
-  {
-    id: "bot",
-    name: "Bot Pack",
-    price: 25,
-    booms: [
-      { name: "Drone", rarity: "uncommon", avatar: "🛸", description: "Flying machine" },
-      { name: "Microchip", rarity: "uncommon", avatar: "💾📟", description: "Silicon heart of electronics" },
-      { name: "Floppy Disk", rarity: "uncommon", avatar: "💾", description: "Vintage storage medium" },
-      { name: "Cyborg", rarity: "rare", avatar: "🦾", description: "Half human, half machine" },
-      { name: "Nanobot", rarity: "rare", avatar: "🤖🔬", description: "Microscopic code operator" },
-      { name: "Mech Suit", rarity: "rare", avatar: "🦿", description: "Heavy exoskeleton pilot" },
-      { name: "AI Core", rarity: "epic", avatar: "🧠💻", description: "Artificial intelligence" },
-      { name: "Android", rarity: "epic", avatar: "🤖🟢", description: "Humanoid green machine" },
-      { name: "Quantum Computer", rarity: "legendary", avatar: "💻✨", description: "Ultimate processing power" },
-      { name: "Glitch Code", rarity: "hidden", avatar: "👾", description: "Disrupted terminal matrix values" },
-      { name: "Digital Soul", rarity: "chroma", avatar: "🌈💾", description: "Consciousness in code" },
-      { name: "Singularity", rarity: "mystical", avatar: "🌌🤖", description: "The awakening" }
-    ],
-    color: "from-slate-600 to-slate-800",
-    image: "/images/bot-pack.png",
-    rarity: "rare",
-    emoji: "🤖"
-  },
-  {
-    id: "wonderland",
-    name: "Wonderland Pack",
-    price: 25,
-    booms: [
-      { name: "Cheshire Cat", rarity: "uncommon", avatar: "😸", description: "Grinning feline" },
-      { name: "Mad Hatter", rarity: "uncommon", avatar: "🎩🫖", description: "Eccentric tea party host" },
-      { name: "Tea Cup", rarity: "uncommon", avatar: "🍵", description: "Fine porcelain china" },
-      { name: "White Rabbit", rarity: "rare", avatar: "🐰⏰", description: "Always late" },
-      { name: "March Hare", rarity: "rare", avatar: "🐇🧁", description: "Mad companion of the Hatter" },
-      { name: "Card Soldier", rarity: "rare", avatar: "🃏❤️", description: "Flat guard of the Queen" },
-      { name: "Queen of Hearts", rarity: "epic", avatar: "👸室内", description: "Off with their heads!" },
-      { name: "Caterpillar Hookah", rarity: "epic", avatar: "🐛💨", description: "Wise smoking insect" },
-      { name: "Magic Mushroom", rarity: "legendary", avatar: "🍄✨", description: "Eat me, drink me" },
-      { name: "Vorpal Blade", rarity: "hidden", avatar: "🗡️✨", description: "Sharp dragon-slaying sword" },
-      { name: "Looking Glass", rarity: "chroma", avatar: "🪞🌈", description: "Portal to another world" },
-      { name: "Jabberwocky", rarity: "mystical", avatar: "🐉🔥", description: "Beware the Jabberwock!" }
-    ],
-    color: "from-pink-600 to-pink-800",
-    image: "/images/wonderland-pack.png",
-    rarity: "legendary",
-    emoji: "🎩"
-  },
-  {
-    id: "outback",
-    name: "Outback Pack",
-    price: 25,
-    booms: [
-      { name: "Koala", rarity: "uncommon", avatar: "🐨", description: "Eucalyptus lover" },
-      { name: "Kangaroo", rarity: "uncommon", avatar: "🦘", description: "Bouncing joey-carrier" },
-      { name: "Wombat", rarity: "uncommon", avatar: "🦫🏜️", description: "Round ground digger" },
-      { name: "Crocodile", rarity: "rare", avatar: "🐊", description: "Swamp predator" },
-      { name: "Platypus", rarity: "rare", avatar: "🦆🦦", description: "Semi-aquatic egg-layer" },
-      { name: "Echidna", rarity: "rare", avatar: "🦔🏜️", description: "Spiny ant eater" },
-      { name: "Dingo", rarity: "epic", avatar: "🐕", description: "Wild Australian dog" },
-      { name: "Tasmanian Devil", rarity: "epic", avatar: "👿👹", description: "Snarl-faced marsh hunter" },
-      { name: "Opal", rarity: "legendary", avatar: "💎🌈", description: "Australian gemstone" },
-      { name: "Didgeridoo", rarity: "hidden", avatar: "📯🌀", description: "Ancient hollowed wood horn" },
-      { name: "Dreamtime Spirit", rarity: "chroma", avatar: "🌟🪃", description: "Ancient Aboriginal magic" },
-      { name: "Rainbow Serpent", rarity: "mystical", avatar: "🌈🐍", description: "Creator of the land" }
-    ],
-    color: "from-red-600 to-red-800",
-    image: "/images/outback-pack.png",
-    rarity: "uncommon",
-    emoji: "🦘"
-  },
-  {
-    id: "ice",
-    name: "Ice Pack",
-    price: 25,
-    booms: [
-      { name: "Polar Bear", rarity: "uncommon", avatar: "🐻‍❄️", description: "Arctic hunter" },
-      { name: "Penguin", rarity: "uncommon", avatar: "🐧", description: "Flightless tux swimmer" },
-      { name: "Snowflake", rarity: "uncommon", avatar: "❄️", description: "Frozen ice geometry" },
-      { name: "Seal", rarity: "rare", avatar: "🦭", description: "Playful swimmer" },
-      { name: "Walrus", rarity: "rare", avatar: "🦣🦷", description: "Tusked cold-water mammal" },
-      { name: "Narwhal", rarity: "rare", avatar: "🐋🦄", description: "Horned whale of the deep" },
-      { name: "Yeti", rarity: "epic", avatar: "🦣", description: "Abominable snowman" },
-      { name: "Snow Golem", rarity: "epic", avatar: "☃️", description: "Walking snow construct" },
-      { name: "Ice Crystal", rarity: "legendary", avatar: "❄️💎", description: "Frozen perfection" },
-      { name: "Everlasting Ice", rarity: "hidden", avatar: "🧊💎", description: "Unmelting ancient glacier core" },
-      { name: "Aurora Borealis", rarity: "chroma", avatar: "🌌🌈", description: "Northern lights magic" },
-      { name: "Frost Titan", rarity: "mystical", avatar: "❄️👹", description: "Lord of eternal winter" }
-    ],
-    color: "from-blue-400 to-blue-600",
-    image: "/images/ice-pack.png",
-    rarity: "rare",
-    emoji: "❄️"
-  }
-];
-// Gamepass Booms - Unlocked at level milestones
-const GAMEPASS_BOOMS = [
-  { level: 10, rarity: "uncommon" as const, name: "Random Uncommon" },
-  { level: 20, rarity: "rare" as const, name: "Random Rare" },
-  { level: 30, rarity: "epic" as const, name: "Random Epic" },
-  { level: 40, rarity: "legendary" as const, name: "Random Legendary" },
-  { level: 50, rarity: "chroma" as const, name: "Random Chroma" },
-  { level: 60, rarity: "mystical" as const, name: "Random Mystical" },
-  { level: 70, rarity: "mystical" as const, name: "The Trophy", isLimited: true },
-]
 
-const LIMITED_BOOMS = [
-  { name: "Void Dragon", rarity: "mystical", avatar: "🐲🌌", description: "Ruler of the dark matter", price: 5000 },
-  { name: "Infinity Gauntlet", rarity: "mystical", avatar: "💎🥊", description: "Power to reshape reality", price: 7500 },
-  { name: "Cosmic Phoenix", rarity: "mystical", avatar: "🔥🦅", description: "Eternal rebirth in starlight", price: 10000 },
-  { name: "God Eye", rarity: "mystical", avatar: "👁️✨", description: "See all, know all", price: 15000 },
-]
+// Gamepass Booms - Unlocked at level milestones
+
+
+
 
 const renderProfilePicture = (profilePic: string, className: string = "w-full h-full object-contain") => {
   if (!profilePic) return <span>🎯</span>;
-  
+
   const isBoom = PACKS.some(p => p.booms.some(b => b.name === profilePic)) ||
                  GAMEPASS_BOOMS.some(b => b.name === profilePic) ||
                  LIMITED_BOOMS.some(b => b.name === profilePic) ||
@@ -842,15 +469,7 @@ const renderProfilePicture = (profilePic: string, className: string = "w-full h-
 }
 
 // Rarity chances for pack opening (total = 100%)
-const RARITY_CHANCES = {
-  uncommon: 60.849,
-  rare: 30,
-  epic: 8,
-  legendary: 1,
-  chroma: 0.1,
-  hidden: 0.05,
-  mystical: 0.001,
-}
+
 
 const DAILY_SPIN_REWARDS = [100, 150, 200, 250, 300, 350, 400, 500]
 
@@ -941,7 +560,7 @@ const playPingSound = () => {
       ctx.resume().catch(() => {});
     }
     const now = ctx.currentTime;
-    
+
     // High-pitched dual-note chime synthesizer
     const osc1 = ctx.createOscillator();
     const gain1 = ctx.createGain();
@@ -953,7 +572,7 @@ const playPingSound = () => {
     gain1.connect(ctx.destination);
     osc1.start(now);
     osc1.stop(now + 0.45);
-    
+
     const osc2 = ctx.createOscillator();
     const gain2 = ctx.createGain();
     osc2.type = "sine";
@@ -1110,6 +729,9 @@ export default function BoomkitGame() {
   const [hostingSubject, setHostingSubject] = useState<{ grade: number, subject: string } | null>(null)
   const [showGameResults, setShowGameResults] = useState(false)
   const [gameScore, setGameScore] = useState(0)
+  const [roomEnded, setRoomEnded] = useState(false)
+  useEffect(()=>{setRoomEnded(false)},[activeGamePin])
+  const [gameTokensEarned, setGameTokensEarned] = useState(0)
   const [gameCorrectAnswers, setGameCorrectAnswersState] = useState(0)
   const [gameTotalAnswered, setGameTotalAnsweredState] = useState(0)
   const gameCorrectAnswersRef = useRef(0)
@@ -1388,7 +1010,6 @@ export default function BoomkitGame() {
           profile_picture: user.profilePicture || "🎮",
           is_owner: user.isOwner || false,
           is_plus_user: user.isPlusUser || false,
-          last_daily_spin: user.lastDailySpin || "",
           name_color: user.nameColor || "text-white",
           last_seen: user.lastSeen || Date.now(),
           reason: user.reason || "",
@@ -1397,6 +1018,11 @@ export default function BoomkitGame() {
         // Only include sensitive/unique fields if they were successfully fetched / exist
         if (user.email && user.email.trim() !== "") {
           updates.email = user.email;
+        }
+
+        if (!currentUser?.isOwner && !['owner', 'admin'].includes(currentUser?.role || '')) {
+          const allowed = new Set(['status', 'is_banned', 'is_muted', 'mute_expiry', 'ban_expiry', 'ban_reason'])
+          for (const key of Object.keys(updates)) if (!allowed.has(key)) delete updates[key]
         }
 
 
@@ -1416,7 +1042,7 @@ export default function BoomkitGame() {
         console.error("[v0] Failed to sync user to API:", err)
       }
     },
-    [],
+    [currentUser?.role, currentUser?.isOwner],
   )
 
   // Declaring updateAndPersistAuctions and updateAndPersistChat
@@ -1438,6 +1064,9 @@ export default function BoomkitGame() {
     // 2. Clear State
     setCurrentUser(null)
     localStorage.removeItem("boomkit_current_user")
+    localStorage.removeItem('boomkit_ai_sets')
+    localStorage.removeItem('boomkit_approved_users')
+    setDiscoveredSets([])
 
     // 3. Redirect to landing
     setCurrentView("owner-access")
@@ -1455,20 +1084,12 @@ export default function BoomkitGame() {
 
     try {
       // Fetch both public sets and user's private sets
-      const { data, error } = await supabase
-        .from("custom_sets")
-        .select("*")
-        .order("created_at", { ascending: false })
-
-      if (error) {
-        console.error("Error fetching custom sets:", error.message)
-        return
-      }
+      const data = await communityAction('sets')
 
       if (data) {
         // Merge with local discovered sets to avoid duplicates, prioritize DB
         setDiscoveredSets(prev => {
-          const dbIds = new Set(data.map(s => s.id))
+          const dbIds = new Set(data.map((s: any) => s.id))
           const localOnly = prev.filter(s => s.id && !dbIds.has(s.id))
           return [...data, ...localOnly]
         })
@@ -1492,7 +1113,7 @@ export default function BoomkitGame() {
       }
 
       // Add or update the lastSeen timestamp on every action
-      const userWithActivity = { ...updatedUser, lastSeen: Date.now(), packsOpened: updatedUser.packs?.length || 0 }
+      const userWithActivity = { ...updatedUser, lastSeen: Date.now(), packsOpened: updatedUser.packsOpened || 0 }
       setCurrentUser(userWithActivity)
       localStorage.setItem("boomkit_current_user", JSON.stringify(userWithActivity))
 
@@ -1507,34 +1128,16 @@ export default function BoomkitGame() {
         // Use the secure API - Omit strictly protected fields to avoid 403 errors for standard users
         const updates: any = {
           username: userWithActivity.username,
-          age: userWithActivity.age || 18,
-          tokens: userWithActivity.tokens || 0,
-          daily_tokens: userWithActivity.dailyTokens || 0,
-          packs: userWithActivity.packs || [],
-          booms: userWithActivity.booms || {},
           reason: userWithActivity.reason || "",
-          join_date: userWithActivity.joinDate,
-          boom_score: userWithActivity.boomScore || 0,
-          total_value: userWithActivity.totalValue || 0,
           profile_picture: userWithActivity.profilePicture || "🎯",
           pinned_boom: userWithActivity.pinned_boom || null,
           name_color: userWithActivity.nameColor || "",
           banner_color: userWithActivity.bannerColor || "",
-          last_daily_spin: userWithActivity.lastDailySpin || "",
           last_seen: userWithActivity.lastSeen,
-          packs_opened: userWithActivity.packsOpened || 0,
-          xp: userWithActivity.xp || 0,
-          level: userWithActivity.level || 1,
-          discover_tokens_earned: userWithActivity.discover_tokens_earned || 0,
-          correct_answers_count: userWithActivity.correct_answers_count || 0,
-          questions_answered_count: userWithActivity.questions_answered_count || 0,
         }
 
         if (userWithActivity.email && userWithActivity.email.trim() !== "") {
           updates.email = userWithActivity.email;
-        }
-        if (userWithActivity.lastIp && userWithActivity.lastIp.trim() !== "") {
-          updates.last_ip = userWithActivity.lastIp;
         }
 
         const response = await fetch("/api/users/update", {
@@ -1563,56 +1166,7 @@ export default function BoomkitGame() {
   const lastScoreSyncRef = useRef<number>(0)
   const lastScoreValueRef = useRef<number>(0)
 
-  const handleScoreUpdate = useCallback(async (newScore: number, force: boolean = false) => {
-    if (!activeGamePin || !supabase || !currentUser?.id) return
-
-    const sanitizedScore = Math.floor(newScore)
-    setGameScore(sanitizedScore)
-
-    // Update local livePlayers state immediately for the current player
-    // to provide instant feedback in rankings overlay
-    setLivePlayers(prev =>
-      prev.map(p => String(p.id) === String(currentUser.id) ? { ...p, score: sanitizedScore } : p)
-    )
-
-    // Throttle RPC calls to max once every 2 seconds UNLESS forced
-    const now = Date.now()
-    if (!force && now - lastScoreSyncRef.current < 2000) {
-      lastScoreValueRef.current = sanitizedScore
-      return
-    }
-
-    lastScoreSyncRef.current = now
-    lastScoreValueRef.current = sanitizedScore
-
-    // For debugging, only on first few updates
-    if (sanitizedScore > 0 && lastScoreValueRef.current === 0) {
-      console.log("[v0] Score Update Triggered:", { sanitizedScore, activeGamePin, userId: currentUser.id, username: currentUser.username })
-    }
-
-    try {
-      const currentAccuracy = gameTotalAnsweredRef.current > 0
-        ? Math.round((gameCorrectAnswersRef.current / gameTotalAnsweredRef.current) * 100)
-        : 0
-
-      const { error } = await supabase.rpc("update_game_score", {
-        p_pin: activeGamePin,
-        p_player_id: String(currentUser.id),
-        p_player_username: currentUser.username,
-        p_score: sanitizedScore,
-        p_accuracy: currentAccuracy
-      })
-      if (error) {
-        console.error("Score sync error:", error)
-        // If it's a critical final sync and it fails, alert for debugging
-        if (force) {
-          console.warn("Final score sync failed. Check database permissions.")
-        }
-      }
-    } catch (err) {
-      console.error("Score sync exception:", err)
-    }
-  }, [activeGamePin, supabase, currentUser?.id])
+  const handleScoreUpdate = useCallback((_score: number, _force = false) => {}, [])
 
   // Periodic fallback to ensure the throttled final score is sent
   useEffect(() => {
@@ -1646,11 +1200,7 @@ export default function BoomkitGame() {
       const storedCurrentUser = localStorage.getItem("boomkit_current_user")
       if (storedCurrentUser) {
         const parsedUser = JSON.parse(storedCurrentUser)
-        // Check if user is banned - redirect immediately
-        if (parsedUser.isBanned) {
-          router.push(`/banned?reason=${encodeURIComponent(parsedUser.banReason || "")}`)
-          return
-        }
+        // Ban and approval status are checked by the server, not cached storage.
         setCurrentUser(parsedUser)
         setCurrentView("game")
       }
@@ -1679,7 +1229,7 @@ export default function BoomkitGame() {
         .select("*")
         .in("status", ["available", "rented"])
         .order("created_at", { ascending: false })
-      
+
       const currentRentals = rentalsData || []
       setRentalListings(currentRentals)
 
@@ -1687,14 +1237,9 @@ export default function BoomkitGame() {
         console.error("[v0] Error fetching rentals:", rentalsErr.message)
       }
 
-      // Only select safe fields; never expose password_hash, last_ip, or email to clients.
-      const safeColumns = "id, username, age, tokens, daily_tokens, packs, booms, is_owner, is_banned, is_muted, status, reason, role, join_date, boom_score, total_value, profile_picture, is_plus_user, name_color, banner_color, last_daily_spin, badges, mute_expiry, ban_expiry, last_seen, packs_opened, xp, level, login_streak, last_streak_claim, pinned_boom, season_xp, has_plus_pass, games_played, total_tokens_earned, discover_tokens_earned, correct_answers_count, questions_answered_count, clan_id, clan_role, clan_tag, clan_tag_color, fusion_cooldown_ends_at, consecutive_fusions, last_fusion_claim_time, active_fusion_boom1, active_fusion_boom2, active_fusion_ends_at, active_fusion_started_at, inventory"
-      const { data, error } = await supabase.from("users").select(safeColumns)
-
-      if (error) {
-        console.error("[v0] Error fetching users from Supabase:", error.message)
-        return
-      }
+      const response = await fetch('/api/users', { cache: 'no-store' })
+      if (!response.ok) return
+      const data = await response.json()
 
       if (data && data.length > 0) {
         const mappedUsers: GameUser[] = data.map((u: any) => {
@@ -1770,11 +1315,11 @@ export default function BoomkitGame() {
                 (r: any) => r.renter_username === self.username && r.status === "rented"
               )
               const hasPinnedBoom = (self.booms[self.pinned_boom] || 0) > 0 || myActiveRentals.some((r: any) => r.boom_name === self.pinned_boom)
-              
+
               if (!hasPinnedBoom) {
                 console.log(`[v0] Pinned boom ${self.pinned_boom} is no longer owned or rented. Unpinning.`)
                 self.pinned_boom = undefined
-                await supabase.from("users").update({ pinned_boom: null }).eq("id", self.id)
+                await updateProfile(self.id, { pinned_boom: null })
               }
             }
             setCurrentUser(self)
@@ -1914,27 +1459,6 @@ export default function BoomkitGame() {
     }
   }, [isStorageLoaded, currentUser, handleLogout, router])
 
-  // Automatically grant 999 of each OG Pack boom to Owner
-  useEffect(() => {
-    if (isStorageLoaded && currentUser && currentUser.role === "owner" && supabase) {
-      const ogPack = PACKS.find(p => p.id === "og");
-      if (ogPack) {
-        let needsUpdate = false;
-        const updatedBooms = { ...currentUser.booms };
-        ogPack.booms.forEach(boom => {
-          if ((updatedBooms[boom.name] || 0) < 999) {
-            updatedBooms[boom.name] = 999;
-            needsUpdate = true;
-          }
-        });
-        if (needsUpdate) {
-          const updatedUser = { ...currentUser, booms: updatedBooms };
-          updateAndPersistCurrentUser(updatedUser);
-        }
-      }
-    }
-  }, [currentUser, isStorageLoaded, updateAndPersistCurrentUser, supabase]);
-
   // Load users from Supabase on mount
   useEffect(() => {
     if (supabase) {
@@ -1944,6 +1468,12 @@ export default function BoomkitGame() {
       fetchActiveBoost()
     }
   }, [supabase, fetchUsersFromSupabase])
+
+  useEffect(() => {
+    if (!currentUser?.id) return
+    const timer = setInterval(() => { void fetchUsersFromSupabase(true) }, 15000)
+    return () => clearInterval(timer)
+  }, [currentUser?.id, fetchUsersFromSupabase])
 
   // Poll active booster status every 15 seconds
   useEffect(() => {
@@ -1978,11 +1508,9 @@ export default function BoomkitGame() {
     if (!currentUser?.id || !supabase) return
 
     try {
-      const { data, error } = await supabase
-        .from("users")
-        .select("role, badges, is_muted, is_banned, is_owner, mute_expiry, ban_expiry, status, ban_reason")
-        .eq("id", currentUser.id)
-        .single()
+      const response = await fetch(`/api/users/${encodeURIComponent(currentUser.id)}`, { cache: 'no-store' })
+      const data = response.ok ? await response.json() : null
+      const error = response.ok ? null : { code: response.status === 404 ? 'PGRST116' : '', message: 'Unable to load account' }
 
       if (error) {
         // If user not found (account deleted), log them out immediately
@@ -2036,7 +1564,7 @@ export default function BoomkitGame() {
           router.push(`/banned?reason=${encodeURIComponent(data.ban_reason || "")}`)
           return
         }
-        updateAndPersistCurrentUser(updatedUser)
+        setCurrentUser(updatedUser)
       }
     } catch (err) {
       console.log("[v0] Error in role sync:", err)
@@ -2120,10 +1648,10 @@ export default function BoomkitGame() {
                 if (pingRegex.test(d.message)) {
                   // Play synthesized notification sound
                   playPingSound();
-                  
+
                   const isGlobalPing = /@(everyone|here)\b/i.test(d.message);
                   const toastTitle = isGlobalPing ? "📢 Global ping in chat!" : `🔔 @${d.username} mentioned you in chat!`;
-                  
+
                   // Show toast alert
                   toast(toastTitle, {
                     description: d.message.length > 80 ? `${d.message.slice(0, 80)}...` : d.message,
@@ -2163,6 +1691,7 @@ export default function BoomkitGame() {
     // Fetch initial chat and clan details
     fetchClanChat(clanId)
     fetchClanDetails(clanId)
+    const pollTimer=setInterval(()=>{void fetchClanChat(clanId)},5000)
 
     // Subscribe to new chat messages
     const channel = supabase
@@ -2187,6 +1716,7 @@ export default function BoomkitGame() {
       .subscribe()
 
     return () => {
+      clearInterval(pollTimer)
       supabase.removeChannel(channel)
     }
   }, [currentUser?.clan_id, supabase])
@@ -2227,21 +1757,8 @@ export default function BoomkitGame() {
 
   // --- GAME SESSION REALTIME SUBSCRIPTION (Host & Joiners) ---
   useEffect(() => {
-    if (!activeGamePin || !supabase || (!isMergingGameActive && !lobbyActive && !showGameResults)) return
-
-    console.log("[v0] Subscribing to game session:", activeGamePin)
-
-    const channel = supabase
-      .channel(`game_session_${activeGamePin}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "game_sessions",
-          filter: `pin=eq.${activeGamePin}`,
-        },
-        (payload) => {
+      if (!activeGamePin || (!isMergingGameActive && !lobbyActive && !showGameResults)) return
+          const receive = (payload: any) => {
           console.log("[v0] Session Update Received:", payload)
           const newSession = payload.new as any
 
@@ -2269,27 +1786,11 @@ export default function BoomkitGame() {
 
           if (newSession.status === "finished") {
             // Final fetch to ensure total sync
-            supabase.from("game_sessions")
-              .select("players")
-              .eq("pin", activeGamePin)
-              .single()
-              .then(({ data }) => {
-                if (data?.players) setLivePlayers(data.players)
-              })
-
-            if (activeDiscoverGame?.mode === "join") {
-              setIsMergingGameActive(false)
-              setShowGameResults(true)
-            }
+            setRoomEnded(true)
           }
         }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [activeGamePin, isMergingGameActive, lobbyActive, showGameResults, activeDiscoverGame, supabase])
+      return pollRoom(activeGamePin, room => receive({new:room}))
+    }, [activeGamePin,isMergingGameActive,lobbyActive,showGameResults,activeDiscoverGame])
 
   // Domain-specific behavior for boomkit.org
   useEffect(() => {
@@ -2325,124 +1826,29 @@ export default function BoomkitGame() {
 
 
 
-  // XP and Leveling System
-  const awardXP = (amount: number, additionalUpdates: Partial<GameUser> = {}) => {
-    if (!currentUser) return
-
-    let currentXP = currentUser.xp || 0
-    let currentLevel = currentUser.level || 1
-    let totalXP = currentXP + amount
-    let newLevel = currentLevel
-    let leveledUp = false
-    const levelsGained: number[] = []
-
-    // Calculate new level correctly with dynamic requirement: Level * 100
-    while (totalXP >= newLevel * 100) {
-      totalXP -= (newLevel * 100)
-      newLevel++
-      leveledUp = true
-      levelsGained.push(newLevel)
-    }
-
-    let newXP = totalXP
-
-    // Cap at level 100
-    if (newLevel >= 100) {
-      newLevel = 100
-      newXP = 0
-    }
-
-    let updatedBooms = { ...currentUser.booms }
-
-    if (leveledUp) {
-      alert(`🎉 LEVEL UP! You are now Level ${newLevel}!`)
-
-      for (const level of levelsGained) {
-        const milestone = GAMEPASS_BOOMS.find(gb => gb.level === level)
-        if (milestone) {
-          let rewardName = ""
-          if (milestone.isLimited) {
-            rewardName = "The Trophy"
-            alert(`🏆 CONGRATULATIONS! You reached Level 70 and unlocked THE TROPHY! 🏆\nYou have unlocked the Limited Section!`)
-          } else {
-            // Pick a random boom of that rarity
-            const pool = PACKS.flatMap(p => p.booms).filter(b => b.rarity === milestone.rarity)
-            if (pool.length > 0) {
-              const randomBoom = pool[Math.floor(Math.random() * pool.length)]
-              rewardName = randomBoom.name
-              alert(`🎁 Level ${level} Milestone! You unlocked a random ${milestone.rarity} Boom: ${rewardName}!`)
-            }
-          }
-
-          if (rewardName) {
-            updatedBooms[rewardName] = (updatedBooms[rewardName] || 0) + 1
-          }
-        }
-      }
-    }
-
-    const updatedUser = {
-      ...currentUser,
-      xp: newXP,
-      level: newLevel,
-      booms: updatedBooms,
-      boomScore: (currentUser.boomScore || 0) + (amount * 10), // Small boost to score too
-      ...additionalUpdates
-    }
-    updateAndPersistCurrentUser(updatedUser)
+  const handleVerifiedGameEnd = (score: number, correctAnswers = 0, questionsAnswered = 0, rewards = { tokens: 0, xp: 0 }) => {
+    setGameTokensEarned(rewards.tokens)
+    setGameScore(score)
+    setGameCorrectAnswers(correctAnswers)
+    setGameTotalAnswered(questionsAnswered)
+    setIsMergingGameActive(false)
+    setShowGameResults(true)
+    handleScoreUpdate(score, true)
+    void fetchUsersFromSupabase(true)
   }
 
-  // Grant HadiGidek Max XP (One-time check)
-  useEffect(() => {
-    if (currentUser && currentUser.username === "HadiGidek" && (currentUser.level || 1) < 100) {
-      console.log("Maxing out XP for HadiGidek...")
-      const updatedUser = {
-        ...currentUser,
-        xp: 100,
-        level: 100
-      }
-      updateAndPersistCurrentUser(updatedUser)
-    }
-  }, [currentUser])
+  // XP and Leveling System
+
+
 
   // Check if user can spin today
   useEffect(() => {
     if (currentUser) {
-      const today = new Date().toDateString()
-      setCanSpin(currentUser.lastDailySpin !== today)
+      const today = new Date().toISOString().slice(0, 10)
+      setCanSpin(currentUser.lastDailySpin !== today && currentUser.lastDailySpin !== new Date().toDateString())
     }
   }, [currentUser])
 
-  // NEW: Auto-grant Gamepass Booms based on level
-  useEffect(() => {
-    if (!currentUser) return
-
-    let hasNewUnlocks = false
-    const updatedBooms = { ...currentUser.booms }
-    const newUnlocks: string[] = []
-
-    GAMEPASS_BOOMS.forEach((boom) => {
-      // Check if user has required level
-      if ((currentUser.level || 1) >= boom.level) {
-        // Check if user already has this boom
-        if (!updatedBooms[boom.name]) {
-          updatedBooms[boom.name] = 1
-          hasNewUnlocks = true
-          newUnlocks.push(boom.name)
-        }
-      }
-    })
-
-    if (hasNewUnlocks) {
-      console.log("Granting missing Gamepass Booms:", newUnlocks)
-      const updatedUser = {
-        ...currentUser,
-        booms: updatedBooms,
-      }
-      updateAndPersistCurrentUser(updatedUser)
-      alert(`🎁 You've recovered missing Gamepass rewards: ${newUnlocks.join(", ")}`)
-    }
-  }, [currentUser?.level, currentUser?.booms]) // Re-run when level or inventory changes
 
 
   // Handle daily spin
@@ -2716,45 +2122,12 @@ export default function BoomkitGame() {
   }
 
   // Get boom based on rarity chances
-  const getRandomBoomFromPack = (pack: Pack): BoomItem => {
-    const chances = getBoostedRarityChances()
-    const random = Math.random() * 100
 
-    let cumulativeChance = 0
-    const rarityOrder: (keyof typeof RARITY_CHANCES)[] = [
-      "mystical",
-      "hidden",
-      "chroma",
-      "legendary",
-      "epic",
-      "rare",
-      "uncommon",
-    ]
 
-    for (const rarity of rarityOrder) {
-      cumulativeChance += chances[rarity]
-      if (random <= cumulativeChance) {
-        const boomsOfRarity = pack.booms.filter((boom) => boom.rarity === rarity)
-        if (boomsOfRarity.length > 0) {
-          return boomsOfRarity[Math.floor(Math.random() * boomsOfRarity.length)]
-        }
-      }
-    }
-
-    // Fallback to uncommon if no boom is found (should not happen with proper configuration)
-    const uncommonBooms = pack.booms.filter((boom) => boom.rarity === "uncommon")
-    if (uncommonBooms.length > 0) {
-      return uncommonBooms[Math.floor(Math.random() * uncommonBooms.length)]
-    }
-    // Ultimate fallback - return first boom
-    return pack.booms[0]
-  }
-
-  const openPack = (packId: string, updatedUser: GameUser) => {
+  const economyBusy = useRef(false)
+  const openPack = (packId: string, randomBoom: BoomItem) => {
     const pack = PACKS.find((p) => p.id === packId)
     if (!pack) return
-
-    const randomBoom = getRandomBoomFromPack(pack)
 
     // Store pack reference for drop rate calculation
     const packRef = pack
@@ -2835,42 +2208,6 @@ export default function BoomkitGame() {
       setPackAnimation((prev) => ({ ...prev, stage: "done" }))
     }, doneDelay)
 
-    const updatedBooms = { ...updatedUser.booms }
-    updatedBooms[randomBoom.name] = (updatedBooms[randomBoom.name] || 0) + 1
-
-    const finalUser = {
-      ...updatedUser,
-      booms: updatedBooms,
-      boomScore:
-        updatedUser.boomScore +
-        (randomBoom.rarity === "mystical"
-          ? 200
-          : randomBoom.rarity === "chroma"
-            ? 100
-            : randomBoom.rarity === "legendary"
-              ? 50
-              : randomBoom.rarity === "epic"
-                ? 25
-                : randomBoom.rarity === "rare"
-                  ? 15
-                  : 10),
-      totalValue:
-        updatedUser.totalValue +
-        (randomBoom.rarity === "mystical"
-          ? 5000
-          : randomBoom.rarity === "chroma"
-            ? 2000
-            : randomBoom.rarity === "legendary"
-              ? 1000
-              : randomBoom.rarity === "epic"
-                ? 500
-                : randomBoom.rarity === "rare"
-                  ? 250
-                  : 100),
-      packsOpened: (updatedUser.packsOpened || 0) + 1,
-    }
-
-    updateAndPersistCurrentUser(finalUser)
   }
 
   const closePackAnimation = () => {
@@ -2952,7 +2289,7 @@ export default function BoomkitGame() {
   }
 
   // Buy or open pack
-  
+
   // Auto Open effect
   useEffect(() => {
     if (packAnimation.show && packAnimation.stage === "done" && isAutoOpen && currentUser) {
@@ -2969,8 +2306,8 @@ export default function BoomkitGame() {
       }
     }
   }, [packAnimation.stage, isAutoOpen, currentUser?.tokens, isInstantOpen, packAnimation.show, packAnimation.packName])
-const handlePackAction = (packId: string) => {
-    if (!currentUser) return
+const handlePackAction = async (packId: string) => {
+    if (!currentUser || economyBusy.current) return
 
     const pack = PACKS.find((p) => p.id === packId)
     if (!pack) return
@@ -2985,17 +2322,15 @@ const handlePackAction = (packId: string) => {
       return
     }
 
-    const userAfterPurchase = {
-      ...currentUser,
-      tokens: currentUser.tokens - pack.price,
-      packs: currentUser.packs.includes(packId) ? currentUser.packs : [...currentUser.packs, packId],
-    }
-
-    // Persist the state *after* charging tokens, but *before* opening the pack
-    updateAndPersistCurrentUser(userAfterPurchase)
-
-    // Open the pack with the updated user object
-    setTimeout(() => openPack(packId, userAfterPurchase), 500)
+    economyBusy.current = true
+    try {
+      const result = await economyAction('open_pack', { packId })
+      await fetchUsersFromSupabase(true)
+      openPack(packId, result.boom)
+    } catch (error) {
+      setIsAutoOpen(false)
+      alert(error instanceof Error ? error.message : 'Unable to open pack')
+    } finally { economyBusy.current = false }
   }
 
   // Handle boom click
@@ -3029,8 +2364,8 @@ const handlePackAction = (packId: string) => {
   }
 
   // Handle selling booms
-  const handleConfirmSell = () => {
-    if (!currentUser || !selectedBoom) return
+  const handleConfirmSell = async () => {
+    if (!currentUser || !selectedBoom || economyBusy.current) return
 
 
 
@@ -3042,33 +2377,16 @@ const handlePackAction = (packId: string) => {
       return
     }
 
-    const sellPrice = getBoomSellPrice(boomName)
-    const totalTokens = sellPrice * quantityToSell
-    const totalValueLost = getBoomValue(boomName) * quantityToSell
-    const totalScoreLost = getBoomScoreValue(boomName) * quantityToSell
-
-    const updatedBooms = { ...currentUser.booms }
-
-    if (updatedBooms[boomName] > quantityToSell) {
-      updatedBooms[boomName] -= quantityToSell
-    } else {
-      delete updatedBooms[boomName]
-    }
-
-    const updatedUser = {
-      ...currentUser,
-      booms: updatedBooms,
-      tokens: currentUser.tokens + totalTokens,
-      totalValue: currentUser.totalValue - totalValueLost,
-      boomScore: currentUser.boomScore - totalScoreLost,
-    }
-
-    updateAndPersistCurrentUser(updatedUser)
-
-    setShowBoomAction(false)
-    setSelectedBoom(null)
-    setSellQuantity(1)
-    alert(`Sold ${quantityToSell} ${boomName}(s) for ${totalTokens} tokens!`)
+    economyBusy.current = true
+    try {
+      const result = await economyAction('sell', { boomName, quantity: quantityToSell })
+      await fetchUsersFromSupabase(true)
+      setShowBoomAction(false)
+      setSelectedBoom(null)
+      setSellQuantity(1)
+      alert(`Sold ${quantityToSell} ${boomName}(s) for ${result.earned} tokens!`)
+    } catch (error) { alert(error instanceof Error ? error.message : 'Unable to sell item') }
+    finally { economyBusy.current = false }
   }
 
   const handleAuctionList = async () => {
@@ -3092,60 +2410,15 @@ const handlePackAction = (packId: string) => {
       return
     }
 
-    // remove one from inventory
-    const updatedBooms = { ...currentUser.booms }
-    if (updatedBooms[selectedBoom] > 1) updatedBooms[selectedBoom] -= 1
-    else delete updatedBooms[selectedBoom]
-
-    const updatedUser = {
-      ...currentUser,
-      booms: updatedBooms,
-      totalValue: currentUser.totalValue - getBoomValue(selectedBoom),
-      boomScore: currentUser.boomScore - getBoomScoreValue(selectedBoom),
+    const { error } = await secureRpc('create_auction', {
+      p_boom_name: selectedBoom, p_starting_bid: startingBid, p_duration_hours: duration,
+    })
+    if (error) {
+      alert(error.message)
+      return
     }
-    updateAndPersistCurrentUser(updatedUser)
-
-    // Try Supabase first
-    const sb =
-      typeof window !== "undefined" ? await Promise.resolve().then(() => require("@/lib/supabase-client")) : null
-    const getClient = sb ? (sb as any).getSupabaseBrowserClient : null
-    const supabase = getClient ? getClient() : null
-
-    try {
-      if (supabase) {
-        const endsAt = new Date(Date.now() + duration * 60 * 60 * 1000).toISOString()
-        const { error } = await supabase.from("auction_items").insert({
-          boom_name: selectedBoom,
-          seller_username: currentUser.username,
-          seller: currentUser.id,
-          current_bid: startingBid,
-          ends_at: endsAt,
-          status: "active",
-        })
-        if (error) throw error
-        alert(`Listed ${selectedBoom} with starting bid of ${startingBid} tokens!`)
-      } else {
-        // LocalStorage fallback (for preview without env vars)
-        const newAuction = {
-          id: Date.now().toString(),
-          boomName: selectedBoom,
-          seller: currentUser.username,
-          currentBid: startingBid,
-          timeLeft: duration,
-          bidders: [],
-        }
-        const raw = localStorage.getItem("boomkit_auctions")
-        const list = raw ? JSON.parse(raw) : []
-        const next = [...list, newAuction]
-        localStorage.setItem("boomkit_auctions", JSON.stringify(next))
-        // Optional: keep legacy state in sync
-        updateAndPersistAuctions(next)
-        alert(`Listed ${selectedBoom} for auction with starting bid of ${startingBid} tokens!`)
-      }
-    } catch (e) {
-      console.error("Auction insert failed:", e)
-      alert("Failed to create auction.")
-    }
+    await fetchUsersFromSupabase(true)
+    alert(`Listed ${selectedBoom} for auction.`)
 
     setShowBoomAction(false)
     setSelectedBoom(null)
@@ -3207,13 +2480,6 @@ const handlePackAction = (packId: string) => {
       ...currentUser, 
       profilePicture: newPicture,
       pinned_boom: isBoom ? newPicture : undefined
-    }
-
-    if (supabase) {
-      supabase.from("users").update({ pinned_boom: isBoom ? newPicture : null }).eq("id", currentUser.id)
-        .then(({ error }: any) => {
-          if (error) console.error("Error updating pinned_boom in DB:", error.message)
-        })
     }
 
     updateAndPersistCurrentUser(updatedUser)
@@ -3313,17 +2579,13 @@ const handlePackAction = (packId: string) => {
 
         // Persist to Supabase if possible
         if (supabase && currentUser) {
-          supabase.from("custom_sets").insert({
-            creator_id: currentUser.id,
+          await communityAction('create_set', {
             title: newSet.title,
             description: newSet.description || "",
             grade: aiGrade,
             subject: aiSubject,
             questions: data.questions,
             is_public: aiIsPublic
-          }).then(({ error }) => {
-            if (error) console.error("Error saving custom set to DB:", error)
-            else console.log("Saved custom set to database successfully")
           })
         }
 
@@ -3351,69 +2613,7 @@ const handlePackAction = (packId: string) => {
     }
   }
 
-  const awardBoomXP = async (amount: number) => {
-    if (!currentUser?.pinned_boom || !supabase) return
 
-    try {
-      const boomName = currentUser.pinned_boom
-      // 1. Fetch or initialize the evolution record
-      const { data: evolution, error: fetchError } = await supabase
-        .from('user_boom_evolution')
-        .select('id, username, boom_name, xp, level, is_fully_evolved, created_at')
-        .eq('username', currentUser.username)
-        .eq('boom_name', boomName)
-        .single()
-
-      if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 is 'no rows found'
-        console.error('Error fetching boom evolution:', fetchError)
-        return
-      }
-
-      let newXP = amount
-      let newLevel = 1
-      let isFullyEvolved = false
-
-      if (evolution) {
-        newXP = evolution.xp + amount
-        newLevel = evolution.level
-        isFullyEvolved = evolution.is_fully_evolved
-
-        // Level up logic (Example: 500 XP per level)
-        const xpRequired = newLevel * 500
-        if (newXP >= xpRequired && !isFullyEvolved) {
-          newXP -= xpRequired
-          newLevel += 1
-          if (newLevel >= 10) isFullyEvolved = true // Max evolution at level 10
-        }
-      }
-
-      // 2. Upsert the record
-      const { error: upsertError } = await supabase
-        .from('user_boom_evolution')
-        .upsert({
-          username: currentUser.username,
-          boom_name: boomName,
-          xp: newXP,
-          level: newLevel,
-          is_fully_evolved: isFullyEvolved
-        }, { onConflict: 'username,boom_name' })
-
-      if (upsertError) {
-        console.error('Error updating boom evolution:', upsertError)
-      } else {
-        // Achievement check for Evolution
-        if (newLevel > 1) {
-          supabase.rpc('check_achievements', {
-            p_username: currentUser.username,
-            p_type: 'evolved_count',
-            p_value: 1
-          })
-        }
-      }
-    } catch (err) {
-      console.error('Failed to award boom XP:', err)
-    }
-  }
 
   const fetchQuestionsWithAi = async (grade: number, subjectStr: string, count: number = 30) => {
     let subject = subjectStr
@@ -3483,10 +2683,7 @@ const handlePackAction = (packId: string) => {
           correct_index: q.correctIndex
         }))
 
-        supabase.from("question_bank").insert(questionsToBank).then(({ error }) => {
-          if (error) console.error("Error saving to global bank:", error)
-          else console.log(`Cached ${questionsToBank.length} new questions to Global Bank for ${subject}: ${topic}`)
-        })
+
       }
 
       return questions.length > 0 ? questions : getFallbackQuestions(grade, subject, count, topic === "General" ? subject : topic)
@@ -3501,24 +2698,7 @@ const handlePackAction = (packId: string) => {
     if (!userToModerate || !supabase) return
 
     try {
-      // 2. Direct Supabase Update (Redundancy fix)
-      // We try to update directly first. If RLS allows (owner/admin), this is faster and more reliable.
-      const { error: directError } = await supabase
-        .from("users")
-        .update({
-          is_banned: true,
-          ban_reason: banReason || "Banned by staff",
-          ban_expiry: null
-        })
-        .eq("id", userToModerate.id)
-
-      if (directError) {
-        console.warn("Direct Supabase ban update failed (likely RLS), falling back to API:", directError)
-      } else {
-        console.log("Direct Supabase ban update successful")
-      }
-
-      // 3. Update the user via Secure API (since RLS prevents direct updates to other users)
+      // The server verifies current staff permissions.
       const response = await fetch("/api/users/update", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -3634,7 +2814,7 @@ const handlePackAction = (packId: string) => {
     }
 
     try {
-      const { data, error } = await supabase.rpc('transfer_tokens', {
+      const { data, error } = await secureRpc('transfer_tokens', {
         p_sender_username: currentUser.username,
         p_receiver_username: receiverUsername,
         p_amount: amount
@@ -3643,7 +2823,7 @@ const handlePackAction = (packId: string) => {
       alert(`🎉 Successfully gifted ${amount.toLocaleString()} tokens to ${receiverUsername}!`)
 
       // Log activity
-      await supabase.rpc('log_user_activity', {
+      await secureRpc('log_user_activity', {
         p_username: currentUser.username,
         p_type: 'gift_tokens',
         p_desc: `Gifted ${amount.toLocaleString()} tokens to ${receiverUsername}`,
@@ -3666,7 +2846,7 @@ const handlePackAction = (packId: string) => {
     }
 
     try {
-      const { data, error } = await supabase.rpc('transfer_boom', {
+      const { data, error } = await secureRpc('transfer_boom', {
         p_sender_username: currentUser.username,
         p_receiver_username: receiverUsername,
         p_boom_name: boomName,
@@ -3676,7 +2856,7 @@ const handlePackAction = (packId: string) => {
       alert(`🎁 Successfully gifted ${amount}x ${boomName} to ${receiverUsername}!`)
 
       // Log activity
-      await supabase.rpc('log_user_activity', {
+      await secureRpc('log_user_activity', {
         p_username: currentUser.username,
         p_type: 'gift_boom',
         p_desc: `Gifted ${amount}x ${boomName} to ${receiverUsername}`,
@@ -3695,7 +2875,7 @@ const handlePackAction = (packId: string) => {
     if (!confirm(`Craft ${recipe.output_boom} for ${recipe.token_cost} tokens?`)) return
 
     try {
-      const { data, error } = await supabase.rpc('craft_boom', {
+      const { data, error } = await secureRpc('craft_boom', {
         p_player_username: currentUser.username,
         p_recipe_id: recipe.id
       })
@@ -3710,7 +2890,7 @@ const handlePackAction = (packId: string) => {
   const handleClaimStreak = async () => {
     if (!currentUser || !supabase) return
     try {
-      const { data, error } = await supabase.rpc('claim_daily_streak', {
+      const { data, error } = await secureRpc('claim_daily_streak', {
         p_username: currentUser.username
       })
       if (error) throw error
@@ -3725,9 +2905,7 @@ const handlePackAction = (packId: string) => {
   const fetchFriends = async () => {
     if (!currentUser || !supabase) return
     try {
-      const { data } = await supabase.from("friends")
-        .select("*")
-        .or(`user_username.eq.${currentUser.username},friend_username.eq.${currentUser.username}`)
+      const data: any[] = await communityAction('friends')
 
       const accepted = (data || []).filter(f => f.status === 'accepted')
       const pending = (data || []).filter(f => f.status === 'pending' && f.friend_username === currentUser.username)
@@ -3747,7 +2925,7 @@ const handlePackAction = (packId: string) => {
         .select("*")
         .eq("id", clanId)
         .single()
-      
+
       if (clanError) throw clanError
 
       // 2. Fetch clan members
@@ -3804,14 +2982,7 @@ const handlePackAction = (packId: string) => {
   const fetchClanChat = async (clanId: string) => {
     if (!supabase) return
     try {
-      const { data, error } = await supabase
-        .from("clan_chat_messages")
-        .select("*")
-        .eq("clan_id", clanId)
-        .order("created_at", { ascending: true })
-        .limit(50)
-
-      if (error) throw error
+      const data = await communityAction('clan_chat',{clanId})
       setClanChat(data || [])
     } catch (e) {
       console.error("Failed to fetch clan chat:", e)
@@ -3821,15 +2992,8 @@ const handlePackAction = (packId: string) => {
   const sendClanChatMessage = async () => {
     if (!newClanMessage.trim() || !currentUser?.clan_id || !supabase) return
     try {
-      const { error } = await supabase
-        .from("clan_chat_messages")
-        .insert({
-          clan_id: currentUser.clan_id,
-          username: currentUser.username,
-          message: newClanMessage.trim()
-        })
-
-      if (error) throw error
+      const data = await communityAction('send_clan_chat',{message:newClanMessage.trim()})
+      setClanChat(data)
       setNewClanMessage("")
     } catch (e: any) {
       toast.error(e.message || "Failed to send chat message")
@@ -3841,7 +3005,7 @@ const handlePackAction = (packId: string) => {
     const name = createClanForm.name.trim()
     const tag = createClanForm.tag.trim().toUpperCase()
     const desc = createClanForm.description.trim()
-    
+
     if (!name || !tag) {
       toast.error("Clan Name and Tag are required.")
       return
@@ -3859,7 +3023,7 @@ const handlePackAction = (packId: string) => {
 
     setIsCreatingClan(true)
     try {
-      const { data, error } = await supabase.rpc("create_clan", {
+      const { data, error } = await secureRpc("create_clan", {
         p_username: currentUser.username,
         p_clan_name: name,
         p_tag: tag,
@@ -3898,7 +3062,7 @@ const handlePackAction = (packId: string) => {
   const handleJoinClan = async (clanId: string) => {
     if (!currentUser || !supabase) return
     try {
-      const { data, error } = await supabase.rpc("join_clan", {
+      const { data, error } = await secureRpc("join_clan", {
         p_username: currentUser.username,
         p_clan_id: clanId
       })
@@ -3919,7 +3083,7 @@ const handlePackAction = (packId: string) => {
   const handleBuyClanUpgrade = async (type: string, color?: string) => {
     if (!currentUser || !supabase || !currentUser.clan_id) return
     try {
-      const { data, error } = await supabase.rpc("buy_clan_upgrade", {
+      const { data, error } = await secureRpc("buy_clan_upgrade", {
         p_username: currentUser.username,
         p_upgrade_type: type,
         p_color_value: color
@@ -3942,7 +3106,7 @@ const handlePackAction = (packId: string) => {
     if (!currentUser || !supabase) return
     if (!confirm("Are you sure you want to leave your clan?")) return
     try {
-      const { data, error } = await supabase.rpc("leave_clan", {
+      const { data, error } = await secureRpc("leave_clan", {
         p_username: currentUser.username
       })
 
@@ -3964,7 +3128,7 @@ const handlePackAction = (packId: string) => {
   const handleDonateToClan = async (amount: number) => {
     if (!currentUser || !supabase || amount <= 0) return
     try {
-      const { data, error } = await supabase.rpc("donate_to_clan", {
+      const { data, error } = await secureRpc("donate_to_clan", {
         p_username: currentUser.username,
         p_amount: amount
       })
@@ -3987,7 +3151,7 @@ const handlePackAction = (packId: string) => {
     if (!currentUser || !supabase) return
     if (!confirm(`Are you sure you want to kick ${targetUsername} from the clan?`)) return
     try {
-      const { data, error } = await supabase.rpc("kick_from_clan", {
+      const { data, error } = await secureRpc("kick_from_clan", {
         p_username: currentUser.username,
         p_target_username: targetUsername
       })
@@ -4008,7 +3172,7 @@ const handlePackAction = (packId: string) => {
   const handleUpdateClanInfo = async (description: string, logo: string, tagColor: string, minTokens: number, minRarity: string, minRarityCount: number) => {
     if (!currentUser || !supabase) return
     try {
-      const { data, error } = await supabase.rpc("update_clan_info", {
+      const { data, error } = await secureRpc("update_clan_info", {
         p_username: currentUser.username,
         p_description: description,
         p_logo: logo,
@@ -4036,7 +3200,7 @@ const handlePackAction = (packId: string) => {
     const roleText = newRole === "co_leader" ? "Promote" : "Demote"
     if (!confirm(`Are you sure you want to ${roleText.toLowerCase()} ${targetUsername}?`)) return
     try {
-      const { data, error } = await supabase.rpc("update_clan_member_role", {
+      const { data, error } = await secureRpc("update_clan_member_role", {
         p_username: currentUser.username,
         p_target_username: targetUsername,
         p_new_role: newRole
@@ -4059,7 +3223,7 @@ const handlePackAction = (packId: string) => {
     if (!currentUser || !supabase) return
     if (!confirm(`⚠️ WARNING: Are you sure you want to transfer clan leadership to ${targetUsername}? You will be demoted to a regular member.`)) return
     try {
-      const { data, error } = await supabase.rpc("transfer_clan_leadership", {
+      const { data, error } = await secureRpc("transfer_clan_leadership", {
         p_username: currentUser.username,
         p_target_username: targetUsername
       })
@@ -4085,7 +3249,7 @@ const handlePackAction = (packId: string) => {
         .select("*")
         .eq("id", clanId)
         .single()
-      
+
       if (clanError) throw clanError
 
       const { data: membersList, error: membersError } = await supabase
@@ -4108,7 +3272,7 @@ const handlePackAction = (packId: string) => {
   const handleSendFriendRequest = async (toUsername: string) => {
     if (!currentUser || !supabase) return
     try {
-      const { data, error } = await supabase.rpc('send_friend_request', {
+      const { data, error } = await secureRpc('send_friend_request', {
         p_from: currentUser.username, p_to: toUsername
       })
       if (error) throw error
@@ -4120,7 +3284,7 @@ const handlePackAction = (packId: string) => {
   const handleAcceptFriend = async (fromUsername: string) => {
     if (!currentUser || !supabase) return
     try {
-      const { data, error } = await supabase.rpc('accept_friend_request', {
+      const { data, error } = await secureRpc('accept_friend_request', {
         p_username: currentUser.username, p_from: fromUsername
       })
       if (error) throw error
@@ -4133,7 +3297,7 @@ const handlePackAction = (packId: string) => {
     if (!currentUser || !supabase) return
     if (!confirm(`Remove ${friendUsername} from friends?`)) return
     try {
-      const { data, error } = await supabase.rpc('remove_friend', {
+      const { data, error } = await secureRpc('remove_friend', {
         p_username: currentUser.username, p_friend: friendUsername
       })
       if (error) throw error
@@ -4158,7 +3322,7 @@ const handlePackAction = (packId: string) => {
     }
 
     try {
-      const { error } = await supabase.rpc("create_tournament", {
+      const { error } = await secureRpc("create_tournament", {
         p_creator_id: currentUser!.id,
         p_title: tourneyTitle,
         p_description: tourneyDesc || null,
@@ -4184,7 +3348,7 @@ const handlePackAction = (packId: string) => {
   const handleFinalizeTournament = async (id: string) => {
     if (!supabase || !confirm("Are you sure you want to finalize this tournament and award prizes?")) return
     try {
-      const { data, error } = await supabase.rpc("finalize_tournament", { p_tournament_id: id })
+      const { data, error } = await secureRpc("finalize_tournament", { p_tournament_id: id })
       if (error) throw error
       alert(`🎉 Tournament finalized! Result: ${data.message}`)
       fetchTournaments()
@@ -4201,7 +3365,7 @@ const handlePackAction = (packId: string) => {
     }
 
     try {
-      const { error } = await supabase.rpc("start_new_season", {
+      const { error } = await secureRpc("start_new_season", {
         p_creator_id: currentUser!.id,
         p_season_name: newSeasonName
       })
@@ -4262,7 +3426,7 @@ const handlePackAction = (packId: string) => {
       return
     }
     try {
-      const { data, error } = await supabase.rpc('join_tournament_clan', {
+      const { data, error } = await secureRpc('join_tournament_clan', {
         p_tournament_id: tournamentId, p_username: currentUser.username
       })
       if (error) throw error
@@ -4283,11 +3447,7 @@ const handlePackAction = (packId: string) => {
   const fetchUserActivity = async (username: string) => {
     if (!supabase) return
     try {
-      const { data } = await supabase.from("user_activity")
-        .select("*")
-        .eq("username", username)
-        .order("created_at", { ascending: false })
-        .limit(20)
+      const data = username === currentUser?.username ? await communityAction('activity') : []
       setUserActivity(data || [])
     } catch (e) { console.error(e) }
   }
@@ -4327,11 +3487,8 @@ const handlePackAction = (packId: string) => {
         setSeasonRewards(rewards || [])
 
         if (currentUser) {
-          const { data: claimed } = await supabase.from("user_activity")
-            .select("details")
-            .eq("username", currentUser.username)
-            .eq("activity_type", "season_claim")
-          const rewardIds = claimed?.map(act => act.details?.reward_id).filter(Boolean) || []
+          const claimed:any[]=await communityAction('claims')
+          const rewardIds = claimed.map(act => act.reward_id).filter(Boolean)
           setClaimedRewards(rewardIds)
         }
       }
@@ -4383,7 +3540,7 @@ const handlePackAction = (packId: string) => {
   const handleBuyShopItem = async (itemId: string) => {
     if (!currentUser || !supabase) return
     try {
-      const { data, error } = await supabase.rpc('buy_shop_item', {
+      const { data, error } = await secureRpc('buy_shop_item', {
         p_username: currentUser.username, p_item_id: itemId
       })
       if (error) throw error
@@ -4393,7 +3550,7 @@ const handlePackAction = (packId: string) => {
       // Check for 'Vault Master' achievement (20 unique booms)
       const uniqueCount = Object.keys(currentUser.booms).length
       if (uniqueCount >= 20) {
-        await supabase.rpc('check_achievements', { p_username: currentUser.username, p_type: 'booms_collected', p_value: uniqueCount })
+        await secureRpc('check_achievements', { p_username: currentUser.username, p_type: 'booms_collected', p_value: uniqueCount })
       }
     } catch (e: any) { alert(e.message || "Purchase failed") }
   }
@@ -4420,15 +3577,7 @@ const handlePackAction = (packId: string) => {
     }
   }
 
-  const handleAddSeasonXp = async (amount: number) => {
-    if (!currentUser || !supabase) return
-    try {
-      const newXp = (currentUser.season_xp || 0) + amount
-      const { error } = await supabase.from("users").update({ season_xp: newXp }).eq("username", currentUser.username)
-      if (error) throw error
-      fetchUsersFromSupabase(true)
-    } catch (e) { console.error(e) }
-  }
+
 
   // --- Profile Features ---
 
@@ -4467,7 +3616,7 @@ const handlePackAction = (packId: string) => {
 
     setIsFusing(true)
     try {
-      const { data, error } = await supabase.rpc('fuse_booms', {
+      const { data, error } = await secureRpc('fuse_booms', {
         p_username: currentUser.username,
         p_boom1: fusionSlot1,
         p_boom2: fusionSlot2
@@ -4496,7 +3645,7 @@ const handlePackAction = (packId: string) => {
 
     setIsFusing(true)
     try {
-      const { data, error } = await supabase.rpc('claim_fusion_result', {
+      const { data, error } = await secureRpc('claim_fusion_result', {
         p_username: currentUser.username
       })
 
@@ -4528,8 +3677,7 @@ const handlePackAction = (packId: string) => {
     setCurrentUser(updatedUser)
 
     try {
-      const { error } = await supabase!.from("users").update({ pinned_boom: boomName }).eq("id", currentUser.id)
-      if (error) throw error
+      await updateProfile(currentUser.id, { pinned_boom: boomName })
       alert(`Successfully pinned ${boomName}!`)
     } catch (err) {
       console.error("Error pinning boom:", err)
@@ -5064,7 +4212,7 @@ const handlePackAction = (packId: string) => {
                   />
                 </div>
               </div>
-              
+
               {authError && (
                 <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-semibold p-3 rounded-xl text-center">
                   {authError}
@@ -5182,7 +4330,7 @@ const handlePackAction = (packId: string) => {
                     : "text-purple-300 hover:text-white hover:bg-[#5b21b6] font-bold"
                 }`}
               >
-                
+
                 <Icon className={`h-4 w-4 shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6 ${isActive ? "text-yellow-400" : "text-slate-500"}`} />
                 <span className="font-heading text-xs uppercase tracking-wider">{item.label}</span>
                 {item.id === "chat" && chatNotificationCount > 0 && (
@@ -5387,16 +4535,16 @@ const handlePackAction = (packId: string) => {
                     className="flex-grow blooket-panel p-8 relative overflow-hidden group"
                   >
                     {/* Glowing grid background */}
-                    
-                    
-                    
+
+
+
                     <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
                       {/* Avatar with cyber-glowing frame */}
                       <div className="relative group/avatar">
-                        
+
                         <div className="w-28 h-28 bg-purple-900 rounded-[2rem] flex items-center justify-center text-5xl border-b-4 border-purple-950 relative overflow-hidden transform transition-all duration-500 p-2">
                           {renderProfilePicture(currentUser?.profilePicture || "🎯", "w-full h-full object-contain")}
-                          
+
                         </div>
                         <Button
                           size="sm"
@@ -5535,7 +4683,7 @@ const handlePackAction = (packId: string) => {
                         </h3>
                         <span className="font-heading text-white/40 text-[9px] font-black uppercase tracking-wider">Log In Daily</span>
                       </div>
-                      
+
                       <div className="flex items-center gap-6 mb-6">
                         <div className="bg-black/50 backdrop-blur-md rounded-2xl p-4 flex flex-col items-center border border-orange-500/20 shadow-[0_0_20px_rgba(249,115,22,0.15)] w-24 shrink-0">
                           <span className="font-heading text-5xl font-black text-orange-400 drop-shadow-[0_0_15px_rgba(249,115,22,0.4)]">{currentUser?.loginStreak || 0}</span>
@@ -5599,14 +4747,13 @@ const handlePackAction = (packId: string) => {
 
                     <div className="relative z-10 flex flex-col items-center w-full">
                       <DailySpinWheel
+                        onSpin={async () => {
+                          const result = await economyAction('spin')
+                          await fetchUsersFromSupabase(true)
+                          return result.amount
+                        }}
                         onWin={(amount) => {
                           setSpinResult(amount)
-                          const updatedUser = {
-                            ...currentUser!,
-                            tokens: (currentUser?.tokens || 0) + amount,
-                            lastDailySpin: new Date().toDateString(),
-                          }
-                          updateAndPersistCurrentUser(updatedUser)
                           setCanSpin(false)
 
                           setTimeout(() => setSpinResult(null), 5000)
@@ -5627,7 +4774,7 @@ const handlePackAction = (packId: string) => {
                   {/* Enhanced Live HUD Statistics (Col Span 2) */}
                   <div className="lg:col-span-2 bg-gradient-to-br from-slate-900 to-slate-950 backdrop-blur-2xl rounded-[2.5rem] p-8 border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.7)] relative overflow-hidden flex flex-col justify-between">
                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 opacity-50" />
-                    
+
                     <div className="flex items-center justify-between mb-6">
                       <div className="bg-orange-500/10 text-orange-400 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border border-orange-400/20 shadow-inner">
                         Live Cockpit Feed
@@ -5691,7 +4838,7 @@ const handlePackAction = (packId: string) => {
                     <div className="w-full bg-gradient-to-r from-slate-950 via-purple-950/20 to-slate-950 border border-white/10 rounded-[2.5rem] p-8 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-2xl relative overflow-hidden group">
                       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:15px_15px] pointer-events-none" />
                       <div className="absolute -top-12 -right-12 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
-                      
+
                       <div className="flex items-center gap-6 relative z-10">
                         <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 via-amber-500 to-orange-500 rounded-2xl flex items-center justify-center border border-yellow-400/20 shadow-[0_4px_25px_rgba(245,158,11,0.3)] text-4xl transform transition-transform group-hover:scale-105 group-hover:rotate-3 duration-500">
                           🏆
@@ -5705,7 +4852,7 @@ const handlePackAction = (packId: string) => {
                           </div>
                         </div>
                       </div>
-                      
+
                       <div className="flex flex-wrap gap-2.5 relative z-10 justify-center">
                         {[10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((lvl) => {
                           const isUnlocked = (currentUser?.level || 1) >= lvl;
@@ -5791,7 +4938,7 @@ const handlePackAction = (packId: string) => {
                                 )
                                 const isRented = !!activeRental
                                 const rarity = boom.rarity || "uncommon";
-                                
+
                                 const glowClass = hasBoom ? (
                                   rarity === "uncommon" ? "shadow-[0_0_15px_rgba(34,197,94,0.15)] border-green-500/20 bg-green-950/10 text-green-400 hover:shadow-[0_0_25px_rgba(34,197,94,0.35)] hover:border-green-500/40" :
                                   rarity === "rare" ? "shadow-[0_0_15px_rgba(59,130,246,0.15)] border-blue-500/20 bg-blue-950/10 text-blue-400 hover:shadow-[0_0_25px_rgba(59,130,246,0.35)] hover:border-blue-500/40" :
@@ -5893,7 +5040,7 @@ const handlePackAction = (packId: string) => {
                               const quantity = currentUser?.booms[boom.name] || 0
                               const hasUnlocked = quantity > 0
                               const rarity = boom.rarity || "uncommon";
-                              
+
                               const glowClass = hasUnlocked ? (
                                 rarity === "uncommon" ? "shadow-[0_0_15px_rgba(34,197,94,0.15)] border-green-500/20 bg-green-950/10 text-green-400 hover:shadow-[0_0_25px_rgba(34,197,94,0.35)] hover:border-green-500/40" :
                                 rarity === "rare" ? "shadow-[0_0_15px_rgba(59,130,246,0.15)] border-blue-500/20 bg-blue-950/10 text-blue-400 hover:shadow-[0_0_25px_rgba(59,130,246,0.35)] hover:border-blue-500/40" :
@@ -5993,20 +5140,18 @@ const handlePackAction = (packId: string) => {
                                       }
                                       hover:scale-105 hover:-rotate-1 active:scale-95
                                     `}
-                                    onClick={() => {
+                                    onClick={async () => {
                                       if (hasIt) {
                                         handleBoomClick(boom.name)
                                       } else if (canAfford) {
                                         if (confirm(`Purchase ${boom.name} for ${boom.price} tokens?`)) {
-                                          const updatedUser = {
-                                            ...currentUser!,
-                                            tokens: currentUser!.tokens - boom.price,
-                                            booms: {
-                                              ...currentUser!.booms,
-                                              [boom.name]: (currentUser!.booms[boom.name] || 0) + 1
-                                            }
-                                          }
-                                          updateAndPersistCurrentUser(updatedUser)
+                                          if (economyBusy.current) return
+                                          economyBusy.current = true
+                                          try {
+                                            await economyAction('buy_limited', { boomName: boom.name })
+                                            await fetchUsersFromSupabase(true)
+                                          } catch (error) { alert(error instanceof Error ? error.message : 'Purchase failed') }
+                                          finally { economyBusy.current = false }
                                         }
                                       } else {
                                         alert("You need more tokens for this ancient treasure.")
@@ -6090,7 +5235,7 @@ const handlePackAction = (packId: string) => {
                       <div className="w-1.5 h-6 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full" />
                       <h3 className="font-heading text-lg font-black text-white uppercase tracking-widest">Global Drop Rates</h3>
                     </div>
-                    
+
                     {/* Toggles for Instant & Auto Open */}
                     <div className="flex items-center gap-6">
                       <label className="flex items-center gap-2.5 cursor-pointer select-none group">
@@ -6963,7 +6108,7 @@ const handlePackAction = (packId: string) => {
                             const count = currentUser?.booms?.[boomName] || 0
                             const emoji = boomDetails?.avatar || "💥"
                             const rarity = boomDetails?.rarity || "uncommon"
-                            
+
                             const rarityStyles: Record<string, string> = {
                               uncommon: "border-green-500/20 bg-green-500/5 text-green-400",
                               rare: "border-blue-500/20 bg-blue-500/5 text-blue-400",
@@ -7132,7 +6277,7 @@ const handlePackAction = (packId: string) => {
                           ☀️ Light Theme
                         </Button>
                       </div>
-                      
+
                       <div className="space-y-3 bg-black/20 p-5 rounded-2xl border border-white/5">
                         <Label className="font-heading text-white/30 text-[9px] font-black uppercase tracking-widest ml-1">Custom Plasma Accent</Label>
                         <div className="flex gap-4">
@@ -7310,7 +6455,7 @@ const handlePackAction = (packId: string) => {
                   <div className="lg:col-span-2 space-y-6">
                     <div className="blooket-card p-6 md:p-8 shadow-2xl relative overflow-hidden">
                       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:30px_30px]" />
-                      
+
                       <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                         <h3 className="font-heading text-lg font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
                           <span className="w-2.5 h-2.5 rounded-full bg-purple-500 animate-pulse" />
@@ -7329,7 +6474,7 @@ const handlePackAction = (packId: string) => {
                           {friendsList.map((f) => {
                             const friendName = f.user_username === currentUser?.username ? f.friend_username : f.user_username
                             const friendUser = users.find(u => u.username === friendName)
-                            
+
                             // Mock a random status for visual variety
                             const statusSeed = friendUser?.id ? friendUser.id.charCodeAt(0) % 3 : 0;
                             const statusColor = statusSeed === 0 ? "bg-emerald-500 shadow-[0_0_8px_#10b981]" : statusSeed === 1 ? "bg-cyan-500 shadow-[0_0_8px_#06b6d4]" : "bg-slate-600";
@@ -7369,7 +6514,7 @@ const handlePackAction = (packId: string) => {
                                     </div>
                                   </div>
                                 </div>
-                                
+
                                 <div className="flex items-center gap-1 pl-2 shrink-0">
                                   <Button
                                     onClick={() => {
@@ -7421,7 +6566,7 @@ const handlePackAction = (packId: string) => {
                         {/* Grid decorative overlay */}
                         <div className="absolute inset-0 bg-[linear-gradient(rgba(168,85,247,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(168,85,247,0.02)_1px,transparent_1px)] bg-[size:30px_30px]" />
                         <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-[100px] pointer-events-none animate-pulse" />
-                        
+
                         <div className="relative flex flex-col xl:flex-row items-center justify-between gap-8 z-10">
                           <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
                             <div className="w-24 h-24 bg-gradient-to-br from-purple-900/30 to-indigo-950/50 rounded-full flex items-center justify-center text-6xl border border-purple-500/30 shadow-[0_0_20px_rgba(168,85,247,0.2)]">
@@ -7517,7 +6662,7 @@ const handlePackAction = (packId: string) => {
                                       currentUser.clan_role === 'leader' ||
                                       (currentUser.clan_role === 'co_leader' && member.clan_role === 'member')
                                     );
-                                    
+
                                     return (
                                       <tr key={member.id} className="hover:bg-white/5 transition-colors group">
                                         <td className="py-4 pl-2 flex items-center gap-3">
@@ -7607,7 +6752,7 @@ const handlePackAction = (packId: string) => {
                                 <Settings2Icon className="w-5 h-5 text-purple-400" />
                                 <h2 className="font-heading text-xl font-black text-white uppercase tracking-wider">Protocol Adjustments</h2>
                               </div>
-                              
+
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
                                   <label className="font-heading text-[9px] font-black uppercase text-white/30 tracking-widest">Logo Emblem</label>
@@ -7666,7 +6811,7 @@ const handlePackAction = (packId: string) => {
 
                               <div className="border-t border-white/5 pt-4 space-y-4">
                                 <h3 className="font-heading text-xs font-black uppercase text-purple-400 tracking-wider">Division Enlistment Criteria</h3>
-                                
+
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                   <div className="space-y-1.5">
                                     <label className="font-heading text-[9px] font-black uppercase text-white/30 tracking-widest">Min Credits</label>
@@ -7709,7 +6854,7 @@ const handlePackAction = (packId: string) => {
                                   const minTokens = parseInt((document.getElementById('clanEditMinTokens') as HTMLInputElement).value || '0');
                                   const minRarity = (document.getElementById('clanEditMinRarity') as HTMLSelectElement).value;
                                   const minRarityCount = parseInt((document.getElementById('clanEditMinRarityCount') as HTMLInputElement).value || '0');
-                                  
+
                                   handleUpdateClanInfo(desc, logo, tagColor, minTokens, minRarity, minRarityCount);
                                 }}
                                 className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black rounded-xl h-11 border-none text-xs uppercase tracking-wider"
@@ -7731,11 +6876,11 @@ const handlePackAction = (packId: string) => {
                                 {clanDetails.bank_tokens.toLocaleString()} Vault Credits
                               </span>
                             </div>
-                            
+
                             <p className="font-heading text-white/40 text-xs font-semibold uppercase tracking-wider leading-relaxed">
                               Procure tactical passives and holographic cosmetics utilizing treasury assets. Authorized command authorization required.
                             </p>
-                            
+
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               {/* Member Limit Upgrade */}
                               <div className="bg-black/40 border border-white/5 rounded-2xl p-4 flex flex-col justify-between gap-4">
@@ -7783,7 +6928,7 @@ const handlePackAction = (packId: string) => {
                             {/* Premium Colors Shop Section */}
                             <div className="border-t border-white/5 pt-4 space-y-3">
                               <h3 className="font-heading text-xs font-black uppercase text-purple-400 tracking-wider">Holographic Plasma Colors</h3>
-                              
+
                               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
                                 {[
                                   { code: 'text-pink-500', name: 'Neon Pink', cost: 5000 },
@@ -7801,7 +6946,7 @@ const handlePackAction = (packId: string) => {
                                         </span>
                                       </span>
                                       <div className="font-heading text-[9px] text-white/40 font-black uppercase tracking-widest leading-tight">{color.name}</div>
-                                      
+
                                       {isUnlocked ? (
                                         <Badge className="bg-green-500/10 border-green-500/20 text-green-400 text-[8px] font-black py-0.5 uppercase tracking-widest">Consolidated</Badge>
                                       ) : (
@@ -7865,7 +7010,7 @@ const handlePackAction = (packId: string) => {
                               <div className="h-2.5 w-2.5 rounded-full bg-green-500 shadow-[0_0_10px_#22c55e] animate-pulse" />
                               <h2 className="font-heading text-xl font-black text-white uppercase tracking-wider">HQ Comms Uplink</h2>
                             </div>
-                            
+
                             {/* Messages area */}
                             <ScrollArea className="flex-1 pr-2 mb-4 scrollbar-hide">
                               <div className="space-y-3">
@@ -8060,7 +7205,7 @@ const handlePackAction = (packId: string) => {
                               ))}
                             </select>
                           </div>
-                          
+
                           <div className="space-y-1.5">
                             <label className="font-heading text-[9px] font-black uppercase text-white/30 tracking-widest">Tag Plasma</label>
                             <select 
@@ -8140,7 +7285,7 @@ const handlePackAction = (packId: string) => {
                     </h3>
                     <div className="blooket-card overflow-hidden min-h-[480px] flex flex-col shadow-2xl relative">
                       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:20px_20px]" />
-                      
+
                       {!selectedTournament ? (
                         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-white/20 italic text-xs uppercase tracking-widest relative z-10">
                           <span className="font-heading text-3xl mb-3">📡</span>
@@ -8152,18 +7297,18 @@ const handlePackAction = (packId: string) => {
                             <span>DIVISION / LOGS</span>
                             <span>SCORE</span>
                           </div>
-                          
+
                           {tournamentParticipants.map((p, idx) => {
                             const isMyClan = p.clan_id === currentUser?.clan_id;
                             const clan = p.clans;
-                            
+
                             // Medal design matching leaderboard styling
                             const rankStyle = 
                               idx === 0 ? "border-yellow-500/30 bg-yellow-500/5 shadow-[0_0_15px_rgba(234,179,8,0.05)]" :
                               idx === 1 ? "border-slate-300/30 bg-slate-300/5 shadow-[0_0_15px_rgba(203,213,225,0.05)]" :
                               idx === 2 ? "border-orange-600/30 bg-orange-600/5 shadow-[0_0_15px_rgba(234,88,12,0.05)]" :
                               "bg-white/5 border-transparent";
-                              
+
                             const medalEmoji = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `#${idx + 1}`;
 
                             return (
@@ -8189,7 +7334,7 @@ const handlePackAction = (packId: string) => {
                               </div>
                             );
                           })}
-                          
+
                           {tournamentParticipants.length === 0 && (
                             <div className="font-heading text-center py-20 text-white/20 text-xs font-black uppercase tracking-widest">No scores recorded for this sector.</div>
                           )}
@@ -8225,7 +7370,7 @@ const handlePackAction = (packId: string) => {
                             >
                               {/* Glowing top line */}
                               <div className={`absolute top-0 inset-x-0 h-0.5 bg-gradient-to-r from-yellow-500/40 via-yellow-500/10 to-transparent transition-opacity duration-500 ${isSelected ? 'opacity-100' : 'opacity-0'}`} />
-                              
+
                               <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-5">
                                 <div className="space-y-1">
                                   <h4 className="font-heading text-2xl font-black text-white group-hover:text-yellow-400 transition-colors uppercase tracking-tight">{t.title}</h4>
@@ -8286,7 +7431,7 @@ const handlePackAction = (packId: string) => {
                                     const gamesPlayed = myClanPart?.games_played || 0;
                                     const totalScore = myClanPart?.score || 0;
                                     const avgScore = gamesPlayed > 0 ? Math.round(totalScore / gamesPlayed) : 0;
-                                    
+
                                     // Motivational status based on rank
                                     let motivation = "Ascend the leaderboard to claim sector dominance. ⚡";
                                     if (myClanRank === 1) motivation = "Defending Sector Dominance! Leader of the Circuit. 👑";
@@ -8299,7 +7444,7 @@ const handlePackAction = (packId: string) => {
                                         className="mt-5 p-4 rounded-2xl bg-purple-500/5 border border-purple-500/20 flex flex-col gap-4 relative overflow-hidden group/arena cursor-default"
                                       >
                                         <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-pink-500/5 opacity-0 group-hover/arena:opacity-100 transition-all duration-500 pointer-events-none" />
-                                        
+
                                         <div className="flex justify-between items-center relative z-10">
                                           <div>
                                             <span className="font-heading text-[8px] font-black uppercase text-purple-400 tracking-widest">DATALINK CONNECTION STATUS</span>
@@ -8406,14 +7551,14 @@ const handlePackAction = (packId: string) => {
                         (() => {
                           const boom1 = currentUser.active_fusion_boom1;
                           const boom2 = currentUser.active_fusion_boom2 || boom1;
-                          
+
                           const activeFusionEndsAt = currentUser.active_fusion_ends_at ? new Date(currentUser.active_fusion_ends_at).getTime() : 0;
                           const activeFusionStartedAt = currentUser.active_fusion_started_at ? new Date(currentUser.active_fusion_started_at).getTime() : 0;
                           const activeFusionRemaining = Math.max(0, Math.ceil((activeFusionEndsAt - timeNow) / 1000));
-                          
+
                           const totalDuration = Math.max(1, Math.round((activeFusionEndsAt - activeFusionStartedAt) / 1000));
                           const percentDone = Math.min(100, Math.max(0, Math.round(((totalDuration - activeFusionRemaining) / totalDuration) * 100)));
-                          
+
                           const formatTime = (secs: number) => {
                             const m = Math.floor(secs / 60);
                             const s = secs % 60;
@@ -8515,7 +7660,7 @@ const handlePackAction = (packId: string) => {
                         (() => {
                           const cooldownEndsAt = currentUser?.fusion_cooldown_ends_at ? new Date(currentUser.fusion_cooldown_ends_at).getTime() : 0;
                           const cooldownRemaining = Math.max(0, Math.ceil((cooldownEndsAt - timeNow) / 1000));
-                          
+
                           const formatTime = (secs: number) => {
                             const m = Math.floor(secs / 60);
                             const s = secs % 60;
@@ -8611,7 +7756,7 @@ const handlePackAction = (packId: string) => {
                     <div className="blooket-card p-6 md:p-8 space-y-6 shadow-2xl relative overflow-hidden">
                       <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:30px_30px]" />
                       <h3 className="font-heading text-lg font-black text-white uppercase tracking-[0.15em] relative z-10">Vault Materials inventory</h3>
-                      
+
                       <div className="relative z-10 space-y-6">
                         {(() => {
                           const boomsByRarity: Record<string, { name: string; count: number }[]> = {
@@ -8656,7 +7801,7 @@ const handlePackAction = (packId: string) => {
                           return rarityTiers.map(tier => {
                             const booms = boomsByRarity[tier.key];
                             if (booms.length === 0) return null;
-                            
+
                             return (
                               <div key={tier.key} className="space-y-3">
                                 <div className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-md border w-fit ${tier.color}`}>
@@ -8844,7 +7989,7 @@ const handlePackAction = (packId: string) => {
                 {/* Linear Laser path timeline */}
                 <div className="blooket-card p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden">
                   <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:30px_30px]" />
-                  
+
                   <div className="flex items-center justify-between mb-8 relative z-10">
                     <h3 className="font-heading text-lg font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
                       <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
@@ -9039,11 +8184,7 @@ const handlePackAction = (packId: string) => {
                   const cleanPin = pin.trim()
 
                   if (supabase) {
-                    const { data: session, error } = await supabase
-                      .from("game_sessions")
-                      .select("*")
-                      .eq("pin", cleanPin)
-                      .single()
+                    const { data: session, error } = await sessionAction('join',{pin:cleanPin})
 
                     if (error) {
                       console.error("Join Error:", error)
@@ -9108,6 +8249,8 @@ const handlePackAction = (packId: string) => {
               activeDiscoverGame.gameMode === "fishing-frenzy" ? (
                 <div className={`w-full h-full transition-transform duration-500 origin-center ${activeDiscoverGame.mode === "host" ? "scale-[0.85]" : ""}`}>
                   <FishingFrenzy
+                    sessionPin={activeGamePin || undefined}
+                    forceEnd={roomEnded}
                     grade={activeDiscoverGame.grade}
                     subject={activeDiscoverGame.subject}
                     mode={activeDiscoverGame.mode as "solo" | "host" | "join"}
@@ -9115,67 +8258,15 @@ const handlePackAction = (packId: string) => {
                     questions={activeDiscoverGame.questions}
                     durationSeconds={activeDiscoverGame.duration || 600}
                     startTimeOffset={gameStartOffset}
-                    onEnd={(score: number, correctAnswers?: number, questionsAnswered?: number) => {
-                      setGameScore(score)
-                      setGameCorrectAnswers(correctAnswers || 0)
-                      setGameTotalAnswered(questionsAnswered || 0)
-                      setIsMergingGameActive(false)
-                      setShowGameResults(true)
-
-                      // Award Rewards
-                      const currentDiscoverEarned = currentUser?.discover_tokens_earned || 0
-                      let actualTokenReward = Math.round(score / 10)
-                      let actualXpReward = Math.floor(score / 2)
-
-                      const remaining = Math.max(0, 5000 - currentDiscoverEarned)
-                      if (remaining <= 0) {
-                        actualTokenReward = 0
-                        actualXpReward = 0
-                        alert("⚠️ You have reached the lifetime limit of 5,000 tokens from Discover minigames. No further tokens or XP will be awarded.")
-                      } else {
-                        if (actualTokenReward > remaining) {
-                          actualTokenReward = remaining
-                          alert(`⚠️ You reached the lifetime limit of 5,000 tokens from Discover minigames! Awarded capped tokens: +${actualTokenReward}`)
-                        }
-                      }
-
-                      if (currentUser) {
-                        const newCorrectCount = (currentUser.correct_answers_count || 0) + (correctAnswers || 0)
-                        const newAnsweredCount = (currentUser.questions_answered_count || 0) + (questionsAnswered || 0)
-
-                        // Sync final score and accuracy to database
-                        handleScoreUpdate(score, true)
-
-                        if (actualXpReward > 0) {
-                          awardBoomXP(Math.floor(score / 4)) // Bonus XP for the pinned boom
-                        }
-
-                        awardXP(actualXpReward, {
-                          tokens: (currentUser.tokens || 0) + actualTokenReward,
-                          discover_tokens_earned: (currentUser.discover_tokens_earned || 0) + actualTokenReward,
-                          correct_answers_count: newCorrectCount,
-                          questions_answered_count: newAnsweredCount
-                        })
-                      }
-                    }}
+                    onEnd={handleVerifiedGameEnd}
                     onScoreUpdate={handleScoreUpdate}
-                    onAwardTokens={(amount) => {
-                      if (currentUser) {
-                        const currentDiscoverEarned = currentUser.discover_tokens_earned || 0
-                        const remaining = Math.max(0, 5000 - currentDiscoverEarned)
-                        if (remaining <= 0) return
-                        const actualTokens = Math.min(amount, remaining)
-                        updateAndPersistCurrentUser({
-                          ...currentUser,
-                          tokens: (currentUser.tokens || 0) + actualTokens,
-                          discover_tokens_earned: currentDiscoverEarned + actualTokens
-                        })
-                      }
-                    }}
+
                   />
                 </div>
               ) : (
                 <MergingGame
+                  sessionPin={activeGamePin || undefined}
+                  forceEnd={roomEnded}
                   grade={activeDiscoverGame.grade}
                   subject={activeDiscoverGame.subject}
                   mode={activeDiscoverGame.mode as "solo" | "host" | "join"}
@@ -9183,63 +8274,9 @@ const handlePackAction = (packId: string) => {
                   questions={activeDiscoverGame.questions}
                   durationSeconds={activeDiscoverGame.duration || 600}
                   startTimeOffset={gameStartOffset}
-                  onEnd={(score: number, correctAnswers?: number, questionsAnswered?: number) => {
-                    setGameScore(score)
-                    setGameCorrectAnswers(correctAnswers || 0)
-                    setGameTotalAnswered(questionsAnswered || 0)
-                    setIsMergingGameActive(false)
-                    setShowGameResults(true)
-
-                    // Grade-based Reward Logic
-                    const currentDiscoverEarned = currentUser?.discover_tokens_earned || 0
-                    let actualTokenReward = score
-                    let actualXpReward = activeDiscoverGame.grade * (correctAnswers || 0)
-
-                    const remaining = Math.max(0, 5000 - currentDiscoverEarned)
-                    if (remaining <= 0) {
-                      actualTokenReward = 0
-                      actualXpReward = 0
-                      alert("⚠️ You have reached the lifetime limit of 5,000 tokens from Discover minigames. No further tokens or XP will be awarded.")
-                    } else {
-                      if (actualTokenReward > remaining) {
-                        actualTokenReward = remaining
-                        alert(`⚠️ You reached the lifetime limit of 5,000 tokens from Discover minigames! Awarded capped tokens: +${actualTokenReward}`)
-                      }
-                    }
-
-                    if (currentUser) {
-                      const newCorrectCount = (currentUser.correct_answers_count || 0) + (correctAnswers || 0)
-                      const newAnsweredCount = (currentUser.questions_answered_count || 0) + (questionsAnswered || 0)
-
-                      // Sync final score and accuracy to database
-                      handleScoreUpdate(score, true)
-
-                      if (actualXpReward > 0) {
-                        awardBoomXP(Math.floor(score / 4)) // Bonus XP for the pinned boom
-                      }
-
-                      awardXP(actualXpReward, {
-                        tokens: (currentUser.tokens || 0) + actualTokenReward,
-                        discover_tokens_earned: (currentUser.discover_tokens_earned || 0) + actualTokenReward,
-                        correct_answers_count: newCorrectCount,
-                        questions_answered_count: newAnsweredCount
-                      })
-                    }
-                  }}
+                  onEnd={handleVerifiedGameEnd}
                   onScoreUpdate={handleScoreUpdate}
-                  onAwardTokens={(amount) => {
-                    if (currentUser) {
-                      const currentDiscoverEarned = currentUser.discover_tokens_earned || 0
-                      const remaining = Math.max(0, 5000 - currentDiscoverEarned)
-                      if (remaining <= 0) return
-                      const actualTokens = Math.min(amount, remaining)
-                      updateAndPersistCurrentUser({
-                        ...currentUser,
-                        tokens: (currentUser.tokens || 0) + actualTokens,
-                        discover_tokens_earned: currentDiscoverEarned + actualTokens
-                      })
-                    }
-                  }}
+
                 />
               )
             )}
@@ -9322,7 +8359,7 @@ const handlePackAction = (packId: string) => {
                   <h4 className="font-heading text-sm font-black uppercase tracking-widest text-purple-400">
                     🛠️ v2.0.0 Patch Notes & Features
                   </h4>
-                  
+
                   <div className="grid gap-4">
                     <div className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-purple-500/20 transition-all">
                       <div className="flex items-center gap-2 mb-1.5">
@@ -9543,7 +8580,7 @@ const handlePackAction = (packId: string) => {
                       // Use pre-existing questions if they were passed via the subject state
                       let questions = (soloSubject as any)?.questions
                       if (!questions) {
-                        questions = await fetchQuestionsWithAi(soloSubject.grade, soloSubject.subject, 30)
+                        questions = getFallbackQuestions(soloSubject.grade, soloSubject.subject, 30, soloSubject.subject)
                       }
 
                       setIsGeneratingSet(false)
@@ -9879,13 +8916,13 @@ const handlePackAction = (packId: string) => {
                   {/* Rotating Outer Rings */}
                   <div className="absolute -inset-8 rounded-full border border-purple-500/20 animate-spin" style={{ animationDuration: '4s' }} />
                   <div className="absolute -inset-12 rounded-full border border-cyan-500/10 animate-spin" style={{ animationDuration: '8s', animationDirection: 'reverse' }} />
-                  
+
                   <div className="w-56 h-56 blooket-card rounded-full shadow-[0_0_50px_rgba(168,85,247,0.2)] flex flex-col items-center justify-center relative overflow-hidden group">
                     <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-transparent pointer-events-none" />
-                    
+
                     {/* Inner spinning core */}
                     <div className="absolute inset-4 rounded-full border border-dashed border-white/10 animate-spin" style={{ animationDuration: '12s' }} />
-                    
+
                     <div className="font-heading text-9xl drop-shadow-[0_8px_16px_rgba(168,85,247,0.3)] z-10 select-none animate-pulse">
                       {PACKS.find(p => p.name === packAnimation.packName)?.emoji || "📦"}
                     </div>
@@ -10025,7 +9062,7 @@ const handlePackAction = (packId: string) => {
                   Express yourself by using a classic emoji or any Boom from your collection!
                 </CardDescription>
               </CardHeader>
-              
+
               <CardContent className="space-y-4">
                 {/* Custom Tabs Navigation */}
                 <div className="grid grid-cols-2 blooket-panel/60 rounded-xl p-1 mb-2">
@@ -10046,7 +9083,7 @@ const handlePackAction = (packId: string) => {
                     My Booms
                   </button>
                 </div>
-                
+
                 {profilePickerTab === "emojis" ? (
                   <ScrollArea className="h-60 pr-2">
                     <div className="grid grid-cols-6 gap-3 p-1">
@@ -10102,7 +9139,7 @@ const handlePackAction = (packId: string) => {
                     })()}
                   </ScrollArea>
                 )}
-                
+
                 <Button 
                   onClick={() => setShowProfilePicker(false)} 
                   className="w-full h-12 bg-white/5 hover:bg-white/10 text-white font-bold rounded-2xl border border-white/5 transition-all mt-4"
@@ -10972,7 +10009,7 @@ const handlePackAction = (packId: string) => {
               // Use pre-existing questions if available
               let questions = (hostingSubject as any)?.questions
               if (!questions) {
-                questions = await fetchQuestionsWithAi(hostingSubject.grade, hostingSubject.subject, 30)
+                questions = getFallbackQuestions(hostingSubject.grade, hostingSubject.subject, 30, hostingSubject.subject)
               }
 
               setIsGeneratingSet(false)
@@ -10982,39 +10019,24 @@ const handlePackAction = (packId: string) => {
                 return
               }
 
-              const pin = Math.floor(100000 + Math.random() * 900000).toString()
-
               if (supabase) {
                 // Robust Hosting logic: Try new columns, fall back to old if schema cache is stale
                 const lobbyData: any = {
-                  pin,
-                  host_id: currentUser?.id,
-                  host_username: currentUser?.username,
                   grade: hostingSubject.grade,
                   subject: hostingSubject.subject,
                   questions,
-                  status: "waiting",
                   duration: settings.duration * 60,
-                  players: []
                 }
 
                 // Try with new columns first
-                let { error } = await supabase.from("game_sessions").insert({
+                const { data: room, error } = await sessionAction('create', {
                   ...lobbyData,
                   mode: selectedGameMode.id,
                   settings: settings,
                 })
 
                 // If missing column error (42703), retry with basic data
-                if (error && error.code === '42703') {
-                  console.warn("Schema cache mismatch: Retrying without 'mode' and 'settings' columns.")
-                  const retry = await supabase.from("game_sessions").insert(lobbyData)
-                  error = retry.error
 
-                  if (!error) {
-                    alert("⚠️ Database Schema Alert: Your game started, but 'Game Modes' and 'Custom Settings' were lost because the database columns are missing. Please run the SQL migration in the implementation plan to fix this permamently.")
-                  }
-                }
 
                 if (error) {
                   console.error("Host Session Error:", error)
@@ -11022,7 +10044,7 @@ const handlePackAction = (packId: string) => {
                   return
                 }
 
-                setActiveGamePin(pin)
+                setActiveGamePin(room.pin)
                 setActiveDiscoverGame({
                   grade: hostingSubject.grade,
                   subject: hostingSubject.subject,
@@ -11050,10 +10072,10 @@ const handlePackAction = (packId: string) => {
                 duration={selectedDuration || activeDiscoverGame.duration || 120}
                 onEndGame={async () => {
                   if (supabase && activeGamePin) {
-                    await supabase.from("game_sessions").update({ status: "finished" }).eq("pin", activeGamePin)
+                    const {error}=await sessionAction('finish',{pin:activeGamePin})
+                    if (error) { alert(error.message); return }
                   }
-                  setIsMergingGameActive(false)
-                  setShowGameResults(true)
+                  setRoomEnded(true)
                 }}
                 players={livePlayers.map(p => ({
                   id: p.id,
@@ -11074,12 +10096,7 @@ const handlePackAction = (packId: string) => {
             score={gameScore}
             totalQuestions={activeDiscoverGame?.questions?.length || 0}
             highScore={currentUser?.boomScore || 0}
-            tokensEarned={currentUser ? Math.min(
-              activeDiscoverGame?.gameMode === "fishing-frenzy"
-                ? Math.round(gameScore / 10)
-                : gameScore,
-              Math.max(0, 5000 - (currentUser.discover_tokens_earned || 0))
-            ) : 0}
+            tokensEarned={gameTokensEarned}
             leaderboard={livePlayers.length > 0 ? [...livePlayers].filter(Boolean).sort((a, b) => (b.score || 0) - (a.score || 0)).map(p => {
               const userObj = users.find(u => u.id === p.id || u.username === p.username)
               const careerAccuracy = (userObj && (userObj.questions_answered_count || 0) > 0)
@@ -11103,75 +10120,12 @@ const handlePackAction = (packId: string) => {
                 ? Math.round(((currentUser.correct_answers_count || 0) / (currentUser.questions_answered_count || 0)) * 100)
                 : 0
             }] : [])}
-            onExit={async () => {
-              if (currentUser && gameScore > 0) {
-                // Log activity
-                await supabase?.rpc('log_user_activity', {
-                  p_username: currentUser.username,
-                  p_type: 'game_win',
-                  p_desc: `Finished a game with score: ${gameScore}`,
-                  p_details: { score: gameScore, pin: activeGamePin }
-                })
-
-                // Phase 5: Update stats and check achievements
-                const newGamesPlayed = (currentUser.games_played || 0) + 1
-                await supabase?.from("users").update({
-                  games_played: newGamesPlayed
-                }).eq("username", currentUser.username)
-
-                // Add Season XP (50 per game + dynamic score bonus!) if not capped
-                if ((currentUser.discover_tokens_earned || 0) < 5000) {
-                  const seasonXpEarned = 50 + Math.floor(gameScore / 10)
-                  await handleAddSeasonXp(seasonXpEarned)
-                }
-
-                // Check achievements
-                await supabase?.rpc('check_achievements', {
-                  p_username: currentUser.username,
-                  p_type: 'games_played',
-                  p_value: newGamesPlayed
-                })
-
-                // Submit to clan-based tournaments
-                if (activeTournaments.length > 0 && currentUser.clan_id) {
-                  for (const t of activeTournaments) {
-                    if (t.status === 'active') {
-                      await supabase?.rpc('submit_clan_tournament_score', {
-                        p_tournament_id: t.id,
-                        p_username: currentUser.username,
-                        p_score: gameScore
-                      })
-                    }
-                  }
-                }
-
-                // Award Clan XP (50 per game + dynamic score bonus!)
-                if (currentUser.clan_id) {
-                  const clanXpEarned = 50 + Math.floor(gameScore / 10)
-                  await supabase?.rpc('add_clan_xp', {
-                    p_username: currentUser.username,
-                    p_amount: clanXpEarned
-                  })
-                }
-
-                // Decrement rental session if playing with a rented boom
-                if (currentUser.pinned_boom) {
-                  const { data: rentRes, error: rentErr } = await supabase!.rpc('decrement_rental_session', {
-                    p_renter: currentUser.username,
-                    p_boom_name: currentUser.pinned_boom
-                  })
-                  if (rentErr) {
-                    console.error("[v0] Error decrementing rental session:", rentErr.message)
-                  } else if (rentRes?.success) {
-                    console.log("[v0] Rental session used:", rentRes.message)
-                  }
-                }
-              }
+            onExit={() => {
               setShowGameResults(false)
               setActiveDiscoverGame(null)
               setActiveGamePin("")
               setLobbyActive(false)
-              fetchUsersFromSupabase(true)
+              void fetchUsersFromSupabase(true)
             }}
             onPlayAgain={() => {
               setShowGameResults(false)
@@ -11191,7 +10145,7 @@ const handlePackAction = (packId: string) => {
               modalNotification.type === "success" ? "bg-emerald-500" :
               modalNotification.type === "error" ? "bg-rose-500" : "bg-cyan-500"
             }`} />
-            
+
             {/* Header Icon */}
             <div className="mx-auto w-16 h-16 rounded-2xl bg-black/40 border border-white/5 flex items-center justify-center text-3xl shadow-inner mb-4">
               {modalNotification.type === "success" ? "🎉" :

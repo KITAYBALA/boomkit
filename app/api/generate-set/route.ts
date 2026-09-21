@@ -1,11 +1,21 @@
 import { NextResponse } from "next/server"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import { getFallbackQuestions } from "@/lib/fallback-questions"
+import { verifySession } from '@/lib/auth-server'
+import { checkRateLimiter } from '@/lib/rate-limiter'
+import { z } from 'zod'
 
 // Fallback questions are now centralized in @/lib/fallback-questions.ts
 
 export async function POST(req: Request) {
-  const { prompt, grade, subject, count = 25 } = await req.json()
+  const session = await verifySession()
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const parsed = z.object({ prompt: z.string().trim().min(1).max(1000), grade: z.number().int().min(1).max(12),
+    subject: z.string().trim().min(1).max(100), count: z.number().int().min(1).max(50).default(25) }).safeParse(await req.json().catch(() => null))
+  if (!parsed.success) return NextResponse.json({ error: 'Invalid question request' }, { status: 400 })
+  const limit = await checkRateLimiter(`ai:${session.userId}`)
+  if (!limit.allowed) return NextResponse.json({ error: limit.message }, { status: 429, headers: { 'Retry-After': String(limit.retryAfter) } })
+  const { prompt, grade, subject, count } = parsed.data
 
   try {
     const apiKey = process.env.GOOGLE_GEMINI_API_KEY
@@ -134,8 +144,12 @@ export async function POST(req: Request) {
         if (jsonMatch) jsonStr = jsonMatch[0]
 
         const data = JSON.parse(jsonStr)
-        if (data.questions && data.questions.length > 0) {
-          finalData = data
+        const validated = z.object({ title: z.string().max(200), description: z.string().max(2000).optional(),
+          questions: z.array(z.object({ id: z.string().max(100), question: z.string().min(1).max(2000),
+            options: z.array(z.string().min(1).max(500)).length(4), correctIndex: z.number().int().min(0).max(3) })).length(count),
+        }).safeParse(data)
+        if (validated.success) {
+          finalData = { ...validated.data, grade, subject }
           generationSuccessful = true
           console.log(`[AI API] Successfully generated with ${modelName}`)
         }
@@ -168,12 +182,11 @@ export async function POST(req: Request) {
       title: `${subject} Quiz`,
       description: isQuotaError
         ? `API Rate Limit hit. Please wait ${retryAfter}s. Using relevant fallback questions.`
-        : `Error: ${errorMsg}. Using fallback questions.`,
+        : 'Question generation unavailable. Using fallback questions.',
       grade,
       subject,
       questions: getFallbackQuestions(grade, subject, count, prompt),
       fallback: true,
-      error: errorMsg,
       isQuotaError,
       retryAfter
     })

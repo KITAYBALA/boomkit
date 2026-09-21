@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import { getSupabaseServerClient } from "@/lib/supabase-server-client"
 import { generateGeminiResponse } from "@/lib/gemini"
+import { escapeLikeLiteral } from "@/lib/auth-input"
+import { canModerate, isModerator } from "@/lib/moderation-policy"
 
 export async function GET() {
   try {
@@ -30,7 +32,7 @@ import { verifySession } from "@/lib/auth-server"
 async function handleStaffCommand(
   cmd: string,
   commandParts: string[],
-  userData: { id: string; username: string; role: string },
+  userData: { id: string; username: string; role: string; is_owner: boolean },
   supabase: any
 ) {
   const targetUsername = commandParts[1]?.trim();
@@ -41,8 +43,8 @@ async function handleStaffCommand(
   // Find target user
   const { data: targetUser, error: fetchErr } = await supabase
     .from("users")
-    .select("id, username, tokens")
-    .ilike("username", targetUsername)
+    .select("id, username, tokens, role, is_owner")
+    .ilike("username", escapeLikeLiteral(targetUsername))
     .maybeSingle();
 
   if (fetchErr || !targetUser) {
@@ -50,6 +52,9 @@ async function handleStaffCommand(
   }
 
   let broadcastMessage = "";
+  if (["/ban", "/unban", "/mute", "/unmute"].includes(cmd) && !canModerate(userData, targetUser)) {
+    return NextResponse.json({ error: "You cannot moderate this account." }, { status: 403 });
+  }
 
   if (cmd === "/ban") {
     let duration: number | null = null;
@@ -58,6 +63,9 @@ async function handleStaffCommand(
       const lastPart = commandParts[commandParts.length - 1];
       const parsedDuration = parseInt(lastPart, 10);
       if (!isNaN(parsedDuration) && parsedDuration > 0) {
+        if (!Number.isSafeInteger(parsedDuration) || parsedDuration > 87600) {
+          return NextResponse.json({ error: "Duration must not exceed 87600 hours." }, { status: 400 });
+        }
         duration = parsedDuration;
         reason = commandParts.slice(2, -1).join(" ") || "Banned by staff";
       } else {
@@ -105,6 +113,9 @@ async function handleStaffCommand(
       const lastPart = commandParts[commandParts.length - 1];
       const parsedDuration = parseInt(lastPart, 10);
       if (!isNaN(parsedDuration) && parsedDuration > 0) {
+        if (!Number.isSafeInteger(parsedDuration) || parsedDuration > 87600) {
+          return NextResponse.json({ error: "Duration must not exceed 87600 hours." }, { status: 400 });
+        }
         duration = parsedDuration;
         reason = commandParts.slice(2, -1).join(" ") || "Muted by staff";
       } else {
@@ -114,9 +125,7 @@ async function handleStaffCommand(
 
     let expiryTime = null;
     if (duration) {
-      const expDate = new Date();
-      expDate.setHours(expDate.getHours() + duration);
-      expiryTime = expDate.toISOString();
+      expiryTime = Date.now() + duration * 3600000;
     }
 
     const { error: updateErr } = await supabase
@@ -151,9 +160,9 @@ async function handleStaffCommand(
   }
   else if (cmd === "/check-alts") {
     const { data: fullTargetUser, error: dbErr } = await supabase
-      .from("users")
-      .select("username, last_ip, mac_address")
-      .eq("id", targetUser.id)
+      .from("user_secrets")
+      .select("last_ip, mac_address")
+      .eq("user_id", targetUser.id)
       .single();
 
     if (dbErr || !fullTargetUser) {
@@ -165,10 +174,13 @@ async function handleStaffCommand(
 
     if (mac && mac.trim() !== "" && mac !== "null") {
       // Check based on device ID (mac_address)
-      const { data: alts, error: altsErr } = await supabase
-        .from("users")
-        .select("username, is_banned, role, join_date")
+      const { data: matches, error: matchError } = await supabase
+        .from("user_secrets")
+        .select("user_id")
         .eq("mac_address", mac);
+      if (matchError) throw matchError;
+      const { data: alts, error: altsErr } = await supabase.from("users")
+        .select("username, is_banned").in("id", matches.map((match: { user_id: string }) => match.user_id));
 
       if (altsErr || !alts) {
         return NextResponse.json({ error: "Error querying for alt accounts." }, { status: 500 });
@@ -181,12 +193,15 @@ async function handleStaffCommand(
         const altNames = otherAlts.map((a: any) => `${a.username}${a.is_banned ? " (Banned)" : ""}`).join(", ");
         broadcastMessage = `System 🛡️: Alt accounts check for ${targetUser.username} found on same device: ${altNames}`;
       }
-    } else if (ip && ip !== "127.0.0.1") {
+    } else if (ip && !["127.0.0.1", "::1", "unknown"].includes(ip)) {
       // Fallback to IP address if no device ID is registered
-      const { data: alts, error: altsErr } = await supabase
-        .from("users")
-        .select("username, is_banned, role, join_date")
+      const { data: matches, error: matchError } = await supabase
+        .from("user_secrets")
+        .select("user_id")
         .eq("last_ip", ip);
+      if (matchError) throw matchError;
+      const { data: alts, error: altsErr } = await supabase.from("users")
+        .select("username, is_banned").in("id", matches.map((match: { user_id: string }) => match.user_id));
 
       if (altsErr || !alts) {
         return NextResponse.json({ error: "Error querying for alt accounts." }, { status: 500 });
@@ -209,8 +224,8 @@ async function handleStaffCommand(
     if (!amountStr) {
       return NextResponse.json({ error: "Missing amount parameter." }, { status: 400 });
     }
-    const amount = parseInt(amountStr, 10);
-    if (isNaN(amount) || amount <= 0) {
+    const amount = Number(amountStr);
+    if (!Number.isSafeInteger(amount) || amount <= 0 || amount > 1000000000) {
       return NextResponse.json({ error: "Invalid amount. Must be a positive integer." }, { status: 400 });
     }
 
@@ -261,12 +276,15 @@ export async function POST(request: Request) {
     }
 
     const { message } = await request.json()
+    if (typeof message !== "string" || !message.trim() || message.length > 2000) {
+      return NextResponse.json({ error: "Message must contain 1 to 2000 characters." }, { status: 400 })
+    }
     const supabase = getSupabaseServerClient()
 
     // Get the actual user data corresponding to the verified session
     const { data: userData, error: userError } = await supabase
       .from("users")
-      .select("id, username, role, is_muted, mute_expiry")
+      .select("id, username, role, is_owner, is_muted, mute_expiry")
       .eq("id", session.userId)
       .single()
 
@@ -288,8 +306,7 @@ export async function POST(request: Request) {
       const supportedCommands = ["/ban", "/unban", "/mute", "/unmute", "/check-alts", "/gift-tokens"];
       
       if (supportedCommands.includes(cmd)) {
-        const STAFF_ROLES = ["owner", "admin", "senior_moderator", "moderator"];
-        if (!STAFF_ROLES.includes(role || "")) {
+        if (!isModerator(userData)) {
           return NextResponse.json({ error: "Unauthorized command: Staff only." }, { status: 403 });
         }
         return await handleStaffCommand(cmd, commandParts, userData, supabase);
@@ -327,7 +344,7 @@ export async function POST(request: Request) {
         .from("users")
         .update({
           is_muted: true,
-          mute_expiry: muteExpiry.toISOString()
+          mute_expiry: muteExpiry.getTime()
         })
         .eq("id", userData.id)
 
@@ -407,7 +424,7 @@ export async function POST(request: Request) {
     if (error) {
       console.error("[v0] Error posting chat message:", error)
       // Return the actual error to the client for debugging
-      return NextResponse.json({ error: error.message, details: error }, { status: 500 })
+      return NextResponse.json({ error: "Failed to post chat message" }, { status: 500 })
     }
 
     console.log("[v0] Successfully posted chat message:", data)
@@ -436,7 +453,7 @@ export async function POST(request: Request) {
     return NextResponse.json(data, { status: 201 })
   } catch (error: any) {
     console.error("[v0] Unexpected error posting chat message:", error)
-    return NextResponse.json({ error: error.message || "Failed to post chat message" }, { status: 500 })
+    return NextResponse.json({ error: "Failed to post chat message" }, { status: 500 })
   }
 }
 
@@ -445,23 +462,40 @@ export async function PATCH(request: Request) {
     const session = await verifySession()
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
-    const { id, message } = await request.json()
+    const { id, message, emoji, active } = await request.json()
+    if (typeof id !== "string" || !id || id.length > 100 ||
+      (emoji === undefined && (typeof message !== "string" || !message.trim() || message.length > 2000))) {
+      return NextResponse.json({ error: "Invalid message" }, { status: 400 })
+    }
     const supabase = getSupabaseServerClient()
 
     // Get the requester's username
     const { data: userData, error: userError } = await supabase
       .from("users")
-      .select("username")
+      .select("username, is_muted, mute_expiry")
       .eq("id", session.userId)
       .single()
 
     if (userError || !userData) return NextResponse.json({ error: "User not found" }, { status: 404 })
     const username = userData.username
+    if (userData.is_muted && (!userData.mute_expiry || !(new Date(userData.mute_expiry).getTime() <= Date.now()))) {
+      return NextResponse.json({ error: "MUTED" }, { status: 403 })
+    }
+    if (emoji !== undefined) {
+      if (!["👍", "❤️", "😂", "🔥", "💀", "👀"].includes(emoji) || typeof active !== "boolean") {
+        return NextResponse.json({ error: "Invalid reaction" }, { status: 400 })
+      }
+      const { data, error } = await supabase.rpc('set_boomkit_chat_reaction', {
+        p_message_id: id, p_username: username, p_emoji: emoji, p_active: active,
+      })
+      if (error) throw error
+      return NextResponse.json({ reactions: data })
+    }
 
     // Ensure the message belongs to the user
     const { data: existingMessage, error: fetchError } = await supabase
       .from("chat_messages")
-      .select("username")
+      .select("user_id")
       .eq("id", id)
       .single()
 
@@ -469,7 +503,7 @@ export async function PATCH(request: Request) {
       return NextResponse.json({ error: "Message not found" }, { status: 404 })
     }
 
-    if (existingMessage.username !== username) {
+    if (existingMessage.user_id !== session.userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
     }
 
@@ -510,7 +544,7 @@ export async function DELETE(request: Request) {
     // Get the requester's info
     const { data: requesterData, error: requesterError } = await supabase
       .from("users")
-      .select("username, role")
+      .select("username, role, is_owner")
       .eq("id", session.userId)
       .single()
 
@@ -519,12 +553,12 @@ export async function DELETE(request: Request) {
     }
 
     const username = requesterData.username
-    const isStaff = ["owner", "admin", "senior_moderator", "moderator", "tester"].includes(requesterData.role)
+    const isStaff = isModerator(requesterData)
 
     // Ensure the message belongs to the user or requester is staff
     const { data: existingMessage, error: fetchError } = await supabase
       .from("chat_messages")
-      .select("username")
+      .select("user_id")
       .eq("id", id)
       .single()
 
@@ -532,7 +566,7 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "Message not found" }, { status: 404 })
     }
 
-    if (existingMessage.username !== username && !isStaff) {
+    if (existingMessage.user_id !== session.userId && !isStaff) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
     }
 

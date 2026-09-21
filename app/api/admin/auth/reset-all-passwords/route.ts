@@ -27,10 +27,10 @@ export async function POST() {
     }
 
     const { data: updatedUsers, error: updateError } = await supabase
-      .from('users')
-      .update({ password_reset_required: true })
+      .from('user_secrets')
+      .update({ password_reset_required: true, sessions_revoked_at: new Date().toISOString() })
       .not('password_hash', 'is', null)
-      .select('id')
+      .select('user_id')
 
     if (updateError) {
       console.error('[AUTH] Error marking passwords for reset:', updateError)

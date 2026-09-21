@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServerClient } from '@/lib/supabase-server-client'
 import { verifySession } from '@/lib/auth-server'
+import { isIP } from 'node:net'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,10 +24,13 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
         }
 
-        const { ip, reason, banned_by } = await request.json()
+        const { ip, reason } = await request.json()
 
-        if (typeof ip !== 'string' || !isValidIp(ip.trim())) {
+        if (typeof ip !== 'string' || !isIP(ip.trim())) {
             return NextResponse.json({ success: false, message: 'A valid IP address is required' }, { status: 400 })
+        }
+        if (reason !== undefined && (typeof reason !== 'string' || reason.length > 1000)) {
+            return NextResponse.json({ success: false, message: 'Invalid reason' }, { status: 400 })
         }
 
         const { error } = await supabase
@@ -34,7 +38,7 @@ export async function POST(request: NextRequest) {
             .upsert({
                 ip: ip.trim(),
                 reason: reason || 'Banned by staff',
-                banned_by: banned_by || actor.id,
+                banned_by: actor.id,
                 banned_at: new Date().toISOString()
             })
 
@@ -48,8 +52,4 @@ export async function POST(request: NextRequest) {
         console.error('Blacklist IP error:', error)
         return NextResponse.json({ success: false, message: 'An unexpected error occurred' }, { status: 500 })
     }
-}
-
-function isValidIp(ip: string) {
-    return /^(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)(?:\.|$)){4}$/.test(ip) || /^[a-fA-F0-9:]+$/.test(ip)
 }

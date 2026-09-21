@@ -1,6 +1,8 @@
 "use client"
 
 import React, { useState, useEffect, useCallback, useRef } from "react"
+import { stepMergeBoard, weightedRarity } from "@/lib/merge-game-engine"
+import { useGameRewards } from '@/hooks/use-game-rewards'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -24,6 +26,8 @@ interface MergeItem {
 }
 
 interface MergingGameProps {
+    sessionPin?: string
+    forceEnd?: boolean
     grade: number
     subject: string
     mode: "solo" | "host" | "join"
@@ -31,7 +35,7 @@ interface MergingGameProps {
     questions: Question[]
     durationSeconds: number
     startTimeOffset?: number
-    onEnd: (score: number, correctAnswers?: number, questionsAnswered?: number) => void
+    onEnd: (score: number, correctAnswers?: number, questionsAnswered?: number, rewards?: { tokens: number; xp: number }) => void
     onScoreUpdate?: (score: number) => void
     onAwardTokens?: (amount: number) => void
 }
@@ -108,7 +112,9 @@ export default function MergingGame({
     onScoreUpdate,
     onAwardTokens,
     startTimeOffset,
+    sessionPin, forceEnd,
 }: MergingGameProps) {
+    const rewards = useGameRewards(questions, durationSeconds - (startTimeOffset || 0), sessionPin)
     const config = MODE_CONFIGS[gameMode] || DEFAULT_CONFIG
     const initialTime = Math.max(0, durationSeconds - (startTimeOffset || 0))
     const [timeLeft, setTimeLeft] = useState(initialTime)
@@ -126,27 +132,26 @@ export default function MergingGame({
 
     const gameAreaRef = useRef<HTMLDivElement>(null)
 
-    // Crash Prevention: If no questions, show loading or error
-    if (!Array.isArray(questions) || questions.length === 0) {
-        return (
-            <div className="flex flex-col items-center justify-center w-full h-full text-white bg-slate-900">
-                <div className="w-12 h-12 rounded-full border-4 border-purple-500 border-t-transparent animate-spin mb-4" />
-                <p className="font-bold text-lg">Loading Game Data...</p>
-                <p className="font-heading text-white/40 text-sm">Waiting for host to sync...</p>
-            </div>
-        )
-    }
+    const endedRef = useRef(false)
+    const answerLockedRef = useRef(false)
+    const dropReadyRef = useRef(false)
+    const boardRef = useRef<MergeItem[]>([])
+    const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([])
+    const latestRef = useRef({ score, correctAnswers, questionsAnswered, onEnd, onAwardTokens })
+    latestRef.current = { score, correctAnswers, questionsAnswered, onEnd, onAwardTokens }
+    useEffect(() => () => { timeoutsRef.current.forEach(clearTimeout) }, [])
+    useEffect(() => { onScoreUpdate?.(score) }, [score, onScoreUpdate])
 
     // Shuffle options whenever the question changes
     useEffect(() => {
-        const question = questions[currentQuestionIndex]
+        const question = questions?.[currentQuestionIndex]
         if (question) {
             const optionsWithIndices = question.options?.map((option, index) => ({
                 text: option,
                 originalIndex: index
             }))
             // Fisher-Yates shuffle
-            const shuffled = [...optionsWithIndices]
+            const shuffled = [...(optionsWithIndices || [])]
             for (let i = shuffled.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
@@ -155,66 +160,59 @@ export default function MergingGame({
         }
     }, [currentQuestionIndex, questions])
 
-    // Timer effect
+    // A deadline prevents background-tab throttling from extending the game.
     useEffect(() => {
-        if (timeLeft <= 0 || isGameOver) {
-            if (!isGameOver) handleGameOver()
-            return
-        }
-
-        const timer = setInterval(() => {
-            setTimeLeft((prev) => prev - 1)
-        }, 1000)
-
+        const deadline = Date.now() + Math.max(0, durationSeconds - (startTimeOffset || 0)) * 1000
+        const tick = () => setTimeLeft(Math.max(0, Math.ceil((deadline - Date.now()) / 1000)))
+        tick()
+        const timer = setInterval(tick, 250)
         return () => clearInterval(timer)
-    }, [timeLeft, isGameOver])
+    }, [durationSeconds, startTimeOffset])
+
+    useEffect(() => {
+        if (timeLeft <= 0 || forceEnd) handleGameOver()
+    }, [timeLeft,forceEnd])
 
     const handleGameOver = () => {
+        if (endedRef.current) return
+        endedRef.current = true
+        timeoutsRef.current.forEach(clearTimeout)
         setIsGameOver(true)
-        onEnd(score, correctAnswers, questionsAnswered)
+        const latest = latestRef.current
+        void rewards.finish().catch(error => { alert(error.message); return { tokens: 0, xp: 0 } }).then(result => {
+            latest.onEnd(latest.score, latest.correctAnswers, latest.questionsAnswered, result)
+        })
     }
 
-    const getRandomRarity = () => {
-        const r = Math.random() * 100
-        let cumulative = 0
-
-        // Apply Mode Drop Rate Shift
-        const adjustedRates = DROP_RATES.map(item => ({
-            ...item,
-            chance: item.rarity === "uncommon" ? item.chance : item.chance + (config.dropRateShift / 5)
-        }))
-
-        for (const item of adjustedRates) {
-            cumulative += item.chance
-            if (r <= cumulative) return item.rarity
-        }
-        return "uncommon"
-    }
+    const getRandomRarity = () => weightedRarity(DROP_RATES, config.dropRateShift, Math.random())
 
     const handleAnswer = (shuffledIndex: number) => {
+        if (endedRef.current || !isAnswering || answerLockedRef.current || !shuffledOptions[shuffledIndex]) return
+        answerLockedRef.current = true
         const originalIndex = shuffledOptions[shuffledIndex].originalIndex
+        rewards.answer(originalIndex)
         setQuestionsAnswered(prev => prev + 1)
 
         if (originalIndex === questions[currentQuestionIndex]?.correctIndex) {
             setFeedback("correct")
             setCorrectAnswers(prev => prev + 1)
-            setScore((prev) => {
-                const newScore = prev + Math.ceil(10 * config.rewardMultiplier)
-                if (onScoreUpdate) onScoreUpdate(newScore)
-                return newScore
-            })
-            setTimeout(() => {
+            setScore(prev => prev + Math.ceil(10 * config.rewardMultiplier))
+            timeoutsRef.current.push(setTimeout(() => {
+                if (endedRef.current) return
                 setFeedback(null)
-                setIsAnswering(false) // Allow dropping boom
+                dropReadyRef.current = true
                 dropBoom()
-                setCurrentQuestionIndex((prev) => (prev + 1) % questions.length)
-            }, 500)
+                setCurrentQuestionIndex(prev => (prev + 1) % questions.length)
+                answerLockedRef.current = false
+            }, 500))
         } else {
             setFeedback("incorrect")
-            setTimeout(() => {
+            timeoutsRef.current.push(setTimeout(() => {
+                if (endedRef.current) return
                 setFeedback(null)
-                setCurrentQuestionIndex((prev) => (prev + 1) % questions.length)
-            }, 1000)
+                setCurrentQuestionIndex(prev => (prev + 1) % questions.length)
+                answerLockedRef.current = false
+            }, 1000))
         }
     }
 
@@ -237,7 +235,8 @@ export default function MergingGame({
     }, [isGameOver, isAnswering, currentBoomX])
 
     const dropBoom = () => {
-        if (isAnswering) return
+        if (endedRef.current || !dropReadyRef.current) return
+        dropReadyRef.current = false
 
         const rarity = nextBooms[0] as keyof typeof RARITY_DATA
         const newBoom: MergeItem = {
@@ -248,106 +247,31 @@ export default function MergingGame({
             y: 0,
         }
 
-        setMergingBooms((prev) => [...prev, newBoom])
+        boardRef.current = [...boardRef.current, newBoom]
+        setMergingBooms(boardRef.current)
         setNextBooms((prev) => [...prev.slice(1), getRandomRarity()])
         setIsAnswering(true)
         setCurrentBoomX(50) // Reset for next turn
     }
 
-    // Simulation
+    // Keep rewards outside React state updaters, which may run twice in Strict Mode.
     useEffect(() => {
-        if (isGameOver) return
-
         const simulation = setInterval(() => {
-            setMergingBooms((prev) => {
-                const next = prev.map((b) => {
-                    let newY = b.y
-                    let newX = b.x
-
-                    if (b.y < 85) {
-                        newY += 2
-                    }
-
-                    // Collision detection with other booms
-                    for (const other of prev) {
-                        if (other.id === b.id) continue
-
-                        const dx = b.x - other.x
-                        const dy = b.y - other.y
-                        const dist = Math.sqrt(dx * dx + dy * dy)
-
-                        // If overlapping (dist < radius * 2, roughly 8 units)
-                        if (dist < 8) {
-                            // Push away horizontally
-                            const force = (8 - dist) / 2
-                            const angle = Math.atan2(dy, dx)
-                            newX += Math.cos(angle) * force
-
-                            // If sitting on top, slow down fall
-                            if (dy < 0) {
-                                newY -= 1
-                            }
-                        }
-                    }
-
-                    // Keep in bounds
-                    newX = Math.max(5, Math.min(95, newX))
-                    newY = Math.min(85, newY)
-
-                    return { ...b, x: newX, y: newY }
-                })
-
-                const merged: MergeItem[] = []
-                const toRemove = new Set<string>()
-
-                for (let i = 0; i < next.length; i++) {
-                    if (toRemove.has(next[i].id)) continue
-                    for (let j = i + 1; j < next.length; j++) {
-                        if (toRemove.has(next[j].id)) continue
-
-                        const b1 = next[i]
-                        const b2 = next[j]
-
-                        const dist = Math.sqrt(Math.pow(b1.x - b2.x, 2) + Math.pow(b1.y - b2.y, 2))
-                        // Relaxed distance for "corner merging" (from 10 to 15)
-                        if (b1.rarity === b2.rarity && dist < 15 && b1.y > 80 && b2.y > 80) {
-                            const data = RARITY_DATA[b1.rarity]
-                            if (data.next) {
-                                const nextRarity = data.next as keyof typeof RARITY_DATA
-                                merged.push({
-                                    id: Math.random().toString(36).substr(2, 9),
-                                    rarity: nextRarity as any,
-                                    emoji: RARITY_DATA[nextRarity].emoji,
-                                    x: (b1.x + b2.x) / 2,
-                                    y: 85,
-                                })
-                                setScore((s) => {
-                                    const newScore = s + data.nextPoints
-                                    if (onScoreUpdate) onScoreUpdate(newScore)
-                                    return newScore
-                                })
-                                toRemove.add(b1.id)
-                                toRemove.add(b2.id)
-
-                                // Award tokens for merge
-                                if (onAwardTokens && RARITY_DATA[nextRarity].tokenAward > 0) {
-                                    onAwardTokens(RARITY_DATA[nextRarity].tokenAward)
-                                }
-
-                                if (nextRarity === "mystical") {
-                                    setTimeout(handleGameOver, 500)
-                                }
-                            }
-                        }
-                    }
-                }
-
-                return [...next.filter((b) => !toRemove.has(b.id)), ...merged]
-            })
+            if (endedRef.current) return
+            const result = stepMergeBoard(boardRef.current, RARITY_DATA, () => crypto.randomUUID())
+            boardRef.current = result.pieces as MergeItem[]
+            setMergingBooms(boardRef.current)
+            if (result.points) setScore(value => value + result.points)
+            if (result.tokens) latestRef.current.onAwardTokens?.(result.tokens)
+            if (result.reachedTopTier) timeoutsRef.current.push(setTimeout(handleGameOver, 500))
         }, 50)
-
         return () => clearInterval(simulation)
-    }, [isGameOver])
+    }, [])
+
+    if (!Array.isArray(questions) || questions.length === 0) {
+        return <div className="flex items-center justify-center w-full h-full text-white">Waiting for questions...</div>
+    }
+
 
     if (isGameOver) {
         return (

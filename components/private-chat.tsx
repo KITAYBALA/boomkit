@@ -140,13 +140,13 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
             const res = await fetch(`/api/messages?conversation_id=${convId}`)
             if (!res.ok) throw new Error('Failed to fetch messages')
             const data = await res.json()
-            setMessages((data || []).reverse())
+            setMessages((data || []).filter((message: Message) => !blockedUsers.includes(message.sender_username)).reverse())
         } catch (e) {
             console.error("Error fetching messages:", e)
         }
     }
 
-    // 3. Realtime Subscription (Broadcast)
+    // Poll the authenticated endpoint; public Broadcast channels cannot protect DMs.
     useEffect(() => {
         if (!supabase || !currentUser) return
 
@@ -154,25 +154,13 @@ export default function PrivateChat({ currentUser, onPlayerClick }: Props) {
 
         if (!activeConversation) return
 
-        const channelName = `private_chat_${activeConversation.id}`
-        const channel = supabase
-            .channel(channelName)
-            .on('broadcast', { event: 'new_message' }, (payload) => {
-                const newMsg = payload.payload as Message
-                const senderBlocked = blockedUsers.includes(newMsg.sender_username)
-                if (!senderBlocked) {
-                    setMessages(prev => {
-                        if (prev.some(m => m.id === newMsg.id)) return prev
-                        return [...prev, newMsg]
-                    })
-                }
-                fetchConversations()
-            })
-            .subscribe()
-
-        return () => {
-            supabase.removeChannel(channel)
-        }
+        const timer = setInterval(() => {
+            if (document.visibilityState === 'visible') {
+                void fetchMessages(activeConversation.id)
+                void fetchConversations()
+            }
+        }, 3000)
+        return () => clearInterval(timer)
     }, [supabase, currentUser?.id, activeConversation?.id, blockedUsers])
 
     // Scroll to bottom when messages change

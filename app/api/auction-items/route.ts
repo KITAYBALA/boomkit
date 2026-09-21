@@ -31,14 +31,14 @@ export async function POST(request: Request) {
     const { boom_name, current_bid, time_left } = body;
 
     // Strict input validation (L-07)
-    if (typeof boom_name !== 'string' || !boom_name.trim()) {
+    if (typeof boom_name !== 'string' || !boom_name.trim() || boom_name.length > 128) {
       return NextResponse.json({ error: "boom_name must be a non-empty string" }, { status: 400 })
     }
-    if (typeof current_bid !== 'number' || isNaN(current_bid) || current_bid <= 0) {
+    if (typeof current_bid !== 'number' || !Number.isSafeInteger(current_bid) || current_bid <= 0 || current_bid > 1000000000) {
       return NextResponse.json({ error: "starting bid (current_bid) must be a positive number" }, { status: 400 })
     }
     const duration = Number(time_left);
-    if (isNaN(duration) || duration < 1 || duration > 72) {
+    if (!Number.isSafeInteger(duration) || duration < 1 || duration > 72) {
       return NextResponse.json({ error: "duration hours (time_left) must be between 1 and 72" }, { status: 400 })
     }
 

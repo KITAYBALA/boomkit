@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
         const body = await request.json()
         const { conversationId, message } = body
 
-        if (!conversationId || !message || message.trim() === '') {
+        if (typeof conversationId !== 'string' || typeof message !== 'string' || !message.trim() || message.length > 2000) {
             return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
         }
 
@@ -83,11 +83,12 @@ export async function POST(request: NextRequest) {
         // Get user details for sender_username
         const { data: userData } = await supabase
             .from('users')
-            .select('username, is_muted')
+            .select('username, is_muted, mute_expiry')
             .eq('id', session.userId)
             .single()
 
-        if (userData?.is_muted) {
+        if (!userData) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        if (userData.is_muted && (!userData.mute_expiry || Number(userData.mute_expiry) > Date.now())) {
             return NextResponse.json({ error: 'MUTED' }, { status: 403 })
         }
 
@@ -110,15 +111,8 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Failed to send message' }, { status: 500 })
         }
 
-        // Broadcast message to clients securely via Broadcast channel
-        supabase.channel(`private_chat_${conversationId}`).send({
-            type: 'broadcast',
-            event: 'new_message',
-            payload: insertedMsg
-        })
-
-        // Also update conversations updated_at (fire and forget)
-        supabase.from('conversations').update({ updated_at: new Date().toISOString() }).eq('id', conversationId).then()
+        // Private messages are only delivered through the membership-checked API.
+        await supabase.from('conversations').update({ updated_at: new Date().toISOString() }).eq('id', conversationId)
 
         return NextResponse.json({ success: true, message: insertedMsg })
     } catch (error) {

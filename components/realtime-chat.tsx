@@ -1,5 +1,7 @@
 "use client"
 
+import { secureRpc } from "@/lib/secure-rpc"
+
 import { useEffect, useMemo, useRef, useState } from "react"
 import { getSupabaseBrowserClient } from "@/lib/supabase-client"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -134,8 +136,18 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
     // Optimistic update
     setMessages(prev => prev.map(m => m.id === msgId ? { ...m, reactions } : m))
 
-    // Persist to DB
-    await supabase.from("chat_messages").update({ reactions }).eq("id", msgId)
+    try {
+      const response = await fetch('/api/chat-messages', {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: msgId, emoji, active: !hasReacted }),
+      })
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error || 'Unable to update reaction')
+      setMessages(prev => prev.map(m => m.id === msgId ? { ...m, reactions: result.reactions } : m))
+    } catch (error) {
+      setMessages(prev => prev.map(m => m.id === msgId ? { ...m, reactions: msg.reactions } : m))
+      toast.error(error instanceof Error ? error.message : 'Unable to update reaction')
+    }
   }
 
   // Update mute status from currentUser prop (reuse existing user state)
@@ -303,7 +315,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
 
         try {
           if (!supabase) throw new Error("Supabase client not initialized")
-          const { data, error } = await supabase.rpc('transfer_tokens', {
+          const { data, error } = await secureRpc('transfer_tokens', {
             p_sender_username: currentUser.username,
             p_receiver_username: receiverUsername,
             p_amount: amount

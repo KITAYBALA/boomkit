@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Timer, Trophy, Star, Anchor, Waves, Fish, Sparkles } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
+import { useGameRewards } from '@/hooks/use-game-rewards'
 
 interface Question {
     id: string
@@ -15,6 +16,8 @@ interface Question {
 }
 
 interface FishingFrenzyProps {
+    sessionPin?: string
+    forceEnd?: boolean
     grade: number
     subject: string
     mode: "solo" | "host" | "join"
@@ -22,7 +25,7 @@ interface FishingFrenzyProps {
     questions: Question[]
     durationSeconds: number
     startTimeOffset?: number
-    onEnd: (score: number, correctAnswers?: number, questionsAnswered?: number) => void
+    onEnd: (score: number, correctAnswers?: number, questionsAnswered?: number, rewards?: { tokens: number; xp: number }) => void
     onScoreUpdate?: (score: number) => void
     onAwardTokens?: (amount: number) => void
 }
@@ -38,8 +41,9 @@ export default function FishingFrenzy({
     onEnd,
     onScoreUpdate,
     onAwardTokens,
-    startTimeOffset
+    startTimeOffset, sessionPin, forceEnd,
 }: FishingFrenzyProps) {
+    const rewards = useGameRewards(questions, durationSeconds - (startTimeOffset || 0), sessionPin)
     const [gameState, setGameState] = useState<GameState>("idle")
     const initialTime = Math.max(0, durationSeconds - (startTimeOffset || 0))
     const [timeLeft, setTimeLeft] = useState(initialTime)
@@ -49,59 +53,55 @@ export default function FishingFrenzy({
     const [isGameOver, setIsGameOver] = useState(false)
     const [correctAnswers, setCorrectAnswers] = useState(0)
     const [questionsAnswered, setQuestionsAnswered] = useState(0)
+    const endedRef = useRef(false)
+    const actionLockedRef = useRef(false)
+    const answerLockedRef = useRef(false)
+    const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([])
 
-    // Crash Prevention
-    if (!Array.isArray(questions) || questions.length === 0) {
-        return (
-            <div className="flex flex-col items-center justify-center w-full h-full text-white bg-slate-900">
-                <div className="w-12 h-12 rounded-full border-4 border-blue-500 border-t-transparent animate-spin mb-4" />
-                <p className="font-bold text-lg">Preparing Waters...</p>
-                <p className="font-heading text-white/40 text-sm">Waiting for host to sync...</p>
-            </div>
-        )
-    }
+    useEffect(() => () => { timeoutsRef.current.forEach(clearTimeout) }, [])
 
     // Timer logic with sync
     useEffect(() => {
-        // Calculate initial time left based on offset
-        const initialTime = Math.max(0, durationSeconds - (startTimeOffset || 0))
-        setTimeLeft(initialTime)
-
-        const timer = setInterval(() => {
-            setTimeLeft(prev => {
-                const next = prev - 1
-                return next > 0 ? next : 0
-            })
-        }, 1000)
-
+        const deadline = Date.now() + Math.max(0, durationSeconds - (startTimeOffset || 0)) * 1000
+        const tick = () => setTimeLeft(Math.max(0, Math.ceil((deadline - Date.now()) / 1000)))
+        tick()
+        const timer = setInterval(tick, 250)
         return () => clearInterval(timer)
     }, [durationSeconds, startTimeOffset])
 
     useEffect(() => {
-        if (timeLeft <= 0) {
+        if ((timeLeft <= 0 || forceEnd) && !endedRef.current) {
+            endedRef.current = true
+            timeoutsRef.current.forEach(clearTimeout)
             setIsGameOver(true)
-            onEnd(score, correctAnswers, questionsAnswered)
+            void rewards.finish().catch(error => { alert(error.message); return { tokens: 0, xp: 0 } })
+                .then(result => onEnd(score, correctAnswers, questionsAnswered, result))
         }
-    }, [timeLeft, score, onEnd, correctAnswers, questionsAnswered])
+    }, [timeLeft, forceEnd, score, onEnd, correctAnswers, questionsAnswered])
 
     const handleCast = () => {
+        if (endedRef.current || actionLockedRef.current) return
         if (gameState !== "idle" && gameState !== "result") return
+        actionLockedRef.current = true
         setLastCatch(null)
         setGameState("casting")
 
         // Random wait time before bite
-        setTimeout(() => {
+        timeoutsRef.current.push(setTimeout(() => {
+            if (endedRef.current) return
             setGameState("waiting")
             const biteDelay = 2000 + Math.random() * 3000
-            setTimeout(() => {
+            timeoutsRef.current.push(setTimeout(() => {
+                if (endedRef.current) return
                 setGameState("hooked")
-            }, biteDelay)
-        }, 1000)
+            }, biteDelay))
+        }, 1000))
     }
 
 
     const handleReel = () => {
-        if (gameState !== "hooked") return
+        if (endedRef.current || gameState !== "hooked") return
+        answerLockedRef.current = false
         setGameState("question")
     }
 
@@ -134,6 +134,10 @@ export default function FishingFrenzy({
     }
 
     const handleAnswer = (index: number) => {
+        if (endedRef.current || gameState !== 'question' || answerLockedRef.current) return
+        answerLockedRef.current = true
+        rewards.answer(index)
+        actionLockedRef.current = false
         const correct = index === (questions[currentQuestionIndex]?.correctIndex ?? -1)
         setQuestionsAnswered(prev => prev + 1)
 
@@ -168,6 +172,10 @@ export default function FishingFrenzy({
             onScoreUpdate(score)
         }
     }, [score, onScoreUpdate])
+
+    if (!Array.isArray(questions) || questions.length === 0) {
+        return <div className="flex items-center justify-center w-full h-full text-white">Waiting for questions...</div>
+    }
 
     return (
         <div className="relative w-full h-full bg-[#1a1c2c] overflow-hidden flex flex-col">
@@ -283,7 +291,9 @@ export default function FishingFrenzy({
                                     animate={{ width: "0%" }}
                                     transition={{ duration: 15, ease: "linear" }}
                                     className="h-full bg-purple-500"
-                                    onAnimationComplete={() => setGameState("idle")}
+                                    onAnimationComplete={() => {
+                                        if (!endedRef.current && !answerLockedRef.current) handleAnswer(-1)
+                                    }}
                                 />
                             </div>
                             <CardContent className="p-12 space-y-12">
@@ -350,18 +360,6 @@ export default function FishingFrenzy({
                     <Star className="w-24 h-24 text-yellow-500 fill-yellow-500 animate-bounce mb-8" />
                     <h2 className="font-heading text-7xl font-black text-white mb-4 tracking-tighter">TIME'S UP!</h2>
                     <p className="font-heading text-4xl text-purple-400 font-black mb-12">TOTAL WEIGHT: {score} lbs</p>
-                    <Button
-                        onClick={() => {
-                            if (onAwardTokens) {
-                                const tokens = Math.floor(score * 0.01)
-                                if (tokens > 0) onAwardTokens(tokens)
-                            }
-                            onEnd(score, correctAnswers, questionsAnswered)
-                        }}
-                        className="px-12 py-8 bg-yellow-500 text-white text-3xl font-black rounded-3xl hover:bg-purple-400 hover:text-white transition-all transform hover:scale-110"
-                    >
-                        RETURN TO LOBBY
-                    </Button>
                 </div>
             )}
         </div>
