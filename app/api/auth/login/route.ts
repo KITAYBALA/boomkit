@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServerClient } from '@/lib/supabase-server-client'
-import { createSession } from '@/lib/auth-server'
+import { createSession, assertSessionConfigured, AuthConfigurationError } from '@/lib/auth-server'
 import { checkRateLimiter } from '@/lib/rate-limiter'
 import { hashPassword, verifyPassword, MAX_PASSWORD_LENGTH } from '@/lib/password'
 import { getClientIp, escapeLikeLiteral } from '@/lib/auth-input'
@@ -78,6 +78,8 @@ export async function POST(request: NextRequest) {
 
     const accountLimit = await checkRateLimiter('account:' + createHash('sha256').update(identifier.toLowerCase()).digest('hex'))
     if (!accountLimit.allowed) return NextResponse.json({success:false,message:accountLimit.message},{status:429,headers:{'Retry-After':String(accountLimit.retryAfter)}})
+
+    assertSessionConfigured()
 
     if (DEBUG_AUTH) {
       console.log('[AUTH DEBUG] ===== LOGIN START =====')
@@ -179,12 +181,11 @@ export async function POST(request: NextRequest) {
     if (error instanceof SyntaxError) return NextResponse.json({ success: false, message: 'Invalid JSON' }, { status: 400 })
     console.error('[AUTH] Login error:', error)
     
-    // If it's a configuration error (missing env vars), expose it to help the user debug
-    if (error instanceof Error && (error.message.includes('env vars') || error.message.includes('FATAL SECURITY ERROR'))) {
-      return NextResponse.json({ success: false, message: `Configuration Error: ${error.message}` }, { status: 500 })
+    if (error instanceof AuthConfigurationError) {
+      return NextResponse.json({ success: false, code: 'AUTH_CONFIGURATION_ERROR', message: 'Sign-in is unavailable because of a server configuration problem. Please contact support.' }, { status: 503 })
     }
     
-    return NextResponse.json({ success: false, message: 'An unexpected error occurred' }, { status: 500 })
+    return NextResponse.json({ success: false, message: 'Sign-in is temporarily unavailable. Please try again shortly.' }, { status: 503 })
   }
 }
 
