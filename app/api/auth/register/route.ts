@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServerClient } from '@/lib/supabase-server-client'
-import { createSession } from '@/lib/auth-server'
+import { createSession, assertSessionConfigured, AuthConfigurationError } from '@/lib/auth-server'
 import { hashPassword, validatePassword } from '@/lib/password'
 import { checkRateLimiter } from '@/lib/rate-limiter'
 import { getClientIp, validUsername } from '@/lib/auth-input'
@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
       { status: 429, headers: { 'Retry-After': String(limit.retryAfter) } })
 
     const body = await request.json()
+    if (!body || typeof body !== 'object' || Array.isArray(body)) return NextResponse.json({ success: false, message: 'Invalid registration request.' }, { status: 400 })
     const username = typeof body.username === 'string' ? body.username.trim() : ''
     const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : ''
     const age = typeof body.age === 'number' || typeof body.age === 'string' ? Number(body.age) : NaN
@@ -27,6 +28,8 @@ export async function POST(request: NextRequest) {
     if (typeof body.accessKey !== 'string' || !body.accessKey.trim() || body.accessKey.length > 128) {
       return NextResponse.json({ success: false, message: 'A valid Discord access key is required.' }, { status: 400 })
     }
+    // A configuration failure must not create an account or consume its access key.
+    assertSessionConfigured()
     const supabase = getSupabaseServerClient()
     const { data: blacklisted, error: blacklistError } = await supabase.from('blacklisted_ips').select('ip').eq('ip', ip).maybeSingle()
     if (blacklistError) throw blacklistError
@@ -47,6 +50,9 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     if (error instanceof SyntaxError) return NextResponse.json({ success: false, message: 'Invalid JSON.' }, { status: 400 })
     console.error('[AUTH] Registration failed:', error)
+    if (error instanceof AuthConfigurationError) {
+      return NextResponse.json({ success: false, code: 'AUTH_CONFIGURATION_ERROR', message: 'Registration is unavailable because of a server configuration problem. Please contact support.' }, { status: 503 })
+    }
     return NextResponse.json({ success: false, message: 'Registration is temporarily unavailable.' }, { status: 503 })
   }
 }

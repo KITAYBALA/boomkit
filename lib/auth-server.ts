@@ -6,20 +6,33 @@ import { getSupabaseServerClient } from './supabase-server-client'
 const SESSION_COOKIE = 'session_token'
 const localRuntime = globalThis as typeof globalThis & { boomkitDevelopmentJwtSecret?: Uint8Array }
 
+export class AuthConfigurationError extends Error {
+    constructor(message: string) {
+        super(message)
+        this.name = 'AuthConfigurationError'
+    }
+}
+
 function getJwtSecret() {
     const secret = process.env.JWT_SECRET
 
     if (!secret) {
         if (process.env.NODE_ENV === 'production') {
-            throw new Error('FATAL SECURITY ERROR: JWT_SECRET environment variable is required in production!')
+            throw new AuthConfigurationError('JWT_SECRET environment variable is required in production.')
         }
         return localRuntime.boomkitDevelopmentJwtSecret ??= randomBytes(32)
     }
 
     if (process.env.NODE_ENV === 'production' && Buffer.byteLength(secret, 'utf8') < 32) {
-        throw new Error('JWT_SECRET must contain at least 32 random bytes in production.')
+        throw new AuthConfigurationError('JWT_SECRET must contain at least 32 random bytes in production.')
     }
     return new TextEncoder().encode(secret)
+}
+
+// Check before accepting credentials or consuming a registration access key.
+// Keep the same signing requirements as createSession; never fall back in production.
+export function assertSessionConfigured(): void {
+    getJwtSecret()
 }
 
 export async function createSession(userId: string, role: string, isOwner: boolean, resetOnly = false) {
