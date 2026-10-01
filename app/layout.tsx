@@ -9,8 +9,7 @@ const fredoka = Fredoka({ subsets: ["latin"], variable: "--font-heading" })
 
 export const metadata: Metadata = {
   title: "Boomkit",
-  description: "Created by: system",
-  generator: "system",
+  description: "Play quizzes, collect Booms, and trade with the Boomkit community.",
   icons: {
     icon: "/favicon.png",
   },
