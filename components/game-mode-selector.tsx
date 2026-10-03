@@ -42,7 +42,7 @@ const GAME_MODES: GameMode[] = [
         name: "Merging",
         description: "Combine items to create higher rarity booms!",
         icon: <Zap className="w-8 h-8" />,
-        color: "from-purple-500 to-indigo-600",
+        color: " ",
         difficulty: "Moderate",
         skills: ["Strategy", "Planning"],
         idealTime: "10 min",
@@ -54,7 +54,7 @@ const GAME_MODES: GameMode[] = [
         name: "Fish Rush", // Renamed from Fishing Frenzy
         description: "Cast your line and reel in the biggest catch!",
         icon: <Fish className="w-8 h-8" />,
-        color: "from-blue-400 to-cyan-600",
+        color: " ",
         difficulty: "Moderate",
         skills: ["Speed", "Precision"],
         idealTime: "10 min",
@@ -85,20 +85,20 @@ export default function GameModeSelector({ onSelect, onBack, subjectName, isSolo
     ]
 
     return (
-        <div className="fixed inset-0 z-[60] bg-[#1a1c2c] flex flex-col md:flex-row overflow-hidden">
+        <div className="fixed inset-0 z-[60] club-surface flex flex-col md:flex-row overflow-hidden">
             {/* Left Sidebar: Mode Info */}
-            <div className="w-full md:w-[400px] border-r border-white/10 bg-[#141521] p-6 flex flex-col gap-6 overflow-y-auto">
+            <div className="w-full md:w-[400px] border-r club-border club-surface p-6 flex flex-col gap-6 overflow-y-auto">
                 <Button
                     variant="ghost"
                     onClick={onBack}
-                    className="w-fit text-white/60 hover:text-white mb-2"
+                    className="club-action w-fit club-muted club-ink mb-2"
                 >
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     Back to Topics
                 </Button>
 
                 <div className="space-y-4">
-                    <div className={`w-full aspect-video rounded-3xl bg-gradient-to-br ${selectedMode.color} flex items-center justify-center text-white shadow-2xl relative overflow-hidden`}>
+                    <div className={`w-full aspect-video rounded-xl club-surface ${selectedMode.color} flex items-center justify-center club-ink relative overflow-hidden`}>
                         {selectedMode.image ? (
                             <img
                                 src={selectedMode.image}
@@ -110,46 +110,46 @@ export default function GameModeSelector({ onSelect, onBack, subjectName, isSolo
                                 {selectedMode.icon}
                             </div>
                         )}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
+                        <div className="absolute inset-0 club-surface pointer-events-none" />
                     </div>
 
                     <div>
-                        <h1 className="font-heading text-4xl font-black text-white tracking-tight">{selectedMode.name}</h1>
-                        <p className="font-heading text-white/60 text-lg mt-2">{selectedMode.description}</p>
+                        <h1 className="font-heading text-4xl font-black club-ink tracking-tight">{selectedMode.name}</h1>
+                        <p className="font-heading club-muted text-lg mt-2">{selectedMode.description}</p>
                     </div>
                 </div>
 
-                <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+                <Card className="club-well club-border ">
                     <CardContent className="p-4 space-y-4">
                         <div className="flex justify-between items-center">
-                            <span className="font-heading text-white/40 text-sm font-bold uppercase tracking-wider">Difficulty</span>
-                            <Badge className={`${selectedMode.difficulty === "Simple" ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/30" :
-                                selectedMode.difficulty === "Moderate" ? "bg-amber-500/20 text-amber-400 border-amber-500/30" :
-                                    "bg-rose-500/20 text-rose-400 border-rose-500/30"
+                            <span className="font-heading club-muted text-sm font-bold uppercase tracking-wider">Difficulty</span>
+                            <Badge className={`${selectedMode.difficulty === "Simple" ? "club-green club-success club-border" :
+                                selectedMode.difficulty === "Moderate" ? "club-yellow club-accent club-border" :
+                                    "club-red club-danger club-border"
                                 }`}>
                                 {selectedMode.difficulty}
                             </Badge>
                         </div>
                         <div className="flex justify-between items-center">
-                            <span className="font-heading text-white/40 text-sm font-bold uppercase tracking-wider">Skills</span>
+                            <span className="font-heading club-muted text-sm font-bold uppercase tracking-wider">Skills</span>
                             <div className="flex gap-2">
                                 {selectedMode.skills.map(skill => (
-                                    <Badge key={skill} variant="outline" className="border-white/10 text-white/80">{skill}</Badge>
+                                    <Badge key={skill} variant="outline" className="club-border club-ink">{skill}</Badge>
                                 ))}
                             </div>
                         </div>
                         <div className="flex justify-between items-center">
-                            <span className="font-heading text-white/40 text-sm font-bold uppercase tracking-wider">Questions</span>
-                            <span className="font-heading text-white font-bold">{selectedMode.questionFrequency}</span>
+                            <span className="font-heading club-muted text-sm font-bold uppercase tracking-wider">Questions</span>
+                            <span className="font-heading club-ink font-bold">{selectedMode.questionFrequency}</span>
                         </div>
                     </CardContent>
                 </Card>
 
                 {isSolo && (
-                    <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+                    <Card className="club-well club-border ">
                         <CardHeader className="p-4 pb-0">
-                            <CardTitle className="font-heading text-white/40 text-sm font-bold uppercase tracking-wider flex items-center gap-2">
-                                <Clock className="w-4 h-4 text-purple-400" />
+                            <CardTitle className="font-heading club-muted text-sm font-bold uppercase tracking-wider flex items-center gap-2">
+                                <Clock className="w-4 h-4 club-accent" />
                                 Game Duration
                             </CardTitle>
                         </CardHeader>
@@ -160,9 +160,9 @@ export default function GameModeSelector({ onSelect, onBack, subjectName, isSolo
                                         key={opt.value}
                                         variant="outline"
                                         onClick={() => setDuration(opt.value)}
-                                        className={`h-10 rounded-xl border-white/10 font-bold transition-all ${duration === opt.value
-                                            ? "bg-purple-600 border-purple-500 text-white shadow-lg shadow-purple-500/20"
-                                            : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
+                                        className={`club-action h-10 rounded-xl club-border font-bold transition-all ${duration === opt.value
+                                            ? "club-purple club-border club-ink "
+                                            : "club-well club-muted club-well club-ink"
                                             }`}
                                     >
                                         {opt.label}
@@ -183,24 +183,24 @@ export default function GameModeSelector({ onSelect, onBack, subjectName, isSolo
                             }, 800)
                         }}
                         disabled={selectedMode.isPlus || isSelecting}
-                        className={`w-full h-16 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white text-2xl font-black rounded-2xl shadow-xl shadow-purple-500/20 transition-all ${isSelecting ? "scale-95 opacity-50" : "hover:scale-105"}`}
+                        className={`club-action w-full h-16 club-surface club-ink text-2xl font-black rounded-xl transition-all ${isSelecting ? "scale-95 opacity-50" : "hover:scale-105"}`}
                     >
                         {isSelecting ? "Initializing Arena..." : (selectedMode.isPlus ? "Unlock Mode" : (isSolo ? "Play Solo" : "Host Game"))}
                     </Button>
-                    <p className="font-heading text-center text-white/30 text-xs mt-4">
-                        Subject: <span className="font-heading text-purple-400 font-bold">{subjectName}</span>
+                    <p className="font-heading text-center club-muted text-xs mt-4">
+                        Subject: <span className="font-heading club-accent font-bold">{subjectName}</span>
                     </p>
                 </div>
             </div>
 
             {/* Main Content: Mode Grid */}
-            <div className="flex-1 p-6 md:p-12 overflow-hidden flex flex-col gap-8 bg-[#1a1c2c]">
+            <div className="flex-1 p-6 md:p-12 overflow-hidden flex flex-col gap-8 club-surface">
                 <div className="flex items-center justify-between">
-                    <h2 className="font-heading text-5xl font-black text-white">Select Mode</h2>
+                    <h2 className="font-heading text-4xl font-black club-ink">Select Mode</h2>
                     <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-full border border-white/10">
-                            <Users className="w-4 h-4 text-blue-400" />
-                            <span className="font-heading text-white font-bold">Live Lobby</span>
+                        <div className="flex items-center gap-2 px-4 py-2 club-well rounded-full border club-border">
+                            <Users className="w-4 h-4 club-accent" />
+                            <span className="font-heading club-ink font-bold">Live Lobby</span>
                         </div>
                     </div>
                 </div>
@@ -211,10 +211,10 @@ export default function GameModeSelector({ onSelect, onBack, subjectName, isSolo
                             <Card
                                 key={mode.id}
                                 className={`
-                                    relative overflow-hidden cursor-pointer group transition-all duration-500
-                                    bg-slate-900/40 backdrop-blur-xl border-white/5 hover:border-white/20
-                                    hover:-translate-y-2 hover:shadow-[0_20px_50px_rgba(0,0,0,0.4)]
-                                    ${selectedId === mode.id ? 'ring-2 ring-purple-500 shadow-[0_0_30px_rgba(168,85,247,0.4)] bg-slate-800/60' : ''}
+ relative overflow-hidden cursor-pointer group transition-all duration-500
+ club-well club-border club-border
+ hover:-translate-y-2
+ ${selectedId === mode.id ? 'ring-2 club-well' : ''}
                                 `}
                                 onClick={() => setSelectedId(mode.id)}
                             >
@@ -226,24 +226,24 @@ export default function GameModeSelector({ onSelect, onBack, subjectName, isSolo
                                             alt={mode.name}
                                             className="w-full h-full object-cover opacity-30 group-hover:opacity-50 group-hover:scale-110 transition-all duration-700"
                                         />
-                                        <div className={`absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent`} />
+                                        <div className={`absolute inset-0 club-surface `} />
                                     </div>
                                 )}
 
                                 {/* Card Content */}
                                 <CardHeader className="relative z-10 pb-2">
                                     <div className="flex items-center justify-between mb-2">
-                                        <div className={`p-3 rounded-2xl bg-gradient-to-br ${mode.color} text-white shadow-lg shadow-black/20 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}>
+                                        <div className={`p-3 rounded-xl club-surface ${mode.color} club-ink group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}>
                                             {mode.icon}
                                         </div>
-                                        <Badge className="bg-white/10 text-white/70 border-white/10 text-[10px] uppercase font-black tracking-widest px-2 py-0.5 backdrop-blur-md">
+                                        <Badge className="club-well club-ink club-border text-xs uppercase font-black tracking-wide px-2 py-0.5 ">
                                             {mode.difficulty}
                                         </Badge>
                                     </div>
-                                    <CardTitle className="font-heading text-2xl font-black text-white tracking-tight group-hover:text-purple-400 transition-colors">
+                                    <CardTitle className="font-heading text-2xl font-black club-ink tracking-tight club-accent transition-colors">
                                         {mode.name}
                                     </CardTitle>
-                                    <CardDescription className="font-heading text-white/60 text-sm line-clamp-2 min-h-[40px] font-medium leading-relaxed">
+                                    <CardDescription className="font-heading club-muted text-sm line-clamp-2 min-h-[40px] font-medium leading-relaxed">
                                         {mode.description}
                                     </CardDescription>
                                 </CardHeader>
@@ -251,38 +251,38 @@ export default function GameModeSelector({ onSelect, onBack, subjectName, isSolo
                                 <CardContent className="relative z-10 space-y-4 pt-0">
                                     <div className="flex flex-wrap gap-1.5">
                                         {mode.skills.map(skill => (
-                                            <Badge key={skill} variant="secondary" className="bg-white/5 text-white/50 border-none text-[9px] font-bold px-1.5 py-0">
+                                            <Badge key={skill} variant="secondary" className="club-well club-muted border-none text-xs font-bold px-1.5 py-0">
                                                 {skill}
                                             </Badge>
                                         ))}
                                     </div>
 
-                                    <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                                    <div className="flex items-center justify-between pt-2 border-t club-border">
                                         <div className="flex items-center gap-4">
                                             <div className="flex items-center gap-1.5">
-                                                <Clock className="w-3.5 h-3.5 text-blue-400" />
-                                                <span className="font-heading text-[10px] font-black text-white/40 uppercase tracking-tighter">{mode.idealTime}</span>
+                                                <Clock className="w-3.5 h-3.5 club-accent" />
+                                                <span className="font-heading text-xs font-black club-muted uppercase tracking-tighter">{mode.idealTime}</span>
                                             </div>
                                             <div className="flex items-center gap-1.5">
-                                                <Zap className="w-3.5 h-3.5 text-yellow-500" />
-                                                <span className="font-heading text-[10px] font-black text-white/40 uppercase tracking-tighter">{mode.questionFrequency}</span>
+                                                <Zap className="w-3.5 h-3.5 club-accent" />
+                                                <span className="font-heading text-xs font-black club-muted uppercase tracking-tighter">{mode.questionFrequency}</span>
                                             </div>
                                         </div>
                                         {selectedId === mode.id && (
-                                            <div className="w-2 h-2 rounded-full bg-purple-500 animate-pulse shadow-[0_0_10px_purple]" />
+                                            <div className="w-2 h-2 rounded-full club-purple " />
                                         )}
                                     </div>
                                 </CardContent>
 
                                 {/* Hover Glow Effect */}
-                                <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl blur opacity-0 group-hover:opacity-10 transition duration-500" />
+                                <div className="absolute -inset-1 club-surface rounded-xl blur opacity-0 group-hover:opacity-10 transition duration-500" />
 
                                 {/* Interactive Particles on Hover */}
                                 <div className="absolute inset-0 z-20 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500">
                                     {Array.from({ length: 12 }).map((_, i) => (
                                         <div
                                             key={i}
-                                            className="absolute w-1 h-1 bg-purple-400 rounded-full animate-mode-particle"
+                                            className="absolute w-1 h-1 club-purple rounded-full animate-mode-particle"
                                             style={{
                                                 left: `${Math.random() * 100}%`,
                                                 top: `${Math.random() * 100}%`,
@@ -300,10 +300,10 @@ export default function GameModeSelector({ onSelect, onBack, subjectName, isSolo
             </div>
             {/* Selection Flash Overlay */}
             {isSelecting && (
-                <div className="fixed inset-0 z-[100] bg-[#5b21b6] animate-flash-white flex items-center justify-center">
+                <div className="fixed inset-0 z-[100] club-surface animate-flash-white flex items-center justify-center">
                     <div className="font-heading text-center">
-                        <Sparkles className="w-24 h-24 text-purple-600 animate-bounce mb-4" />
-                        <h2 className="font-heading text-4xl font-black text-purple-900 tracking-tighter">PREPARING ARENA</h2>
+                        <Sparkles className="w-24 h-24 club-accent mb-4" />
+                        <h2 className="font-heading text-4xl font-black club-accent tracking-tighter">PREPARING ARENA</h2>
                     </div>
                 </div>
             )}

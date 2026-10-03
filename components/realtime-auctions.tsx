@@ -397,19 +397,19 @@ export default function RealtimeAuctions({
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
-      <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-white/5 backdrop-blur-xl p-8 rounded-[2.5rem] border border-white/10 shadow-2xl">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-6 club-well p-8 rounded-xl border club-border ">
         <div className="flex items-center gap-5">
-          <div className="p-4 bg-purple-600 rounded-2xl shadow-xl shadow-purple-500/20 ring-1 ring-white/20">
-            <GavelIcon className="h-10 w-10 text-white" />
+          <div className="p-4 club-purple rounded-xl ring-1 ">
+            <GavelIcon className="h-10 w-10 club-ink" />
           </div>
           <div>
-            <h1 className="font-heading text-5xl font-black text-white tracking-tighter">Auction House</h1>
-            <p className="font-heading text-purple-300/60 font-medium">Bid on rare Booms or start your own auction.</p>
+            <h1 className="font-heading text-4xl font-black club-ink tracking-tighter">Auction House</h1>
+            <p className="font-heading club-accent font-medium">Bid on rare Booms or start your own auction.</p>
           </div>
         </div>
         <Button
           onClick={() => setShowCreateModal(true)}
-          className="w-full md:w-auto px-8 py-7 bg-purple-600 hover:bg-purple-500 text-white font-black rounded-2xl shadow-2xl shadow-purple-500/30 transition-all hover:scale-[1.02] active:scale-95 border-none text-lg flex items-center gap-3"
+          className="club-action w-full md:w-auto px-8 py-7 club-purple club-purple club-ink font-black rounded-xl transition-all hover:scale-[1.02] active:scale-95 border-none text-lg flex items-center gap-3"
         >
           <PlusIcon className="h-6 w-6" />
           Create Auction
@@ -417,27 +417,27 @@ export default function RealtimeAuctions({
       </div>
 
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in zoom-in-95 duration-300">
-          <Card className="w-full max-w-2xl bg-[#0a0a0c]/95 backdrop-blur-2xl border-purple-500/30 shadow-[0_0_80px_rgba(139,92,246,0.2)] rounded-[2.5rem] overflow-hidden">
-            <CardHeader className="border-b border-white/5 pb-8 p-10">
+        <div className="fixed inset-0 club-overlay flex items-center justify-center z-50 p-4 animate-in fade-in zoom-in-95 duration-300">
+          <Card className="w-full max-w-2xl club-surface club-border rounded-xl overflow-hidden">
+            <CardHeader className="border-b club-border pb-8 p-10">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-5">
-                  <div className="p-4 bg-purple-500/20 rounded-2xl border border-purple-500/30">
-                    <PlusIcon className="h-8 w-8 text-purple-400" />
+                  <div className="p-4 club-purple rounded-xl border club-border">
+                    <PlusIcon className="h-8 w-8 club-accent" />
                   </div>
                   <div>
-                    <CardTitle className="font-heading text-3xl font-black text-white tracking-tight">Post Auction</CardTitle>
-                    <CardDescription className="font-heading text-purple-300/50 text-base">Select a Boom from your vault to auction off.</CardDescription>
+                    <CardTitle className="font-heading text-3xl font-black club-ink tracking-tight">Post Auction</CardTitle>
+                    <CardDescription className="font-heading club-accent text-base">Select a Boom from your vault to auction off.</CardDescription>
                   </div>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => setShowCreateModal(false)} className="rounded-full h-12 w-12 text-white/40 hover:text-white hover:bg-white/5 transition-colors">
+                <Button variant="ghost" size="icon" onClick={() => setShowCreateModal(false)} className="club-action rounded-full h-12 w-12 club-muted club-ink club-well transition-colors">
                   <XIcon className="h-8 w-8" />
                 </Button>
               </div>
             </CardHeader>
             <CardContent className="p-10 space-y-10">
               <div className="space-y-4">
-                <label className="font-heading text-xs font-black text-white/30 uppercase tracking-[0.2em] ml-2">Choose Item</label>
+                <label className="font-heading text-xs font-black club-muted uppercase tracking-wide ml-2">Choose Item</label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-56 overflow-y-auto pr-4 custom-scrollbar">
                   {currentUser?.booms && Object.keys(currentUser.booms).length > 0 ? (
                     Object.entries(currentUser.booms).map(([boom, qty]) => (
@@ -446,25 +446,25 @@ export default function RealtimeAuctions({
                         type="button"
                         onClick={() => setSelectedBoom(boom)}
                         className={`group relative flex flex-col items-center justify-center gap-2 p-5 rounded-2xl border transition-all duration-300 ${selectedBoom === boom
-                          ? 'bg-purple-600/20 border-purple-500 shadow-[0_0_20px_rgba(139,92,246,0.15)] ring-1 ring-purple-500'
-                          : 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/10'
+                          ? 'club-purple club-border ring-1 '
+                          : 'club-well club-border club-well club-border'
                           }`}
                       >
                         <div className="font-heading text-4xl group-hover:scale-110 transition-transform duration-300 flex items-center justify-center">
                           <BoomAvatar name={boom} className="w-[1em] h-[1em]" />
                         </div>
                         <div className="font-heading text-center">
-                          <p className={`text-xs font-bold leading-tight ${selectedBoom === boom ? 'text-white' : 'text-white/70'}`}>{boom}</p>
-                          <p className="font-heading text-[10px] text-white/30 font-black mt-1">x{qty} OWNED</p>
+                          <p className={`text-xs font-bold leading-tight ${selectedBoom === boom ? 'club-ink' : 'club-ink'}`}>{boom}</p>
+                          <p className="font-heading text-xs club-muted font-black mt-1">x{qty} OWNED</p>
                         </div>
                         {selectedBoom === boom && (
-                          <div className="absolute top-2 right-2 h-2 w-2 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(139,92,246,1)]" />
+                          <div className="absolute top-2 right-2 h-2 w-2 rounded-full club-purple " />
                         )}
                       </button>
                     ))
                   ) : (
-                    <div className="col-span-full py-12 text-center bg-white/5 rounded-3xl border border-dashed border-white/10">
-                      <p className="font-heading text-white/20 font-bold">Your vault is empty</p>
+                    <div className="col-span-full py-12 text-center club-well rounded-xl border border-dashed club-border">
+                      <p className="font-heading club-muted font-bold">Your vault is empty</p>
                     </div>
                   )}
                 </div>
@@ -472,30 +472,30 @@ export default function RealtimeAuctions({
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-4 text-center">
-                  <label className="font-heading text-xs font-black text-white/30 uppercase tracking-[0.2em]">Starting Bid</label>
+                  <label className="font-heading text-xs font-black club-muted uppercase tracking-wide">Starting Bid</label>
                   <div className="relative group">
                     <Input
                       type="number"
                       value={startingBid}
                       onChange={e => setStartingBid(Number(e.target.value))}
-                      className="bg-black/30 border-white/10 text-white h-16 rounded-2xl text-2xl font-black text-center focus:ring-purple-500/50 transition-all"
+                      className="club-well club-border club-ink h-16 rounded-xl text-2xl font-black text-center transition-all"
                       min={10}
                     />
-                    <CoinsIcon className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-yellow-500/50" />
+                    <CoinsIcon className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 club-accent" />
                   </div>
                 </div>
                 <div className="space-y-4 text-center">
-                  <label className="font-heading text-xs font-black text-white/30 uppercase tracking-[0.2em]">Duration (Hours)</label>
+                  <label className="font-heading text-xs font-black club-muted uppercase tracking-wide">Duration (Hours)</label>
                   <div className="relative group">
                     <Input
                       type="number"
                       value={duration}
                       onChange={e => setDuration(Number(e.target.value))}
-                      className="bg-black/30 border-white/10 text-white h-16 rounded-2xl text-2xl font-black text-center focus:ring-purple-500/50 transition-all"
+                      className="club-well club-border club-ink h-16 rounded-xl text-2xl font-black text-center transition-all"
                       min={1}
                       max={72}
                     />
-                    <TimerIcon className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-blue-500/50" />
+                    <TimerIcon className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 club-accent" />
                   </div>
                 </div>
               </div>
@@ -504,18 +504,18 @@ export default function RealtimeAuctions({
                 <Button
                   variant="ghost"
                   onClick={() => setShowCreateModal(false)}
-                  className="flex-1 h-14 rounded-2xl text-white/40 hover:text-white hover:bg-white/5 font-bold"
+                  className="club-action flex-1 h-14 rounded-xl club-muted club-ink club-well font-bold"
                 >
                   Discard
                 </Button>
                 <Button
                   onClick={createAuction}
                   disabled={!selectedBoom || loading}
-                  className="flex-1 h-14 bg-purple-600 hover:bg-purple-500 text-white font-black rounded-2xl shadow-xl shadow-purple-500/20 transition-all hover:scale-[1.02]"
+                  className="club-action flex-1 h-14 club-purple club-purple club-ink font-black rounded-xl transition-all hover:scale-[1.02]"
                 >
                   {loading ? (
                     <span className="flex items-center gap-2">
-                      <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <div className="h-4 w-4 border-2 club-border border-t-white rounded-full animate-spin" />
                       Creating...
                     </span>
                   ) : 'Launch Auction'}
@@ -526,22 +526,22 @@ export default function RealtimeAuctions({
         </div>
       )}
 
-      <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-10 shadow-2xl overflow-hidden relative">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />
+      <div className="club-well border club-border rounded-xl p-10 overflow-hidden relative">
+        <div className="club-decoration absolute top-0 right-0 w-96 h-96 club-purple rounded-full pointer-events-none" />
+        <div className="club-decoration absolute bottom-0 left-0 w-96 h-96 club-blue rounded-full pointer-events-none" />
 
         <div className="flex items-center gap-3 mb-10">
-          <div className="h-2 w-2 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)]" />
-          <h2 className="font-heading text-xl font-black text-white tracking-widest uppercase opacity-60">Live Listings</h2>
+          <div className="h-2 w-2 rounded-full club-green " />
+          <h2 className="font-heading text-xl font-black club-ink tracking-wide uppercase opacity-60">Live Listings</h2>
         </div>
 
         {items.length === 0 ? (
-          <div className="py-24 flex flex-col items-center justify-center rounded-[2rem] border border-dashed border-white/10 bg-white/5">
-            <div className="p-6 bg-white/5 rounded-full mb-6 ring-1 ring-white/10">
-              <TimerIcon className="h-10 w-10 text-white/20" />
+          <div className="py-24 flex flex-col items-center justify-center rounded-xl border border-dashed club-border club-well">
+            <div className="p-6 club-well rounded-full mb-6 ring-1 ">
+              <TimerIcon className="h-10 w-10 club-muted" />
             </div>
-            <p className="font-heading text-white/30 font-black text-xl">The market is currently quiet</p>
-            <p className="font-heading text-white/10 text-sm mt-2">Be the first to list a legendary Boom!</p>
+            <p className="font-heading club-muted font-black text-xl">The market is currently quiet</p>
+            <p className="font-heading club-muted text-sm mt-2">Be the first to list a legendary Boom!</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
@@ -558,11 +558,11 @@ export default function RealtimeAuctions({
                 <div
                   key={item.id}
                   className={`group relative rounded-[2rem] p-1 overflow-hidden transition-all duration-500 hover:scale-[1.02] ${ended
-                    ? 'border-red-500/30 bg-red-500/5'
-                    : 'border-white/5 bg-white/5 hover:border-purple-500/30'
+                    ? 'club-border club-red'
+                    : 'club-border club-well club-border'
                     }`}
                 >
-                  <div className={`absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500 bg-gradient-to-br ${rarityColor}`} />
+                  <div className={`absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500 club-surface ${rarityColor}`} />
 
                   <div className="relative p-7 space-y-6">
                     <div className="flex items-center justify-between">
@@ -573,13 +573,13 @@ export default function RealtimeAuctions({
                           </div>
                           {rarity === 'legendary' || rarity === 'chroma' || rarity === 'mystical' ? (
                             <div className="absolute -top-2 -right-2">
-                              <SparklesIcon className="h-6 w-6 text-yellow-500 animate-pulse" />
+                              <SparklesIcon className="h-6 w-6 club-accent animate-pulse" />
                             </div>
                           ) : null}
                         </div>
                         <div>
-                          <h3 className="font-heading text-2xl font-black text-white tracking-tight">{item.boom_name}</h3>
-                          <Badge className={`${rarityColor} text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 mt-1 border-none shadow-lg ring-1 ring-white/20`}>
+                          <h3 className="font-heading text-2xl font-black club-ink tracking-tight">{item.boom_name}</h3>
+                          <Badge className={`${rarityColor} club-ink text-xs font-black uppercase tracking-wide px-3 py-1 mt-1 border-none ring-1 `}>
                             {rarity}
                           </Badge>
                         </div>
@@ -587,8 +587,8 @@ export default function RealtimeAuctions({
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-black/30 rounded-2xl p-4 border border-white/5">
-                        <p className="font-heading text-[10px] font-black text-white/30 uppercase tracking-widest mb-1">Seller</p>
+                      <div className="club-well rounded-xl p-4 border club-border">
+                        <p className="font-heading text-xs font-black club-muted uppercase tracking-wide mb-1">Seller</p>
                         <div
                           className={`flex items-center gap-2 ${onPlayerClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
                           onClick={(e) => {
@@ -596,13 +596,13 @@ export default function RealtimeAuctions({
                             if (onPlayerClick) onPlayerClick(item.seller); // Note: Seller is a username right now, need a way to look up ID or pass username to modal
                           }}
                         >
-                          <UserIcon className="h-3.5 w-3.5 text-purple-400" />
-                          <span className="font-heading text-sm font-bold text-white truncate flex items-center gap-1">
+                          <UserIcon className="h-3.5 w-3.5 club-accent" />
+                          <span className="font-heading text-sm font-bold club-ink truncate flex items-center gap-1">
                              {(() => {
                                const u = users?.find((usr) => usr.username === item.seller)
                                return u?.clan_tag ? (
                                   <span className="inline-block text-[10px] font-black tracking-tight">
-                                    <span className={u.clan_tag_color || 'text-purple-400'}>
+                                    <span className={u.clan_tag_color || 'club-accent'}>
                                       [{u.clan_tag}]
                                     </span>
                                   </span>
@@ -612,16 +612,16 @@ export default function RealtimeAuctions({
                            </span>
                         </div>
                       </div>
-                      <div className="bg-black/30 rounded-2xl p-4 border border-white/5">
-                        <p className="font-heading text-[10px] font-black text-white/30 uppercase tracking-widest mb-1">Status</p>
+                      <div className="club-well rounded-xl p-4 border club-border">
+                        <p className="font-heading text-xs font-black club-muted uppercase tracking-wide mb-1">Status</p>
                         <div className="flex items-center gap-2">
                           {ended ? (
-                            <div className="flex items-center gap-2 text-red-400">
+                            <div className="flex items-center gap-2 club-danger">
                               <TimerIcon className="h-3.5 w-3.5" />
                               <span className="font-heading text-sm font-black uppercase">Ended</span>
                             </div>
                           ) : (
-                            <div className="flex items-center gap-2 text-green-400">
+                            <div className="flex items-center gap-2 club-success">
                               <ClockIcon className="h-3.5 w-3.5 animate-pulse" />
                               <span className="font-heading text-sm font-black whitespace-nowrap">{timeLeftText(item.ends_at)}</span>
                             </div>
@@ -630,18 +630,18 @@ export default function RealtimeAuctions({
                       </div>
                     </div>
 
-                    <div className="bg-gradient-to-r from-purple-600/20 to-blue-600/20 rounded-[1.5rem] p-6 border border-white/10 ring-1 ring-white/5 space-y-3">
+                    <div className="club-surface rounded-[1.5rem] p-6 border club-border ring-1 space-y-3">
                       <div className="flex items-center justify-between">
-                        <span className="font-heading text-xs font-black text-white/40 uppercase tracking-widest">Current Bid</span>
+                        <span className="font-heading text-xs font-black club-muted uppercase tracking-wide">Current Bid</span>
                         <div className="flex items-center gap-2">
-                          <CoinsIcon className="h-5 w-5 text-yellow-500" />
-                          <span className="font-heading text-2xl font-black text-white tabular-nums tracking-tighter">{item.current_bid.toLocaleString()}</span>
+                          <CoinsIcon className="h-5 w-5 club-accent" />
+                          <span className="font-heading text-2xl font-black club-ink tabular-nums tracking-tighter">{item.current_bid.toLocaleString()}</span>
                         </div>
                       </div>
 
                       {item.top_bidder ? (
-                        <div className="flex items-center justify-between pt-3 border-t border-white/5">
-                          <span className="font-heading text-[10px] font-black text-white/30 uppercase tracking-widest">Top Bidder</span>
+                        <div className="flex items-center justify-between pt-3 border-t club-border">
+                          <span className="font-heading text-xs font-black club-muted uppercase tracking-wide">Top Bidder</span>
                           <div
                             className={`flex items-center gap-2 ${onPlayerClick && !isWinner ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
                             onClick={(e) => {
@@ -649,15 +649,15 @@ export default function RealtimeAuctions({
                               if (onPlayerClick && !isWinner && item.top_bidder) onPlayerClick(item.top_bidder); // Requires username -> id lookup if modal expects ID
                             }}
                           >
-                            <TrophyIcon className={`h-3 w-3 ${isWinner ? 'text-yellow-500' : 'text-purple-400'}`} />
-                            <span className={`text-[10px] font-black uppercase tracking-wider ${isWinner ? 'text-yellow-500' : 'text-white'} flex items-center gap-1`}>
+                            <TrophyIcon className={`h-3 w-3 ${isWinner ? 'club-accent' : 'club-accent'}`} />
+                            <span className={`text-[10px] font-black uppercase tracking-wider ${isWinner ? 'club-accent' : 'club-ink'} flex items-center gap-1`}>
                               {isWinner ? 'Your Leading!' : (
                                 <>
                                   {(() => {
                                     const u = users?.find((usr) => usr.username === item.top_bidder)
                                     return u?.clan_tag ? (
                                        <span className="inline-block text-[9px] font-black tracking-tight mr-0.5">
-                                         <span className={u.clan_tag_color || 'text-purple-400'}>
+                                         <span className={u.clan_tag_color || 'club-accent'}>
                                            [{u.clan_tag}]
                                          </span>
                                        </span>
@@ -670,15 +670,15 @@ export default function RealtimeAuctions({
                           </div>
                         </div>
                       ) : (
-                        <div className="font-heading text-center pt-2 italic text-[10px] font-bold text-white/20 uppercase tracking-widest">No bids placed yet</div>
+                        <div className="font-heading text-center pt-2 italic text-xs font-bold club-muted uppercase tracking-wide">No bids placed yet</div>
                       )}
                     </div>
 
                     {!ended ? (
                       <Button
-                        className={`w-full h-14 rounded-2xl font-black text-base transition-all duration-300 active:scale-95 flex items-center gap-3 border-none ${isSeller
-                          ? 'bg-white/5 text-white/30 cursor-not-allowed'
-                          : 'bg-green-600 hover:bg-green-500 text-white shadow-xl shadow-green-900/40'
+                        className={`club-action w-full h-14 rounded-2xl font-black text-base transition-all duration-300 active:scale-95 flex items-center gap-3 border-none ${isSeller
+                          ? 'club-well club-muted cursor-not-allowed'
+                          : 'club-green club-green club-ink '
                           }`}
                         onClick={() => placeBid(item)}
                         disabled={isSeller}
@@ -694,7 +694,7 @@ export default function RealtimeAuctions({
                       <div className="animate-in slide-in-from-bottom-2">
                         {isWinner && (
                           <Button
-                            className="w-full h-14 bg-yellow-400 hover:bg-yellow-300 text-black font-black rounded-2xl shadow-xl shadow-yellow-500/40 flex items-center justify-center gap-3 animate-pulse border-none"
+                            className="club-action w-full h-14 club-yellow club-yellow club-ink font-black rounded-xl flex items-center justify-center gap-3 border-none"
                             onClick={() => claimAuction(item)}
                           >
                             <TrophyIcon className="h-6 w-6" />
@@ -703,7 +703,7 @@ export default function RealtimeAuctions({
                         )}
                         {isSeller && !item.top_bidder && (
                           <Button
-                            className="w-full h-14 bg-white/10 hover:bg-white/20 text-white font-black rounded-2xl border border-white/10 flex items-center justify-center gap-3 transition-colors"
+                            className="club-action w-full h-14 club-well club-well club-ink font-black rounded-xl border club-border flex items-center justify-center gap-3 transition-colors"
                             onClick={() => claimAuction(item)}
                           >
                             <ArrowRightIcon className="h-6 w-6 rotate-180" />
@@ -711,12 +711,12 @@ export default function RealtimeAuctions({
                           </Button>
                         )}
                         {isSeller && item.top_bidder && (
-                          <div className="h-14 flex items-center justify-center bg-white/5 rounded-2xl border border-white/5 text-yellow-200/50 text-[10px] font-black uppercase tracking-[0.2em]">
+                          <div className="h-14 flex items-center justify-center club-well rounded-xl border club-border club-accent text-xs font-black uppercase tracking-wide">
                             WAITING FOR {item.top_bidder} TO CLAIM
                           </div>
                         )}
                         {!isWinner && !isSeller && (
-                          <div className="h-14 flex items-center justify-center bg-white/5 rounded-2xl border border-white/5 text-white/10 text-[10px] font-black uppercase tracking-[0.2em] italic">
+                          <div className="h-14 flex items-center justify-center club-well rounded-xl border club-border club-muted text-xs font-black uppercase tracking-wide italic">
                             MARKET LISTING EXPIRED
                           </div>
                         )}
@@ -731,44 +731,44 @@ export default function RealtimeAuctions({
       </div>
       {/* Bidding Modal */}
       {biddingItem && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in zoom-in-95 duration-300">
-          <Card className="w-full max-w-md bg-[#0a0a0c]/95 backdrop-blur-2xl border-purple-500/30 shadow-[0_0_80px_rgba(139,92,246,0.3)] rounded-[2.5rem] overflow-hidden">
+        <div className="fixed inset-0 club-overlay flex items-center justify-center z-50 p-4 animate-in fade-in zoom-in-95 duration-300">
+          <Card className="w-full max-w-md club-surface club-border rounded-xl overflow-hidden">
             <CardHeader className="p-8 text-center">
-              <div className="mx-auto w-24 h-24 bg-purple-600/10 rounded-full flex items-center justify-center mb-6 ring-1 ring-purple-500/30">
+              <div className="mx-auto w-24 h-24 club-purple rounded-full flex items-center justify-center mb-6 ring-1 ">
                 <span className="font-heading text-6xl drop-shadow-2xl flex items-center justify-center">
                   <BoomAvatar name={biddingItem.boom_name} className="w-[1em] h-[1em]" />
                 </span>
               </div>
-              <CardTitle className="font-heading text-3xl font-black text-white tracking-tight">Place Your Bid</CardTitle>
-              <CardDescription className="font-heading text-purple-300/40 mt-2">You are bidding on {biddingItem.boom_name}</CardDescription>
+              <CardTitle className="font-heading text-3xl font-black club-ink tracking-tight">Place Your Bid</CardTitle>
+              <CardDescription className="font-heading club-accent mt-2">You are bidding on {biddingItem.boom_name}</CardDescription>
             </CardHeader>
             <CardContent className="p-8 space-y-8">
-              <div className="bg-white/5 rounded-3xl p-6 border border-white/10 space-y-4">
+              <div className="club-well rounded-xl p-6 border club-border space-y-4">
                 <div className="flex justify-between items-center px-2">
-                  <span className="font-heading text-xs font-black text-white/30 uppercase tracking-[0.2em]">Current Bid</span>
+                  <span className="font-heading text-xs font-black club-muted uppercase tracking-wide">Current Bid</span>
                   <div className="flex items-center gap-2">
-                    <CoinsIcon className="h-4 w-4 text-yellow-500" />
-                    <span className="font-heading text-lg font-black text-white">{biddingItem.current_bid.toLocaleString()}</span>
+                    <CoinsIcon className="h-4 w-4 club-accent" />
+                    <span className="font-heading text-lg font-black club-ink">{biddingItem.current_bid.toLocaleString()}</span>
                   </div>
                 </div>
 
                 <div className="space-y-4 pt-2">
-                  <Label className="font-heading text-xs font-black text-white/30 uppercase tracking-[0.2em] ml-2">Your New Bid</Label>
+                  <Label className="font-heading text-xs font-black club-muted uppercase tracking-wide ml-2">Your New Bid</Label>
                   <div className="relative">
                     <Input
                       type="number"
                       value={bidAmount}
                       onChange={e => setBidAmount(Number(e.target.value))}
-                      className="bg-black/40 border-purple-500/30 text-white h-16 rounded-2xl text-2xl font-black text-center focus:ring-purple-500/50 focus:border-purple-500 transition-all shadow-[inset_0_0_20px_rgba(139,92,246,0.1)]"
+                      className="club-well club-border club-ink h-16 rounded-xl text-2xl font-black text-center club-border transition-all "
                     />
-                    <CoinsIcon className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-yellow-500" />
+                    <CoinsIcon className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 club-accent" />
                   </div>
                   <div className="flex justify-between gap-2 px-1">
                     {[10, 50, 100].map(add => (
                       <button
                         key={add}
                         onClick={() => setBidAmount(prev => prev + add)}
-                        className="flex-1 py-2 bg-white/5 hover:bg-white/10 rounded-xl text-[10px] font-black text-white/60 transition-colors uppercase tracking-widest border border-white/5"
+                        className="flex-1 py-2 club-well club-well rounded-xl text-xs font-black club-muted transition-colors uppercase tracking-wide border club-border"
                       >
                         +{add}
                       </button>
@@ -781,7 +781,7 @@ export default function RealtimeAuctions({
                 <Button
                   onClick={handlePlaceBid}
                   disabled={loading || bidAmount <= biddingItem.current_bid}
-                  className="h-16 bg-green-600 hover:bg-green-500 text-white font-black rounded-2xl shadow-xl shadow-green-900/40 text-lg group transition-all"
+                  className="club-action h-16 club-green club-green club-ink font-black rounded-xl text-lg group transition-all"
                 >
                   {loading ? 'Processing...' : (
                     <span className="flex items-center gap-3">
@@ -793,7 +793,7 @@ export default function RealtimeAuctions({
                 <Button
                   variant="ghost"
                   onClick={() => setBiddingItem(null)}
-                  className="h-14 rounded-2xl text-white/30 hover:text-white hover:bg-white/5 font-bold"
+                  className="club-action h-14 rounded-xl club-muted club-ink club-well font-bold"
                 >
                   Maybe later
                 </Button>
@@ -804,12 +804,12 @@ export default function RealtimeAuctions({
       )}
       {/* Status Modal */}
       {statusModal.show && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-in fade-in zoom-in-95 duration-300">
-          <Card className="w-full max-w-sm bg-[#0a0a0c]/95 backdrop-blur-2xl border-white/10 shadow-[0_0_80px_rgba(0,0,0,0.5)] rounded-[2.5rem] overflow-hidden text-center">
+        <div className="fixed inset-0 club-overlay flex items-center justify-center z-[100] p-4 animate-in fade-in zoom-in-95 duration-300">
+          <Card className="w-full max-w-sm club-surface club-border rounded-xl overflow-hidden text-center">
             <CardContent className="p-10 space-y-6">
-              <div className={`mx-auto w-20 h-20 rounded-full flex items-center justify-center ring-4 ring-offset-4 ring-offset-[#0a0a0c] ${statusModal.type === 'success' ? 'bg-green-500/20 ring-green-500/50 text-green-400' :
-                statusModal.type === 'error' ? 'bg-red-500/20 ring-red-500/50 text-red-400' :
-                  'bg-blue-500/20 ring-blue-500/50 text-blue-400'
+              <div className={`mx-auto w-20 h-20 rounded-full flex items-center justify-center ring-4 ring-offset-4 ring-offset-[#0a0a0c] ${statusModal.type === 'success' ? 'club-green ring-green-500/50 club-success' :
+                statusModal.type === 'error' ? 'club-red ring-red-500/50 club-danger' :
+                  'club-blue club-accent'
                 }`}>
                 {statusModal.type === 'success' ? <CheckIcon className="h-10 w-10" /> :
                   statusModal.type === 'error' ? <XIcon className="h-10 w-10" /> :
@@ -817,15 +817,15 @@ export default function RealtimeAuctions({
               </div>
 
               <div className="space-y-2">
-                <h3 className="font-heading text-2xl font-black text-white tracking-tight">{statusModal.title}</h3>
-                <p className="font-heading text-white/40 text-sm font-medium leading-relaxed">{statusModal.message}</p>
+                <h3 className="font-heading text-2xl font-black club-ink tracking-tight">{statusModal.title}</h3>
+                <p className="font-heading club-muted text-sm font-medium leading-relaxed">{statusModal.message}</p>
               </div>
 
               <Button
                 onClick={() => setStatusModal({ ...statusModal, show: false })}
-                className={`w-full h-12 rounded-2xl font-black transition-all active:scale-95 ${statusModal.type === 'success' ? 'bg-green-600 hover:bg-green-500 text-white' :
-                  statusModal.type === 'error' ? 'bg-red-600 hover:bg-red-500 text-white' :
-                    'bg-blue-600 hover:bg-blue-500 text-white'
+                className={`club-action w-full h-12 rounded-2xl font-black transition-all active:scale-95 ${statusModal.type === 'success' ? 'club-green club-green club-ink' :
+                  statusModal.type === 'error' ? 'club-red club-red club-ink' :
+                    'club-blue club-blue club-ink'
                   }`}
               >
                 Dismiss

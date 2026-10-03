@@ -70,25 +70,25 @@ export default function LemonCheckout({ userId, isStaff }: LemonCheckoutProps) {
     <div className="space-y-6">
       {subscriptionProducts.length > 0 && (
         <div className="mb-6">
-          <h4 className="font-heading text-white font-bold text-lg mb-3 flex items-center gap-2">
-            <Crown className="w-5 h-5 text-yellow-400" />
+          <h4 className="font-heading club-ink font-bold text-lg mb-3 flex items-center gap-2">
+            <Crown className="w-5 h-5 club-accent" />
             Premium Membership
           </h4>
           {subscriptionProducts.map((product) => (
             <div
               key={product.id}
-              className="relative bg-gradient-to-r from-yellow-600/30 to-orange-600/30 border-2 border-yellow-500/50 rounded-xl p-5 hover:border-yellow-400 transition-all"
+              className="relative club-surface border-2 club-border rounded-xl p-5 club-border transition-all"
             >
-              <div className="absolute -top-3 left-4 bg-yellow-500 text-black text-xs font-bold px-3 py-1 rounded-full">
+              <div className="absolute -top-3 left-4 club-yellow club-ink text-xs font-bold px-3 py-1 rounded-full">
                 RECOMMENDED
               </div>
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-14 h-14 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center">
-                  <Crown className="w-8 h-8 text-white" />
+                <div className="w-14 h-14 club-surface rounded-xl flex items-center justify-center">
+                  <Crown className="w-8 h-8 club-ink" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-white text-xl">{product.name}</h3>
-                  <p className="font-heading text-yellow-200 text-sm">{product.description}</p>
+                  <h3 className="font-bold club-ink text-xl">{product.name}</h3>
+                  <p className="font-heading club-accent text-sm">{product.description}</p>
                 </div>
               </div>
               {product.features && (
@@ -96,11 +96,11 @@ export default function LemonCheckout({ userId, isStaff }: LemonCheckoutProps) {
                   {product.features.map((feature, idx) => (
                     <div
                       key={idx}
-                      className="flex items-center gap-2 text-white text-sm bg-white/10 rounded-lg px-3 py-2"
+                      className="flex items-center gap-2 club-ink text-sm club-well rounded-lg px-3 py-2"
                     >
-                      {feature.includes("Banner") && <Palette className="w-4 h-4 text-purple-400" />}
-                      {feature.includes("Role") && <BadgeCheck className="w-4 h-4 text-blue-400" />}
-                      {feature.includes("Color") && <Sparkles className="w-4 h-4 text-pink-400" />}
+                      {feature.includes("Banner") && <Palette className="w-4 h-4 club-accent" />}
+                      {feature.includes("Role") && <BadgeCheck className="w-4 h-4 club-accent" />}
+                      {feature.includes("Color") && <Sparkles className="w-4 h-4 club-accent" />}
                       {feature}
                     </div>
                   ))}
@@ -109,7 +109,7 @@ export default function LemonCheckout({ userId, isStaff }: LemonCheckoutProps) {
               <Button
                 onClick={() => handleSelectProduct(product.id)}
                 disabled={loadingProductId !== null}
-                className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-black font-bold text-lg py-3"
+                className="club-action w-full club-surface club-ink font-bold text-lg py-3"
               >
                 {loadingProductId === product.id ? "Loading..." : `Get Plus - ₼${(product.priceInCents / 100).toFixed(2)} AZN/month`}
               </Button>
@@ -119,36 +119,36 @@ export default function LemonCheckout({ userId, isStaff }: LemonCheckoutProps) {
       )}
 
       {/* Token Products Section */}
-      <h4 className="font-heading text-white font-bold text-lg mb-3 flex items-center gap-2">
-        <Coins className="w-5 h-5 text-yellow-400" />
+      <h4 className="font-heading club-ink font-bold text-lg mb-3 flex items-center gap-2">
+        <Coins className="w-5 h-5 club-accent" />
         Token Packs
       </h4>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {tokenProducts.map((product) => (
           <div
             key={product.id}
-            className="relative bg-purple-900/50 border border-purple-500/30 rounded-xl p-4 hover:border-purple-400 transition-all"
+            className="relative club-purple border club-border rounded-xl p-4 club-border transition-all"
           >
             {product.bonus && (
-              <div className="absolute -top-2 -right-2 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
+              <div className="absolute -top-2 -right-2 club-yellow club-ink text-xs font-bold px-2 py-1 rounded-full flex items-center gap-1">
                 <Sparkles className="w-3 h-3" />
                 {product.bonus}
               </div>
             )}
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 bg-purple-600 rounded-lg flex items-center justify-center">
-                <Coins className="w-6 h-6 text-yellow-400" />
+              <div className="w-12 h-12 club-purple rounded-lg flex items-center justify-center">
+                <Coins className="w-6 h-6 club-accent" />
               </div>
               <div>
-                <h3 className="font-bold text-white">{product.name}</h3>
-                <p className="font-heading text-purple-300 text-sm">{product.tokens?.toLocaleString()} Tokens</p>
+                <h3 className="font-bold club-ink">{product.name}</h3>
+                <p className="font-heading club-accent text-sm">{product.tokens?.toLocaleString()} Tokens</p>
               </div>
             </div>
-            <p className="font-heading text-purple-200 text-sm mb-4">{product.description}</p>
+            <p className="font-heading club-accent text-sm mb-4">{product.description}</p>
             <Button
               onClick={() => handleSelectProduct(product.id)}
               disabled={loadingProductId !== null}
-              className="w-full bg-purple-600 hover:bg-purple-500 text-white"
+              className="club-action w-full club-purple club-purple club-ink"
             >
               {loadingProductId === product.id ? "Loading..." : `₼${(product.priceInCents / 100).toFixed(2)} AZN`}
             </Button>
@@ -159,23 +159,23 @@ export default function LemonCheckout({ userId, isStaff }: LemonCheckoutProps) {
       {/* Booster Products Section */}
       {boosterProducts.length > 0 && (
         <div className="mt-6">
-          <h4 className="font-heading text-white font-bold text-lg mb-3 flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-purple-400" />
+          <h4 className="font-heading club-ink font-bold text-lg mb-3 flex items-center gap-2">
+            <Sparkles className="w-5 h-5 club-accent" />
             Luck Boosters
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {boosterProducts.map((product) => (
               <div
                 key={product.id}
-                className="relative bg-indigo-950/45 border border-indigo-500/20 rounded-xl p-4 hover:border-indigo-400 transition-all flex flex-col justify-between"
+                className="relative club-purple border club-border rounded-xl p-4 club-border transition-all flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center shrink-0">
-                      <Sparkles className="w-6 h-6 text-white animate-pulse" />
+                    <div className="w-12 h-12 club-surface rounded-lg flex items-center justify-center shrink-0">
+                      <Sparkles className="w-6 h-6 club-ink " />
                     </div>
                     <div>
-                      <h3 className="font-bold text-white text-sm">{product.name}</h3>
+                      <h3 className="font-bold club-ink text-sm">{product.name}</h3>
                       <p className="font-heading text-indigo-300/80 text-xs mt-1 leading-relaxed">{product.description}</p>
                     </div>
                   </div>
@@ -183,7 +183,7 @@ export default function LemonCheckout({ userId, isStaff }: LemonCheckoutProps) {
                 <Button
                   onClick={() => handleSelectProduct(product.id)}
                   disabled={loadingProductId !== null}
-                  className="w-full mt-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold text-sm py-2 rounded-lg"
+                  className="club-action w-full mt-4 club-surface club-ink font-bold text-sm py-2 rounded-lg"
                 >
                   {loadingProductId === product.id ? "Loading..." : `₼${(product.priceInCents / 100).toFixed(2)} AZN`}
                 </Button>

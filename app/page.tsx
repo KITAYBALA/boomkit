@@ -77,6 +77,8 @@ import GameResults from "@/components/game-results"
 import DailySpinWheel from "@/components/daily-spin-wheel"
 import { toast } from "sonner"
 import { BoomAvatar } from "@/components/boom-avatar"
+import PublicLobby from "@/components/public-lobby"
+import { ClubDialog, ClubSettings, ClubSidebar, ClubTopbar, ClubOverview, ClubMarket, ClubCollection, type ClubNavItem } from "@/components/clubhouse"
 
 // Advanced computer identification system
 const generateSystemSignature = (): string => {
@@ -324,14 +326,14 @@ const getBoomAvatar = (boomName: string) => {
 
 const getRarityColor = (rarity: string) => {
   switch (rarity) {
-    case "uncommon": return "bg-green-500"
-    case "rare": return "bg-blue-500"
-    case "epic": return "bg-purple-500"
-    case "legendary": return "bg-orange-500"
-    case "chroma": return "bg-pink-500"
-    case "mystical": return "bg-cyan-500"
-    case "hidden": return "bg-slate-900 border-slate-700 text-slate-300"
-    default: return "bg-gray-500"
+    case "uncommon": return "club-green"
+    case "rare": return "club-blue"
+    case "epic": return "club-purple"
+    case "legendary": return "club-yellow"
+    case "chroma": return "club-purple"
+    case "mystical": return "club-blue"
+    case "hidden": return "club-well club-border club-muted"
+    default: return "club-well"
   }
 }
 
@@ -369,37 +371,37 @@ const DEFAULT_ROLES: UserRole[] = [
   {
     id: "player",
     name: "Player",
-    color: "bg-gray-500",
+    color: "club-well",
     permissions: ["chat", "play"],
   },
   {
     id: "tester", // Added Tester role
     name: "Tester",
-    color: "bg-green-500",
+    color: "club-green",
     permissions: ["chat", "play"],
   },
   {
     id: "moderator",
     name: "Moderator",
-    color: "bg-green-500",
+    color: "club-green",
     permissions: ["chat", "play", "mute", "kick"],
   },
   {
     id: "senior_moderator",
     name: "Senior Moderator",
-    color: "bg-blue-500",
+    color: "club-blue",
     permissions: ["chat", "play", "mute", "kick", "ban", "manage_chat"],
   },
   {
     id: "admin",
     name: "Admin",
-    color: "bg-purple-500",
+    color: "club-purple",
     permissions: ["chat", "play", "mute", "kick", "ban", "manage_chat", "manage_users", "manage_packs"],
   },
   {
     id: "owner",
     name: "Owner",
-    color: "bg-yellow-500",
+    color: "club-yellow",
     permissions: ["all"],
   },
 ]
@@ -415,10 +417,10 @@ const gradingGroups = [
 
 // Available badges
 const AVAILABLE_BADGES = [
-  { id: "trusted", name: "Trusted", emoji: "🛡️", color: "bg-blue-500" },
-  { id: "staff", name: "Staff", emoji: "⚡", color: "bg-green-500" },
-  { id: "og", name: "OG", emoji: "👑", color: "bg-purple-500" },
-  { id: "developer", name: "Developer", emoji: "💻", color: "bg-red-500" },
+  { id: "trusted", name: "Trusted", emoji: "🛡️", color: "club-blue" },
+  { id: "staff", name: "Staff", emoji: "⚡", color: "club-green" },
+  { id: "og", name: "OG", emoji: "👑", color: "club-purple" },
+  { id: "developer", name: "Developer", emoji: "💻", color: "club-red" },
 ]
 
 const INVENTORY_SPECS: Record<string, { name: string; description: string; emoji: string; color: string }> = {
@@ -426,25 +428,25 @@ const INVENTORY_SPECS: Record<string, { name: string; description: string; emoji
     name: "2x Luck Charm (1 Hour)",
     description: "Applies a global 2x Luck Boost for legendary, chroma, hidden, and mystical drops for 1 hour.",
     emoji: "🍀",
-    color: "from-green-500/20 to-emerald-500/20 border-green-500/30 text-green-400"
+    color: " club-border club-success"
   },
   "luck-charm-2x-2h": {
     name: "2x Luck Charm (2 Hours)",
     description: "Applies a global 2x Luck Boost for legendary, chroma, hidden, and mystical drops for 2 hours.",
     emoji: "🔮",
-    color: "from-blue-500/20 to-indigo-500/20 border-blue-500/30 text-blue-400"
+    color: " club-border club-accent"
   },
   "luck-charm-2x-3h": {
     name: "2x Luck Charm (3 Hours)",
     description: "Applies a global 2x Luck Boost for legendary, chroma, hidden, and mystical drops for 3 hours.",
     emoji: "🧿",
-    color: "from-purple-500/20 to-violet-500/20 border-purple-500/30 text-purple-400"
+    color: " club-border club-accent"
   },
   "luck-charm-super-3x-1h": {
     name: "SUPER LUCK CHARM (3x Luck, 1 Hour)",
     description: "Applies a global 3x Luck Boost for legendary, chroma, hidden, and mystical drops for 1 hour.",
     emoji: "🔥",
-    color: "from-orange-500/20 to-red-500/20 border-orange-500/30 text-orange-400"
+    color: " club-border club-accent"
   }
 }
 
@@ -505,7 +507,7 @@ const NEWS_ITEMS: NewsItem[] = [
     image: "🚀",
     imageUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1200&q=80",
     badge: "V2 Release",
-    badgeColor: "bg-gradient-to-r from-purple-500 to-pink-500"
+    badgeColor: "club-surface "
   },
   {
     id: "3",
@@ -515,7 +517,7 @@ const NEWS_ITEMS: NewsItem[] = [
     image: "🎮",
     imageUrl: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1200&q=80",
     badge: "Major Update",
-    badgeColor: "bg-purple-500"
+    badgeColor: "club-purple"
   },
   {
     id: "2",
@@ -525,7 +527,7 @@ const NEWS_ITEMS: NewsItem[] = [
     image: "👤",
     imageUrl: "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=1200&q=80",
     badge: "New Feature",
-    badgeColor: "bg-blue-500"
+    badgeColor: "club-blue"
   },
   {
     id: "1",
@@ -535,7 +537,7 @@ const NEWS_ITEMS: NewsItem[] = [
     image: "🎉",
     imageUrl: "https://images.unsplash.com/photo-1513151233558-d860c5398176?w=1200&q=80",
     badge: "Official Release",
-    badgeColor: "bg-emerald-500"
+    badgeColor: "club-green"
   },
 ]
 
@@ -895,8 +897,8 @@ export default function BoomkitGame() {
   const [isStorageLoaded, setIsStorageLoaded] = useState(false) // Added to prevent hydration race conditions
 
   // Theme State
-  const [themeMode, setThemeMode] = useState<"dark" | "light" | "custom">("dark")
-  const [customThemeColor, setCustomThemeColor] = useState("#6d28d9")
+  const [themeMode, setThemeMode] = useState<"dark" | "light" | "custom">("light")
+  const [customThemeColor, setCustomThemeColor] = useState("#226653")
   // Custom roles feature removed for security reasons
 
 
@@ -966,7 +968,6 @@ export default function BoomkitGame() {
 
   // ToS State
   const [tosAccepted, setTosAccepted] = useState(false)
-  const [showTosModal, setShowTosModal] = useState(false)
 
   // Login form state
   const [loginForm, setLoginForm] = useState({
@@ -3791,19 +3792,19 @@ const handlePackAction = async (packId: string) => {
   const getRarityColor = (rarity: string) => {
     switch (rarity) {
       case "uncommon":
-        return "bg-green-500"
+        return "club-green"
       case "rare":
-        return "bg-blue-500"
+        return "club-blue"
       case "epic":
-        return "bg-purple-500"
+        return "club-purple"
       case "legendary":
-        return "bg-orange-500"
+        return "club-yellow"
       case "chroma":
-        return "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500"
+        return "club-surface "
       case "mystical":
-        return "bg-gradient-to-r from-purple-900 via-pink-500 to-indigo-900"
+        return "club-surface "
       default:
-        return "bg-green-500"
+        return "club-green"
     }
   }
 
@@ -3838,1203 +3839,144 @@ const handlePackAction = async (packId: string) => {
   const getRoleColor = (role: string) => {
     switch (role) {
       case "owner":
-        return "bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.5)]"
+        return "club-yellow "
       case "admin":
-        return "bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.5)]"
+        return "club-purple "
       case "senior_moderator":
-        return "bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+        return "club-blue "
       case "moderator":
-        return "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]"
+        return "club-green "
       case "tester":
-        return "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]"
+        return "club-green "
       case "player":
-        return "bg-slate-500 shadow-[0_0_10px_rgba(100,116,139,0.5)]"
+        return "club-well "
       default:
-        return "bg-gray-500"
+        return "club-well"
     }
   }
 
-  // Landing Page (replacing Owner Access default)
-  if (currentView === "owner-access") {
-    // Generate a list of random booms for the background/grid
-    const showcaseBooms = PACKS.flatMap(p => p.booms).slice(0, 16) // Take first 16 for grid
-
-    return (
-      <div className="min-h-screen blooket-bg bg-sky-50 dark:bg-slate-900 flex flex-col  relative overflow-hidden">
-        {/* Glowing Nebula Backgrounds */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-          <div className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-purple-600/10 blur-[130px] nebula-float-1" />
-          <div className="absolute top-[20%] -right-40 w-[600px] h-[600px] rounded-full bg-pink-600/10 blur-[150px] nebula-float-2" />
-        </div>
-
-        {/* Navbar */}
-        <nav className="flex justify-between items-center p-6 px-10 backdrop-blur-md blooket-panel/20 border-b border-white/5 relative z-10">
-          <h1 className="font-heading text-3xl font-black text-pink-600 dark:text-pink-400 font-black tracking-tight hover:scale-[1.02] transition-transform duration-300 cursor-pointer">
-            Boomkit
-          </h1>
-          <div className="space-x-4">
-            <Button
-              onClick={() => setCurrentView("login")}
-              className="bg-transparent hover:bg-white/10 text-white border border-white/10 font-bold px-6 h-11 rounded-xl transition-all"
-            >
-              Login
-            </Button>
-            <Button
-              onClick={() => setCurrentView("register")}
-              className="bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold px-6 h-11 rounded-xl shadow-[0_0_20px_rgba(168,85,247,0.3)] transition-all hover:scale-[1.02]"
-            >
-              Register
-            </Button>
-          </div>
-        </nav>
-
-        {/* Hero Section */}
-        <main className="flex-1 flex flex-col md:flex-row items-center justify-center p-6 md:p-20 gap-12 relative z-10">
-
-          {/* Left Content */}
-          <div className="flex-1 space-y-6 text-center md:text-left max-w-xl">
-            <h1 className="font-heading text-6xl md:text-8xl font-black text-white leading-tight tracking-tighter">
-              Boomkit
-            </h1>
-            <p className="font-heading text-3xl md:text-5xl font-black text-pink-600 dark:text-pink-400 font-black">
-              The Ultimate Emoji Trading Arena
-            </p>
-            <p className="font-heading text-slate-400 text-lg md:text-xl max-w-md mx-auto md:mx-0 leading-relaxed">
-              Collect rare emojis, dominate the market, and climb the ranks in the world's premier emoji-based trading experience.
-            </p>
-            <div className="pt-4 flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-              <Button
-                onClick={() => setCurrentView("register")}
-                className="blooket-button bg-yellow-500 hover:bg-yellow-400 text-white font-black h-14 px-10 text-2xl"
-              >
-                Get Started
-              </Button>
-            </div>
-          </div>
-
-          {/* Right Content - Boom Grid */}
-          <div className="flex-1 grid grid-cols-4 gap-4 max-w-lg p-6 blooket-panel rounded-[2.5rem] backdrop-blur-xl border border-white/10 rotate-3 hover:rotate-0 transition-all duration-700 shadow-2xl shadow-purple-950/10">
-            {showcaseBooms.map((boom, idx) => (
-              <div
-                key={idx}
-                className="aspect-square bg-slate-900/60 rounded-2xl flex items-center justify-center text-4xl shadow-inner border border-white/5 hover:border-purple-500/30 hover:scale-110 transition-all duration-300 cursor-default select-none overflow-hidden"
-                title={boom.name}
-              >
-                <BoomAvatar name={boom.name} className="w-full h-full object-contain" />
-              </div>
-            ))}
-          </div>
-
-        </main>
-
-        {/* Footer / Secret Access */}
-        <footer className="p-6 text-center text-slate-600 text-xs border-t border-white/5 blooket-panel/10 relative z-10">
-          <p>&copy; 2026 Boomkit. All rights reserved.</p>
-        </footer>
-      </div>
-    )
+  // Public views share presentation; auth and game state remain owned here.
+  if (currentView !== "game") {
+    return <PublicLobby
+      view={currentView}
+      onNavigate={(view) => { setAuthError(null); setCurrentView(view) }}
+      loginForm={loginForm}
+      setLoginForm={setLoginForm}
+      registerForm={registerForm}
+      setRegisterForm={setRegisterForm}
+      onLogin={handleLogin}
+      onRegister={handleRegister}
+      busy={isAuthenticating}
+      error={authError}
+      tosAccepted={tosAccepted}
+      setTosAccepted={setTosAccepted}
+    />
   }
 
-  if (currentView === "register") {
-    return (
-      <div className="min-h-screen blooket-bg bg-sky-50 dark:bg-slate-900 flex items-center justify-center p-4 relative overflow-hidden ">
-        {/* Glowing Nebula Backgrounds */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-          <div className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-purple-600/10 blur-[130px] nebula-float-1" />
-          <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full bg-pink-600/10 blur-[130px] nebula-float-2" />
-        </div>
-
-        <Card className="w-full max-w-md blooket-card overflow-hidden relative z-10">
-          <CardHeader className="font-heading text-center relative overflow-hidden pb-8">
-            <div className="absolute inset-0 bg-gradient-to-b from-purple-600/10 to-transparent" />
-            <CardTitle className="font-heading text-4xl font-black text-pink-600 dark:text-pink-400 font-black relative z-10 drop-shadow-md pb-1">
-              Join Boomkit!
-            </CardTitle>
-            <CardDescription className="font-heading text-white/60 font-medium relative z-10">Start your adventure today</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6 pt-0 relative z-10">
-            {/* Promo Code / Discord Key Notice */}
-            <div className="p-3.5 rounded-2xl bg-indigo-950/40 border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.1)] flex items-start gap-3 relative overflow-hidden animate-pulse">
-              <div className="p-2 bg-[#5865F2]/10 rounded-xl border border-[#5865F2]/20 text-[#5865F2] shrink-0">
-                <svg className="w-4 h-4" viewBox="0 0 127.14 96.36" fill="currentColor">
-                  <path d="M107.7,8.07A105.15,105.15,0,0,0,77.26,0a77.19,77.19,0,0,0-3.3,6.83A96.67,96.67,0,0,0,53.22,6.83,77.19,77.19,0,0,0,49.88,0,105.15,105.15,0,0,0,19.44,8.07C3.66,31.58-1.86,54.65,1,77.53A105.73,105.73,0,0,0,32,96.36a77.7,77.7,0,0,0,6.63-10.85,68.43,68.43,0,0,1-10.4-5c.89-.65,1.76-1.34,2.58-2.06a75.22,75.22,0,0,0,72.57,0c.82.72,1.69,1.41,2.58,2.06a68.43,68.43,0,0,1-10.4,5,77.7,77.7,0,0,0,6.63,10.85,105.73,105.73,0,0,0,31-18.83C129,54.65,123.5,31.58,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53S36.18,40.36,42.45,40.36,53.83,46,53.83,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.24,60,73.24,53S78.41,40.36,84.69,40.36,96.07,46,96.07,53,91,65.69,84.69,65.69Z"/>
-                </svg>
-              </div>
-              <div className="space-y-1 text-left">
-                <div className="font-heading text-[11px] font-black tracking-wider text-indigo-400 uppercase">Need an Access Key?</div>
-                <p className="font-heading text-[10px] text-white/70 leading-relaxed font-medium">
-                  Registering? Join our{" "}
-                  <a
-                    href={process.env.NEXT_PUBLIC_DISCORD_INVITE_URL || "https://discord.gg/uqbPsEpyhE"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-heading text-cyan-400 hover:text-cyan-300 underline font-bold transition-colors"
-                  >
-                    Discord server
-                  </a>{" "}
-                  to generate your access key via <code className="font-heading text-pink-400 bg-black/40 px-1 py-0.5 rounded font-mono text-[9px]">/getkey</code> and claim active promo codes!
-                </p>
-              </div>
-            </div>
-            <form onSubmit={handleRegister} className="space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="username" className="font-heading text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Username</Label>
-                <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-pink-500 to-purple-500 rounded-xl blur opacity-20 group-focus-within:opacity-100 transition duration-500" />
-                  <Input
-                    id="username"
-                    value={registerForm.username}
-                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, username: e.target.value }))}
-                    required
-                    className="glass-input placeholder:text-white/20 rounded-xl relative h-12"
-                    placeholder="Choose a cool name..."
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password" className="font-heading text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Password</Label>
-                <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 rounded-xl blur opacity-20 group-focus-within:opacity-100 transition duration-500" />
-                  <Input
-                    id="password"
-                    type="password"
-                    value={registerForm.password}
-                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, password: e.target.value }))}
-                    required
-                    minLength={8}
-                    className="glass-input placeholder:text-white/20 rounded-xl relative h-12"
-                    placeholder="At least 8 characters..."
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="age" className="font-heading text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Age (Minimum 10)</Label>
-                <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl blur opacity-20 group-focus-within:opacity-100 transition duration-500" />
-                  <Input
-                    id="age"
-                    type="number"
-                    min="10"
-                    value={registerForm.age}
-                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, age: e.target.value }))}
-                    required
-                    className="glass-input placeholder:text-white/20 rounded-xl relative h-12"
-                    placeholder="Enter your age"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="reason" className="font-heading text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Application Reason</Label>
-                <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-green-500 to-emerald-500 rounded-xl blur opacity-20 group-focus-within:opacity-100 transition duration-500" />
-                  <textarea
-                    id="reason"
-                    value={registerForm.reason}
-                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, reason: e.target.value }))}
-                    className="w-full glass-input placeholder:text-white/20 rounded-xl relative p-3 min-h-[80px] focus:outline-none focus:ring-0 text-sm resize-none"
-                    placeholder="Tell us why you want to join Boomkit..."
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="accessKey" className="font-heading text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Discord Access Key</Label>
-                <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-xl blur opacity-20 group-focus-within:opacity-100 transition duration-500" />
-                  <Input
-                    id="accessKey"
-                    value={registerForm.accessKey}
-                    onChange={(e) => setRegisterForm((prev) => ({ ...prev, accessKey: e.target.value }))}
-                    required
-                    className="glass-input placeholder:text-white/20 rounded-xl relative h-12"
-                    placeholder="Enter key BK-KEY-..."
-                  />
-                </div>
-              </div>
-
-              {/* ToS Checkbox */}
-              <div className="flex items-center space-x-3 pt-2">
-                <div className="relative flex items-center">
-                  <input
-                    type="checkbox"
-                    id="tos"
-                    checked={tosAccepted}
-                    onChange={(e) => setTosAccepted(e.target.checked)}
-                    className="peer h-5 w-5 cursor-pointer appearance-none rounded-md border border-white/20 bg-black/40 checked:bg-green-500 checked:border-green-500 checked:scale-105 transition-all"
-                  />
-                  <CheckIcon className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity" />
-                </div>
-                <label htmlFor="tos" className="font-heading text-sm font-medium text-white/90 cursor-pointer select-none">
-                  I accept the{' '}
-                  <button
-                    type="button"
-                    onClick={() => setShowTosModal(true)}
-                    className="font-heading text-cyan-300 hover:text-cyan-200 underline underline-offset-2 font-bold transition-colors"
-                  >
-                    Terms of Service
-                  </button>
-                </label>
-              </div>
-
-              {authError && (
-                <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-semibold p-3 rounded-xl text-center">
-                  {authError}
-                </div>
-              )}
-
-              <Button
-                type="submit"
-                disabled={!tosAccepted || isAuthenticating}
-                className="w-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white h-12 rounded-xl text-lg font-bold shadow-lg shadow-purple-900/40 disabled:opacity-50 disabled:cursor-not-allowed transition-all transform active:scale-95 hover:scale-[1.02]"
-              >
-                {isAuthenticating ? "Loading..." : "Let's Go! 🚀"}
-              </Button>
-            </form>
-
-            <div className="mt-6 text-center space-y-3">
-              <Button variant="link" className="font-heading text-white/60 hover:text-white" onClick={() => setCurrentView("login")}>
-                Already have an account? Login
-              </Button>
-              <div className="w-full h-px bg-white/10" />
-              <Button variant="link" className="font-heading text-white/40 hover:text-white/80 text-xs" onClick={() => setCurrentView("owner-access")}>
-                Back to Main Menu
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* ToS Modal */}
-        {showTosModal && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-            <Card className="w-full max-w-2xl bg-[#0e0a22]/95 border-white/10 shadow-2xl max-h-[80vh] flex flex-col rounded-[2rem] overflow-hidden">
-              <CardHeader className="border-b border-white/10 bg-white/5">
-                <CardTitle className="font-heading text-2xl font-black text-white flex items-center gap-2">
-                  <FileTextIcon className="w-6 h-6 text-purple-400" />
-                  Terms of Service
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="flex-1 overflow-y-auto p-6 space-y-4 text-white/80 leading-relaxed text-sm premium-scrollbar">
-                <p><strong className="font-heading text-white">1. Respect Required:</strong> Treat all players with kindness. No bullying, hate speech, or harassment.</p>
-                <p><strong className="font-heading text-white">2. No Cheating:</strong> Using bots, scripts, or unfair advantages will result in an immediate ban.</p>
-                <p><strong className="font-heading text-white">3. Safety First:</strong> Do not share personal information (real name, address, phone number) in public chats.</p>
-                <p><strong className="font-heading text-white">4. Appropriate Content:</strong> No inappropriate language or themes. This is a game for everyone.</p>
-                <p><strong className="font-heading text-white">5. Account Responsibility:</strong> You are responsible for your account security. Do not share your password.</p>
-                <p className="pt-4 text-xs text-white/40 italic">Last updated: January 2026</p>
-              </CardContent>
-              <div className="p-6 border-t border-white/10 bg-white/5 flex justify-end">
-                <Button
-                  onClick={() => {
-                    setShowTosModal(false)
-                    setTosAccepted(true)
-                  }}
-                  className="bg-green-600 hover:bg-green-500 text-white px-8 font-bold rounded-xl h-11"
-                >
-                  I Understand & Accept
-                </Button>
-              </div>
-            </Card>
-          </div>
-        )}
-      </div>
-    )
+  const clubNavigation: ClubNavItem[] = [
+    { id: "stats", label: "My account", group: "Your club", icon: BarChart3Icon },
+    { id: "discover", label: "Play & discover", group: "Your club", icon: CompassIcon },
+    { id: "booms", label: "My collection", group: "Your club", icon: PackageIcon },
+    { id: "market", label: "Pack market", group: "Your club", icon: ShoppingCartIcon },
+    { id: "inventory", label: "Inventory", group: "Your club", icon: BoxIcon },
+    { id: "fusion", label: "Fusion lab", group: "Your club", icon: BeakerIcon },
+    { id: "shop", label: "Shop", group: "Your club", icon: ShoppingBagIcon, fetch: fetchShopItems },
+    { id: "season", label: "Season pass", group: "Your club", icon: FlameIcon, fetch: fetchActiveSeason },
+    { id: "chat", label: "Club chat", group: "Community", icon: MessageCircleIcon },
+    { id: "private-chat", label: "Messages", group: "Community", icon: Users2Icon },
+    { id: "trading", label: "Trading", group: "Community", icon: PackageIcon },
+    { id: "auction", label: "Auctions", group: "Community", icon: GavelIcon },
+    { id: "leaderboard", label: "Leaderboard", group: "Community", icon: BarChart3Icon },
+    { id: "friends", label: "Friends", group: "Community", icon: Users2Icon, fetch: fetchFriends },
+    { id: "clans", label: "Clans", group: "Community", icon: ShieldIcon, fetch: () => currentUser?.clan_id ? fetchClanDetails(currentUser.clan_id) : fetchClansList() },
+    { id: "tournaments", label: "Tournaments", group: "Community", icon: TrophyIcon, fetch: fetchTournaments },
+    { id: "achievements", label: "Achievements", group: "Your account", icon: StarIcon, fetch: fetchAchievements },
+    { id: "settings", label: "Settings", group: "Your account", icon: SettingsIcon },
+    ...(currentUser?.role === "moderator" || currentUser?.role === "senior_moderator" || currentUser?.role === "admin" || currentUser?.role === "tester" || isOwner() ? [{ id: "staff", label: "Staff", group: "Your account", icon: ShieldIcon }] : []),
+  ]
+  const navigateClub = (item: ClubNavItem) => {
+    setCurrentPage(item.id as typeof currentPage)
+    setSidebarOpen(false)
+    if (item.id === "chat") setChatNotificationCount(0)
+    item.fetch?.()
+    document.getElementById("club-content")?.focus()
+    window.scrollTo(0, 0)
   }
-
-  if (currentView === "login") {
-    return (
-      <div className="min-h-screen blooket-bg bg-sky-50 dark:bg-slate-900 flex items-center justify-center p-4 relative overflow-hidden ">
-        {/* Glowing Nebula Backgrounds */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-          <div className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-purple-600/10 blur-[130px] nebula-float-1" />
-          <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full bg-pink-600/10 blur-[130px] nebula-float-2" />
-        </div>
-
-        <Card className="w-full max-w-md blooket-card overflow-hidden relative z-10">
-          <CardHeader className="font-heading text-center relative overflow-hidden pb-8">
-            <div className="absolute inset-0 bg-gradient-to-b from-blue-600/10 to-transparent" />
-            <CardTitle className="font-heading text-4xl font-black text-blue-600 dark:text-blue-400 font-black relative z-10 drop-shadow-md pb-1">
-              Welcome Back!
-            </CardTitle>
-            <CardDescription className="font-heading text-white/60 font-medium relative z-10">Continue your quiz journey</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6 pt-0 relative z-10">
-            {/* Promo Code / Discord Key Notice */}
-            <div className="p-3.5 rounded-2xl bg-indigo-950/40 border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.1)] flex items-start gap-3 relative overflow-hidden animate-pulse">
-              <div className="p-2 bg-[#5865F2]/10 rounded-xl border border-[#5865F2]/20 text-[#5865F2] shrink-0">
-                <svg className="w-4 h-4" viewBox="0 0 127.14 96.36" fill="currentColor">
-                  <path d="M107.7,8.07A105.15,105.15,0,0,0,77.26,0a77.19,77.19,0,0,0-3.3,6.83A96.67,96.67,0,0,0,53.22,6.83,77.19,77.19,0,0,0,49.88,0,105.15,105.15,0,0,0,19.44,8.07C3.66,31.58-1.86,54.65,1,77.53A105.73,105.73,0,0,0,32,96.36a77.7,77.7,0,0,0,6.63-10.85,68.43,68.43,0,0,1-10.4-5c.89-.65,1.76-1.34,2.58-2.06a75.22,75.22,0,0,0,72.57,0c.82.72,1.69,1.41,2.58,2.06a68.43,68.43,0,0,1-10.4,5,77.7,77.7,0,0,0,6.63,10.85,105.73,105.73,0,0,0,31-18.83C129,54.65,123.5,31.58,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53S36.18,40.36,42.45,40.36,53.83,46,53.83,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.24,60,73.24,53S78.41,40.36,84.69,40.36,96.07,46,96.07,53,91,65.69,84.69,65.69Z"/>
-                </svg>
-              </div>
-              <div className="space-y-1 text-left">
-                <div className="font-heading text-[11px] font-black tracking-wider text-indigo-400 uppercase">Join our Discord</div>
-                <p className="font-heading text-[10px] text-white/70 leading-relaxed font-medium">
-                  Need an access key or looking for active promo codes? Join the{" "}
-                  <a
-                    href={process.env.NEXT_PUBLIC_DISCORD_INVITE_URL || "https://discord.gg/uqbPsEpyhE"}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-heading text-cyan-400 hover:text-cyan-300 underline font-bold transition-colors"
-                  >
-                    Discord community
-                  </a>{" "}
-                  to claim exclusive giveaways!
-                </p>
-              </div>
-            </div>
-            <form onSubmit={handleLogin} className="space-y-5">
-              <div className="space-y-2">
-                <Label htmlFor="loginUsername" className="font-heading text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Username</Label>
-                <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl blur opacity-20 group-focus-within:opacity-100 transition duration-500" />
-                  <Input
-                    id="loginUsername"
-                    value={loginForm.username}
-                    onChange={(e) => setLoginForm((prev) => ({ ...prev, username: e.target.value }))}
-                    required
-                    className="glass-input placeholder:text-white/20 rounded-xl relative h-12"
-                    placeholder="Your username..."
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="loginPassword" className="font-heading text-white/80 font-black uppercase text-[10px] tracking-wider ml-1">Password</Label>
-                <div className="relative group">
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl blur opacity-20 group-focus-within:opacity-100 transition duration-500" />
-                  <Input
-                    id="loginPassword"
-                    type="password"
-                    value={loginForm.password}
-                    onChange={(e) => setLoginForm((prev) => ({ ...prev, password: e.target.value }))}
-                    required
-                    className="glass-input placeholder:text-white/20 rounded-xl relative h-12"
-                    placeholder="Your password..."
-                  />
-                </div>
-              </div>
-
-              {authError && (
-                <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-semibold p-3 rounded-xl text-center">
-                  {authError}
-                </div>
-              )}
-
-              <Button 
-                type="submit" 
-                disabled={isAuthenticating}
-                className="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white h-12 rounded-xl text-lg font-bold shadow-lg shadow-blue-900/40 transition-all transform active:scale-95 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isAuthenticating ? "Loading..." : "Login"}
-              </Button>
-            </form>
-            <div className="mt-6 text-center space-y-3">
-              <Button variant="link" className="font-heading text-white/60 hover:text-white" onClick={() => setCurrentView("register")}>
-                Need an account? Register
-              </Button>
-              <div className="w-full h-px bg-white/10" />
-              <Button variant="link" className="font-heading text-white/40 hover:text-white/80 text-xs" onClick={() => setCurrentView("owner-access")}>
-                Back to Main Menu
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
   return (
-    <div
-      className="min-h-screen blooket-bg flex transition-colors duration-500 bg-sky-50 dark:bg-slate-900 text-slate-100  relative overflow-hidden w-full z-10"
-      style={
-        themeMode === "custom"
-          ? { background: customThemeColor }
-          : themeMode === "light"
-          ? { background: "#181335" }
-          : {}
-      }
-    >
-      {/* Glowing Nebula Backgrounds */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full bg-purple-600/5 blur-[130px] nebula-float-1" />
-        <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] rounded-full bg-pink-600/5 blur-[150px] nebula-float-2" />
-        <div className="absolute top-[35%] left-[25%] w-[400px] h-[400px] rounded-full bg-blue-600/5 blur-[120px] nebula-float-1" />
-      </div>
-
-      {/* Mobile Overlay */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden" onClick={() => setSidebarOpen(false)} />
-      )}
-
-      {/* Sidebar - Hidden on mobile, toggleable */}
-      <div
-        className={`
-          fixed md:relative inset-y-0 left-0 z-50
-          w-52 text-white flex flex-col
-          transform transition-transform duration-300 ease-in-out
-          bg-[#4c1d95] shadow-xl relative border-r border-[#3b0764]
-          ${sidebarOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"}
-        `}
-        style={
-          themeMode === "custom"
-            ? { background: customThemeColor, filter: "brightness(0.8)" }
-            : themeMode === "light"
-            ? { background: "#221c4e" }
-            : {}
-        }
-      >
-        {/* Logo */}
-        <div className="p-5 text-center flex items-center justify-between border-b border-white/5">
-          <h1 className="font-heading text-2xl font-black text-pink-600 dark:text-pink-400 font-black tracking-tight">Boomkit</h1>
-          {/* Close button on mobile */}
-          <button onClick={() => setSidebarOpen(false)} className="md:hidden p-1 rounded-lg hover:bg-white/10">
-            <XIcon className="h-5 w-5" />
-          </button>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 space-y-1.5 overflow-y-auto premium-scrollbar relative z-10">
-          {[
-            { id: "stats", label: "Stats", icon: BarChart3Icon },
-            { id: "booms", label: "Booms", icon: PackageIcon },
-            { id: "market", label: "Market", icon: ShoppingCartIcon },
-            { id: "chat", label: "Chat", icon: MessageCircleIcon },
-            { id: "private-chat", label: "Private Chat", icon: Users2Icon },
-            { id: "auction", label: "Auction", icon: GavelIcon },
-            { id: "leaderboard", label: "Leaderboard", icon: BarChart3Icon },
-            { id: "trading", label: "Trading", icon: PackageIcon },
-            { id: "discover", label: "Discover", icon: CompassIcon },
-            { id: "friends", label: "Friends", icon: Users2Icon, fetch: fetchFriends },
-            { id: "clans", label: "Clans", icon: ShieldIcon, fetch: () => currentUser?.clan_id ? fetchClanDetails(currentUser.clan_id) : fetchClansList() },
-            { id: "fusion", label: "Fusion Lab", icon: BeakerIcon },
-            { id: "tournaments", label: "Tournaments", icon: TrophyIcon, fetch: fetchTournaments },
-            { id: "shop", label: "Shop", icon: ShoppingBagIcon, fetch: fetchShopItems },
-            { id: "season", label: "Season Pass", icon: FlameIcon, fetch: fetchActiveSeason },
-            ...(currentUser?.role === "moderator" || currentUser?.role === "senior_moderator" || currentUser?.role === "admin" || currentUser?.role === "tester" || isOwner() ? [{ id: "staff", label: "Staff", icon: ShieldIcon }] : []),
-          ].map((item) => {
-            const Icon = item.icon
-            const isActive = currentPage === item.id
-            return (
-              <button
-                key={item.id}
-                onClick={() => {
-                  setCurrentPage(item.id as any)
-                  setSidebarOpen(false)
-                  if (item.id === "chat") {
-                    setChatNotificationCount(0)
-                  }
-                  if (item.fetch) item.fetch()
-                }}
-                className={`w-full flex items-center px-4 py-3 rounded-xl text-left transition-all duration-300 group gap-3 relative overflow-hidden ${
-                  isActive
-                    ? "bg-[#6d28d9] text-white font-black"
-                    : "text-purple-300 hover:text-white hover:bg-[#5b21b6] font-bold"
-                }`}
-              >
-
-                <Icon className={`h-4 w-4 shrink-0 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-6 ${isActive ? "text-yellow-400" : "text-slate-500"}`} />
-                <span className="font-heading text-xs uppercase tracking-wider">{item.label}</span>
-                {item.id === "chat" && chatNotificationCount > 0 && (
-                  <span className="ml-auto w-5 h-5 bg-red-600 border border-red-500 rounded-full flex items-center justify-center text-[10px] font-black text-white shadow-[0_0_8px_rgba(220,38,38,0.6)] animate-pulse shrink-0">
-                    {chatNotificationCount}
-                  </span>
-                )}
-              </button>
-            )
-          })}
-
-          {/* More Collapsible Navigation */}
-          <div className="pt-2 border-t border-white/5">
-            <button
-              onClick={() => setMoreOpen(!moreOpen)}
-              className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-left transition-all duration-300 text-slate-400/80 hover:text-white hover:bg-white/5 font-bold gap-3"
-            >
-              <div className="flex items-center gap-3">
-                <SparklesIcon className="h-4 w-4 text-slate-500" />
-                <span className="font-heading text-xs uppercase tracking-wider text-slate-400">More</span>
-              </div>
-              {moreOpen ? (
-                <ChevronUpIcon className="h-4 w-4 text-slate-400" />
-              ) : (
-                <ChevronDownIcon className="h-4 w-4 text-slate-400" />
-              )}
-            </button>
-
-            {moreOpen && (
-              <div className="pl-3 mt-1 space-y-1 border-l border-white/5 ml-3">
-                {[
-                  { id: "inventory", label: "Inventory", icon: BoxIcon },
-                  { id: "achievements", label: "Achievements", icon: StarIcon, fetch: fetchAchievements },
-                  { id: "settings", label: "Settings", icon: SettingsIcon },
-                ].map((subItem) => {
-                  const SubIcon = subItem.icon
-                  const isSubActive = currentPage === subItem.id
-                  return (
-                    <button
-                      key={subItem.id}
-                      onClick={() => {
-                        setCurrentPage(subItem.id as any)
-                        setSidebarOpen(false)
-                        if (subItem.fetch) subItem.fetch()
-                      }}
-                      className={`w-full flex items-center px-4 py-2.5 rounded-lg text-left transition-all duration-300 group gap-3 relative overflow-hidden ${
-                        isSubActive
-                          ? "bg-purple-500/10 text-white font-black"
-                          : "text-slate-400/80 hover:text-white hover:bg-white/5 font-bold"
-                      }`}
-                    >
-                      <SubIcon className={`h-3.5 w-3.5 shrink-0 transition-transform duration-300 group-hover:scale-110 ${isSubActive ? "text-purple-400" : "text-slate-500"}`} />
-                      <span className="font-heading text-[11px] uppercase tracking-wider">{subItem.label}</span>
-                    </button>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        </nav>
-
-        {/* Discord Promo Widget */}
-        <div className="p-4 m-3 mt-auto rounded-2xl bg-gradient-to-br from-indigo-950/40 via-purple-950/20 to-slate-950/60 border border-indigo-500/20 shadow-[0_0_15px_rgba(99,102,241,0.15)] flex flex-col items-center gap-3 relative overflow-hidden group shrink-0">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
-          <div className="flex items-center gap-2 w-full justify-start">
-            <div className="p-2 bg-[#5865F2]/10 rounded-xl border border-[#5865F2]/20 shadow-[0_0_10px_rgba(88,101,242,0.2)] text-[#5865F2]">
-              <svg className="w-5 h-5" viewBox="0 0 127.14 96.36" fill="currentColor">
-                <path d="M107.7,8.07A105.15,105.15,0,0,0,77.26,0a77.19,77.19,0,0,0-3.3,6.83A96.67,96.67,0,0,0,53.22,6.83,77.19,77.19,0,0,0,49.88,0,105.15,105.15,0,0,0,19.44,8.07C3.66,31.58-1.86,54.65,1,77.53A105.73,105.73,0,0,0,32,96.36a77.7,77.7,0,0,0,6.63-10.85,68.43,68.43,0,0,1-10.4-5c.89-.65,1.76-1.34,2.58-2.06a75.22,75.22,0,0,0,72.57,0c.82.72,1.69,1.41,2.58,2.06a68.43,68.43,0,0,1-10.4,5,77.7,77.7,0,0,0,6.63,10.85,105.73,105.73,0,0,0,31-18.83C129,54.65,123.5,31.58,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53S36.18,40.36,42.45,40.36,53.83,46,53.83,53,48.72,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.24,60,73.24,53S78.41,40.36,84.69,40.36,96.07,46,96.07,53,91,65.69,84.69,65.69Z"/>
-              </svg>
-            </div>
-            <div className="font-heading text-left">
-              <div className="font-heading text-[10px] font-black tracking-widest text-[#5865F2] uppercase">Discord</div>
-              <div className="font-heading text-[11px] font-bold text-white/90 leading-none">Key Giveaways!</div>
-            </div>
-          </div>
-          <p className="font-heading text-[10px] text-white/40 font-medium text-left leading-relaxed">
-            Join for giveaways, access keys & active promo codes!
-          </p>
-          <a
-            href={process.env.NEXT_PUBLIC_DISCORD_INVITE_URL || "https://discord.gg/uqbPsEpyhE"}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="w-full py-1.5 px-3 rounded-xl bg-[#5865F2] hover:bg-[#4752C4] text-white text-[11px] font-black uppercase tracking-wider text-center transition-all duration-300 shadow-md shadow-indigo-900/30 hover:shadow-indigo-500/20 active:scale-95 text-center block"
-          >
-            Join Discord
-          </a>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col w-full md:w-auto">
-        {/* Top Bar - Mobile Responsive */}
-        <div className="bg-white/10 backdrop-blur-md border-b border-white/20 p-2 md:p-4 flex justify-between items-center gap-2">
-          {/* Left side - Hamburger + Tokens */}
-          <div className="flex items-center gap-2 md:gap-4">
-            {/* Mobile hamburger menu */}
-            <button
-              onClick={() => setSidebarOpen(true)}
-              className="md:hidden p-2 rounded-lg bg-purple-600 hover:bg-purple-700 text-white"
-            >
-              <MenuIcon className="h-5 w-5" />
-            </button>
-
-            <Badge className="bg-yellow-500 text-white text-xs md:text-sm">
-              <CoinsIcon className="h-3 w-3 md:h-4 md:w-4 mr-1" />
-              {currentUser?.tokens || 0}
-            </Badge>
-            {currentUser?.isOwner && <CrownIcon className="h-5 w-5 md:h-6 md:w-6 text-yellow-400" />}
-
-            {/* Credentials - Hidden on mobile */}
-            <div className="hidden md:flex items-center space-x-2 bg-purple-500/30 rounded-lg px-3 py-1 text-xs text-white">
-              <span className="font-semibold">Credentials:</span>
-              <span>Oktay Abdullazada (Owner)</span>
-              <span className="font-heading text-white/50">|</span>
-              <span>Ughur Akparli (Co-Owner - Developer)</span>
-              <span className="font-heading text-white/50">|</span>
-              <span>Turan Mecidov (Tester)</span>
-            </div>
-          </div>
-
-          {/* Right side - News, User, Logout */}
-          <div className="flex items-center gap-1 md:gap-4">
-            {/* News button - Icon only on mobile */}
-            <Button
-              onClick={() => setShowNews(!showNews)}
-              className="bg-cyan-500 hover:bg-cyan-600 text-white p-2 md:px-3"
-              size="sm"
-            >
-              <NewspaperIcon className="h-4 w-4 md:mr-2" />
-              <span className="hidden md:inline">Boomkit News</span>
-            </Button>
-
-            {/* User info - Simplified on mobile */}
-            <div className="flex items-center gap-1 md:gap-2 bg-purple-600 rounded-lg px-2 md:px-3 py-1">
-              <Avatar className="h-6 w-6 md:h-8 md:w-8">
-                <AvatarFallback className="bg-yellow-500 text-white text-xs md:text-sm flex items-center justify-center p-0.5 overflow-hidden">
-                  {renderProfilePicture(currentUser?.profilePicture || "U", "w-full h-full object-contain")}
-                </AvatarFallback>
-              </Avatar>
-              <span
-                className={`font-medium text-xs md:text-sm truncate max-w-[60px] md:max-w-none ${currentUser?.nameColor === "rainbow"
-                  ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent animate-pulse"
-                  : "text-white"
-                  }`}
-              >
-                {currentUser?.username}
-              </span>
-              {/* Badges - Hidden on small mobile */}
-              <div className="hidden sm:flex space-x-1">
-                {(currentUser?.badges ?? []).slice(0, 3).map((badgeId) => {
-                  const badge = AVAILABLE_BADGES.find((b) => b.id === badgeId)
-                  return badge ? (
-                    <span key={badgeId} className="font-heading text-xs md:text-sm" title={badge.name}>
-                      {badge.emoji}
-                    </span>
-                  ) : null
-                })}
-              </div>
-            </div>
-
-            {/* Logout - Icon only on mobile */}
-            <Button onClick={handleLogout} className="bg-red-500 hover:bg-red-600 text-white p-2 md:px-3" size="sm">
-              <XIcon className="h-4 w-4 md:hidden" />
-              <span className="hidden md:inline">Logout</span>
-            </Button>
-          </div>
-        </div>
-
-        <div className="flex-1 flex">
-          {/* Main Content Area */}
-          <div className="flex-1 p-3 md:p-6 overflow-y-auto">
+    <div className="clubhouse club-app" data-theme={themeMode} style={{ "--club-custom": customThemeColor } as React.CSSProperties}>
+      <a href="#club-content" className="club-skip-link">Skip to content</a>
+      <ClubSidebar items={clubNavigation} currentPage={currentPage} onNavigate={navigateClub} open={sidebarOpen} onOpenChange={setSidebarOpen} notificationCount={chatNotificationCount} theme={themeMode} accent={customThemeColor} />
+      <div className="club-workspace">
+        <ClubTopbar title={clubNavigation.find(item => item.id === currentPage)?.label || "Boomkit"} username={currentUser?.username || "Collector"} tokens={currentUser?.tokens || 0} avatar={renderProfilePicture(currentUser?.profilePicture || "Alien", "w-full h-full object-contain")} onMenu={() => setSidebarOpen(true)} onNews={() => setShowNews(!showNews)} onAccount={() => setCurrentPage("stats")} onLogout={handleLogout} />
+        <div className="club-body">
+          <div className="club-content" id="club-content" role="main" tabIndex={-1}>
             {/* Active Boost Banner */}
             {activeBoost && (
-              <div className="mb-6 bg-gradient-to-r from-purple-600/30 via-pink-600/20 to-slate-950/40 border border-purple-500/30 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-[0_0_20px_rgba(168,85,247,0.15)]">
+              <div className="mb-6 club-surface border club-border rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 ">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl text-white font-black text-xs animate-bounce shrink-0">
+                  <div className="p-2 club-surface rounded-xl club-ink font-black text-xs shrink-0">
                     ⚡ BOOSTED
                   </div>
                   <div>
-                    <div className="font-heading text-white font-black text-xs uppercase tracking-wider">
+                    <div className="font-heading club-ink font-black text-xs uppercase tracking-wider">
                       Boomkit is boosted {activeBoost.multiplier}x by {activeBoost.activated_by}!
                     </div>
-                    <p className="font-heading text-[10px] text-slate-400 mt-0.5">
+                    <p className="font-heading text-xs club-muted mt-0.5">
                       All legendary, chroma, hidden, and mystical drop rates are multiplied by {activeBoost.multiplier}x.
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2 bg-black/40 border border-white/5 py-1.5 px-3 rounded-xl shrink-0">
-                  <span className="font-heading text-slate-500 text-[9px] font-black uppercase tracking-wider">Time Left:</span>
-                  <span className="font-heading text-purple-400 font-black text-xs min-w-[70px] text-right">{boostTimeLeft}</span>
+                <div className="flex items-center gap-2 club-well border club-border py-1.5 px-3 rounded-xl shrink-0">
+                  <span className="font-heading club-muted text-xs font-black uppercase tracking-wider">Time Left:</span>
+                  <span className="font-heading club-accent font-black text-xs min-w-[70px] text-right">{boostTimeLeft}</span>
                 </div>
               </div>
             )}
 
-            {/* Stats Page */}
-            {currentPage === "stats" && (
-              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                {/* Tactical Command Console Header */}
-                <div className="flex flex-col xl:flex-row gap-8">
-                  {/* Holographic Cockpit Profile Card */}
-                  <div
-                    className="flex-grow blooket-panel p-8 relative overflow-hidden group"
-                  >
-                    {/* Glowing grid background */}
-
-
-
-                    <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
-                      {/* Avatar with cyber-glowing frame */}
-                      <div className="relative group/avatar">
-
-                        <div className="w-28 h-28 bg-purple-900 rounded-[2rem] flex items-center justify-center text-5xl border-b-4 border-purple-950 relative overflow-hidden transform transition-all duration-500 p-2">
-                          {renderProfilePicture(currentUser?.profilePicture || "🎯", "w-full h-full object-contain")}
-
-                        </div>
-                        <Button
-                          size="sm"
-                          onClick={() => setShowProfilePicker(true)}
-                          className="absolute -bottom-1 -right-1 w-9 h-9 rounded-full bg-orange-600 hover:bg-orange-500 p-0 shadow-lg border-2 border-slate-950 transition-transform duration-300 hover:scale-110 active:scale-95"
-                        >
-                          <CameraIcon className="h-4 w-4 text-white" />
-                        </Button>
-                      </div>
-
-                      {/* User Info Deck */}
-                      <div className="font-heading text-center md:text-left flex-1 space-y-3">
-                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                          <Badge
-                            className={`px-4 py-1.5 text-xs font-black uppercase tracking-wider rounded-xl ${currentUser?.role === "owner"
-                              ? "bg-yellow-500 shadow-[0_0_20px_rgba(234,179,8,0.4)]"
-                              : currentUser?.role === "admin"
-                                ? "bg-red-500 shadow-[0_0_20px_rgba(239,68,68,0.4)]"
-                                : currentUser?.role === "senior_moderator"
-                                  ? "bg-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.4)]"
-                                  : currentUser?.role === "moderator"
-                                    ? "bg-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.4)]"
-                                    : currentUser?.role === "tester"
-                                      ? "bg-green-500 shadow-[0_0_20px_rgba(34,197,94,0.4)]"
-                                      : "bg-slate-700"
-                              } text-white border-none`}
-                          >
-                            {currentUser ? getUserRoleName(currentUser) : "Player"}
-                          </Badge>
-
-                          {(currentUser?.role === "moderator" ||
-                            currentUser?.role === "senior_moderator" ||
-                            currentUser?.role === "admin" ||
-                            currentUser?.role === "tester" ||
-                            currentUser?.isOwner) && (
-                              <Badge className="bg-orange-500/10 text-orange-400 border border-orange-500/20 px-4 py-1.5 text-xs font-black uppercase tracking-wider rounded-xl shadow-sm">
-                                Staff Member
-                              </Badge>
-                            )}
-                        </div>
-
-                        <h2
-                          className={`text-5xl font-black tracking-tight drop-shadow-md leading-none ${currentUser?.nameColor === "rainbow"
-                            ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent animate-pulse"
-                            : "text-white"
-                            }`}
-                        >
-                          {currentUser?.username}
-                        </h2>
-
-                        {/* Badges Roster */}
-                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 pt-2">
-                          {(currentUser?.badges ?? []).slice(0, 5).map((badgeId) => {
-                            const badge = AVAILABLE_BADGES.find((b) => b.id === badgeId)
-                            return badge ? (
-                              <Badge
-                                key={badgeId}
-                                className={`${badge.color} text-white text-[10px] px-3 py-1 rounded-xl shadow-md hover:scale-105 hover:-translate-y-0.5 transition-all cursor-help border-none`}
-                                title={badge.name}
-                              >
-                                {badge.emoji} {badge.name}
-                              </Badge>
-                            ) : null
-                          })}
-                        </div>
-                      </div>
-
-                      {/* HUD Radial Level XP Gauge */}
-                      <div className="relative w-28 h-28 flex-shrink-0 flex items-center justify-center">
-                        <svg className="w-full h-full transform -rotate-90">
-                          {/* Outer ring path */}
-                          <circle
-                            cx="56"
-                            cy="56"
-                            r="48"
-                            className="stroke-slate-800"
-                            strokeWidth="8"
-                            fill="transparent"
-                          />
-                          {/* Filling progress path */}
-                          <circle
-                            cx="56"
-                            cy="56"
-                            r="48"
-                            className="stroke-orange-500 transition-all duration-1000 ease-out"
-                            strokeWidth="8"
-                            strokeDasharray={2 * Math.PI * 48}
-                            strokeDashoffset={2 * Math.PI * 48 * (1 - (currentUser ? Math.min(1, Math.max(0, (currentUser.xp || 0) / ((currentUser.level || 1) * 100))) : 0))}
-                            strokeLinecap="round"
-                            fill="transparent"
-                          />
-                        </svg>
-                        <div className="absolute flex flex-col items-center justify-center">
-                          <span className="font-heading text-white/40 text-[9px] font-black uppercase tracking-widest">Level</span>
-                          <span className="font-heading text-white text-3xl font-black leading-none">{currentUser?.level || 1}</span>
-                          <span className="font-heading text-orange-400 font-bold text-[9px] mt-0.5">{currentUser ? Math.min(100, Math.max(0, Math.round(((currentUser.xp || 0) / ((currentUser.level || 1) * 100)) * 100))) : 0}%</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-8 relative z-10">
-                      <Button
-                        onClick={() => setCurrentPage("market")}
-                        className="group bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-black h-14 rounded-2xl border-none shadow-[0_4px_25px_rgba(249,115,22,0.25)] hover:shadow-[0_8px_35px_rgba(249,115,22,0.4)] transition-all hover:scale-[1.02] hover:-translate-y-0.5 active:scale-95"
-                      >
-                        <span className="mr-2 text-lg transition-transform group-hover:scale-125 duration-300">🔓</span> Unlock Booms
-                      </Button>
-                      <Button
-                        onClick={() => setCurrentPage("booms")}
-                        className="group bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black h-14 rounded-2xl border-none shadow-[0_4px_25px_rgba(37,99,235,0.25)] hover:shadow-[0_8px_35px_rgba(37,99,235,0.4)] transition-all hover:scale-[1.02] hover:-translate-y-0.5 active:scale-95"
-                      >
-                        <span className="mr-2 text-lg transition-transform group-hover:rotate-45 duration-300">⚙️</span> Manage Booms
-                      </Button>
-                      <Button
-                        onClick={() => {
-                          setSelectedUserStats(currentUser)
-                          setShowUserStats(true)
-                        }}
-                        className="group bg-white/5 hover:bg-white/10 text-white font-black h-14 rounded-2xl border border-white/10 backdrop-blur-md transition-all hover:scale-[1.02] hover:-translate-y-0.5 active:scale-95"
-                      >
-                        <span className="mr-2 text-lg transition-transform group-hover:scale-125 duration-300">📊</span> Full Profile
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Daily Streak Module */}
-                  <div className="w-full xl:w-96 bg-gradient-to-br from-slate-900 to-orange-950/20 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-8 relative overflow-hidden group shadow-[0_0_50px_rgba(0,0,0,0.7)] hover:border-orange-500/20 transition-all duration-500 flex flex-col justify-between">
-                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
-                      <FlameIcon className="w-24 h-24 text-orange-400" />
-                    </div>
-                    <div className="relative z-10">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="font-heading text-2xl font-black text-white flex items-center gap-2">
-                          <FlameIcon className="h-6 w-6 text-orange-500 animate-pulse" />
-                          Daily Streak
-                        </h3>
-                        <span className="font-heading text-white/40 text-[9px] font-black uppercase tracking-wider">Log In Daily</span>
-                      </div>
-
-                      <div className="flex items-center gap-6 mb-6">
-                        <div className="bg-black/50 backdrop-blur-md rounded-2xl p-4 flex flex-col items-center border border-orange-500/20 shadow-[0_0_20px_rgba(249,115,22,0.15)] w-24 shrink-0">
-                          <span className="font-heading text-5xl font-black text-orange-400 drop-shadow-[0_0_15px_rgba(249,115,22,0.4)]">{currentUser?.loginStreak || 0}</span>
-                          <span className="font-heading text-[9px] font-black text-white/40 uppercase tracking-widest mt-1">Days</span>
-                        </div>
-                        <div className="flex-grow space-y-3">
-                          <div className="flex gap-1.5">
-                            {[1, 2, 3, 4, 5, 6, 7].map((day) => {
-                              const streakDay = (currentUser?.loginStreak || 0) % 7;
-                              const isClaimed = day <= streakDay || (streakDay === 0 && (currentUser?.loginStreak || 0) > 0);
-                              const isBonus = day === 7;
-                              return (
-                                <div
-                                  key={day}
-                                  className={`flex-1 h-3 rounded-full transition-all duration-500 ${isClaimed ? (isBonus ? "bg-gradient-to-r from-yellow-400 to-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.6)]" : "bg-gradient-to-r from-orange-500 to-red-500 shadow-[0_0_10px_rgba(239,68,68,0.4)]") : "bg-white/5 border border-white/5"}`}
-                                  title={`Day ${day}`}
-                                />
-                              )
-                            })}
-                          </div>
-                          <div className="flex justify-between text-[9px] text-white/30 font-black uppercase tracking-wider px-0.5">
-                            <span>Day 1</span>
-                            <span className="font-heading text-yellow-500">Day 7 Bonus</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <Button
-                        onClick={handleClaimStreak}
-                        className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-500 hover:to-red-500 text-white font-black py-6 rounded-2xl shadow-[0_4px_25px_rgba(234,88,12,0.3)] hover:shadow-[0_8px_35px_rgba(234,88,12,0.4)] transition-all hover:scale-[1.02] border-none text-xs"
-                      >
-                        <FlameIcon className="w-4 h-4 mr-2 animate-bounce" />
-                        Claim Streak Reward
-                      </Button>
-                    </div>
-
-                    <div className="mt-6 grid grid-cols-3 gap-2.5 text-center">
-                      <div className="bg-black/40 border border-white/5 rounded-xl p-2.5 shadow-inner">
-                        <div className="font-heading text-orange-400 font-black text-sm">+50</div>
-                        <div className="font-heading text-[8px] text-white/30 font-black uppercase tracking-widest mt-0.5">DAILY</div>
-                      </div>
-                      <div className="bg-black/40 border border-white/5 rounded-xl p-2.5 shadow-inner">
-                        <div className="font-heading text-yellow-400 font-black text-sm">+500</div>
-                        <div className="font-heading text-[8px] text-white/30 font-black uppercase tracking-widest mt-0.5">7-DAY</div>
-                      </div>
-                      <div className="bg-black/40 border border-white/5 rounded-xl p-2.5 shadow-inner">
-                        <div className="font-heading text-pink-400 font-black text-sm">+5k</div>
-                        <div className="font-heading text-[8px] text-white/30 font-black uppercase tracking-widest mt-0.5">30-DAY</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Spin Wheel and Core Statistics */}
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                  {/* Daily Spin Wheel (Col Span 1) */}
-                  <div className="bg-gradient-to-br from-slate-900 to-purple-950/20 backdrop-blur-xl border border-white/10 rounded-[2.5rem] p-8 relative overflow-hidden group shadow-[0_0_50px_rgba(0,0,0,0.7)] hover:border-purple-500/20 transition-all duration-500 flex flex-col items-center justify-center">
-                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity pointer-events-none">
-                      <SparklesIcon className="w-24 h-24 text-indigo-400" />
-                    </div>
-
-                    <div className="relative z-10 flex flex-col items-center w-full">
-                      <DailySpinWheel
-                        onSpin={async () => {
-                          const result = await economyAction('spin')
-                          await fetchUsersFromSupabase(true)
-                          return result.amount
-                        }}
-                        onWin={(amount) => {
-                          setSpinResult(amount)
-                          setCanSpin(false)
-
-                          setTimeout(() => setSpinResult(null), 5000)
-                        }}
-                        isSpinning={spinning}
-                        setIsSpinning={setSpinning}
-                        canSpin={canSpin}
-                      />
-
-                      {!canSpin && !spinning && (
-                        <p className="font-heading text-white/30 font-black uppercase tracking-[0.2em] text-[10px] mt-6 animate-pulse bg-white/5 border border-white/5 px-4 py-1.5 rounded-full">
-                          Next Spin Tomorrow
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Enhanced Live HUD Statistics (Col Span 2) */}
-                  <div className="lg:col-span-2 bg-gradient-to-br from-slate-900 to-slate-950 backdrop-blur-2xl rounded-[2.5rem] p-8 border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.7)] relative overflow-hidden flex flex-col justify-between">
-                    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 opacity-50" />
-
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="bg-orange-500/10 text-orange-400 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border border-orange-400/20 shadow-inner">
-                        Live Cockpit Feed
-                      </div>
-                      <span className="font-heading text-white/20 text-[9px] font-black uppercase tracking-widest">System Synchronized</span>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                      <div className="group relative bg-gradient-to-br from-purple-600/5 to-indigo-950/20 hover:from-purple-600/10 hover:to-indigo-950/40 border border-purple-500/10 hover:border-purple-500/30 rounded-3xl p-6 transition-all duration-500 hover:scale-[1.02] hover:-translate-y-0.5 shadow-lg">
-                        <div className="absolute -top-4 -right-4 text-7xl opacity-5 group-hover:opacity-10 transition-opacity select-none group-hover:scale-110 duration-500">🪙</div>
-                        <div className="flex flex-col relative z-10">
-                          <span className="font-heading text-purple-400 text-[10px] font-black uppercase tracking-[0.25em] mb-1">Available Tokens</span>
-                          <div className="font-heading text-white text-4xl font-black drop-shadow-md flex items-baseline gap-2 tabular-nums">
-                            {currentUser?.tokens?.toLocaleString() || 0}
-                            <span className="font-heading text-yellow-500 text-xl">🪙</span>
-                          </div>
-                          <div className="mt-4 h-1 w-12 bg-purple-500 rounded-full" />
-                        </div>
-                      </div>
-
-                      <div className="group relative bg-gradient-to-br from-pink-600/5 to-rose-950/20 hover:from-pink-600/10 hover:to-rose-950/40 border border-pink-500/10 hover:border-pink-500/30 rounded-3xl p-6 transition-all duration-500 hover:scale-[1.02] hover:-translate-y-0.5 shadow-lg">
-                        <div className="absolute -top-4 -right-4 text-7xl opacity-5 group-hover:opacity-10 transition-opacity select-none group-hover:scale-110 duration-500">🌌</div>
-                        <div className="flex flex-col relative z-10">
-                          <span className="font-heading text-pink-400 text-[10px] font-black uppercase tracking-[0.25em] mb-1">Collection Size</span>
-                          <div className="font-heading text-white text-4xl font-black drop-shadow-md flex items-baseline gap-2 tabular-nums">
-                            {Object.keys(getVirtualBooms(currentUser)).length || 0}
-                            <span className="font-heading text-pink-500 text-xl">✨</span>
-                          </div>
-                          <div className="mt-4 h-1 w-12 bg-pink-500 rounded-full" />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-8 p-4 bg-black/40 border border-white/5 rounded-2xl flex items-center justify-between text-xs text-white/40">
-                      <span className="flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
-                        Security Engine Active
-                      </span>
-                      <span>Next Sync: Instant</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+            {currentPage === "stats" && <ClubOverview
+              user={currentUser}
+              avatar={renderProfilePicture(currentUser?.profilePicture || "Alien", "w-full h-full object-contain")}
+              role={currentUser ? getUserRoleName(currentUser) : "Player"}
+              badges={(currentUser?.badges ?? []).slice(0,5).map(id => { const badge = AVAILABLE_BADGES.find(b => b.id === id); return badge ? <span key={id} title={badge.name}>{badge.emoji}</span> : null })}
+              collectionSize={Object.keys(getVirtualBooms(currentUser)).length}
+              onAvatar={() => setShowProfilePicker(true)}
+              onProfile={() => { setSelectedUserStats(currentUser); setShowUserStats(true) }}
+              onNavigate={page => setCurrentPage(page as typeof currentPage)}
+              onClaim={handleClaimStreak}
+              spin={<>
+                <DailySpinWheel onSpin={async () => { const result = await economyAction('spin'); await fetchUsersFromSupabase(true); return result.amount }} onWin={amount => { setSpinResult(amount); setCanSpin(false); setTimeout(() => setSpinResult(null), 5000) }} isSpinning={spinning} setIsSpinning={setSpinning} canSpin={canSpin} />
+                {!canSpin && !spinning && <p className="club-spin-note">Your next spin is tomorrow.</p>}
+              </>}
+            />}
 
             {/* Booms Page */}
             {currentPage === "booms" && (
-              <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="flex justify-between items-end flex-wrap gap-6 border-b border-white/10 pb-6">
-                  <div>
-                    <h1 className="font-heading text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white via-white/80 to-white/50 mb-2">
-                      My Collection
-                    </h1>
-                    <p className="font-heading text-white/60 text-lg">Manage and view your discovered Booms</p>
-                  </div>
-                </div>
-
-
-                  <div className="space-y-12 animate-in fade-in duration-500">
-                    {/* Level Rewards Banner */}
-                    <div className="w-full bg-gradient-to-r from-slate-950 via-purple-950/20 to-slate-950 border border-white/10 rounded-[2.5rem] p-8 flex flex-col lg:flex-row items-center justify-between gap-8 shadow-2xl relative overflow-hidden group">
-                      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:15px_15px] pointer-events-none" />
-                      <div className="absolute -top-12 -right-12 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl pointer-events-none" />
-
-                      <div className="flex items-center gap-6 relative z-10">
-                        <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 via-amber-500 to-orange-500 rounded-2xl flex items-center justify-center border border-yellow-400/20 shadow-[0_4px_25px_rgba(245,158,11,0.3)] text-4xl transform transition-transform group-hover:scale-105 group-hover:rotate-3 duration-500">
-                          🏆
-                        </div>
-                        <div className="space-y-1">
-                          <h3 className="font-heading text-2xl font-black text-white tracking-tight">Milestone Rewards</h3>
-                          <p className="font-heading text-white/40 text-xs font-bold uppercase tracking-wider">Unlock exclusive custom titles and chests every 10 levels!</p>
-                          <div className="font-heading text-orange-400 font-black text-[9px] uppercase tracking-[0.2em] mt-1.5 flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-ping" />
-                            Next Node: Level {Math.ceil((currentUser?.level || 1) / 10) * 10}
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap gap-2.5 relative z-10 justify-center">
-                        {[10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((lvl) => {
-                          const isUnlocked = (currentUser?.level || 1) >= lvl;
-                          return (
-                            <div
-                              key={lvl}
-                              className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-black border transition-all duration-300 ${isUnlocked
-                                ? "bg-gradient-to-br from-green-500 to-emerald-600 border-green-400 text-white shadow-[0_4px_15px_rgba(16,185,129,0.35)] hover:scale-110"
-                                : "bg-black/60 border-white/5 text-white/20"
-                                }`}
-                              title={`Level ${lvl} Reward`}
-                            >
-                              {isUnlocked ? "✓" : lvl}
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </div>
-
-                    {/* HUD metrics overview */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full">
-                      <div className="bg-gradient-to-br from-slate-900/60 to-slate-950/80 backdrop-blur-xl border border-white/10 rounded-2xl p-5 flex items-center gap-4 shadow-xl hover:border-yellow-500/30 transition-all duration-300 group">
-                        <div className="bg-yellow-500/10 p-3 rounded-xl border border-yellow-500/20 shadow-inner group-hover:scale-105 transition-transform duration-300">
-                          <Star className="h-7 w-7 text-yellow-500 animate-pulse" />
-                        </div>
-                        <div>
-                          <div className="font-heading text-white/40 text-[9px] uppercase tracking-wider font-black">Vault Score</div>
-                          <div className="font-heading text-white text-2xl font-black tabular-nums">{currentUser?.boomScore || 0}</div>
-                        </div>
-                      </div>
-
-                      <div className="bg-gradient-to-br from-slate-900/60 to-slate-950/80 backdrop-blur-xl border border-white/10 rounded-2xl p-5 flex items-center gap-4 shadow-xl hover:border-purple-500/30 transition-all duration-300 group">
-                        <div className="bg-purple-500/10 p-3 rounded-xl border border-purple-500/20 shadow-inner group-hover:scale-105 transition-transform duration-300">
-                          <PackageIcon className="h-7 w-7 text-purple-500" />
-                        </div>
-                        <div>
-                          <div className="font-heading text-white/40 text-[9px] uppercase tracking-wider font-black">Pack Inventory</div>
-                          <div className="font-heading text-white text-2xl font-black tabular-nums">{currentUser?.packs.length || 0}</div>
-                        </div>
-                      </div>
-
-                      <div className="bg-gradient-to-br from-slate-900/60 to-slate-950/80 backdrop-blur-xl border border-white/10 rounded-2xl p-5 flex items-center gap-4 shadow-xl hover:border-emerald-500/30 transition-all duration-300 group">
-                        <div className="bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/20 shadow-inner group-hover:scale-105 transition-transform duration-300">
-                          <CoinsIcon className="h-7 w-7 text-emerald-500" />
-                        </div>
-                        <div>
-                          <div className="font-heading text-white/40 text-[9px] uppercase tracking-wider font-black">Total Asset Value</div>
-                          <div className="font-heading text-emerald-400 text-2xl font-black tabular-nums">🪙 {currentUser?.totalValue || 0}</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Pack Sections */}
-                    <div className="grid grid-cols-1 gap-8">
-                      {PACKS.map((pack) => (
-                        <div
-                          key={pack.id}
-                          className="group blooket-card overflow-hidden transition-all duration-500 hover:border-white/20 hover:shadow-[0_0_50px_rgba(0,0,0,0.8)] shadow-xl"
-                        >
-                          <div className={`h-2.5 w-full bg-gradient-to-r ${pack.color}`} />
-                          <div className="p-8">
-                            <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
-                              <h2 className="font-heading text-3xl font-black text-white flex items-center gap-4">
-                                <span className="font-heading text-5xl filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.4)] transform transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3 select-none">
-                                  {pack.emoji}
-                                </span>
-                                {pack.name}
-                              </h2>
-                              <Badge className="bg-white/5 text-white/50 border border-white/10 px-4 py-2 font-black uppercase text-[10px] tracking-widest rounded-xl shadow-inner">
-                                {pack.booms.filter(b => (getVirtualBooms(currentUser)[b.name] || 0) > 0).length} / {pack.booms.length} Found
-                              </Badge>
-                            </div>
-
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-5">
-                              {pack.booms.map((boom, index) => {
-                                const quantity = getVirtualBooms(currentUser)[boom.name] || 0
-                                const hasBoom = quantity > 0
-                                const activeRental = rentalListings.find(
-                                  (r) =>
-                                    r.renter_username === currentUser?.username &&
-                                    r.boom_name === boom.name &&
-                                    r.status === "rented"
-                                )
-                                const isRented = !!activeRental
-                                const rarity = boom.rarity || "uncommon";
-
-                                const glowClass = hasBoom ? (
-                                  rarity === "uncommon" ? "shadow-[0_0_15px_rgba(34,197,94,0.15)] border-green-500/20 bg-green-950/10 text-green-400 hover:shadow-[0_0_25px_rgba(34,197,94,0.35)] hover:border-green-500/40" :
-                                  rarity === "rare" ? "shadow-[0_0_15px_rgba(59,130,246,0.15)] border-blue-500/20 bg-blue-950/10 text-blue-400 hover:shadow-[0_0_25px_rgba(59,130,246,0.35)] hover:border-blue-500/40" :
-                                  rarity === "epic" ? "shadow-[0_0_15px_rgba(168,85,247,0.15)] border-purple-500/20 bg-purple-950/10 text-purple-400 hover:shadow-[0_0_25px_rgba(168,85,247,0.35)] hover:border-purple-500/40" :
-                                  rarity === "legendary" ? "shadow-[0_0_20px_rgba(249,115,22,0.25)] border-orange-500/30 bg-orange-950/15 text-orange-400 hover:shadow-[0_0_30px_rgba(249,115,22,0.45)] hover:border-orange-500/50 animate-pulse-slow" :
-                                  rarity === "chroma" ? "shadow-[0_0_25px_rgba(236,72,153,0.3)] border-pink-500/30 bg-pink-950/20 text-pink-400 hover:shadow-[0_0_35px_rgba(236,72,153,0.5)] hover:border-pink-500/60" :
-                                  "shadow-[0_0_30px_rgba(6,182,212,0.4)] border-cyan-500/40 bg-cyan-950/25 text-cyan-400 hover:shadow-[0_0_40px_rgba(6,182,212,0.6)] hover:border-cyan-500/70"
-                                ) : "bg-black/60 border-white/5 text-white/5 cursor-not-allowed filter grayscale";
-
-                                return (
-                                  <div
-                                    key={index}
-                                    className="group/item flex flex-col items-center gap-2.5"
-                                  >
-                                    <div
-                                      className={`
-                                        w-full aspect-square rounded-2xl border flex items-center justify-center text-4xl 
-                                        transition-all duration-300 relative overflow-hidden cursor-pointer
-                                        ${glowClass}
-                                        hover:scale-105 hover:-rotate-1 active:scale-95
-                                      `}
-                                      onClick={() => hasBoom && handleBoomClick(boom.name)}
-                                    >
-                                      {/* Rarity Glow Effect */}
-                                      {hasBoom && (
-                                        <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none z-0" />
-                                      )}
-
-                                      {hasBoom ? (
-                                        <>
-                                          {/* Quantity Badge */}
-                                          {quantity > 1 && (
-                                            <div className="absolute top-2 right-2 bg-yellow-500 text-white text-[9px] font-black rounded-lg px-1.5 py-0.5 flex items-center justify-center shadow-md border border-black/10 z-20">
-                                              {quantity}x
-                                            </div>
-                                          )}
-
-                                          {/* Rented Session Badge */}
-                                          {isRented && activeRental && (
-                                            <div className="absolute top-2 left-2 bg-blue-600 text-white text-[8px] font-black rounded-lg px-1.5 py-0.5 flex items-center justify-center shadow-lg border border-blue-500/30 z-20 uppercase tracking-widest animate-pulse">
-                                              Rent ({activeRental.sessions_remaining})
-                                            </div>
-                                          )}
-
-                                          <BoomAvatar name={boom.name} className="z-10 relative w-14 h-14 object-contain drop-shadow-xl transform transition-transform duration-300 group-hover/item:scale-110" />
-                                        </>
-                                      ) : (
-                                        <LockIcon className="h-7 w-7 opacity-20 text-white" />
-                                      )}
-
-                                      {/* Highlight for rare items */}
-                                      {hasBoom && (boom.rarity === 'legendary' || boom.rarity === 'hidden' || boom.rarity === 'chroma' || boom.rarity === 'mystical') && (
-                                        <div className="absolute inset-0 bg-white/5 animate-pulse" />
-                                      )}
-                                    </div>
-
-                                    <div className="w-full text-center">
-                                      <div className={`text-[9px] uppercase tracking-widest font-black mb-0.5 ${hasBoom ? 'text-purple-400' : 'text-white/20'}`}>
-                                        {boom.rarity}
-                                      </div>
-                                      <div className={`text-xs font-black truncate w-full ${hasBoom ? 'text-white' : 'text-white/30'}`}>
-                                        {boom.name}
-                                      </div>
-                                    </div>
-                                  </div>
-                                )
-                              })}
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-
+              <div className="space-y-8">
+                <ClubCollection booms={getVirtualBooms(currentUser)} level={currentUser?.level || 1} score={currentUser?.boomScore || 0} value={currentUser?.totalValue || 0} packs={currentUser?.packs.length || 0} rentalSessions={Object.fromEntries(rentalListings.filter(r => r.renter_username === currentUser?.username && r.status === "rented").map(r => [r.boom_name, r.sessions_remaining]))} onBoom={handleBoomClick} onMarket={() => setCurrentPage("market")} />
+                <div className="space-y-8">
                     {/* Gamepass Booms Section */}
                     {(currentUser?.level || 1) >= 10 && (
                       <div className="mt-16">
                         <div className="flex items-center gap-4 mb-8">
-                          <div className="w-2 h-12 bg-gradient-to-b from-purple-500 via-pink-500 to-yellow-500 rounded-full shadow-[0_0_20px_rgba(168,85,247,0.5)]" />
+                          <div className="w-2 h-12 club-surface rounded-full " />
                           <div>
-                            <h2 className="font-heading text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-600 tracking-tighter">
-                              GAMEPASS BOOMS
+                            <h2 className="font-heading text-4xl font-black club-accent tracking-tighter">
+                              Level rewards
                             </h2>
-                            <p className="font-heading text-white/40 text-xs font-bold uppercase tracking-widest mt-1">
+                            <p className="font-heading club-muted text-xs font-bold uppercase tracking-wide mt-1">
                               Exclusive rewards for reaching milestone levels
                             </p>
                           </div>
                           {(currentUser?.level || 1) >= 100 && (
                             <div className="ml-auto">
-                              <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-full px-6 py-2 border border-white/20 shadow-md">
-                                <span className="font-heading text-white font-black text-xs uppercase tracking-wider">⚡ MAX LEVEL ⚡</span>
+                              <div className="club-surface rounded-full px-6 py-2 border club-border ">
+                                <span className="font-heading club-ink font-black text-xs uppercase tracking-wider">⚡ MAX LEVEL ⚡</span>
                               </div>
                             </div>
                           )}
                         </div>
 
-                        <div className="blooket-panel backdrop-blur-xl rounded-[2rem] border border-white/10 p-8 shadow-2xl">
+                        <div className="club-panel rounded-xl border club-border p-8 ">
                           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                             {GAMEPASS_BOOMS.map((boom) => {
                               const quantity = currentUser?.booms[boom.name] || 0
@@ -5042,13 +3984,13 @@ const handlePackAction = async (packId: string) => {
                               const rarity = boom.rarity || "uncommon";
 
                               const glowClass = hasUnlocked ? (
-                                rarity === "uncommon" ? "shadow-[0_0_15px_rgba(34,197,94,0.15)] border-green-500/20 bg-green-950/10 text-green-400 hover:shadow-[0_0_25px_rgba(34,197,94,0.35)] hover:border-green-500/40" :
-                                rarity === "rare" ? "shadow-[0_0_15px_rgba(59,130,246,0.15)] border-blue-500/20 bg-blue-950/10 text-blue-400 hover:shadow-[0_0_25px_rgba(59,130,246,0.35)] hover:border-blue-500/40" :
-                                rarity === "epic" ? "shadow-[0_0_15px_rgba(168,85,247,0.15)] border-purple-500/20 bg-purple-950/10 text-purple-400 hover:shadow-[0_0_25px_rgba(168,85,247,0.35)] hover:border-purple-500/40" :
-                                rarity === "legendary" ? "shadow-[0_0_20px_rgba(249,115,22,0.25)] border-orange-500/30 bg-orange-950/15 text-orange-400 hover:shadow-[0_0_30px_rgba(249,115,22,0.45)] hover:border-orange-500/50 animate-pulse-slow" :
-                                rarity === "chroma" ? "shadow-[0_0_25px_rgba(236,72,153,0.3)] border-pink-500/30 bg-pink-950/20 text-pink-400 hover:shadow-[0_0_35px_rgba(236,72,153,0.5)] hover:border-pink-500/60" :
-                                "shadow-[0_0_30px_rgba(6,182,212,0.4)] border-cyan-500/40 bg-cyan-950/25 text-cyan-400 hover:shadow-[0_0_40px_rgba(6,182,212,0.6)] hover:border-cyan-500/70"
-                              ) : "bg-black/60 border-white/10 text-white/5 grayscale cursor-not-allowed";
+                                rarity === "uncommon" ? " club-border club-green club-success club-border" :
+                                rarity === "rare" ? " club-border club-blue club-accent club-border" :
+                                rarity === "epic" ? " club-border club-purple club-accent club-border" :
+                                rarity === "legendary" ? " club-border club-yellow club-accent club-border " :
+                                rarity === "chroma" ? " club-border club-purple club-accent club-border" :
+                                " club-border club-blue club-accent club-border"
+                              ) : "club-overlay club-border club-muted grayscale cursor-not-allowed";
 
                               return (
                                 <div key={boom.level} className="group flex flex-col items-center gap-3">
@@ -5067,18 +4009,18 @@ const handlePackAction = async (packId: string) => {
                                     {hasUnlocked ? (
                                       <div className="z-10 flex flex-col items-center gap-1.5">
                                         <BoomAvatar name={boom.name} className="w-16 h-16 object-contain drop-shadow-lg transform transition-transform duration-300 group-hover:scale-115" />
-                                        <span className="font-heading text-[9px] font-black text-white/40 uppercase tracking-widest">LVL {boom.level}</span>
+                                        <span className="font-heading text-xs font-black club-muted uppercase tracking-wide">LVL {boom.level}</span>
                                       </div>
                                     ) : (
                                       <div className="flex flex-col items-center gap-1.5">
-                                        <LockIcon className="h-7 w-7 opacity-20 text-white" />
-                                        <span className="font-heading text-[9px] font-black text-white/20 uppercase tracking-widest">LVL {boom.level}</span>
+                                        <LockIcon className="h-7 w-7 opacity-20 club-ink" />
+                                        <span className="font-heading text-xs font-black club-muted uppercase tracking-wide">LVL {boom.level}</span>
                                       </div>
                                     )}
 
                                     {/* Quantity Badge */}
                                     {hasUnlocked && quantity > 1 && (
-                                      <div className="absolute bottom-2 right-2 bg-black/80 text-white text-[10px] font-black px-2 py-0.5 rounded-full border border-white/20">
+                                      <div className="absolute bottom-2 right-2 club-well club-ink text-xs font-black px-2 py-0.5 rounded-full border club-border">
                                         ×{quantity}
                                       </div>
                                     )}
@@ -5086,11 +4028,11 @@ const handlePackAction = async (packId: string) => {
 
                                   {/* Boom Name */}
                                   <div className="font-heading text-center space-y-1">
-                                    <p className={`text-sm font-black ${hasUnlocked ? "text-white" : "text-white/30"} line-clamp-2`}>
+                                    <p className={`text-sm font-black ${hasUnlocked ? "club-ink" : "club-muted"} line-clamp-2`}>
                                       {boom.name}
                                     </p>
                                     {hasUnlocked && (
-                                      <p className="font-heading text-[10px] text-white/40 line-clamp-1">
+                                      <p className="font-heading text-xs club-muted line-clamp-1">
                                         {String((boom as { description?: string }).description ?? "")}
                                       </p>
                                     )}
@@ -5107,18 +4049,18 @@ const handlePackAction = async (packId: string) => {
                     {((currentUser?.level || 1) >= 70 || (currentUser?.booms["The Trophy"] || 0) > 0) && (
                       <div className="mt-16 animate-in zoom-in duration-1000">
                         <div className="flex items-center gap-4 mb-8">
-                          <div className="w-2 h-12 bg-gradient-to-b from-red-600 via-pink-600 to-purple-600 rounded-full shadow-[0_0_30px_rgba(220,38,38,0.5)] animate-pulse" />
+                          <div className="w-2 h-12 club-surface rounded-full " />
                           <div>
-                            <h2 className="font-heading text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-purple-500 to-indigo-600 tracking-tighter">
-                              LIMITED SECTION
+                            <h2 className="font-heading text-4xl font-black club-accent tracking-tighter">
+                              Limited Booms
                             </h2>
-                            <p className="font-heading text-red-400/80 text-xs font-black mt-1 uppercase tracking-widest">
-                              The Vault of the Ancients has opened
+                            <p className="font-heading club-danger text-xs font-black mt-1 uppercase tracking-widest">
+                              Special Booms for your collection
                             </p>
                           </div>
                         </div>
 
-                        <div className="bg-gradient-to-br from-red-950/20 to-purple-950/20 backdrop-blur-xl rounded-[2.5rem] border-2 border-red-500/20 p-10 shadow-[0_0_50px_rgba(220,38,38,0.15)] ring-1 ring-white/10">
+                        <div className="club-surface rounded-xl border-2 club-border p-10 ring-1 ">
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                             {LIMITED_BOOMS.map((boom) => {
                               const hasIt = (currentUser?.booms[boom.name] || 0) > 0
@@ -5127,7 +4069,7 @@ const handlePackAction = async (packId: string) => {
                               return (
                                 <div key={boom.name} className="group flex flex-col items-center gap-4 relative">
                                   <div className="absolute -top-4 -right-2 z-20">
-                                    <Badge className="bg-red-600 text-white font-black border-none px-3 py-1 animate-bounce text-[9px] tracking-widest uppercase">LIMITED</Badge>
+                                    <Badge className="club-red club-ink font-black border-none px-3 py-1 text-xs tracking-wide uppercase">LIMITED</Badge>
                                   </div>
 
                                   <div
@@ -5135,8 +4077,8 @@ const handlePackAction = async (packId: string) => {
                                       w-full aspect-square rounded-[2rem] border flex flex-col items-center justify-center text-6xl 
                                       transition-all duration-500 relative overflow-hidden cursor-pointer
                                       ${hasIt
-                                        ? "text-cyan-400 border-cyan-500/40 shadow-[0_0_40px_rgba(34,211,238,0.25)] bg-cyan-950/20"
-                                        : "bg-black/80 text-white/5 border-white/5 hover:border-red-500/40 hover:shadow-[0_0_30px_rgba(220,38,38,0.15)]"
+                                        ? "club-accent club-border club-blue"
+                                        : "club-overlay club-muted club-border club-border "
                                       }
                                       hover:scale-105 hover:-rotate-1 active:scale-95
                                     `}
@@ -5159,15 +4101,15 @@ const handlePackAction = async (packId: string) => {
                                     }}
                                   >
                                     {/* Particle Effect Background */}
-                                    <div className="absolute inset-0 opacity-20 bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+                                    <div className="club-decoration absolute inset-0 opacity-20 " />
 
                                     <span className={`z-10 drop-shadow-[0_0_20px_rgba(255,255,255,0.4)] transform group-hover:scale-110 transition-transform duration-500 ${!hasIt && 'filter grayscale brightness-50'}`}>
                                       {boom.avatar}
                                     </span>
 
                                     {!hasIt && (
-                                      <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 backdrop-blur-[2px] z-20 group-hover:bg-black/35 transition-all">
-                                        <div className="flex items-center gap-1.5 bg-yellow-500 text-black px-3.5 py-1.5 rounded-full font-black text-xs shadow-xl">
+                                      <div className="club-decoration absolute inset-0 flex flex-col items-center justify-center club-well z-20 club-well transition-all">
+                                        <div className="flex items-center gap-1.5 club-yellow club-ink px-3.5 py-1.5 rounded-full font-black text-xs ">
                                           <CoinsIcon className="w-4 h-4" />
                                           {boom.price}
                                         </div>
@@ -5176,10 +4118,10 @@ const handlePackAction = async (packId: string) => {
                                   </div>
 
                                   <div className="font-heading text-center space-y-1">
-                                    <p className={`text-lg font-black tracking-tight ${hasIt ? "text-cyan-400" : "text-white/40"}`}>
+                                    <p className={`text-lg font-black tracking-tight ${hasIt ? "club-accent" : "club-muted"}`}>
                                       {boom.name}
                                     </p>
-                                    <p className="font-heading text-[10px] text-white/30 font-bold uppercase tracking-widest">{boom.description}</p>
+                                    <p className="font-heading text-xs club-muted font-bold uppercase tracking-wide">{boom.description}</p>
                                   </div>
                                 </div>
                               )
@@ -5192,199 +4134,7 @@ const handlePackAction = async (packId: string) => {
               </div>
             )}
 
-            {/* Market Page */}
-            {currentPage === "market" && (
-              <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
-                {/* Market Hero Header */}
-                <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-slate-950 via-purple-950/30 to-slate-950 border border-white/10 p-8 md:p-12 shadow-[0_12px_40px_rgba(0,0,0,0.6)]">
-                  <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-purple-500/5 rounded-full blur-[100px] pointer-events-none" />
-                  <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-blue-500/5 rounded-full blur-[100px] pointer-events-none" />
-
-                  <div className="relative flex flex-col md:flex-row justify-between items-center gap-8 z-10">
-                    <div className="space-y-4 text-center md:text-left">
-                      <h1 className="font-heading text-5xl md:text-7xl font-black text-white tracking-tighter">
-                        BOOM <span className="font-heading text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-orange-400 drop-shadow-sm">MARKET</span>
-                      </h1>
-                      <p className="font-heading text-white/40 text-base md:text-lg max-w-md font-medium leading-relaxed">
-                        Unleash the power of the arena. Discover legendary Booms, collect rare series, and dominate the rankings.
-                      </p>
-                    </div>
-
-                    <div className="shrink-0 transform hover:scale-[1.02] transition-transform duration-300">
-                      <div className="bg-slate-900/60 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-8 shadow-2xl flex flex-col items-center gap-1.5 w-64 border-yellow-500/20">
-                        <div className="font-heading text-white/40 text-[9px] uppercase tracking-[0.3em] font-black">Your Balance</div>
-                        <div className="flex items-center gap-3">
-                          <span className="font-heading text-4xl drop-shadow-md">🪙</span>
-                          <span className="font-heading text-5xl font-black text-yellow-400 tabular-nums drop-shadow-[0_0_15px_rgba(234,179,8,0.3)]">
-                            {currentUser?.tokens.toLocaleString() || 0}
-                          </span>
-                        </div>
-                        <div className="mt-3 flex items-center gap-2 px-4 py-1.5 bg-yellow-500/10 rounded-full border border-yellow-500/20 shadow-inner">
-                          <span className="w-1.5 h-1.5 rounded-full bg-yellow-400 animate-ping" />
-                          <span className="font-heading text-yellow-500 text-[9px] font-black uppercase tracking-widest">Ready to spend</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Premium Rarity Banner */}
-                <div className="bg-slate-900/40 backdrop-blur-xl rounded-[2rem] border border-white/10 p-8 shadow-xl">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-1.5 h-6 bg-gradient-to-b from-purple-500 to-pink-500 rounded-full" />
-                      <h3 className="font-heading text-lg font-black text-white uppercase tracking-widest">Global Drop Rates</h3>
-                    </div>
-
-                    {/* Toggles for Instant & Auto Open */}
-                    <div className="flex items-center gap-6">
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none group">
-                        <input
-                          type="checkbox"
-                          checked={isInstantOpen}
-                          onChange={(e) => setIsInstantOpen(e.target.checked)}
-                          className="sr-only"
-                        />
-                        <div className={`w-10 h-6 rounded-full p-1 transition-colors duration-300 ${isInstantOpen ? 'bg-purple-600' : 'bg-slate-800 border border-white/10'}`}>
-                          <div className={`w-4 h-4 rounded-full bg-[#5b21b6] transition-transform duration-300 ${isInstantOpen ? 'translate-x-4' : 'translate-x-0'}`} />
-                        </div>
-                        <span className="font-heading text-[10px] font-black uppercase tracking-wider text-white/70 group-hover:text-white transition-colors">Instant Open (2x)</span>
-                      </label>
-
-                      <label className="flex items-center gap-2.5 cursor-pointer select-none group">
-                        <input
-                          type="checkbox"
-                          checked={isAutoOpen}
-                          onChange={(e) => setIsAutoOpen(e.target.checked)}
-                          className="sr-only"
-                        />
-                        <div className={`w-10 h-6 rounded-full p-1 transition-colors duration-300 ${isAutoOpen ? 'bg-pink-600' : 'bg-slate-800 border border-white/10'}`}>
-                          <div className={`w-4 h-4 rounded-full bg-[#5b21b6] transition-transform duration-300 ${isAutoOpen ? 'translate-x-4' : 'translate-x-0'}`} />
-                        </div>
-                        <span className="font-heading text-[10px] font-black uppercase tracking-wider text-white/70 group-hover:text-white transition-colors">Auto Open</span>
-                      </label>
-                    </div>
-                  </div>
-
-                  {(() => {
-                    const chances = getBoostedRarityChances()
-                    return (
-                      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-                        {[
-                          { label: "Uncommon", rate: Number(chances.uncommon.toFixed(3)) + "%", color: "bg-green-500", border: "border-green-500/20", glow: "hover:shadow-[0_0_20px_rgba(34,197,94,0.2)]" },
-                          { label: "Rare", rate: Number(chances.rare.toFixed(3)) + "%", color: "bg-blue-500", border: "border-blue-500/20", glow: "hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]" },
-                          { label: "Epic", rate: Number(chances.epic.toFixed(3)) + "%", color: "bg-purple-500", border: "border-purple-500/20", glow: "hover:shadow-[0_0_20px_rgba(168,85,247,0.2)]" },
-                          { label: "Legendary", rate: Number(chances.legendary.toFixed(3)) + "%", color: "bg-orange-500", border: "border-orange-500/20", glow: "hover:shadow-[0_0_20px_rgba(249,115,22,0.2)]" },
-                          { label: "Chroma", rate: Number(chances.chroma.toFixed(3)) + "%", color: "bg-gradient-to-r from-red-500 via-yellow-500 to-purple-500", border: "border-pink-500/20", glow: "hover:shadow-[0_0_25px_rgba(236,72,153,0.25)]" },
-                          { label: "Hidden", rate: Number(chances.hidden.toFixed(3)) + "%", color: "bg-slate-800 text-slate-100", border: "border-slate-700", glow: "hover:shadow-[0_0_20px_rgba(148,163,184,0.3)] animate-pulse" },
-                          { label: "Mystical", rate: Number(chances.mystical.toFixed(3)) + "%", color: "bg-gradient-to-r from-purple-900 via-pink-500 to-indigo-900", border: "border-cyan-500/20", glow: "hover:shadow-[0_0_30px_rgba(6,182,212,0.35)]" },
-                        ].map((rarity, i) => (
-                          <div key={i} className={`relative group overflow-hidden rounded-2xl border ${rarity.border} bg-black/40 p-4 transition-all duration-500 hover:bg-black/20 hover:-translate-y-0.5 ${rarity.glow}`}>
-                            <div className="relative z-10 flex flex-col items-center gap-2">
-                              <div className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider text-white ${rarity.color}`}>
-                                {rarity.label}
-                              </div>
-                              <div className="font-heading text-3xl font-black text-white drop-shadow">{rarity.rate}</div>
-                            </div>
-                            <div className="absolute bottom-0 left-0 w-full h-1 bg-white/5 overflow-hidden">
-                              <div className={`h-full ${rarity.color} group-hover:animate-pulse`} style={{ width: rarity.rate }} />
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )
-                  })()}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {PACKS.filter((p) => p.id !== "plus" || (currentUser && currentUser.isPlusUser)).map((pack) => (
-                    <div key={pack.id} className="relative group perspective-1000">
-                      {/* Label and Series */}
-                      {pack.isNew && (
-                        <div className="absolute -top-3 -right-3 z-30 animate-bounce">
-                          <div className="bg-gradient-to-r from-red-600 to-pink-600 text-white text-[9px] font-black px-3.5 py-1.5 rounded-full shadow-lg shadow-red-900/40 border border-white/20 uppercase tracking-widest">
-                            NEW!
-                          </div>
-                        </div>
-                      )}
-                      {pack.series && (
-                        <div className="absolute top-4 left-4 z-30">
-                          <Badge className="bg-black/60 backdrop-blur-md border border-white/10 text-[9px] font-black uppercase text-white/80 px-2.5 py-1 rounded-lg">
-                            Series {pack.series}
-                          </Badge>
-                        </div>
-                      )}
-                      <div
-                        className={`
-                          bg-gradient-to-br ${pack.color} rounded-[2rem] overflow-hidden relative shadow-[0_8px_30px_rgba(0,0,0,0.5)]
-                          transition-all duration-500 ease-out transform-gpu
-                          group-hover:scale-105 group-hover:-rotate-1 group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.65)]
-                          border border-white/10
-                        `}
-                      >
-                        {/* Shine Effect */}
-                        <div className="absolute inset-0 z-20 pointer-events-none overflow-hidden rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                          <div className="absolute h-[200%] w-[120px] bg-white/20 skew-x-[-30deg] animate-shine blur-2xl" />
-                        </div>
-
-                        {/* Zigzag Header */}
-                        <div
-                          className="absolute top-0 left-0 right-0 h-8 bg-black/15 backdrop-blur-sm z-10"
-                          style={{
-                            clipPath: "polygon(0 0, 10% 100%, 20% 0, 30% 100%, 40% 0, 50% 100%, 60% 0, 70% 100%, 80% 0, 90% 100%, 100% 0, 100% 100%, 0 100%)",
-                          }}
-                        />
-
-                        {/* Content */}
-                        <div className="h-68 flex flex-col items-center justify-center relative p-8 mt-4">
-                          {/* Inner card glow */}
-                          <div className="absolute inset-x-8 inset-y-8 bg-white/5 rounded-3xl blur-2xl pointer-events-none" />
-
-                          <div className="font-heading text-9xl drop-shadow-[0_12px_15px_rgba(0,0,0,0.6)] transform-gpu transition-all duration-500 group-hover:scale-110 group-hover:-translate-y-2 select-none z-10">
-                            {pack.emoji}
-                          </div>
-                          <div className="mt-6 z-10 text-center">
-                            <h2 className="font-heading text-3xl font-black text-white tracking-tight drop-shadow-md">
-                              {pack.name}
-                            </h2>
-                            <div className="mt-1 px-3 py-1 bg-black/30 rounded-full text-[9px] font-black text-white/50 uppercase tracking-widest inline-block backdrop-blur-md border border-white/5">
-                              Series 1
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Footer / Price Area */}
-                        <div className="bg-black/50 backdrop-blur-xl p-6 flex items-center justify-between border-t border-white/10">
-                          <div className="flex flex-col">
-                            <span className="font-heading text-[9px] font-black text-white/30 uppercase tracking-widest">Price tag</span>
-                            <div className="flex items-center gap-1.5 mt-0.5">
-                              <span className="font-heading text-xl">🪙</span>
-                              <span className="font-heading text-2xl font-black text-yellow-400 tabular-nums drop-shadow-[0_0_10px_rgba(234,179,8,0.2)]">{pack.price}</span>
-                            </div>
-                          </div>
-
-                          <Button
-                            onClick={() => handlePackAction(pack.id)}
-                            disabled={(currentUser?.tokens || 0) < pack.price}
-                            className={`
-                              h-12 px-8 rounded-xl font-black uppercase tracking-wider text-xs
-                              transition-all duration-300 transform active:scale-95 border-none
-                              ${(currentUser?.tokens || 0) < pack.price
-                                ? "bg-white/5 text-white/20 cursor-not-allowed"
-                                : "bg-yellow-500 text-white hover:bg-yellow-400 hover:text-black hover:shadow-[0_0_20px_rgba(255,255,255,0.4)] shadow-xl"
-                              }
-                            `}
-                          >
-                            Open Pack
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-              </div>
-            )}
+            {currentPage === "market" && <ClubMarket balance={currentUser?.tokens || 0} plus={!!currentUser?.isPlusUser} instant={isInstantOpen} auto={isAutoOpen} onInstant={setIsInstantOpen} onAuto={setIsAutoOpen} chances={getBoostedRarityChances()} onOpen={handlePackAction} />}
 
             {/* Chat Page */}
             {currentPage === "chat" && (
@@ -5402,8 +4152,8 @@ const handlePackAction = async (packId: string) => {
             {currentPage === "private-chat" && currentUser && (
               <div className="space-y-12">
                 <div className="flex items-center gap-3 mb-8">
-                  <div className="w-1.5 h-8 bg-purple-500 rounded-full shadow-[0_0_15px_purple]" />
-                  <h2 className="font-heading text-4xl font-black text-white tracking-tighter">Private Quarters</h2>
+                  <div className="w-1.5 h-8 club-purple rounded-full " />
+                  <h2 className="font-heading text-4xl font-black club-ink tracking-tighter">Your messages</h2>
                 </div>
                 <PrivateChat currentUser={currentUser} onPlayerClick={openPlayerProfile} />
               </div>
@@ -5454,28 +4204,28 @@ const handlePackAction = async (packId: string) => {
             {isOwner() || currentUser?.role === "moderator" || currentUser?.role === "senior_moderator" || currentUser?.role === "admin" || currentUser?.role === "tester" ? (
               currentPage === "staff" && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
-                  <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 blooket-card p-8 shadow-xl">
+                  <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 club-panel p-8 ">
                     <div>
-                      <h1 className="font-heading text-4xl md:text-5xl font-black text-white tracking-tighter uppercase">OPERATIONS COMMAND DECK</h1>
-                      <p className="font-heading text-purple-300/60 font-semibold uppercase tracking-wider text-xs mt-1">Direct system configuration and operator enforcement directives.</p>
+                      <h1 className="font-heading text-4xl md:text-5xl font-black club-ink tracking-tighter uppercase">OPERATIONS COMMAND DECK</h1>
+                      <p className="font-heading club-accent font-semibold uppercase tracking-wider text-xs mt-1">Direct system configuration and operator enforcement directives.</p>
                     </div>
                     <div className="flex items-center gap-2">
                       {isOwner() && (
                         <Button
                           onClick={() => setShowBadgeManager(true)}
-                          className="bg-blue-600/20 hover:bg-blue-600 text-blue-400 hover:text-white border border-blue-500/30 rounded-xl font-black text-xs uppercase tracking-wider transition-all h-10 px-6"
+                          className="club-action club-blue club-blue club-accent club-ink border club-border rounded-xl font-black text-xs uppercase tracking-wider transition-all h-10 px-6"
                         >
-                          BADGE PROTOCOLS
+                          Badges
                         </Button>
                       )}
                     </div>
                   </div>
 
                   {/* Tab Navigation */}
-                  <div className="flex flex-wrap gap-2 p-1 bg-slate-900/60 backdrop-blur-md border border-white/10 rounded-2xl w-fit">
+                  <div className="flex flex-wrap gap-2 p-1 club-well border club-border rounded-xl w-fit">
                     <button
                       onClick={() => setStaffTab("all")}
-                      className={`px-6 py-2 rounded-xl text-sm font-black transition-all duration-300 flex items-center gap-2 ${staffTab === "all" ? "bg-purple-600/20 text-purple-400 border border-purple-500/30 shadow-lg" : "text-white/40 hover:text-white hover:bg-white/5"
+                      className={`px-6 py-2 rounded-xl text-sm font-black transition-all duration-300 flex items-center gap-2 ${staffTab === "all" ? "club-purple club-accent border club-border " : "club-muted club-ink club-well"
                         }`}
                     >
                       <UserIcon className="w-4 h-4" />
@@ -5483,51 +4233,51 @@ const handlePackAction = async (packId: string) => {
                     </button>
                     <button
                       onClick={() => setStaffTab("active")}
-                      className={`px-6 py-2 rounded-xl text-sm font-black transition-all duration-300 flex items-center gap-2 ${staffTab === "active" ? "bg-blue-600/20 text-blue-400 border border-blue-500/30 shadow-lg" : "text-white/40 hover:text-white hover:bg-white/5"
+                      className={`px-6 py-2 rounded-xl text-sm font-black transition-all duration-300 flex items-center gap-2 ${staffTab === "active" ? "club-blue club-accent border club-border " : "club-muted club-ink club-well"
                         }`}
                     >
                       <ShieldIcon className="w-4 h-4" />
                       Active
-                      <Badge className="ml-1 bg-white/10 text-white border-none px-1.5 py-0 min-w-[20px] justify-center">
+                      <Badge className="ml-1 club-well club-ink border-none px-1.5 py-0 min-w-[20px] justify-center">
                         {(users || []).filter(u => u && !u.isBanned).length}
                       </Badge>
                     </button>
                     <button
                       onClick={() => setStaffTab("muted")}
-                      className={`px-6 py-2 rounded-xl text-sm font-black transition-all duration-300 flex items-center gap-2 ${staffTab === "muted" ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/30 shadow-lg" : "text-white/40 hover:text-white hover:bg-white/5"
+                      className={`px-6 py-2 rounded-xl text-sm font-black transition-all duration-300 flex items-center gap-2 ${staffTab === "muted" ? "club-yellow club-accent border club-border " : "club-muted club-ink club-well"
                         }`}
                     >
                       <MessageCircleIcon className="w-4 h-4" />
                       Muted
-                      <Badge className="ml-1 bg-white/10 text-white border-none px-1.5 py-0 min-w-[20px] justify-center">
+                      <Badge className="ml-1 club-well club-ink border-none px-1.5 py-0 min-w-[20px] justify-center">
                         {(users || []).filter(u => u && u.isMuted).length}
                       </Badge>
                     </button>
                     <button
                       onClick={() => setStaffTab("banned")}
-                      className={`px-6 py-2 rounded-xl text-sm font-black transition-all duration-300 flex items-center gap-2 ${staffTab === "banned" ? "bg-red-600/20 text-red-400 border border-red-500/30 shadow-lg" : "text-white/40 hover:text-white hover:bg-white/5"
+                      className={`px-6 py-2 rounded-xl text-sm font-black transition-all duration-300 flex items-center gap-2 ${staffTab === "banned" ? "club-red club-danger border club-border " : "club-muted club-ink club-well"
                         }`}
                     >
                       <BanIcon className="w-4 h-4" />
                       Banned
-                      <Badge className="ml-1 bg-white/10 text-white border-none px-1.5 py-0 min-w-[20px] justify-center">
+                      <Badge className="ml-1 club-well club-ink border-none px-1.5 py-0 min-w-[20px] justify-center">
                         {(users || []).filter(u => u && u.isBanned).length}
                       </Badge>
                     </button>
                     <button
                       onClick={() => setStaffTab("applications")}
-                      className={`px-6 py-2 rounded-xl text-sm font-black transition-all duration-300 flex items-center gap-2 ${staffTab === "applications" ? "bg-orange-600/20 text-orange-400 border border-orange-500/30 shadow-lg" : "text-white/40 hover:text-white hover:bg-white/5"
+                      className={`px-6 py-2 rounded-xl text-sm font-black transition-all duration-300 flex items-center gap-2 ${staffTab === "applications" ? "club-yellow club-accent border club-border " : "club-muted club-ink club-well"
                         }`}
                     >
                       <FileTextIcon className="w-4 h-4" />
                       Applications
-                      <Badge className="ml-1 bg-white/10 text-white border-none px-1.5 py-0 min-w-[20px] justify-center text-orange-400">
+                      <Badge className="ml-1 club-well club-ink border-none px-1.5 py-0 min-w-[20px] justify-center club-accent">
                         {(users || []).filter(u => u && u.status === "pending").length}
                       </Badge>
                     </button>
                     <button
                       onClick={() => setStaffTab("tournaments")}
-                      className={`px-6 py-2 rounded-xl text-sm font-black transition-all duration-300 flex items-center gap-2 ${staffTab === "tournaments" ? "bg-yellow-600/20 text-yellow-400 border border-yellow-500/30 shadow-lg" : "text-white/40 hover:text-white hover:bg-white/5"
+                      className={`px-6 py-2 rounded-xl text-sm font-black transition-all duration-300 flex items-center gap-2 ${staffTab === "tournaments" ? "club-yellow club-accent border club-border " : "club-muted club-ink club-well"
                         }`}
                     >
                       <TrophyIcon className="w-4 h-4" />
@@ -5535,7 +4285,7 @@ const handlePackAction = async (packId: string) => {
                     </button>
                     <button
                       onClick={() => setStaffTab("seasons")}
-                      className={`px-6 py-2 rounded-xl text-sm font-black transition-all duration-300 flex items-center gap-2 ${staffTab === "seasons" ? "bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 shadow-lg" : "text-white/40 hover:text-white hover:bg-white/5"
+                      className={`px-6 py-2 rounded-xl text-sm font-black transition-all duration-300 flex items-center gap-2 ${staffTab === "seasons" ? "club-green club-success border club-border " : "club-muted club-ink club-well"
                         }`}
                     >
                       <FlameIcon className="w-4 h-4" />
@@ -5545,13 +4295,13 @@ const handlePackAction = async (packId: string) => {
 
                   {/* Search and Filters Strip */}
                   {staffTab !== "tournaments" && staffTab !== "seasons" && (
-                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center bg-slate-900/60 backdrop-blur-2xl border border-white/10 rounded-2xl p-4 gap-4">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center club-well border club-border rounded-xl p-4 gap-4">
                       <div className="relative w-full md:w-80">
                         <Input
                           placeholder="Search players..."
                           value={staffSearchQuery}
                           onChange={(e) => setStaffSearchQuery(e.target.value)}
-                          className="bg-black/20 border-white/10 text-white placeholder:text-white/30 rounded-xl focus:border-purple-500/50 transition-all h-10 px-4"
+                          className="club-well club-border club-ink placeholder:text-white/30 rounded-xl club-border transition-all h-10 px-4"
                         />
                       </div>
                     </div>
@@ -5575,46 +4325,46 @@ const handlePackAction = async (packId: string) => {
                         const userRole = DEFAULT_ROLES.find((r) => r.id === user.role)
                         const isActive = Date.now() - user.lastSeen < 300000
                         return (
-                          <div key={user.id} className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 group hover:bg-white/10 transition-all duration-300">
+                          <div key={user.id} className="club-well border club-border rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 group club-well transition-all duration-300">
                             <div className="flex items-center gap-4">
                               <div className="relative">
-                                <div className={`h-3 w-3 rounded-full ${isActive ? "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]" : user.status === "pending" ? "bg-orange-500 animate-pulse" : "bg-zinc-600"}`} />
-                                {isActive && <div className="absolute inset-0 bg-green-500 rounded-full animate-ping opacity-20" />}
+                                <div className={`h-3 w-3 rounded-full ${isActive ? "club-green " : user.status === "pending" ? "club-yellow " : "club-well"}`} />
+                                {isActive && <div className="absolute inset-0 club-green rounded-full opacity-20" />}
                               </div>
                               <div className="flex flex-col">
                                 <div className="flex items-center gap-2">
-                                  <span className="font-heading text-white font-black tracking-tight">{user.username}</span>
+                                  <span className="font-heading club-ink font-black tracking-tight">{user.username}</span>
                                   {user.status === "pending" ? (
-                                    <Badge className="bg-orange-500/20 text-orange-400 text-[10px] font-black uppercase tracking-widest px-2 py-0.5 border border-orange-500/30 shadow-sm">
+                                    <Badge className="club-yellow club-accent text-xs font-black uppercase tracking-wide px-2 py-0.5 border club-border ">
                                       Pending Approval
                                     </Badge>
                                   ) : (
-                                    <Badge className={`${userRole?.color || "bg-zinc-600"} text-white text-[10px] font-black uppercase tracking-widest px-2 py-0.5 border-none shadow-sm`}>
+                                    <Badge className={`${userRole?.color || "club-well"} club-ink text-xs font-black uppercase tracking-wide px-2 py-0.5 border-none `}>
                                       {userRole?.name || "Player"}
                                     </Badge>
                                   )}
                                 </div>
 
                                 {user.status === "pending" ? (
-                                  <div className="mt-2 text-xs text-white/80 bg-black/20 p-2 rounded-lg border border-white/5">
+                                  <div className="mt-2 text-xs club-ink club-well p-2 rounded-lg border club-border">
                                     <p className="flex items-center gap-2 mb-1">
-                                      <span className="font-heading text-orange-400 font-bold uppercase text-[10px] tracking-wider w-12">Age:</span>
+                                      <span className="font-heading club-accent font-bold uppercase text-[10px] tracking-wider w-12">Age:</span>
                                       <span className="font-mono">{user.age || "N/A"}</span>
                                     </p>
                                     <p className="flex items-start gap-2">
-                                      <span className="font-heading text-orange-400 font-bold uppercase text-[10px] tracking-wider w-12 mt-0.5">Reason:</span>
-                                      <span className="italic text-white/90">{user.reason || "No reason provided"}</span>
+                                      <span className="font-heading club-accent font-bold uppercase text-[10px] tracking-wider w-12 mt-0.5">Reason:</span>
+                                      <span className="italic club-ink">{user.reason || "No reason provided"}</span>
                                     </p>
                                   </div>
                                 ) : (
                                   <div className="flex items-center gap-2 mt-1">
-                                    {user.isMuted && <span className="font-heading text-yellow-500/80 text-[10px] font-black uppercase tracking-widest flex items-center gap-1">🔇 Muted</span>}
-                                    {user.isBanned && <span className="font-heading text-red-500/80 text-[10px] font-black uppercase tracking-widest flex items-center gap-1">🚫 Banned</span>}
+                                    {user.isMuted && <span className="font-heading club-accent text-[10px] font-black uppercase tracking-widest flex items-center gap-1">🔇 Muted</span>}
+                                    {user.isBanned && <span className="font-heading club-danger text-[10px] font-black uppercase tracking-widest flex items-center gap-1">🚫 Banned</span>}
                                   </div>
                                 )}
 
                                 {staffTab === "banned" && user.banReason && (
-                                  <div className="mt-2 p-2 bg-red-500/10 rounded-lg border border-red-500/20 text-xs text-red-100/70 italic">
+                                  <div className="mt-2 p-2 club-red rounded-lg border club-border text-xs club-danger italic">
                                     "{user.banReason}"
                                   </div>
                                 )}
@@ -5633,14 +4383,14 @@ const handlePackAction = async (packId: string) => {
                                         <Button
                                           size="sm"
                                           onClick={() => handleApproveUser(user.id)}
-                                          className="bg-green-600 hover:bg-green-500 text-white border border-green-500/30 rounded-xl font-bold h-9 px-4 transition-all shadow-lg shadow-green-900/20"
+                                          className="club-action club-green club-green club-ink border club-border rounded-xl font-bold h-9 px-4 transition-all "
                                         >
                                           Approve
                                         </Button>
                                         <Button
                                           size="sm"
                                           onClick={() => handleRejectUser(user.id)}
-                                          className="bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/30 rounded-xl font-bold h-9 px-4 transition-all"
+                                          className="club-action club-red club-red club-danger club-ink border club-border rounded-xl font-bold h-9 px-4 transition-all"
                                         >
                                           Reject
                                         </Button>
@@ -5652,7 +4402,7 @@ const handlePackAction = async (packId: string) => {
                                             size="sm"
                                             variant="ghost"
                                             onClick={() => openEditUserDialog(user)}
-                                            className="h-9 w-9 p-0 text-white/40 hover:text-purple-400 hover:bg-purple-500/10 rounded-xl transition-all"
+                                            className="club-action h-9 w-9 p-0 club-muted club-accent club-purple rounded-xl transition-all"
                                           >
                                             <PencilIcon className="h-4 w-4" />
                                           </Button>
@@ -5660,7 +4410,7 @@ const handlePackAction = async (packId: string) => {
                                         <select
                                           value={user.role}
                                           onChange={(e) => quickAssignRole(user.id, e.target.value)}
-                                          className="bg-zinc-900 border border-white/10 text-white text-xs font-bold rounded-xl px-3 py-1.5 focus:border-purple-500/50 outline-none h-9"
+                                          className="club-well border club-border club-ink text-xs font-bold rounded-xl px-3 py-1.5 club-border outline-none h-9"
                                         >
                                           {DEFAULT_ROLES.filter(
                                             (role) => role.id !== "owner" || (isOwner() && user.id === currentUser?.id),
@@ -5671,13 +4421,13 @@ const handlePackAction = async (packId: string) => {
                                           ))}
                                         </select>
 
-                                        <div className="h-6 w-px bg-white/10 mx-1 hidden md:block" />
+                                        <div className="h-6 w-px club-well mx-1 hidden md:block" />
 
                                         {user.isMuted ? (
                                           <Button
                                             size="sm"
                                             onClick={() => handleUnbanUnmute(user.id, "unmute")}
-                                            className="bg-yellow-500/10 hover:bg-yellow-500 text-yellow-500 hover:text-white border border-yellow-500/20 rounded-xl font-bold h-9 px-4 transition-all"
+                                            className="club-action club-yellow club-yellow club-accent club-ink border club-border rounded-xl font-bold h-9 px-4 transition-all"
                                           >
                                             Unmute
                                           </Button>
@@ -5686,7 +4436,7 @@ const handlePackAction = async (packId: string) => {
                                             size="sm"
                                             variant="ghost"
                                             onClick={() => openMuteDialog(user)}
-                                            className="font-heading text-white/40 hover:text-yellow-500 hover:bg-yellow-500/10 rounded-xl font-bold h-9 px-4 transition-all"
+                                            className="club-action font-heading club-muted club-accent club-yellow rounded-xl font-bold h-9 px-4 transition-all"
                                           >
                                             Mute
                                           </Button>
@@ -5696,7 +4446,7 @@ const handlePackAction = async (packId: string) => {
                                           <Button
                                             size="sm"
                                             onClick={() => handleUnbanUnmute(user.id, "unban")}
-                                            className="bg-green-500/10 hover:bg-green-500 text-green-500 hover:text-white border border-green-500/20 rounded-xl font-bold h-9 px-4 transition-all"
+                                            className="club-action club-green club-green club-success club-ink border club-border rounded-xl font-bold h-9 px-4 transition-all"
                                           >
                                             Unban
                                           </Button>
@@ -5705,7 +4455,7 @@ const handlePackAction = async (packId: string) => {
                                             size="sm"
                                             variant="ghost"
                                             onClick={() => openBanDialog(user)}
-                                            className="font-heading text-white/40 hover:text-red-500 hover:bg-red-500/10 rounded-xl font-bold h-9 px-4 transition-all"
+                                            className="club-action font-heading club-muted club-danger club-red rounded-xl font-bold h-9 px-4 transition-all"
                                           >
                                             Ban
                                           </Button>
@@ -5729,12 +4479,12 @@ const handlePackAction = async (packId: string) => {
                         (staffTab === "banned" && u.isBanned)
                       return matchesSearch && matchesTab
                     }).length === 0 && (
-                        <div className="py-20 flex flex-col items-center justify-center bg-white/5 rounded-3xl border border-dashed border-white/10">
-                          <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-4">
-                            <CheckIcon className="w-8 h-8 text-white/20" />
+                        <div className="py-20 flex flex-col items-center justify-center club-well rounded-xl border border-dashed club-border">
+                          <div className="w-16 h-16 club-well rounded-full flex items-center justify-center mb-4">
+                            <CheckIcon className="w-8 h-8 club-muted" />
                           </div>
-                          <p className="font-heading text-white/40 font-bold">No users found.</p>
-                          <p className="font-heading text-white/10 text-xs">The arena is clear.</p>
+                          <p className="font-heading club-muted font-bold">No users found.</p>
+                          <p className="font-heading club-muted text-xs">The arena is clear.</p>
                         </div>
                       )}
                   </div>
@@ -5744,63 +4494,63 @@ const handlePackAction = async (packId: string) => {
                   {staffTab === "tournaments" && (
                     <div className="space-y-8 animate-in fade-in duration-300">
                       {/* Create Tournament Form */}
-                      <Card className="bg-white/5 border-white/10 backdrop-blur-md rounded-3xl">
+                      <Card className="club-well club-border rounded-xl">
                         <CardHeader>
-                          <CardTitle className="font-heading text-2xl font-black text-white flex items-center gap-2">
-                            <TrophyIcon className="h-6 w-6 text-yellow-500" />
+                          <CardTitle className="font-heading text-2xl font-black club-ink flex items-center gap-2">
+                            <TrophyIcon className="h-6 w-6 club-accent" />
                             Create New Tournament
                           </CardTitle>
-                          <CardDescription className="font-heading text-slate-400">Host an arena competition with custom rewards.</CardDescription>
+                          <CardDescription className="font-heading club-muted">Host an arena competition with custom rewards.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                              <Label className="font-heading text-white font-bold text-sm">Tournament Title</Label>
+                              <Label className="font-heading club-ink font-bold text-sm">Tournament Title</Label>
                               <Input
                                 placeholder="e.g. Weekly Trivia Clash #1"
                                 value={tourneyTitle}
                                 onChange={(e) => setTourneyTitle(e.target.value)}
-                                className="bg-black/20 border-white/10 text-white rounded-xl"
+                                className="club-well club-border club-ink rounded-xl"
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label className="font-heading text-white font-bold text-sm">End Date & Time</Label>
+                              <Label className="font-heading club-ink font-bold text-sm">End Date & Time</Label>
                               <Input
                                 type="datetime-local"
                                 value={tourneyEndTime}
                                 onChange={(e) => setTourneyEndTime(e.target.value)}
-                                className="bg-black/20 border-white/10 text-white rounded-xl"
+                                className="club-well club-border club-ink rounded-xl"
                               />
                             </div>
                           </div>
 
                           <div className="space-y-2">
-                            <Label className="font-heading text-white font-bold text-sm">Description</Label>
+                            <Label className="font-heading club-ink font-bold text-sm">Description</Label>
                             <Input
                               placeholder="e.g. Compete for the top score in history trivia!"
                               value={tourneyDesc}
                               onChange={(e) => setTourneyDesc(e.target.value)}
-                              className="bg-black/20 border-white/10 text-white rounded-xl"
+                              className="club-well club-border club-ink rounded-xl"
                             />
                           </div>
 
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                              <Label className="font-heading text-white font-bold text-sm">Prize Tokens</Label>
+                              <Label className="font-heading club-ink font-bold text-sm">Prize Tokens</Label>
                               <Input
                                 type="number"
                                 placeholder="10000"
                                 value={tourneyPrizeTokens || ""}
                                 onChange={(e) => setTourneyPrizeTokens(parseInt(e.target.value) || 0)}
-                                className="bg-black/20 border-white/10 text-white rounded-xl"
+                                className="club-well club-border club-ink rounded-xl"
                               />
                             </div>
                             <div className="space-y-2">
-                              <Label className="font-heading text-white font-bold text-sm">Prize Boom Name (Optional)</Label>
+                              <Label className="font-heading club-ink font-bold text-sm">Prize Boom Name (Optional)</Label>
                               <select
                                 value={tourneyPrizeBoom}
                                 onChange={(e) => setTourneyPrizeBoom(e.target.value)}
-                                className="w-full bg-black/20 border border-white/10 text-white rounded-xl h-10 px-3 outline-none"
+                                className="w-full club-well border club-border club-ink rounded-xl h-10 px-3 outline-none"
                               >
                                 <option value="">No Boom Reward</option>
                                 <option value="Basic Box">Basic Box 📦</option>
@@ -5813,7 +4563,7 @@ const handlePackAction = async (packId: string) => {
 
                           <Button
                             onClick={handleCreateTournament}
-                            className="bg-gradient-to-r from-yellow-500 to-amber-600 hover:from-yellow-600 hover:to-amber-700 text-white font-black w-full py-6 rounded-2xl shadow-lg transition-transform hover:scale-[1.01]"
+                            className="club-action club-surface club-ink font-black w-full py-6 rounded-xl transition-transform hover:scale-[1.01]"
                           >
                             Launch Tournament
                           </Button>
@@ -5822,31 +4572,31 @@ const handlePackAction = async (packId: string) => {
 
                       {/* Tournament List */}
                       <div className="space-y-4">
-                        <h3 className="font-heading text-xl font-black text-white flex items-center gap-2">
-                          <TrophyIcon className="h-5 w-5 text-yellow-500" />
+                        <h3 className="font-heading text-xl font-black club-ink flex items-center gap-2">
+                          <TrophyIcon className="h-5 w-5 club-accent" />
                           Tournaments Arena
                         </h3>
                         <div className="grid grid-cols-1 gap-4">
                           {activeTournaments.map((t) => (
-                            <div key={t.id} className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div key={t.id} className="club-well border club-border rounded-xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
                               <div>
                                 <div className="flex items-center gap-3 mb-1">
-                                  <h4 className="font-heading text-xl font-bold text-white">{t.title}</h4>
-                                  <Badge className={`${t.status === 'active' ? 'bg-green-500' : 'bg-red-500'} text-white font-black uppercase text-[8px]`}>
+                                  <h4 className="font-heading text-xl font-bold club-ink">{t.title}</h4>
+                                  <Badge className={`${t.status === 'active' ? 'club-green' : 'club-red'} club-ink font-black uppercase text-xs`}>
                                     {t.status}
                                   </Badge>
                                 </div>
-                                <p className="font-heading text-slate-400 text-sm mb-3">{t.description}</p>
-                                <div className="flex flex-wrap gap-3 text-xs text-slate-400">
-                                  <span className="flex items-center gap-1 font-bold text-white"><CoinsIcon className="w-3 h-3 text-yellow-400" /> {t.prize_tokens?.toLocaleString() || 0}</span>
-                                  {t.prize_boom_name && <span className="font-bold text-white">🎁 {t.prize_boom_name}</span>}
+                                <p className="font-heading club-muted text-sm mb-3">{t.description}</p>
+                                <div className="flex flex-wrap gap-3 text-xs club-muted">
+                                  <span className="flex items-center gap-1 font-bold club-ink"><CoinsIcon className="w-3 h-3 club-accent" /> {t.prize_tokens?.toLocaleString() || 0}</span>
+                                  {t.prize_boom_name && <span className="font-bold club-ink">🎁 {t.prize_boom_name}</span>}
                                   <span>Ends: {new Date(t.end_time).toLocaleString()}</span>
                                 </div>
                               </div>
                               {t.status === 'active' && (
                                 <Button
                                   onClick={() => handleFinalizeTournament(t.id)}
-                                  className="bg-red-600 hover:bg-red-500 text-white font-black px-6 rounded-xl transition-all"
+                                  className="club-action club-red club-red club-ink font-black px-6 rounded-xl transition-all"
                                 >
                                   Finalize & Award Prizes
                                 </Button>
@@ -5854,7 +4604,7 @@ const handlePackAction = async (packId: string) => {
                             </div>
                           ))}
                           {activeTournaments.length === 0 && (
-                            <div className="p-12 text-center text-white/30 border border-dashed border-white/10 rounded-2xl">
+                            <div className="p-12 text-center club-muted border border-dashed club-border rounded-xl">
                               No tournaments have been hosted yet.
                             </div>
                           )}
@@ -5867,46 +4617,46 @@ const handlePackAction = async (packId: string) => {
                   {staffTab === "seasons" && (
                     <div className="space-y-8 animate-in fade-in duration-300">
                       {/* Active Season Info */}
-                      <Card className="bg-white/5 border-white/10 backdrop-blur-md rounded-3xl">
+                      <Card className="club-well club-border rounded-xl">
                         <CardHeader>
-                          <CardTitle className="font-heading text-2xl font-black text-white flex items-center gap-2">
-                            <FlameIcon className="h-6 w-6 text-orange-500 animate-pulse" />
+                          <CardTitle className="font-heading text-2xl font-black club-ink flex items-center gap-2">
+                            <FlameIcon className="h-6 w-6 club-accent animate-pulse" />
                             Season Management
                           </CardTitle>
-                          <CardDescription className="font-heading text-slate-400">Start new seasons and manage active passes.</CardDescription>
+                          <CardDescription className="font-heading club-muted">Start new seasons and manage active passes.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
                           {activeSeason ? (
-                            <div className="bg-gradient-to-r from-orange-500/10 to-yellow-500/10 border border-orange-500/20 rounded-2xl p-6">
-                              <span className="font-heading text-[10px] font-black text-orange-400 uppercase tracking-widest block mb-1">Currently Active Season</span>
-                              <h4 className="font-heading text-2xl font-black text-white mb-2">{activeSeason.name}</h4>
-                              <p className="font-heading text-xs text-slate-400">
+                            <div className="club-surface border club-border rounded-xl p-6">
+                              <span className="font-heading text-[10px] font-black club-accent uppercase tracking-widest block mb-1">Currently Active Season</span>
+                              <h4 className="font-heading text-2xl font-black club-ink mb-2">{activeSeason.name}</h4>
+                              <p className="font-heading text-xs club-muted">
                                 Started: {new Date(activeSeason.start_date).toLocaleDateString()} | Ends: {new Date(activeSeason.end_date).toLocaleDateString()}
                               </p>
                             </div>
                           ) : (
-                            <div className="bg-red-950/20 border border-red-500/20 rounded-2xl p-6 text-center">
-                              <p className="font-heading text-red-300 font-bold">No active season pass currently running.</p>
+                            <div className="club-red border club-border rounded-xl p-6 text-center">
+                              <p className="font-heading club-danger font-bold">No active season pass currently running.</p>
                             </div>
                           )}
 
                           <div className="space-y-3">
-                            <Label className="font-heading text-white font-bold text-sm">Start Next Season</Label>
+                            <Label className="font-heading club-ink font-bold text-sm">Start Next Season</Label>
                             <div className="flex flex-col sm:flex-row gap-3">
                               <Input
                                 placeholder="e.g. Season 2: Legends Ascend"
                                 value={newSeasonName}
                                 onChange={(e) => setNewSeasonName(e.target.value)}
-                                className="bg-black/20 border-white/10 text-white rounded-xl flex-grow h-12"
+                                className="club-well club-border club-ink rounded-xl flex-grow h-12"
                               />
                               <Button
                                 onClick={handleStartNewSeason}
-                                className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white font-black px-8 h-12 rounded-xl"
+                                className="club-action club-surface club-ink font-black px-8 h-12 rounded-xl"
                               >
                                 Activate Season
                               </Button>
                             </div>
-                            <p className="font-heading text-[10px] text-slate-400">
+                            <p className="font-heading text-xs club-muted">
                               Activating a new season deactivates the current one and creates standard reward tiers (100 XP, 250 XP, 500 XP).
                             </p>
                           </div>
@@ -5921,25 +4671,25 @@ const handlePackAction = async (packId: string) => {
             {currentPage === "inventory" && (
               <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
                 {/* Inventory Hero Banner */}
-                <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 border border-white/10 p-8 shadow-[0_12px_40px_rgba(0,0,0,0.6)]">
-                  <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-purple-500/5 rounded-full blur-[100px] pointer-events-none" />
-                  <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-blue-500/5 rounded-full blur-[100px] pointer-events-none" />
+                <div className="relative overflow-hidden rounded-xl club-surface border club-border p-8 ">
+                  <div className="club-decoration absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 club-purple rounded-full pointer-events-none" />
+                  <div className="club-decoration absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 club-blue rounded-full pointer-events-none" />
 
                   <div className="relative flex flex-col md:flex-row justify-between items-center gap-6 z-10">
                     <div className="space-y-2 text-center md:text-left">
-                      <h1 className="font-heading text-4xl md:text-5xl font-black text-white tracking-tighter">
-                        MY <span className="font-heading text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 drop-shadow-sm">INVENTORY</span>
+                      <h1 className="font-heading text-4xl md:text-5xl font-black club-ink tracking-tighter">
+                        Your <span className="font-heading club-accent ">inventory</span>
                       </h1>
-                      <p className="font-heading text-white/40 text-xs md:text-sm font-semibold uppercase tracking-wider">
+                      <p className="font-heading club-muted text-xs md:text-sm font-semibold uppercase tracking-wider">
                         View, activate, and manage your boosters and charms
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-4 bg-slate-900/60 backdrop-blur-2xl border border-white/10 px-6 py-3 rounded-2xl">
+                    <div className="flex items-center gap-4 club-well border club-border px-6 py-3 rounded-xl">
                       <span className="relative flex h-2 w-2">
-                        <span className={`relative inline-flex rounded-full h-2 w-2 ${activeBoost ? 'bg-green-500 shadow-[0_0_10px_green]' : 'bg-slate-500'}`} />
+                        <span className={`relative inline-flex rounded-full h-2 w-2 ${activeBoost ? 'club-green ' : 'club-well'}`} />
                       </span>
-                      <span className="font-heading text-white/30 text-[9px] font-black uppercase tracking-widest">
+                      <span className="font-heading club-muted text-xs font-black uppercase tracking-wide">
                         {activeBoost ? 'Booster Active' : 'No Boosters Active'}
                       </span>
                     </div>
@@ -5947,31 +4697,31 @@ const handlePackAction = async (packId: string) => {
                 </div>
 
                 {/* Tabs */}
-                <div className="flex gap-4 border-b border-white/5 pb-2">
+                <div className="flex gap-4 border-b club-border pb-2">
                   <button
                     onClick={() => setInventoryTab("boosters")}
                     className={`pb-2 px-1 text-sm font-bold uppercase tracking-wider transition-all relative ${
                       inventoryTab === "boosters"
-                        ? "text-white font-black"
-                        : "text-slate-400 hover:text-white"
+                        ? "club-ink font-black"
+                        : "club-muted club-ink"
                     }`}
                   >
                     Boosters & Charms
                     {inventoryTab === "boosters" && (
-                      <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-purple-500 to-pink-500" />
+                      <div className="absolute bottom-0 left-0 w-full h-0.5 club-surface " />
                     )}
                   </button>
                   <button
                     onClick={() => setInventoryTab("booms")}
                     className={`pb-2 px-1 text-sm font-bold uppercase tracking-wider transition-all relative ${
                       inventoryTab === "booms"
-                        ? "text-white font-black"
-                        : "text-slate-400 hover:text-white"
+                        ? "club-ink font-black"
+                        : "club-muted club-ink"
                     }`}
                   >
                     Owned Booms
                     {inventoryTab === "booms" && (
-                      <div className="absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-purple-500 to-pink-500" />
+                      <div className="absolute bottom-0 left-0 w-full h-0.5 club-surface " />
                     )}
                   </button>
                 </div>
@@ -5980,22 +4730,22 @@ const handlePackAction = async (packId: string) => {
                   <div className="space-y-6">
                     {/* Active booster status widget if active */}
                     {activeBoost && (
-                      <div className="bg-gradient-to-r from-green-500/10 via-emerald-500/5 to-slate-950/40 border border-green-500/20 rounded-3xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                      <div className="club-surface border club-border rounded-xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div className="flex items-center gap-4">
-                          <div className="p-3 bg-green-500/15 rounded-2xl border border-green-500/20 text-green-400 text-2xl">
+                          <div className="p-3 club-green rounded-xl border club-border club-success text-2xl">
                             ⚡
                           </div>
                           <div>
-                            <div className="font-heading text-white font-black text-sm uppercase tracking-wider">Active Global Boost</div>
-                            <p className="font-heading text-xs text-slate-400 mt-0.5">
-                              Activated by <span className="font-heading text-white font-bold">{activeBoost.activated_by}</span>. 
-                              All drops currently boosted by <span className="font-heading text-green-400 font-bold">{activeBoost.multiplier}x</span>!
+                            <div className="font-heading club-ink font-black text-sm uppercase tracking-wider">Active Global Boost</div>
+                            <p className="font-heading text-xs club-muted mt-0.5">
+                              Activated by <span className="font-heading club-ink font-bold">{activeBoost.activated_by}</span>.
+                              All drops currently boosted by <span className="font-heading club-success font-bold">{activeBoost.multiplier}x</span>!
                             </p>
                           </div>
                         </div>
-                        <div className="bg-black/40 border border-white/5 px-4 py-2.5 rounded-2xl text-center">
-                          <div className="font-heading text-slate-500 text-[9px] uppercase tracking-widest font-black">Ends At</div>
-                          <div className="font-heading text-white font-black text-xs mt-0.5">
+                        <div className="club-well border club-border px-4 py-2.5 rounded-xl text-center">
+                          <div className="font-heading club-muted text-xs uppercase tracking-wide font-black">Ends At</div>
+                          <div className="font-heading club-ink font-black text-xs mt-0.5">
                             {new Date(activeBoost.ends_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </div>
                         </div>
@@ -6004,19 +4754,19 @@ const handlePackAction = async (packId: string) => {
 
                     {/* Boosters Grid */}
                     {(!currentUser?.inventory || currentUser.inventory.length === 0) ? (
-                      <div className="bg-slate-900/20 border border-white/5 rounded-[2rem] p-12 text-center flex flex-col items-center gap-4">
-                        <div className="w-16 h-16 bg-slate-800/30 rounded-2xl flex items-center justify-center border border-white/5 text-4xl text-slate-600">
+                      <div className="club-well border club-border rounded-xl p-12 text-center flex flex-col items-center gap-4">
+                        <div className="w-16 h-16 club-well rounded-xl flex items-center justify-center border club-border text-4xl club-ink">
                           📦
                         </div>
                         <div>
-                          <h3 className="font-heading text-white font-black text-lg">Your inventory is empty</h3>
-                          <p className="font-heading text-slate-400 text-xs mt-1 max-w-sm mx-auto">
+                          <h3 className="font-heading club-ink font-black text-lg">Your inventory is empty</h3>
+                          <p className="font-heading club-muted text-xs mt-1 max-w-sm mx-auto">
                             You don't own any booster items yet. Head over to the Shop to purchase Luck Charms!
                           </p>
                         </div>
                         <button
                           onClick={() => setCurrentPage("shop")}
-                          className="mt-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-black text-xs uppercase tracking-wider px-6 py-3 rounded-xl shadow-lg transition-all"
+                          className="mt-2 club-surface club-ink font-black text-xs uppercase tracking-wider px-6 py-3 rounded-xl transition-all"
                         >
                           Visit Shop
                         </button>
@@ -6028,39 +4778,39 @@ const handlePackAction = async (packId: string) => {
                             name: item.id.replace(/-/g, " "),
                             description: "Special inventory item",
                             emoji: "📦",
-                            color: "from-slate-800/20 to-slate-950/20 border-slate-700/30 text-slate-400"
+                            color: " club-border club-muted"
                           }
                           return (
                             <div
                               key={item.id}
-                              className={`bg-gradient-to-br ${spec.color} blooket-panel border rounded-3xl p-6 flex flex-col justify-between hover:-translate-y-1 transition-all duration-300 shadow-xl`}
+                              className={`club-surface ${spec.color} club-panel border rounded-xl p-6 flex flex-col justify-between hover:-translate-y-1 transition-all duration-300 `}
                             >
                               <div className="flex justify-between items-start gap-4">
                                 <div className="flex items-center gap-4">
-                                  <div className="w-14 h-14 bg-black/40 rounded-2xl flex items-center justify-center text-3xl border border-white/5 shadow-inner">
+                                  <div className="w-14 h-14 club-well rounded-xl flex items-center justify-center text-3xl border club-border ">
                                     {spec.emoji}
                                   </div>
                                   <div>
-                                    <h3 className="font-heading text-white font-black text-base uppercase tracking-wider">{spec.name}</h3>
-                                    <span className="font-heading text-[10px] font-black uppercase tracking-widest text-slate-500 block mt-0.5">
+                                    <h3 className="font-heading club-ink font-black text-base uppercase tracking-wider">{spec.name}</h3>
+                                    <span className="font-heading text-xs font-black uppercase tracking-wide club-muted block mt-0.5">
                                       Booster Charm
                                     </span>
                                   </div>
                                 </div>
-                                <div className="bg-black/60 border border-white/5 px-3 py-1.5 rounded-xl text-center shrink-0">
-                                  <div className="font-heading text-[9px] font-bold text-slate-500 uppercase tracking-wider">Owned</div>
-                                  <div className="font-heading text-white font-black text-sm">{item.quantity}</div>
+                                <div className="club-well border club-border px-3 py-1.5 rounded-xl text-center shrink-0">
+                                  <div className="font-heading text-xs font-bold club-muted uppercase tracking-wider">Owned</div>
+                                  <div className="font-heading club-ink font-black text-sm">{item.quantity}</div>
                                 </div>
                               </div>
 
-                              <p className="font-heading text-slate-400 text-xs mt-4 leading-relaxed">
+                              <p className="font-heading club-muted text-xs mt-4 leading-relaxed">
                                 {spec.description}
                               </p>
 
                               <div className="mt-6 flex gap-3">
                                 <button
                                   onClick={() => activateBooster(item.id)}
-                                  className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 active:scale-95 text-white font-black text-xs uppercase tracking-widest py-3 px-4 rounded-xl shadow-lg transition-all"
+                                  className="flex-1 club-surface active:scale-95 club-ink font-black text-xs uppercase tracking-wide py-3 px-4 rounded-xl transition-all"
                                 >
                                   Activate Booster
                                 </button>
@@ -6075,19 +4825,19 @@ const handlePackAction = async (packId: string) => {
                   <div className="space-y-6 animate-in fade-in duration-300">
                     {/* Booms list grid */}
                     {Object.keys(currentUser?.booms || {}).filter(k => (currentUser?.booms?.[k] || 0) > 0).length === 0 ? (
-                      <div className="bg-slate-900/20 border border-white/5 rounded-[2rem] p-12 text-center flex flex-col items-center gap-4">
-                        <div className="w-16 h-16 bg-slate-800/30 rounded-2xl flex items-center justify-center border border-white/5 text-4xl text-slate-600">
+                      <div className="club-well border club-border rounded-xl p-12 text-center flex flex-col items-center gap-4">
+                        <div className="w-16 h-16 club-well rounded-xl flex items-center justify-center border club-border text-4xl club-ink">
                           💥
                         </div>
                         <div>
-                          <h3 className="font-heading text-white font-black text-lg">No Booms owned</h3>
-                          <p className="font-heading text-slate-400 text-xs mt-1 max-w-sm mx-auto">
+                          <h3 className="font-heading club-ink font-black text-lg">No Booms owned</h3>
+                          <p className="font-heading club-muted text-xs mt-1 max-w-sm mx-auto">
                             Open packs in the Market to start collecting unique Booms!
                           </p>
                         </div>
                         <button
                           onClick={() => setCurrentPage("market")}
-                          className="mt-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-black text-xs uppercase tracking-wider px-6 py-3 rounded-xl shadow-lg transition-all"
+                          className="mt-2 club-surface club-ink font-black text-xs uppercase tracking-wider px-6 py-3 rounded-xl transition-all"
                         >
                           Visit Market
                         </button>
@@ -6110,30 +4860,30 @@ const handlePackAction = async (packId: string) => {
                             const rarity = boomDetails?.rarity || "uncommon"
 
                             const rarityStyles: Record<string, string> = {
-                              uncommon: "border-green-500/20 bg-green-500/5 text-green-400",
-                              rare: "border-blue-500/20 bg-blue-500/5 text-blue-400",
-                              epic: "border-purple-500/20 bg-purple-500/5 text-purple-400",
-                              legendary: "border-orange-500/20 bg-orange-500/5 text-orange-400",
-                              chroma: "border-pink-500/20 bg-pink-500/5 text-pink-400",
-                              hidden: "border-slate-500/20 bg-slate-500/5 text-slate-400",
-                              mystical: "border-cyan-500/20 bg-cyan-500/5 text-cyan-400",
+                              uncommon: "club-border club-green club-success",
+                              rare: "club-border club-blue club-accent",
+                              epic: "club-border club-purple club-accent",
+                              legendary: "club-border club-yellow club-accent",
+                              chroma: "club-border club-purple club-accent",
+                              hidden: "club-border club-well club-muted",
+                              mystical: "club-border club-blue club-accent",
                             }
 
                             return (
                               <div
                                 key={boomName}
                                 className={`border rounded-2xl p-4 flex flex-col items-center justify-between text-center relative overflow-hidden group hover:scale-105 transition-all duration-300 ${
-                                  rarityStyles[rarity] || "border-white/5 bg-white/5 text-white"
+                                  rarityStyles[rarity] || "club-border club-well club-ink"
                                 }`}
                               >
-                                <div className="absolute top-2 right-2 bg-black/60 border border-white/10 px-1.5 py-0.5 rounded-md text-[9px] font-black text-white">
+                                <div className="absolute top-2 right-2 club-well border club-border px-1.5 py-0.5 rounded-md text-xs font-black club-ink">
                                   x{count}
                                 </div>
                                 <div className="font-heading text-4xl my-2 select-none filter drop-shadow group-hover:scale-110 transition-transform duration-300">
                                   {emoji}
                                 </div>
                                 <div className="w-full">
-                                  <div className="font-heading text-white font-bold text-[10px] truncate w-full" title={boomName}>
+                                  <div className="font-heading club-ink font-bold text-xs truncate w-full" title={boomName}>
                                     {boomName}
                                   </div>
                                   <div className="font-heading text-[8px] font-black uppercase tracking-widest opacity-60 mt-0.5">
@@ -6151,225 +4901,41 @@ const handlePackAction = async (packId: string) => {
             )}
 
             {/* Settings Page */}
-            {currentPage === "settings" && (
-              <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
-                {/* Settings Hero Banner */}
-                <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 border border-white/10 p-8 shadow-[0_12px_40px_rgba(0,0,0,0.6)]">
-                  <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-purple-500/5 rounded-full blur-[100px] pointer-events-none" />
-                  <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-blue-500/5 rounded-full blur-[100px] pointer-events-none" />
-
-                  <div className="relative flex flex-col md:flex-row justify-between items-center gap-6 z-10">
-                    <div className="space-y-2 text-center md:text-left">
-                      <h1 className="font-heading text-4xl md:text-5xl font-black text-white tracking-tighter">
-                        SYSTEMS <span className="font-heading text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 drop-shadow-sm">CONFIG</span>
-                      </h1>
-                      <p className="font-heading text-white/40 text-xs md:text-sm font-semibold uppercase tracking-wider">
-                        Configure terminal behavior, authorization protocols, and visuals
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-4 bg-slate-900/60 backdrop-blur-2xl border border-white/10 px-6 py-3 rounded-2xl">
-                      <span className="relative flex h-2 w-2">
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500 shadow-[0_0_10px_purple]" />
-                      </span>
-                      <span className="font-heading text-white/30 text-[9px] font-black uppercase tracking-widest">Interface Node V1.0</span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  {/* Profile Section */}
-                  <div className="group bg-gradient-to-br from-slate-900/60 to-slate-950/80 backdrop-blur-2xl rounded-[2rem] p-8 border border-white/10 hover:border-purple-500/30 transition-all duration-500 shadow-xl">
-                    <div className="flex items-center mb-8">
-                      <div className="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center mr-4 border border-purple-500/20 shadow-inner group-hover:scale-105 transition-transform duration-300">
-                        <UserIcon className="font-heading text-purple-400 w-5 h-5" />
-                      </div>
-                      <h2 className="font-heading text-2xl font-black text-white tracking-tight">Identity Matrix</h2>
-                    </div>
-                    <div className="space-y-5">
-                      <div className="flex flex-col space-y-1 bg-black/20 p-4 rounded-xl border border-white/5">
-                        <span className="font-heading text-white/30 text-[9px] font-black uppercase tracking-widest">Sign Username</span>
-                        <p className="font-heading text-white font-bold">{currentUser?.username}</p>
-                      </div>
-                      <div className="flex flex-col space-y-1 bg-black/20 p-4 rounded-xl border border-white/5">
-                        <span className="font-heading text-white/30 text-[9px] font-black uppercase tracking-widest">Authorization Access</span>
-                        <p className="font-heading text-white font-bold">{currentUser ? getUserRoleName(currentUser) : "Player"}</p>
-                      </div>
-                      <div className="flex flex-col space-y-1 bg-black/20 p-4 rounded-xl border border-white/5">
-                        <span className="font-heading text-white/30 text-[9px] font-black uppercase tracking-widest">Deployment Date</span>
-                        <p className="font-heading text-white font-bold">{currentUser?.joinDate}</p>
-                      </div>
-                      {/* Display badges */}
-                      {currentUser?.badges && currentUser.badges.length > 0 && (
-                        <div className="pt-2">
-                          <span className="font-heading text-white/30 text-[9px] font-black uppercase tracking-widest ml-1">Acquired Badges</span>
-                          <div className="flex flex-wrap gap-2 mt-2">
-                            {currentUser.badges.map((badgeId) => {
-                              const badge = AVAILABLE_BADGES.find((b) => b.id === badgeId)
-                              return badge ? (
-                                <Badge key={badgeId} className={`${badge.color} text-white px-3.5 py-1 text-[10px] font-black uppercase tracking-wider rounded-lg border-none shadow-md hover:scale-105 transition-transform cursor-default`}>
-                                  {badge.emoji} {badge.name}
-                                </Badge>
-                              ) : null
-                            })}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Edit Info Section */}
-                  <div className="group bg-gradient-to-br from-slate-900/60 to-slate-950/80 backdrop-blur-2xl rounded-[2rem] p-8 border border-white/10 hover:border-red-500/30 transition-all duration-500 shadow-xl">
-                    <div className="flex items-center mb-8">
-                      <div className="w-12 h-12 bg-red-500/10 rounded-xl flex items-center justify-center mr-4 border border-red-500/20 shadow-inner group-hover:scale-105 transition-transform duration-300">
-                        <PencilIcon className="font-heading text-red-400 w-5 h-5" />
-                      </div>
-                      <h2 className="font-heading text-2xl font-black text-white tracking-tight">Access Control</h2>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <Button
-                        variant="secondary"
-                        onClick={() => setShowPasswordEdit(true)}
-                        className="bg-white/5 hover:bg-white/10 text-white border-white/10 flex items-center justify-center gap-2 h-13 rounded-2xl transition-all font-black text-xs uppercase tracking-wider border-none"
-                      >
-                        <LockIcon className="w-4 h-4" />
-                        Modify Keys
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        onClick={() => setShowDeleteConfirm(true)}
-                        className="bg-red-500/10 hover:bg-red-600 text-red-400 hover:text-white border-red-500/20 flex items-center justify-center gap-2 h-13 rounded-2xl transition-all font-black text-xs uppercase tracking-wider border-none shadow-md"
-                      >
-                        <TrashIcon className="w-4 h-4" />
-                        Purge Profile
-                      </Button>
-                    </div>
-                  </div>
-
-                  {/* Theme Changing Section */}
-                  <div className="group bg-gradient-to-br from-slate-900/60 to-slate-950/80 backdrop-blur-2xl rounded-[2rem] p-8 border border-white/10 hover:border-blue-500/30 transition-all duration-500 shadow-xl">
-                    <div className="flex items-center mb-8">
-                      <div className="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center mr-4 border border-blue-500/20 shadow-inner group-hover:scale-105 transition-transform duration-300">
-                        <SparklesIcon className="font-heading text-blue-400 w-5 h-5" />
-                      </div>
-                      <h2 className="font-heading text-2xl font-black text-white tracking-tight">Hologram Styles</h2>
-                    </div>
-                    <div className="flex flex-col gap-6">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <Button
-                          variant={themeMode === "dark" ? "default" : "secondary"}
-                          onClick={() => setThemeMode("dark")}
-                          className={`flex items-center justify-center gap-2 h-13 rounded-2xl transition-all font-black text-xs uppercase tracking-wider border-none ${themeMode === "dark"
-                            ? "bg-purple-600 hover:bg-purple-700 text-white shadow-lg shadow-purple-900/20"
-                            : "bg-white/5 hover:bg-white/10 text-white"
-                            }`}
-                        >
-                          🌑 Dark Theme
-                        </Button>
-                        <Button
-                          variant={themeMode === "light" ? "default" : "secondary"}
-                          onClick={() => setThemeMode("light")}
-                          className={`flex items-center justify-center gap-2 h-13 rounded-2xl transition-all font-black text-xs uppercase tracking-wider border-none ${themeMode === "light"
-                            ? "bg-[#5b21b6] text-purple-950 hover:bg-white/90 shadow-lg"
-                            : "bg-white/5 hover:bg-white/10 text-white"
-                            }`}
-                        >
-                          ☀️ Light Theme
-                        </Button>
-                      </div>
-
-                      <div className="space-y-3 bg-black/20 p-5 rounded-2xl border border-white/5">
-                        <Label className="font-heading text-white/30 text-[9px] font-black uppercase tracking-widest ml-1">Custom Plasma Accent</Label>
-                        <div className="flex gap-4">
-                          <div className="relative h-12 flex-1 rounded-xl overflow-hidden border border-white/10 bg-black/30">
-                            <input
-                              type="color"
-                              value={customThemeColor}
-                              onChange={(e) => {
-                                setCustomThemeColor(e.target.value)
-                                setThemeMode("custom")
-                              }}
-                              className="absolute -top-1/2 -left-1/2 w-[200%] h-[200%] cursor-pointer p-0 m-0 border-none opacity-0"
-                            />
-                            <div className="absolute inset-0 pointer-events-none flex items-center justify-center text-white font-mono text-sm font-black uppercase">
-                              <span className="w-3 h-3 rounded-full mr-2 shadow-md border border-white/10" style={{ backgroundColor: customThemeColor }} />
-                              {customThemeColor}
-                            </div>
-                          </div>
-                          <Button
-                            onClick={() => setThemeMode("custom")}
-                            className={`h-12 px-6 rounded-xl transition-all font-black text-xs uppercase tracking-wider border-none ${themeMode === "custom"
-                              ? "bg-white/20 border-white/20"
-                              : "bg-white/5 border-white/10"
-                              }`}
-                            style={{ backgroundColor: customThemeColor }}
-                          >
-                            Apply
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Legal Section */}
-                  <div className="group bg-gradient-to-br from-slate-900/60 to-slate-950/80 backdrop-blur-2xl rounded-[2rem] p-8 border border-white/10 hover:border-slate-500/30 transition-all duration-500 shadow-xl">
-                    <div className="flex items-center mb-8">
-                      <div className="w-12 h-12 bg-slate-500/10 rounded-xl flex items-center justify-center mr-4 border border-slate-500/20 shadow-inner group-hover:scale-105 transition-transform duration-300">
-                        <FileTextIcon className="font-heading text-slate-400 w-5 h-5" />
-                      </div>
-                      <h2 className="font-heading text-2xl font-black text-white tracking-tight">Legal Protocols</h2>
-                    </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <Button
-                        variant="secondary"
-                        onClick={() => setShowPrivacyPolicy(true)}
-                        className="bg-white/5 hover:bg-white/10 text-white flex items-center justify-center gap-2 h-13 rounded-2xl transition-all font-black text-xs uppercase tracking-wider border-none"
-                      >
-                        <ShieldIcon className="w-4 h-4" />
-                        Privacy downlinks
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        onClick={() => setShowTermsOfService(true)}
-                        className="bg-white/5 hover:bg-white/10 text-white flex items-center justify-center gap-2 h-13 rounded-2xl transition-all font-black text-xs uppercase tracking-wider border-none"
-                      >
-                        <FileTextIcon className="w-4 h-4" />
-                        Terms of usage
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-
+            {currentPage === "settings" && <ClubSettings
+              username={currentUser?.username || ""} role={currentUser ? getUserRoleName(currentUser) : "Player"}
+              joined={currentUser?.joinDate || ""} theme={themeMode} accent={customThemeColor}
+              onTheme={setThemeMode} onAccent={setCustomThemeColor}
+              onPassword={() => setShowPasswordEdit(true)} onDelete={() => setShowDeleteConfirm(true)}
+              onPrivacy={() => setShowPrivacyPolicy(true)} onTerms={() => setShowTermsOfService(true)}
+              badges={currentUser?.badges?.map(badgeId => { const badge = AVAILABLE_BADGES.find(b => b.id === badgeId); return badge ? <span key={badgeId}>{badge.emoji} {badge.name}</span> : null })}
+            />}
 
             {/* Friends Page */}
             {currentPage === "friends" && (
               <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
                 {/* Roster Hero Banner */}
-                <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 border border-white/10 p-8 shadow-[0_12px_40px_rgba(0,0,0,0.6)]">
-                  <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-purple-500/5 rounded-full blur-[100px] pointer-events-none" />
-                  <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-blue-500/5 rounded-full blur-[100px] pointer-events-none" />
+                <div className="relative overflow-hidden rounded-xl club-surface border club-border p-8 ">
+                  <div className="club-decoration absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 club-purple rounded-full pointer-events-none" />
+                  <div className="club-decoration absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 club-blue rounded-full pointer-events-none" />
 
                   <div className="relative flex flex-col md:flex-row justify-between items-center gap-6 z-10">
                     <div className="space-y-2 text-center md:text-left">
-                      <h1 className="font-heading text-4xl md:text-5xl font-black text-white tracking-tighter">
-                        TACTICAL <span className="font-heading text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 drop-shadow-sm">ROSTER</span>
+                      <h1 className="font-heading text-4xl md:text-5xl font-black club-ink tracking-tighter">
+                        Your <span className="font-heading club-accent ">friends</span>
                       </h1>
-                      <p className="font-heading text-white/40 text-xs md:text-sm font-semibold uppercase tracking-wider">
-                        Manage your network coordinates, authorization nodes, and encrypted requests
+                      <p className="font-heading club-muted text-xs md:text-sm font-semibold uppercase tracking-wider">
+                        Find friends, accept requests, and keep in touch.
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-6 bg-slate-900/60 backdrop-blur-2xl border border-white/10 px-6 py-4 rounded-3xl shadow-xl">
-                      <div className="font-heading text-center border-r border-white/5 pr-6">
-                        <div className="font-heading text-2xl font-black text-purple-400 tabular-nums">{friendsList.length}</div>
-                        <div className="font-heading text-[8px] text-white/30 font-black uppercase tracking-widest mt-0.5">Operatives</div>
+                    <div className="flex items-center gap-6 club-well border club-border px-6 py-4 rounded-xl ">
+                      <div className="font-heading text-center border-r club-border pr-6">
+                        <div className="font-heading text-2xl font-black club-accent tabular-nums">{friendsList.length}</div>
+                        <div className="font-heading text-xs club-muted font-black uppercase tracking-wide mt-0.5">Operatives</div>
                       </div>
                       <div className="font-heading text-center">
-                        <div className="font-heading text-2xl font-black text-orange-400 tabular-nums">{friendRequests.length}</div>
-                        <div className="font-heading text-[8px] text-white/30 font-black uppercase tracking-widest mt-0.5">Incoming</div>
+                        <div className="font-heading text-2xl font-black club-accent tabular-nums">{friendRequests.length}</div>
+                        <div className="font-heading text-xs club-muted font-black uppercase tracking-wide mt-0.5">Incoming</div>
                       </div>
                     </div>
                   </div>
@@ -6379,13 +4945,13 @@ const handlePackAction = async (packId: string) => {
                   {/* Left Column: Actions & Invites */}
                   <div className="lg:col-span-1 space-y-8">
                     {/* Add Friend - Beacons */}
-                    <div className="bg-gradient-to-b from-slate-900/60 to-slate-950/80 border border-white/10 rounded-[2rem] p-6 shadow-xl relative overflow-hidden group">
-                      <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-2xl pointer-events-none" />
-                      <h3 className="font-heading text-lg font-black text-white mb-4 flex items-center gap-2 relative z-10">
-                        <Users2Icon className="h-5 w-5 text-purple-400" />
-                        LINK BEACON
+                    <div className="club-surface border club-border rounded-xl p-6 relative overflow-hidden group">
+                      <div className="club-decoration absolute top-0 right-0 w-32 h-32 club-purple rounded-full pointer-events-none" />
+                      <h3 className="font-heading text-lg font-black club-ink mb-4 flex items-center gap-2 relative z-10">
+                        <Users2Icon className="h-5 w-5 club-accent" />
+                        Add a friend
                       </h3>
-                      <p className="font-heading text-xs text-white/40 font-medium mb-4 uppercase tracking-wider">
+                      <p className="font-heading text-xs club-muted font-medium mb-4 uppercase tracking-wider">
                         Transmit friend invitation beacon to an operators code name
                       </p>
                       <div className="space-y-3 relative z-10">
@@ -6393,7 +4959,7 @@ const handlePackAction = async (packId: string) => {
                           value={friendSearchQuery}
                           onChange={(e) => setFriendSearchQuery(e.target.value)}
                           placeholder="Enter operative code..."
-                          className="bg-black/40 border-white/10 text-white placeholder:text-white/20 h-12 rounded-xl focus:ring-purple-500/50"
+                          className="club-well club-border club-ink placeholder:text-white/20 h-12 rounded-xl "
                           onKeyDown={(e) => {
                             if (e.key === "Enter" && friendSearchQuery.trim()) {
                               handleSendFriendRequest(friendSearchQuery.trim())
@@ -6408,7 +4974,7 @@ const handlePackAction = async (packId: string) => {
                               setFriendSearchQuery("")
                             }
                           }}
-                          className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black rounded-xl h-11 transition-all"
+                          className="club-action w-full club-surface club-ink font-black rounded-xl h-11 transition-all"
                         >
                           BROADCAST INVITE
                         </Button>
@@ -6417,29 +4983,29 @@ const handlePackAction = async (packId: string) => {
 
                     {/* Pending Relays */}
                     {friendRequests.length > 0 && (
-                      <div className="bg-orange-950/20 border border-orange-500/30 rounded-[2rem] p-6 shadow-lg">
-                        <h3 className="font-heading text-sm font-black text-orange-400 mb-4 uppercase tracking-[0.2em] flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full bg-orange-500 animate-ping" />
-                          Pending Beacons ({friendRequests.length})
+                      <div className="club-yellow border club-border rounded-xl p-6 ">
+                        <h3 className="font-heading text-sm font-black club-accent mb-4 uppercase tracking-[0.2em] flex items-center gap-2">
+                          <span className="w-2 h-2 rounded-full club-yellow " />
+                          Friend requests ({friendRequests.length})
                         </h3>
                         <div className="space-y-3">
                           {friendRequests.map((req) => (
-                            <div key={req.id} className="flex items-center justify-between bg-black/40 rounded-xl p-4 border border-orange-500/10">
+                            <div key={req.id} className="flex items-center justify-between club-well rounded-xl p-4 border club-border">
                               <div className="flex flex-col">
-                                <span className="font-heading text-white font-bold text-sm">{req.user_username}</span>
-                                <span className="font-heading text-[8px] text-orange-400 font-black uppercase tracking-wider mt-0.5">Incoming Request</span>
+                                <span className="font-heading club-ink font-bold text-sm">{req.user_username}</span>
+                                <span className="font-heading text-[8px] club-accent font-black uppercase tracking-wider mt-0.5">Incoming Request</span>
                               </div>
                               <div className="flex gap-1.5">
                                 <Button
                                   onClick={() => handleAcceptFriend(req.user_username)}
-                                  className="bg-green-600 hover:bg-green-500 text-white font-bold rounded-lg px-3 h-8 text-xs border-none"
+                                  className="club-action club-green club-green club-ink font-bold rounded-lg px-3 h-8 text-xs border-none"
                                 >
                                   Accept
                                 </Button>
                                 <Button
                                   onClick={() => handleRemoveFriend(req.user_username)}
                                   variant="ghost"
-                                  className="font-heading text-red-400 hover:bg-red-500/20 rounded-lg px-2.5 h-8 text-xs"
+                                  className="club-action font-heading club-danger hover:bg-red-500/20 rounded-lg px-2.5 h-8 text-xs"
                                 >
                                   Decline
                                 </Button>
@@ -6453,21 +5019,21 @@ const handlePackAction = async (packId: string) => {
 
                   {/* Right Column: Operative List */}
                   <div className="lg:col-span-2 space-y-6">
-                    <div className="blooket-card p-6 md:p-8 shadow-2xl relative overflow-hidden">
-                      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:30px_30px]" />
+                    <div className="club-panel p-6 md:p-8 relative overflow-hidden">
+                      <div className="club-decoration absolute inset-0 bg-[size:30px_30px]" />
 
                       <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                        <h3 className="font-heading text-lg font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
-                          <span className="w-2.5 h-2.5 rounded-full bg-purple-500 animate-pulse" />
-                          Operator Network ({friendsList.length})
+                        <h3 className="font-heading text-lg font-black club-ink uppercase tracking-wide flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full club-purple " />
+                          Your friends ({friendsList.length})
                         </h3>
                       </div>
 
                       {friendsList.length === 0 ? (
-                        <div className="relative z-10 text-center py-20 text-white/20 border-2 border-dashed border-white/5 rounded-[2rem] bg-black/20">
+                        <div className="relative z-10 text-center py-20 club-muted border-2 border-dashed club-border rounded-xl club-well">
                           <Users2Icon className="w-16 h-16 mx-auto mb-4 opacity-10 animate-pulse" />
                           <p className="font-black text-sm uppercase tracking-widest mb-1">No active links</p>
-                          <p className="font-heading text-xs font-semibold text-white/30 uppercase tracking-wider">Broadcast your beacon to enlist crew nodes</p>
+                          <p className="font-heading text-xs font-semibold club-muted uppercase tracking-wider">Send a friend request to another collector.</p>
                         </div>
                       ) : (
                         <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -6477,22 +5043,22 @@ const handlePackAction = async (packId: string) => {
 
                             // Mock a random status for visual variety
                             const statusSeed = friendUser?.id ? friendUser.id.charCodeAt(0) % 3 : 0;
-                            const statusColor = statusSeed === 0 ? "bg-emerald-500 shadow-[0_0_8px_#10b981]" : statusSeed === 1 ? "bg-cyan-500 shadow-[0_0_8px_#06b6d4]" : "bg-slate-600";
+                            const statusColor = statusSeed === 0 ? "club-green " : statusSeed === 1 ? "club-blue " : "club-well";
                             const statusLabel = statusSeed === 0 ? "OPERATOR ACTIVE" : statusSeed === 1 ? "IN BRIEFING" : "OFFLINE";
-                            const statusTextColor = statusSeed === 0 ? "text-emerald-400" : statusSeed === 1 ? "text-cyan-400" : "text-white/30";
+                            const statusTextColor = statusSeed === 0 ? "club-success" : statusSeed === 1 ? "club-accent" : "club-muted";
 
                             return (
                               <div
                                 key={f.id}
-                                className="group/card bg-gradient-to-b from-slate-900/40 to-slate-950/60 border border-white/5 hover:border-purple-500/30 rounded-2xl p-4 flex items-center justify-between transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/5 hover:-translate-y-0.5"
+                                className="group/card club-surface border club-border club-border rounded-xl p-4 flex items-center justify-between transition-all duration-300 hover:-translate-y-0.5"
                               >
                                 <div
                                   className="flex items-center gap-4 cursor-pointer min-w-0"
                                   onClick={() => friendUser && openPlayerProfile(friendUser)}
                                 >
                                   <div className="relative shrink-0">
-                                    <div className="absolute -inset-0.5 bg-gradient-to-tr from-purple-500/30 to-indigo-500/30 rounded-xl blur opacity-0 group-hover/card:opacity-100 transition duration-300" />
-                                    <div className="w-12 h-12 rounded-xl bg-slate-900 border border-white/10 flex items-center justify-center text-2xl relative overflow-hidden p-1">
+                                    <div className="absolute -inset-0.5 club-surface rounded-xl blur opacity-0 group-hover/card:opacity-100 transition duration-300" />
+                                    <div className="w-12 h-12 rounded-xl club-well border club-border flex items-center justify-center text-2xl relative overflow-hidden p-1">
                                       {renderProfilePicture(friendUser?.profilePicture || "👤", "w-full h-full object-contain")}
                                     </div>
                                     <div className={`absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 border-slate-950 ${statusColor}`} />
@@ -6501,15 +5067,15 @@ const handlePackAction = async (packId: string) => {
                                     <div className="flex items-center gap-1">
                                       {friendUser?.clan_tag && (
                                         <span className="inline-block text-[9px] font-black tracking-tight shrink-0">
-                                          <span className={friendUser.clan_tag_color || 'text-purple-400'}>
+                                          <span className={friendUser.clan_tag_color || 'club-accent'}>
                                             [{friendUser.clan_tag}]
                                           </span>
                                         </span>
                                       )}
-                                      <span className="font-heading text-white font-black text-sm truncate group-hover/card:text-purple-300 transition-colors">{friendName}</span>
+                                      <span className="font-heading club-ink font-black text-sm truncate club-accent transition-colors">{friendName}</span>
                                     </div>
                                     <div className="flex items-center gap-2 mt-1">
-                                      <span className="font-heading text-[8px] bg-purple-500/10 text-purple-400 border border-purple-500/20 px-1.5 py-0.5 rounded font-black uppercase">LVL {friendUser?.level || 1}</span>
+                                      <span className="font-heading text-xs club-purple club-accent border club-border px-1.5 py-0.5 rounded font-black uppercase">LVL {friendUser?.level || 1}</span>
                                       <span className={`text-[8px] font-black uppercase tracking-wider ${statusTextColor}`}>{statusLabel}</span>
                                     </div>
                                   </div>
@@ -6523,7 +5089,7 @@ const handlePackAction = async (packId: string) => {
                                     }}
                                     size="icon"
                                     variant="ghost"
-                                    className="w-8 h-8 rounded-lg text-white/40 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/5"
+                                    className="club-action w-8 h-8 rounded-lg club-muted club-ink club-well border border-transparent club-border"
                                     title="Open private channel"
                                   >
                                     💬
@@ -6532,7 +5098,7 @@ const handlePackAction = async (packId: string) => {
                                     onClick={() => handleRemoveFriend(friendName)}
                                     size="icon"
                                     variant="ghost"
-                                    className="w-8 h-8 rounded-lg text-red-400 hover:text-white hover:bg-red-500/10 opacity-0 group-hover/card:opacity-100 transition-all border border-transparent hover:border-red-500/10"
+                                    className="club-action w-8 h-8 rounded-lg club-danger hover:text-white hover:bg-red-500/10 opacity-0 group-hover/card:opacity-100 transition-all border border-transparent hover:border-red-500/10"
                                     title="De-authorize link"
                                   >
                                     ❌
@@ -6555,47 +5121,47 @@ const handlePackAction = async (packId: string) => {
                 {currentUser?.clan_id ? (
                   // IN A CLAN VIEW
                   !clanDetails ? (
-                    <div className="flex flex-col items-center justify-center p-20 min-h-[400px] blooket-card">
-                      <div className="w-12 h-12 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin" />
-                      <p className="mt-4 text-purple-400 font-black text-xs uppercase tracking-[0.2em] animate-pulse">Establishing HQ Datastream...</p>
+                    <div className="flex flex-col items-center justify-center p-20 min-h-[400px] club-panel">
+                      <div className="w-12 h-12 border-4 club-border border-t-purple-500 rounded-full animate-spin" />
+                      <p className="mt-4 club-accent font-black text-xs uppercase tracking-wide ">Establishing HQ Datastream...</p>
                     </div>
                   ) : (
                     <div className="space-y-8">
                       {/* Clan Banner Card */}
-                      <div className="bg-gradient-to-r from-purple-950/40 via-indigo-950/20 to-slate-950 border border-purple-500/20 rounded-[2.5rem] p-8 shadow-2xl relative overflow-hidden">
+                      <div className="club-surface border club-border rounded-xl p-8 relative overflow-hidden">
                         {/* Grid decorative overlay */}
-                        <div className="absolute inset-0 bg-[linear-gradient(rgba(168,85,247,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(168,85,247,0.02)_1px,transparent_1px)] bg-[size:30px_30px]" />
-                        <div className="absolute top-0 right-0 w-96 h-96 bg-purple-500/10 rounded-full blur-[100px] pointer-events-none animate-pulse" />
+                        <div className="club-decoration absolute inset-0 bg-[size:30px_30px]" />
+                        <div className="club-decoration absolute top-0 right-0 w-96 h-96 club-purple rounded-full pointer-events-none " />
 
                         <div className="relative flex flex-col xl:flex-row items-center justify-between gap-8 z-10">
                           <div className="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
-                            <div className="w-24 h-24 bg-gradient-to-br from-purple-900/30 to-indigo-950/50 rounded-full flex items-center justify-center text-6xl border border-purple-500/30 shadow-[0_0_20px_rgba(168,85,247,0.2)]">
+                            <div className="w-24 h-24 club-surface rounded-full flex items-center justify-center text-4xl border club-border ">
                               {clanDetails.logo}
                             </div>
                             <div className="space-y-2">
                               <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                                <h1 className="font-heading text-4xl font-black text-white tracking-tight">{clanDetails.name}</h1>
-                                <Badge className="bg-black/60 border border-purple-500/30 text-lg font-black px-3.5 py-0.5 rounded-xl uppercase tracking-wider">
+                                <h1 className="font-heading text-4xl font-black club-ink tracking-tight">{clanDetails.name}</h1>
+                                <Badge className="club-well border club-border text-lg font-black px-3.5 py-0.5 rounded-xl uppercase tracking-wider">
                                   <span className={clanDetails.tag_color}>
                                     [{clanDetails.tag}]
                                   </span>
                                 </Badge>
                               </div>
-                              <p className="font-heading text-white/50 font-semibold text-sm max-w-xl">
-                                {clanDetails.description || "Establish operational objectives for your division."}
+                              <p className="font-heading club-muted font-semibold text-sm max-w-xl">
+                                {clanDetails.description || "A place for your team."}
                               </p>
-                              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 text-[10px] font-black uppercase tracking-wider text-white/40 pt-1">
-                                <span className="flex items-center gap-1.5 bg-white/5 px-3 py-1 rounded-xl border border-white/5">
-                                  <CrownIcon className="w-3.5 h-3.5 text-yellow-500" />
-                                  HQ Commander: <span className="font-heading text-yellow-400 font-bold">{clanDetails.leader}</span>
+                              <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 text-xs font-black uppercase tracking-wider club-muted pt-1">
+                                <span className="flex items-center gap-1.5 club-well px-3 py-1 rounded-xl border club-border">
+                                  <CrownIcon className="w-3.5 h-3.5 club-accent" />
+                                  HQ Commander: <span className="font-heading club-accent font-bold">{clanDetails.leader}</span>
                                 </span>
-                                <span className="flex items-center gap-1.5 bg-white/5 px-3 py-1 rounded-xl border border-white/5">
-                                  <CoinsIcon className="w-3.5 h-3.5 text-yellow-500" />
-                                  Credits: <span className="font-heading text-white font-bold">{clanDetails.bank_tokens.toLocaleString()} tokens</span>
+                                <span className="flex items-center gap-1.5 club-well px-3 py-1 rounded-xl border club-border">
+                                  <CoinsIcon className="w-3.5 h-3.5 club-accent" />
+                                  Credits: <span className="font-heading club-ink font-bold">{clanDetails.bank_tokens.toLocaleString()} tokens</span>
                                 </span>
-                                <span className="flex items-center gap-1.5 bg-white/5 px-3 py-1 rounded-xl border border-white/5">
-                                  <Users2Icon className="w-3.5 h-3.5 text-purple-400" />
-                                  Nodes: <span className="font-heading text-white font-bold">{clanDetails.members?.length || 0} / {clanDetails.member_limit || 15}</span>
+                                <span className="flex items-center gap-1.5 club-well px-3 py-1 rounded-xl border club-border">
+                                  <Users2Icon className="w-3.5 h-3.5 club-accent" />
+                                  members: <span className="font-heading club-ink font-bold">{clanDetails.members?.length || 0} / {clanDetails.member_limit || 15}</span>
                                 </span>
                               </div>
                             </div>
@@ -6603,20 +5169,20 @@ const handlePackAction = async (packId: string) => {
 
                           <div className="flex flex-col items-center xl:items-end gap-3 shrink-0 w-full xl:w-auto">
                             {/* Clan Level & XP */}
-                            <div className="bg-black/40 border border-white/5 rounded-2xl p-4 w-full sm:w-64 space-y-2">
+                            <div className="club-well border club-border rounded-xl p-4 w-full sm:w-64 space-y-2">
                               <div className="flex justify-between items-end">
-                                <span className="font-heading text-xs font-black uppercase text-purple-400 tracking-wider">Tier {clanDetails.level}</span>
-                                <span className="font-heading text-[10px] text-white/45 font-black tabular-nums">
+                                <span className="font-heading text-xs font-black uppercase club-accent tracking-wider">Tier {clanDetails.level}</span>
+                                <span className="font-heading text-xs club-muted font-black tabular-nums">
                                   {clanDetails.xp % 10000} / 10000 XP
                                 </span>
                               </div>
-                              <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden p-0.5 border border-white/5">
+                              <div className="h-2 w-full club-well rounded-full overflow-hidden p-0.5 border club-border">
                                 <div 
-                                  className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 transition-all duration-500 rounded-full shadow-[0_0_10px_purple]"
+                                  className="h-full club-surface transition-all duration-500 rounded-full "
                                   style={{ width: `${(clanDetails.xp % 10000) / 100}%` }}
                                 />
                               </div>
-                              <div className="font-heading text-[9px] font-black text-white/30 uppercase tracking-widest text-right">
+                              <div className="font-heading text-xs font-black club-muted uppercase tracking-wide text-right">
                                 {10000 - (clanDetails.xp % 10000)} XP to next upgrade
                               </div>
                             </div>
@@ -6624,7 +5190,7 @@ const handlePackAction = async (packId: string) => {
                             <Button 
                               onClick={handleLeaveClan}
                               variant="ghost" 
-                              className="font-heading text-red-400 hover:bg-red-500/10 hover:text-white rounded-2xl w-full text-xs font-black uppercase tracking-wider h-10 border border-red-500/10 hover:border-transparent transition-all"
+                              className="club-action font-heading club-danger hover:bg-red-500/10 hover:text-white rounded-2xl w-full text-xs font-black uppercase tracking-wider h-10 border border-red-500/10 hover:border-transparent transition-all"
                             >
                               DISCONNECT HQ LINK
                             </Button>
@@ -6637,18 +5203,18 @@ const handlePackAction = async (packId: string) => {
                         {/* Member Roster & Settings (Col Span 2) */}
                         <div className="lg:col-span-2 space-y-8">
                           {/* Member Roster Card */}
-                          <div className="blooket-card p-6 shadow-xl space-y-6">
+                          <div className="club-panel p-6 space-y-6">
                             <div className="flex items-center gap-3">
-                              <Users2Icon className="w-5 h-5 text-purple-400" />
-                              <h2 className="font-heading text-xl font-black text-white uppercase tracking-wider">HQ Personnel Roster</h2>
+                              <Users2Icon className="w-5 h-5 club-accent" />
+                              <h2 className="font-heading text-xl font-black club-ink uppercase tracking-wider">Clan members</h2>
                             </div>
 
                             <div className="overflow-x-auto">
                               <table className="w-full text-left border-collapse">
                                 <thead>
-                                  <tr className="border-b border-white/5 text-xs text-white/30 font-black uppercase tracking-wider">
+                                  <tr className="border-b club-border text-xs club-muted font-black uppercase tracking-wider">
                                     <th className="pb-3 pl-2">Member Node</th>
-                                    <th className="pb-3">Division Rank</th>
+                                    <th className="pb-3">Clan role</th>
                                     <th className="pb-3 text-right">Tokens balance</th>
                                     {(currentUser.clan_role === 'leader' || currentUser.clan_role === 'co_leader') && (
                                       <th className="pb-3 text-right pr-2">Command actions</th>
@@ -6666,30 +5232,30 @@ const handlePackAction = async (packId: string) => {
                                     return (
                                       <tr key={member.id} className="hover:bg-white/5 transition-colors group">
                                         <td className="py-4 pl-2 flex items-center gap-3">
-                                          <div className="w-10 h-10 rounded-xl bg-slate-900 border border-white/10 flex items-center justify-center text-2xl shadow-inner shrink-0 p-1">
+                                          <div className="w-10 h-10 rounded-xl club-well border club-border flex items-center justify-center text-2xl shrink-0 p-1">
                                             {renderProfilePicture(member.profile_picture || "🎮", "w-full h-full object-contain")}
                                           </div>
                                           <div>
                                             <span 
-                                              className={`font-black cursor-pointer hover:underline ${member.name_color || 'text-white'}`}
+                                              className={`font-black cursor-pointer hover:underline ${member.name_color || 'club-ink'}`}
                                               onClick={() => openPlayerProfile(member.id)}
                                             >
                                               {member.username}
                                             </span>
-                                            {isSelf && <span className="font-heading text-[8px] text-purple-400 font-black ml-2 bg-purple-500/10 px-1.5 py-0.5 rounded border border-purple-500/20 tracking-wider">YOU</span>}
+                                            {isSelf && <span className="font-heading text-xs club-accent font-black ml-2 club-purple px-1.5 py-0.5 rounded border club-border tracking-wider">YOU</span>}
                                           </div>
                                         </td>
                                         <td className="py-4">
                                           <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-full border tracking-widest ${
-                                            member.clan_role === 'leader' ? 'bg-yellow-500/10 border-yellow-500/20 text-yellow-500' :
-                                            member.clan_role === 'co_leader' ? 'bg-purple-500/10 border-purple-500/20 text-purple-400' :
-                                            'bg-white/5 border-white/5 text-white/40'
+                                            member.clan_role === 'leader' ? 'club-yellow club-border club-accent' :
+                                            member.clan_role === 'co_leader' ? 'club-purple club-border club-accent' :
+                                            'club-well club-border club-muted'
                                           }`}>
                                             {member.clan_role === 'leader' ? 'HQ Leader' :
                                              member.clan_role === 'co_leader' ? 'Co-Leader' : 'Operator'}
                                           </span>
                                         </td>
-                                        <td className="py-4 text-right font-black tabular-nums text-white/80">
+                                        <td className="py-4 text-right font-black tabular-nums club-ink">
                                           🪙 {member.tokens?.toLocaleString()}
                                         </td>
                                         {(currentUser.clan_role === 'leader' || currentUser.clan_role === 'co_leader') && (
@@ -6701,7 +5267,7 @@ const handlePackAction = async (packId: string) => {
                                                     {member.clan_role === 'member' ? (
                                                       <button 
                                                         onClick={() => handlePromoteMember(member.username, 'co_leader')}
-                                                        className="font-heading text-[9px] bg-purple-600 hover:bg-purple-500 text-white px-2.5 py-1 rounded-lg font-black uppercase tracking-wider"
+                                                        className="font-heading text-xs club-purple club-purple club-ink px-2.5 py-1 rounded-lg font-black uppercase tracking-wider"
                                                         title="Promote to Co-Leader"
                                                       >
                                                         Promote
@@ -6709,7 +5275,7 @@ const handlePackAction = async (packId: string) => {
                                                     ) : (
                                                       <button 
                                                         onClick={() => handlePromoteMember(member.username, 'member')}
-                                                        className="font-heading text-[9px] bg-slate-700 hover:bg-slate-600 text-white px-2.5 py-1 rounded-lg font-black uppercase tracking-wider"
+                                                        className="font-heading text-xs club-well club-well club-ink px-2.5 py-1 rounded-lg font-black uppercase tracking-wider"
                                                         title="Demote to Member"
                                                       >
                                                         Demote
@@ -6717,7 +5283,7 @@ const handlePackAction = async (packId: string) => {
                                                     )}
                                                     <button 
                                                       onClick={() => handleTransferLeadership(member.username)}
-                                                      className="font-heading text-[9px] bg-yellow-600 hover:bg-yellow-500 text-white px-2.5 py-1 rounded-lg font-black uppercase tracking-wider"
+                                                      className="font-heading text-xs club-yellow club-yellow club-ink px-2.5 py-1 rounded-lg font-black uppercase tracking-wider"
                                                       title="Transfer Clan Leadership"
                                                     >
                                                       Leader
@@ -6726,14 +5292,14 @@ const handlePackAction = async (packId: string) => {
                                                 )}
                                                 <button 
                                                   onClick={() => handleKickMember(member.username)}
-                                                  className="font-heading text-[9px] bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white px-2.5 py-1 rounded-lg font-black border border-red-500/20 hover:border-transparent transition-colors uppercase tracking-wider"
+                                                  className="font-heading text-xs club-red club-red club-danger club-ink px-2.5 py-1 rounded-lg font-black border club-border hover:border-transparent transition-colors uppercase tracking-wider"
                                                   title="Kick from Clan"
                                                 >
                                                   Kick
                                                 </button>
                                               </div>
                                             ) : (
-                                              <span className="font-heading text-xs text-white/20">-</span>
+                                              <span className="font-heading text-xs club-muted">-</span>
                                             )}
                                           </td>
                                         )}
@@ -6747,19 +5313,19 @@ const handlePackAction = async (packId: string) => {
 
                           {/* Clan Requirements & Settings */}
                           {(currentUser.clan_role === 'leader' || currentUser.clan_role === 'co_leader') && (
-                            <div className="blooket-card p-6 shadow-xl space-y-6">
+                            <div className="club-panel p-6 space-y-6">
                               <div className="flex items-center gap-3">
-                                <Settings2Icon className="w-5 h-5 text-purple-400" />
-                                <h2 className="font-heading text-xl font-black text-white uppercase tracking-wider">Protocol Adjustments</h2>
+                                <Settings2Icon className="w-5 h-5 club-accent" />
+                                <h2 className="font-heading text-xl font-black club-ink uppercase tracking-wider">Clan settings</h2>
                               </div>
 
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
-                                  <label className="font-heading text-[9px] font-black uppercase text-white/30 tracking-widest">Logo Emblem</label>
+                                  <label className="font-heading text-xs font-black uppercase club-muted tracking-wide">Logo Emblem</label>
                                   <select 
                                     id="clanEditLogo"
                                     defaultValue={clanDetails.logo}
-                                    className="bg-black border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs w-full focus:outline-none focus:border-purple-500/50"
+                                    className="club-well border club-border rounded-xl px-4 py-2.5 club-ink text-xs w-full focus:outline-none club-border"
                                   >
                                     {["🛡️", "⚔️", "👑", "🔥", "🌀", "☠️", "🦊", "🐉", "🦄", "🐼", "🌟"].map(emoji => (
                                       <option key={emoji} value={emoji}>{emoji} Emblem</option>
@@ -6767,11 +5333,11 @@ const handlePackAction = async (packId: string) => {
                                   </select>
                                 </div>
                                 <div className="space-y-1.5">
-                                  <label className="font-heading text-[9px] font-black uppercase text-white/30 tracking-widest">Tag Plasma Glow</label>
+                                  <label className="font-heading text-xs font-black uppercase club-muted tracking-wide">Tag color</label>
                                   <select 
                                     id="clanEditTagColor"
                                     defaultValue={clanDetails.tag_color}
-                                    className="bg-black border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs w-full focus:outline-none focus:border-purple-500/50"
+                                    className="club-well border club-border rounded-xl px-4 py-2.5 club-ink text-xs w-full focus:outline-none club-border"
                                   >
                                     {Array.from(new Set([
                                       'text-purple-400', 'text-red-400', 'text-blue-400', 'text-green-400', 'text-yellow-400',
@@ -6799,35 +5365,35 @@ const handlePackAction = async (packId: string) => {
                               </div>
 
                               <div className="space-y-1.5">
-                                <label className="font-heading text-[9px] font-black uppercase text-white/30 tracking-widest">HQ Mission Log</label>
+                                <label className="font-heading text-xs font-black uppercase club-muted tracking-wide">About your clan</label>
                                 <textarea
                                   id="clanEditDescription"
                                   defaultValue={clanDetails.description || ""}
                                   rows={2}
                                   placeholder="Recruiting active operators..."
-                                  className="bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs w-full focus:outline-none focus:border-purple-500/50 resize-none"
+                                  className="club-well border club-border rounded-xl px-4 py-2.5 club-ink text-xs w-full focus:outline-none club-border resize-none"
                                 />
                               </div>
 
-                              <div className="border-t border-white/5 pt-4 space-y-4">
-                                <h3 className="font-heading text-xs font-black uppercase text-purple-400 tracking-wider">Division Enlistment Criteria</h3>
+                              <div className="border-t club-border pt-4 space-y-4">
+                                <h3 className="font-heading text-xs font-black uppercase club-accent tracking-wider">Joining requirements</h3>
 
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                   <div className="space-y-1.5">
-                                    <label className="font-heading text-[9px] font-black uppercase text-white/30 tracking-widest">Min Credits</label>
+                                    <label className="font-heading text-xs font-black uppercase club-muted tracking-wide">Min Credits</label>
                                     <input 
                                       type="number"
                                       id="clanEditMinTokens"
                                       defaultValue={clanDetails.min_tokens || 0}
-                                      className="bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs w-full focus:outline-none focus:border-purple-500/50"
+                                      className="club-well border club-border rounded-xl px-4 py-2.5 club-ink text-xs w-full focus:outline-none club-border"
                                     />
                                   </div>
                                   <div className="space-y-1.5">
-                                    <label className="font-heading text-[9px] font-black uppercase text-white/30 tracking-widest">Min Boom rarity</label>
+                                    <label className="font-heading text-xs font-black uppercase club-muted tracking-wide">Min Boom rarity</label>
                                     <select 
                                       id="clanEditMinRarity"
                                       defaultValue={clanDetails.min_rarity || "uncommon"}
-                                      className="bg-black border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs w-full focus:outline-none focus:border-purple-500/50"
+                                      className="club-well border club-border rounded-xl px-4 py-2.5 club-ink text-xs w-full focus:outline-none club-border"
                                     >
                                       {["uncommon", "rare", "epic", "legendary", "hidden", "chroma", "mystical"].map(rarity => (
                                         <option key={rarity} value={rarity}>{rarity.toUpperCase()}</option>
@@ -6835,12 +5401,12 @@ const handlePackAction = async (packId: string) => {
                                     </select>
                                   </div>
                                   <div className="space-y-1.5">
-                                    <label className="font-heading text-[9px] font-black uppercase text-white/30 tracking-widest">Required count</label>
+                                    <label className="font-heading text-xs font-black uppercase club-muted tracking-wide">Required count</label>
                                     <input 
                                       type="number"
                                       id="clanEditMinRarityCount"
                                       defaultValue={clanDetails.min_rarity_count || 0}
-                                      className="bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs w-full focus:outline-none focus:border-purple-500/50"
+                                      className="club-well border club-border rounded-xl px-4 py-2.5 club-ink text-xs w-full focus:outline-none club-border"
                                     />
                                   </div>
                                 </div>
@@ -6857,45 +5423,45 @@ const handlePackAction = async (packId: string) => {
 
                                   handleUpdateClanInfo(desc, logo, tagColor, minTokens, minRarity, minRarityCount);
                                 }}
-                                className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black rounded-xl h-11 border-none text-xs uppercase tracking-wider"
+                                className="club-action w-full club-surface club-ink font-black rounded-xl h-11 border-none text-xs uppercase tracking-wider"
                               >
-                                EXECUTE PROTOCOL UPDATE
+                                Save clan settings
                               </Button>
                             </div>
                           )}
 
                           {/* Clan Upgrades Shop Card */}
-                          <div className="bg-gradient-to-br from-indigo-950/20 via-purple-950/20 to-slate-950/80 border border-purple-500/20 rounded-[2rem] p-6 shadow-xl space-y-6">
+                          <div className="club-surface border club-border rounded-xl p-6 space-y-6">
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                               <div className="flex items-center gap-3">
-                                <SparklesIcon className="w-5 h-5 text-yellow-400" />
-                                <h2 className="font-heading text-xl font-black text-white uppercase tracking-wider">HQ Augmentations</h2>
+                                <SparklesIcon className="w-5 h-5 club-accent" />
+                                <h2 className="font-heading text-xl font-black club-ink uppercase tracking-wider">Clan upgrades</h2>
                               </div>
-                              <span className="font-heading text-xs bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 px-3.5 py-1 rounded-xl font-black flex items-center gap-1.5 uppercase tracking-wider">
+                              <span className="font-heading text-xs club-yellow border club-border club-accent px-3.5 py-1 rounded-xl font-black flex items-center gap-1.5 uppercase tracking-wider">
                                 <CoinsIcon className="w-3.5 h-3.5" />
                                 {clanDetails.bank_tokens.toLocaleString()} Vault Credits
                               </span>
                             </div>
 
-                            <p className="font-heading text-white/40 text-xs font-semibold uppercase tracking-wider leading-relaxed">
+                            <p className="font-heading club-muted text-xs font-semibold uppercase tracking-wider leading-relaxed">
                               Procure tactical passives and holographic cosmetics utilizing treasury assets. Authorized command authorization required.
                             </p>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               {/* Member Limit Upgrade */}
-                              <div className="bg-black/40 border border-white/5 rounded-2xl p-4 flex flex-col justify-between gap-4">
+                              <div className="club-well border club-border rounded-xl p-4 flex flex-col justify-between gap-4">
                                 <div className="space-y-1">
-                                  <h4 className="font-black text-white text-xs uppercase tracking-wider">OPERATIONAL NODE CAPACITY</h4>
-                                  <p className="font-heading text-xs text-white/40 font-semibold uppercase">Increase total operatives. Current: <span className="font-heading text-white font-black">{clanDetails.member_limit || 15} / 30</span></p>
+                                  <h4 className="font-black club-ink text-xs uppercase tracking-wider">OPERATIONAL NODE CAPACITY</h4>
+                                  <p className="font-heading text-xs club-muted font-semibold uppercase">Increase total operatives. Current: <span className="font-heading club-ink font-black">{clanDetails.member_limit || 15} / 30</span></p>
                                 </div>
                                 <div>
                                   {clanDetails.member_limit >= 30 ? (
-                                    <Badge className="bg-green-500/10 border-green-500/20 text-green-400 font-black w-full justify-center text-[10px] uppercase py-1">CAPACITY SYNCHRONIZED</Badge>
+                                    <Badge className="club-green club-border club-success font-black w-full justify-center text-xs uppercase py-1">CAPACITY SYNCHRONIZED</Badge>
                                   ) : (
                                     <Button
                                       onClick={() => handleBuyClanUpgrade('member_limit')}
                                       disabled={currentUser.clan_role !== 'leader' && currentUser.clan_role !== 'co_leader'}
-                                      className="w-full bg-purple-600 hover:bg-purple-500 text-white border-none text-[10px] font-black rounded-xl h-10 transition-all uppercase tracking-wider"
+                                      className="club-action w-full club-purple club-purple club-ink border-none text-xs font-black rounded-xl h-10 transition-all uppercase tracking-wider"
                                     >
                                       Upgrade to {clanDetails.member_limit === 20 ? 25 : clanDetails.member_limit === 25 ? 30 : 20} (🪙 {clanDetails.member_limit === 20 ? "25,000" : clanDetails.member_limit === 25 ? "50,000" : "10,000"})
                                     </Button>
@@ -6904,19 +5470,19 @@ const handlePackAction = async (packId: string) => {
                               </div>
 
                               {/* XP Multiplier Upgrade */}
-                              <div className="bg-black/40 border border-white/5 rounded-2xl p-4 flex flex-col justify-between gap-4">
+                              <div className="club-well border club-border rounded-xl p-4 flex flex-col justify-between gap-4">
                                 <div className="space-y-1">
-                                  <h4 className="font-black text-white text-xs uppercase tracking-wider">DATALINK XP ACCELERATOR</h4>
-                                  <p className="font-heading text-xs text-white/40 font-semibold uppercase">Passive score gains multiplier. Current: <span className="font-heading text-yellow-400 font-black">{clanDetails.xp_multiplier || "1.0"}x</span></p>
+                                  <h4 className="font-black club-ink text-xs uppercase tracking-wider">DATALINK XP ACCELERATOR</h4>
+                                  <p className="font-heading text-xs club-muted font-semibold uppercase">Passive score gains multiplier. Current: <span className="font-heading club-accent font-black">{clanDetails.xp_multiplier || "1.0"}x</span></p>
                                 </div>
                                 <div>
                                   {clanDetails.xp_multiplier >= 2.0 ? (
-                                    <Badge className="bg-green-500/10 border-green-500/20 text-green-400 font-black w-full justify-center text-[10px] uppercase py-1">AMPLIFIER CONSOLIDATED</Badge>
+                                    <Badge className="club-green club-border club-success font-black w-full justify-center text-xs uppercase py-1">AMPLIFIER CONSOLIDATED</Badge>
                                   ) : (
                                     <Button
                                       onClick={() => handleBuyClanUpgrade('xp_multiplier')}
                                       disabled={currentUser.clan_role !== 'leader' && currentUser.clan_role !== 'co_leader'}
-                                      className="w-full bg-purple-600 hover:bg-purple-500 text-white border-none text-[10px] font-black rounded-xl h-10 transition-all uppercase tracking-wider"
+                                      className="club-action w-full club-purple club-purple club-ink border-none text-xs font-black rounded-xl h-10 transition-all uppercase tracking-wider"
                                     >
                                       Upgrade to {clanDetails.xp_multiplier >= 1.5 ? "2.0" : clanDetails.xp_multiplier >= 1.2 ? "1.5" : "1.2"}x (🪙 {clanDetails.xp_multiplier >= 1.5 ? "75,000" : clanDetails.xp_multiplier >= 1.2 ? "35,000" : "15,000"})
                                     </Button>
@@ -6926,34 +5492,34 @@ const handlePackAction = async (packId: string) => {
                             </div>
 
                             {/* Premium Colors Shop Section */}
-                            <div className="border-t border-white/5 pt-4 space-y-3">
-                              <h3 className="font-heading text-xs font-black uppercase text-purple-400 tracking-wider">Holographic Plasma Colors</h3>
+                            <div className="border-t club-border pt-4 space-y-3">
+                              <h3 className="font-heading text-xs font-black uppercase club-accent tracking-wider">Clan colors</h3>
 
                               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
                                 {[
-                                  { code: 'text-pink-500', name: 'Neon Pink', cost: 5000 },
-                                  { code: 'text-emerald-400', name: 'Neon Emerald', cost: 5000 },
-                                  { code: 'text-cyan-400', name: 'Neon Cyan', cost: 5000 },
-                                  { code: 'bg-gradient-to-r from-yellow-400 to-amber-500 text-transparent bg-clip-text font-black', name: 'Gold Plasma', cost: 20000 },
-                                  { code: 'bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-transparent bg-clip-text font-black animate-pulse', name: 'Chroma Plasma', cost: 35000 },
+                                  { code: "text-pink-500", name: 'Neon Pink', cost: 5000 },
+                                  { code: "text-emerald-400", name: 'Neon Emerald', cost: 5000 },
+                                  { code: "text-cyan-400", name: 'Neon Cyan', cost: 5000 },
+                                  { code: "bg-gradient-to-r from-yellow-400 to-amber-500 text-transparent bg-clip-text font-black", name: 'Gold Plasma', cost: 20000 },
+                                  { code: "bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-transparent bg-clip-text font-black animate-pulse", name: 'Chroma Plasma', cost: 35000 },
                                 ].map(color => {
                                   const isUnlocked = (clanDetails.unlocked_colors || []).includes(color.code);
                                   return (
-                                    <div key={color.code} className="bg-black/40 border border-white/5 rounded-xl p-3 flex flex-col justify-between items-center text-center gap-3">
-                                      <span className="font-heading text-[10px] font-black px-2 py-0.5 rounded bg-black/60 border border-white/5 shrink-0">
+                                    <div key={color.code} className="club-well border club-border rounded-xl p-3 flex flex-col justify-between items-center text-center gap-3">
+                                      <span className="font-heading text-xs font-black px-2 py-0.5 rounded club-well border club-border shrink-0">
                                         <span className={color.code}>
                                           [{clanDetails.tag}]
                                         </span>
                                       </span>
-                                      <div className="font-heading text-[9px] text-white/40 font-black uppercase tracking-widest leading-tight">{color.name}</div>
+                                      <div className="font-heading text-xs club-muted font-black uppercase tracking-wide leading-tight">{color.name}</div>
 
                                       {isUnlocked ? (
-                                        <Badge className="bg-green-500/10 border-green-500/20 text-green-400 text-[8px] font-black py-0.5 uppercase tracking-widest">Consolidated</Badge>
+                                        <Badge className="club-green club-border club-success text-xs font-black py-0.5 uppercase tracking-wide">Unlocked</Badge>
                                       ) : (
                                         <Button
                                           onClick={() => handleBuyClanUpgrade('unlock_color', color.code)}
                                           disabled={currentUser.clan_role !== 'leader' && currentUser.clan_role !== 'co_leader'}
-                                          className="w-full bg-yellow-600 hover:bg-yellow-500 text-white border-none text-[9px] font-black rounded-lg h-7 disabled:opacity-50"
+                                          className="club-action w-full club-yellow club-yellow club-ink border-none text-xs font-black rounded-lg h-7 disabled:opacity-50"
                                         >
                                           🪙 {color.cost.toLocaleString()}
                                         </Button>
@@ -6969,21 +5535,21 @@ const handlePackAction = async (packId: string) => {
                         {/* Clan Bank & Chat (Col Span 1) */}
                         <div className="space-y-8">
                           {/* Donate Box */}
-                          <div className="bg-gradient-to-r from-yellow-950/20 to-slate-950 border border-yellow-500/20 rounded-[2rem] p-6 shadow-xl space-y-4 relative overflow-hidden">
-                            <div className="absolute top-0 right-0 w-24 h-24 bg-yellow-500/5 rounded-full blur-2xl pointer-events-none" />
+                          <div className="club-surface border club-border rounded-xl p-6 space-y-4 relative overflow-hidden">
+                            <div className="club-decoration absolute top-0 right-0 w-24 h-24 club-yellow rounded-full pointer-events-none" />
                             <div className="flex items-center gap-3">
-                              <CoinsIcon className="w-5 h-5 text-yellow-500" />
-                              <h2 className="font-heading text-xl font-black text-white uppercase tracking-wider">Treasury Vault</h2>
+                              <CoinsIcon className="w-5 h-5 club-accent" />
+                              <h2 className="font-heading text-xl font-black club-ink uppercase tracking-wider">Clan treasury</h2>
                             </div>
-                            <p className="font-heading text-white/40 text-xs font-semibold uppercase tracking-wider leading-relaxed">
-                              Deposit tokens into the treasury division. 1 deposited token yields 1 XP. Helping division level-ups activates capacity expansions.
+                            <p className="font-heading club-muted text-xs font-semibold uppercase tracking-wider leading-relaxed">
+                              Support your clan with tokens. Each deposited token adds 1 XP; higher clan levels unlock more member spaces.
                             </p>
                             <div className="flex gap-2">
                               <input 
                                 type="number" 
                                 id="clanDonateAmount"
                                 placeholder="Credits quantity..."
-                                className="bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-white font-bold w-full focus:outline-none focus:border-yellow-500/50 text-xs"
+                                className="club-well border club-border rounded-xl px-4 py-2 club-ink font-bold w-full focus:outline-none club-border text-xs"
                                 min={1}
                               />
                               <Button 
@@ -6997,7 +5563,7 @@ const handlePackAction = async (packId: string) => {
                                     toast.error("Please enter a valid donation amount.");
                                   }
                                 }}
-                                className="bg-yellow-600 hover:bg-yellow-500 text-white font-black rounded-xl px-5 h-10 border-none text-xs uppercase tracking-wider transition-all"
+                                className="club-action club-yellow club-yellow club-ink font-black rounded-xl px-5 h-10 border-none text-xs uppercase tracking-wider transition-all"
                               >
                                 DEPOSIT
                               </Button>
@@ -7005,28 +5571,28 @@ const handlePackAction = async (packId: string) => {
                           </div>
 
                           {/* Real-time Clan Chat Box */}
-                          <div className="blooket-card p-6 shadow-xl flex flex-col h-[480px]">
+                          <div className="club-panel p-6 flex flex-col h-[480px]">
                             <div className="flex items-center gap-3 mb-4">
-                              <div className="h-2.5 w-2.5 rounded-full bg-green-500 shadow-[0_0_10px_#22c55e] animate-pulse" />
-                              <h2 className="font-heading text-xl font-black text-white uppercase tracking-wider">HQ Comms Uplink</h2>
+                              <div className="h-2.5 w-2.5 rounded-full club-green " />
+                              <h2 className="font-heading text-xl font-black club-ink uppercase tracking-wider">Clan chat</h2>
                             </div>
 
                             {/* Messages area */}
                             <ScrollArea className="flex-1 pr-2 mb-4 scrollbar-hide">
                               <div className="space-y-3">
                                 {clanChat.map((msg, idx) => (
-                                  <div key={msg.id || idx} className="font-heading text-xs bg-black/40 border border-white/5 rounded-xl p-3 space-y-1 relative">
+                                  <div key={msg.id || idx} className="font-heading text-xs club-well border club-border rounded-xl p-3 space-y-1 relative">
                                     <div className="flex items-center justify-between">
-                                      <span className="font-black text-purple-400 text-[10px] uppercase tracking-wider">{msg.username}</span>
-                                      <span className="font-heading text-[9px] text-white/30 font-bold">
+                                      <span className="font-black club-accent text-xs uppercase tracking-wider">{msg.username}</span>
+                                      <span className="font-heading text-xs club-muted font-bold">
                                         {msg.created_at ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "Just now"}
                                       </span>
                                     </div>
-                                    <p className="font-heading text-white/80 leading-relaxed break-words font-medium">{msg.message}</p>
+                                    <p className="font-heading club-ink leading-relaxed break-words font-medium">{msg.message}</p>
                                   </div>
                                 ))}
                                 {clanChat.length === 0 && (
-                                  <div className="font-heading text-center py-20 text-white/20 italic text-xs uppercase tracking-widest">
+                                  <div className="font-heading text-center py-20 club-muted italic text-xs uppercase tracking-wide">
                                     No Uplink datalogs. Transmit a signal.
                                   </div>
                                 )}
@@ -7043,11 +5609,11 @@ const handlePackAction = async (packId: string) => {
                                   if (e.key === 'Enter') sendClanChatMessage();
                                 }}
                                 placeholder="Transmit report..."
-                                className="bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-white text-xs w-full focus:outline-none focus:border-purple-500/50"
+                                className="club-well border club-border rounded-xl px-4 py-2 club-ink text-xs w-full focus:outline-none club-border"
                               />
                               <Button 
                                 onClick={sendClanChatMessage}
-                                className="bg-purple-600 hover:bg-purple-500 text-white font-black rounded-xl px-5 h-9 text-xs border-none uppercase tracking-wider transition-all"
+                                className="club-action club-purple club-purple club-ink font-black rounded-xl px-5 h-9 text-xs border-none uppercase tracking-wider transition-all"
                               >
                                 SEND
                               </Button>
@@ -7061,18 +5627,18 @@ const handlePackAction = async (packId: string) => {
                   // BROWSE & JOIN / CREATE VIEW
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     {/* Browse Clans Column (Col Span 2) */}
-                    <div className="lg:col-span-2 blooket-card p-8 shadow-xl space-y-6">
-                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/5">
+                    <div className="lg:col-span-2 club-panel p-8 space-y-6">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b club-border">
                         <div>
-                          <h2 className="font-heading text-3xl font-black text-white tracking-tight uppercase">Operational Divisions</h2>
-                          <p className="font-heading text-white/40 text-xs font-semibold uppercase tracking-wider">Browse active factions in the sector</p>
+                          <h2 className="font-heading text-3xl font-black club-ink tracking-tight uppercase">Find a clan</h2>
+                          <p className="font-heading club-muted text-xs font-semibold uppercase tracking-wider">Find your people and collect together.</p>
                         </div>
                         <input 
                           type="text"
                           value={searchClanQuery}
                           onChange={(e) => setSearchClanQuery(e.target.value)}
-                          placeholder="Query name or division tag..."
-                          className="bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-white text-xs w-full sm:w-64 focus:outline-none focus:border-purple-500/50"
+                          placeholder="Search by clan name or tag..."
+                          className="club-well border club-border rounded-xl px-4 py-2 club-ink text-xs w-full sm:w-64 focus:outline-none club-border"
                         />
                       </div>
 
@@ -7084,46 +5650,46 @@ const handlePackAction = async (packId: string) => {
                               c.tag.toLowerCase().includes(searchClanQuery.toLowerCase())
                             )
                             .map((clan) => (
-                              <div key={clan.id} className="bg-gradient-to-b from-slate-900/60 to-slate-950/85 border border-white/5 hover:border-purple-500/30 rounded-2xl p-5 space-y-4 hover:shadow-[0_10px_30px_rgba(139,92,246,0.05)] transition-all flex flex-col justify-between">
+                              <div key={clan.id} className="club-surface border club-border club-border rounded-xl p-5 space-y-4 transition-all flex flex-col justify-between">
                                 <div className="space-y-3">
                                   <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 bg-slate-900 rounded-xl flex items-center justify-center text-3xl border border-white/10">
+                                    <div className="w-12 h-12 club-well rounded-xl flex items-center justify-center text-3xl border club-border">
                                       {clan.logo}
                                     </div>
                                     <div>
                                       <div className="flex items-center gap-2">
-                                        <h3 className="font-black text-white leading-tight">{clan.name}</h3>
+                                        <h3 className="font-black club-ink leading-tight">{clan.name}</h3>
                                         <span className="inline-block text-[10px] font-black tracking-tight">
                                           <span className={clan.tag_color}>
                                             [{clan.tag}]
                                           </span>
                                         </span>
                                       </div>
-                                      <p className="font-heading text-[9px] text-white/45 font-black uppercase tracking-widest mt-0.5">
-                                        Tier {clan.level} • {clan.memberCount} / {clan.member_limit || 15} Nodes
+                                      <p className="font-heading text-xs club-muted font-black uppercase tracking-wide mt-0.5">
+                                        Tier {clan.level} • {clan.memberCount} / {clan.member_limit || 15} members
                                       </p>
                                     </div>
                                   </div>
 
-                                  <p className="font-heading text-xs text-white/50 line-clamp-2 min-h-[2rem] leading-relaxed font-semibold">
-                                    {clan.description || "Establish operational objectives for this division."}
+                                  <p className="font-heading text-xs club-muted line-clamp-2 min-h-[2rem] leading-relaxed font-semibold">
+                                    {clan.description || "A place for your team."}
                                   </p>
 
                                   {/* Requirements badges */}
                                   <div className="flex flex-wrap gap-1.5 pt-1">
                                     {clan.min_tokens > 0 && (
-                                      <Badge className="bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 text-[9px] font-black uppercase tracking-widest">
+                                      <Badge className="club-yellow club-accent border club-border text-xs font-black uppercase tracking-wide">
                                         🪙 {clan.min_tokens.toLocaleString()}
                                       </Badge>
                                     )}
                                     {clan.min_rarity_count > 0 && (
-                                      <Badge className="bg-purple-500/10 text-purple-400 border border-purple-500/20 text-[9px] font-black uppercase tracking-widest">
+                                      <Badge className="club-purple club-accent border club-border text-xs font-black uppercase tracking-wide">
                                         📦 {clan.min_rarity_count}x {clan.min_rarity.toUpperCase()}+
                                       </Badge>
                                     )}
                                     {clan.min_tokens === 0 && clan.min_rarity_count === 0 && (
-                                      <Badge className="bg-green-500/10 text-green-400 border border-green-500/20 text-[9px] font-black uppercase tracking-widest">
-                                        Enlist open
+                                      <Badge className="club-green club-success border club-border text-xs font-black uppercase tracking-wide">
+                                        Open to join
                                       </Badge>
                                     )}
                                   </div>
@@ -7131,9 +5697,9 @@ const handlePackAction = async (packId: string) => {
 
                                 <Button 
                                   onClick={() => handleJoinClan(clan.id)}
-                                  className="w-full mt-4 bg-purple-600 hover:bg-purple-500 text-white font-black rounded-xl h-10 border-none text-xs uppercase tracking-wider transition-all"
+                                  className="club-action w-full mt-4 club-purple club-purple club-ink font-black rounded-xl h-10 border-none text-xs uppercase tracking-wider transition-all"
                                 >
-                                  ENLIST TO DIVISION
+                                  Join clan
                                 </Button>
                               </div>
                             ))}
@@ -7141,8 +5707,8 @@ const handlePackAction = async (packId: string) => {
                             c.name.toLowerCase().includes(searchClanQuery.toLowerCase()) ||
                             c.tag.toLowerCase().includes(searchClanQuery.toLowerCase())
                           ).length === 0 && (
-                            <div className="col-span-full text-center py-20 text-white/20 italic uppercase tracking-widest text-xs">
-                              No operational division matching coordinates.
+                            <div className="col-span-full text-center py-20 club-muted italic uppercase tracking-wide text-xs">
+                              No clans match your search.
                             </div>
                           )}
                         </div>
@@ -7150,55 +5716,55 @@ const handlePackAction = async (packId: string) => {
                     </div>
 
                     {/* Create Clan Column */}
-                    <div className="bg-gradient-to-b from-slate-900/60 to-slate-950/80 border border-white/10 rounded-[2.5rem] p-8 shadow-xl space-y-6 h-fit relative overflow-hidden group">
-                      <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 rounded-full blur-2xl pointer-events-none" />
+                    <div className="club-surface border club-border rounded-xl p-8 space-y-6 h-fit relative overflow-hidden group">
+                      <div className="club-decoration absolute top-0 right-0 w-32 h-32 club-purple rounded-full pointer-events-none" />
                       <div>
-                        <h2 className="font-heading text-2xl font-black text-white tracking-tight uppercase">Forge Faction</h2>
-                        <p className="font-heading text-white/40 text-xs font-semibold uppercase tracking-wider">Establish your own command authority</p>
+                        <h2 className="font-heading text-2xl font-black club-ink tracking-tight uppercase">Start a clan</h2>
+                        <p className="font-heading club-muted text-xs font-semibold uppercase tracking-wider">Make a home for your team.</p>
                       </div>
 
                       <div className="space-y-4">
                         <div className="space-y-1.5">
-                          <label className="font-heading text-[9px] font-black uppercase text-white/30 tracking-widest">Division Name</label>
+                          <label className="font-heading text-xs font-black uppercase club-muted tracking-wide">Clan name</label>
                           <input 
                             type="text"
                             value={createClanForm.name}
                             onChange={(e) => setCreateClanForm(prev => ({ ...prev, name: e.target.value }))}
-                            placeholder="Legendary Division..."
-                            className="bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs w-full focus:outline-none focus:border-purple-500/50"
+                            placeholder="Your clan name..."
+                            className="club-well border club-border rounded-xl px-4 py-2.5 club-ink text-xs w-full focus:outline-none club-border"
                           />
                         </div>
 
                         <div className="space-y-1.5">
-                          <label className="font-heading text-[9px] font-black uppercase text-white/30 tracking-widest">Division Tag (3-6 chars)</label>
+                          <label className="font-heading text-xs font-black uppercase club-muted tracking-wide">Clan tag (3–6 characters)</label>
                           <input 
                             type="text"
                             value={createClanForm.tag}
                             onChange={(e) => setCreateClanForm(prev => ({ ...prev, tag: e.target.value.toUpperCase() }))}
                             placeholder="LEGEND"
                             maxLength={6}
-                            className="bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs w-full focus:outline-none focus:border-purple-500/50"
+                            className="club-well border club-border rounded-xl px-4 py-2.5 club-ink text-xs w-full focus:outline-none club-border"
                           />
                         </div>
 
                         <div className="space-y-1.5">
-                          <label className="font-heading text-[9px] font-black uppercase text-white/30 tracking-widest">Division Mandate</label>
+                          <label className="font-heading text-xs font-black uppercase club-muted tracking-wide">About your clan</label>
                           <textarea
                             value={createClanForm.description}
                             onChange={(e) => setCreateClanForm(prev => ({ ...prev, description: e.target.value }))}
-                            placeholder="Describe sector missions..."
+                            placeholder="What is your clan about?"
                             rows={3}
-                            className="bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs w-full focus:outline-none focus:border-purple-500/50 resize-none"
+                            className="club-well border club-border rounded-xl px-4 py-2.5 club-ink text-xs w-full focus:outline-none club-border resize-none"
                           />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-1.5">
-                            <label className="font-heading text-[9px] font-black uppercase text-white/30 tracking-widest">Emblem</label>
+                            <label className="font-heading text-xs font-black uppercase club-muted tracking-wide">Emblem</label>
                             <select 
                               value={createClanForm.logo}
                               onChange={(e) => setCreateClanForm(prev => ({ ...prev, logo: e.target.value }))}
-                              className="bg-black border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs w-full focus:outline-none focus:border-purple-500/50"
+                              className="club-well border club-border rounded-xl px-4 py-2.5 club-ink text-xs w-full focus:outline-none club-border"
                             >
                               {["🛡️", "⚔️", "👑", "🔥", "🌀", "☠️", "🦊", "🐉", "🦄", "🐼", "🌟"].map(emoji => (
                                 <option key={emoji} value={emoji}>{emoji} Emblem</option>
@@ -7207,11 +5773,11 @@ const handlePackAction = async (packId: string) => {
                           </div>
 
                           <div className="space-y-1.5">
-                            <label className="font-heading text-[9px] font-black uppercase text-white/30 tracking-widest">Tag Plasma</label>
+                            <label className="font-heading text-xs font-black uppercase club-muted tracking-wide">Tag color</label>
                             <select 
                               value={createClanForm.tagColor}
                               onChange={(e) => setCreateClanForm(prev => ({ ...prev, tagColor: e.target.value }))}
-                              className="bg-black border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs w-full focus:outline-none focus:border-purple-500/50"
+                              className="club-well border club-border rounded-xl px-4 py-2.5 club-ink text-xs w-full focus:outline-none club-border"
                             >
                               <option value="text-purple-400">Purple</option>
                               <option value="text-red-400">Red</option>
@@ -7225,22 +5791,22 @@ const handlePackAction = async (packId: string) => {
                           </div>
                         </div>
 
-                        <div className="p-4 bg-purple-500/10 border border-purple-500/20 rounded-2xl flex items-center justify-between text-xs pt-3">
-                          <span className="font-semibold text-white/60">Licensing cost:</span>
-                          <span className="font-bold text-yellow-400 flex items-center gap-1">🪙 5,000 tokens</span>
+                        <div className="p-4 club-purple border club-border rounded-xl flex items-center justify-between text-xs pt-3">
+                          <span className="font-semibold club-muted">Creation cost:</span>
+                          <span className="font-bold club-accent flex items-center gap-1">🪙 5,000 tokens</span>
                         </div>
 
                         <Button 
                           onClick={handleCreateClan}
                           disabled={isCreatingClan}
-                          className="w-full h-12 bg-purple-600 hover:bg-purple-500 text-white font-black rounded-xl border-none text-xs flex items-center justify-center gap-2 uppercase tracking-wider transition-all"
+                          className="club-action w-full h-12 club-purple club-purple club-ink font-black rounded-xl border-none text-xs flex items-center justify-center gap-2 uppercase tracking-wider transition-all"
                         >
                           {isCreatingClan ? (
                             <span className="flex items-center gap-2">
-                              <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                              <div className="h-4 w-4 border-2 club-border border-t-white rounded-full animate-spin" />
                               Forwards licensing...
                             </span>
-                          ) : 'LICENSE FACTION'}
+                          ) : 'Create clan'}
                         </Button>
                       </div>
                     </div>
@@ -7252,25 +5818,25 @@ const handlePackAction = async (packId: string) => {
             {currentPage === "tournaments" && (
               <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
                 {/* Arena Hero Banner */}
-                <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-slate-950 via-yellow-950/20 to-slate-950 border border-white/10 p-8 shadow-[0_12px_40px_rgba(0,0,0,0.6)]">
-                  <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-yellow-500/5 rounded-full blur-[100px] pointer-events-none" />
-                  <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-purple-500/5 rounded-full blur-[100px] pointer-events-none" />
+                <div className="relative overflow-hidden rounded-xl club-surface border club-border p-8 ">
+                  <div className="club-decoration absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 club-yellow rounded-full pointer-events-none" />
+                  <div className="club-decoration absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 club-purple rounded-full pointer-events-none" />
 
                   <div className="relative flex flex-col md:flex-row justify-between items-center gap-6 z-10 ">
                     <div className="space-y-2 text-center md:text-left">
-                      <h1 className="font-heading text-4xl md:text-5xl font-black text-white tracking-tighter">
-                        ARENA <span className="font-heading text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-400 to-orange-400 drop-shadow-sm">CIRCUITS</span>
+                      <h1 className="font-heading text-4xl md:text-5xl font-black club-ink tracking-tighter">
+                        Clan <span className="font-heading club-accent ">tournaments</span>
                       </h1>
-                      <p className="font-heading text-white/40 text-xs md:text-sm font-semibold uppercase tracking-wider">
-                        Compete in sector championships to secure legendary assets and division recognition
+                      <p className="font-heading club-muted text-xs md:text-sm font-semibold uppercase tracking-wider">
+                        Team up with your clan and climb the tournament standings.
                       </p>
                     </div>
 
-                    <div className="shrink-0 flex items-center gap-4 bg-slate-900/60 backdrop-blur-2xl border border-white/10 px-6 py-4 rounded-3xl shadow-xl">
+                    <div className="shrink-0 flex items-center gap-4 club-well border club-border px-6 py-4 rounded-xl ">
                       <span className="font-heading text-3xl animate-bounce">🏆</span>
                       <div className="font-heading text-left">
-                        <div className="font-heading text-[9px] text-white/40 font-black uppercase tracking-widest">Active division</div>
-                        <div className="font-heading text-sm font-black text-white">{currentUser?.clan_tag ? `[${currentUser.clan_tag}]` : "UNLISTED"}</div>
+                        <div className="font-heading text-xs club-muted font-black uppercase tracking-wide">Your clan</div>
+                        <div className="font-heading text-sm font-black club-ink">{currentUser?.clan_tag ? `[${currentUser.clan_tag}]` : "UNLISTED"}</div>
                       </div>
                     </div>
                   </div>
@@ -7279,22 +5845,22 @@ const handlePackAction = async (packId: string) => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   {/* Leaderboard for selected tournament */}
                   <div className="space-y-6 lg:col-span-1">
-                    <h3 className="font-heading text-lg font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
-                      <StarIcon className="h-5 w-5 text-purple-400 animate-pulse" />
-                      CIRCUIT STANDINGS
+                    <h3 className="font-heading text-lg font-black club-ink uppercase tracking-wide flex items-center gap-2">
+                      <StarIcon className="h-5 w-5 club-accent " />
+                      Standings
                     </h3>
-                    <div className="blooket-card overflow-hidden min-h-[480px] flex flex-col shadow-2xl relative">
-                      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:20px_20px]" />
+                    <div className="club-panel overflow-hidden min-h-[480px] flex flex-col relative">
+                      <div className="club-decoration absolute inset-0 bg-[size:20px_20px]" />
 
                       {!selectedTournament ? (
-                        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-white/20 italic text-xs uppercase tracking-widest relative z-10">
+                        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center club-muted italic text-xs uppercase tracking-wide relative z-10">
                           <span className="font-heading text-3xl mb-3">📡</span>
                           Select circuit bracket to tap standlings telemetry
                         </div>
                       ) : (
                         <div className="p-5 space-y-3 relative z-10 flex-1 overflow-y-auto">
-                          <div className="font-heading text-[9px] font-black text-white/30 uppercase tracking-[0.2em] px-2 mb-3 flex justify-between">
-                            <span>DIVISION / LOGS</span>
+                          <div className="font-heading text-xs font-black club-muted uppercase tracking-wide px-2 mb-3 flex justify-between">
+                            <span>CLAN / SCORE</span>
                             <span>SCORE</span>
                           </div>
 
@@ -7304,39 +5870,39 @@ const handlePackAction = async (packId: string) => {
 
                             // Medal design matching leaderboard styling
                             const rankStyle = 
-                              idx === 0 ? "border-yellow-500/30 bg-yellow-500/5 shadow-[0_0_15px_rgba(234,179,8,0.05)]" :
-                              idx === 1 ? "border-slate-300/30 bg-slate-300/5 shadow-[0_0_15px_rgba(203,213,225,0.05)]" :
-                              idx === 2 ? "border-orange-600/30 bg-orange-600/5 shadow-[0_0_15px_rgba(234,88,12,0.05)]" :
-                              "bg-white/5 border-transparent";
+                              idx === 0 ? "club-border club-yellow " :
+                              idx === 1 ? "club-border club-well " :
+                              idx === 2 ? "club-border club-yellow " :
+                              "club-well border-transparent";
 
                             const medalEmoji = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `#${idx + 1}`;
 
                             return (
                               <div key={p.id} className={`flex items-center gap-3 p-3 rounded-xl border transition-all duration-300 ${rankStyle} hover:border-purple-500/30`}>
-                                <div className="w-8 h-8 rounded-lg bg-black/60 border border-white/10 flex items-center justify-center text-xs font-black text-white shrink-0">
+                                <div className="w-8 h-8 rounded-lg club-well border club-border flex items-center justify-center text-xs font-black club-ink shrink-0">
                                   {medalEmoji}
                                 </div>
-                                <div className="w-9 h-9 rounded-xl bg-slate-900 border border-white/10 flex items-center justify-center text-lg shrink-0">
+                                <div className="w-9 h-9 rounded-xl club-well border club-border flex items-center justify-center text-lg shrink-0">
                                   {clan?.logo || "🛡️"}
                                 </div>
                                 <div className="flex-grow flex flex-col font-medium min-w-0">
                                   <div className="flex items-center gap-2">
-                                    <span className="font-heading text-white font-black text-xs truncate max-w-[100px]">{clan?.name || "Unlisted Division"}</span>
-                                    <span className="inline-block text-[8px] font-black px-1.5 py-0.5 rounded bg-black/40 border border-white/5 shrink-0">
-                                      <span className={clan?.tag_color || "text-purple-400"}>
+                                    <span className="font-heading club-ink font-black text-xs truncate max-w-[100px]">{clan?.name || "Unknown clan"}</span>
+                                    <span className="inline-block text-xs font-black px-1.5 py-0.5 rounded club-well border club-border shrink-0">
+                                      <span className={clan?.tag_color || "club-accent"}>
                                         [{clan?.tag || "???"}]
                                       </span>
                                     </span>
                                   </div>
-                                  <div className="font-heading text-[8px] text-white/30 uppercase font-black tracking-wider mt-0.5">{p.games_played} Games played</div>
+                                  <div className="font-heading text-xs club-muted uppercase font-black tracking-wider mt-0.5">{p.games_played} Games played</div>
                                 </div>
-                                <div className="font-heading text-white font-black text-base tabular-nums pl-2 shrink-0">{p.score.toLocaleString()}</div>
+                                <div className="font-heading club-ink font-black text-base tabular-nums pl-2 shrink-0">{p.score.toLocaleString()}</div>
                               </div>
                             );
                           })}
 
                           {tournamentParticipants.length === 0 && (
-                            <div className="font-heading text-center py-20 text-white/20 text-xs font-black uppercase tracking-widest">No scores recorded for this sector.</div>
+                            <div className="font-heading text-center py-20 club-muted text-xs font-black uppercase tracking-wide">No scores recorded yet.</div>
                           )}
                         </div>
                       )}
@@ -7345,15 +5911,15 @@ const handlePackAction = async (packId: string) => {
 
                   {/* Active Tournaments */}
                   <div className="lg:col-span-2 space-y-6">
-                    <h3 className="font-heading text-lg font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
-                      <TrophyIcon className="h-5 w-5 text-yellow-400 animate-pulse" />
-                      ONGOING CHAMPS
+                    <h3 className="font-heading text-lg font-black club-ink uppercase tracking-wide flex items-center gap-2">
+                      <TrophyIcon className="h-5 w-5 club-accent animate-pulse" />
+                      Current tournaments
                     </h3>
                     {activeTournaments.length === 0 ? (
-                      <div className="blooket-panel border border-dashed border-white/10 rounded-[2.5rem] p-16 text-center text-white/20">
+                      <div className="club-panel border border-dashed club-border rounded-xl p-16 text-center club-muted">
                         <TrophyIcon className="w-16 h-16 mx-auto mb-4 opacity-10 animate-pulse" />
-                        <p className="font-black uppercase text-sm tracking-widest mb-1">No active operations</p>
-                        <p className="font-heading text-xs font-semibold text-white/30 uppercase tracking-wider">Operational schedules are currently down</p>
+                        <p className="font-black uppercase text-sm tracking-widest mb-1">No active tournaments</p>
+                        <p className="font-heading text-xs font-semibold club-muted uppercase tracking-wider">Check back for the next tournament.</p>
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 gap-6">
@@ -7366,35 +5932,35 @@ const handlePackAction = async (packId: string) => {
                                 setSelectedTournament(t)
                                 fetchTournamentParticipants(t.id)
                               }}
-                              className={`bg-gradient-to-b from-slate-900/60 to-slate-950/80 border border-white/5 hover:border-yellow-500/30 rounded-[2rem] p-6 cursor-pointer transition-all duration-500 group relative overflow-hidden ${isSelected ? 'border-yellow-500/40 shadow-[0_12px_45px_rgba(234,179,8,0.06)]' : ''}`}
+                              className={`club-surface border club-border club-border rounded-xl p-6 cursor-pointer transition-all duration-500 group relative overflow-hidden ${isSelected ? 'club-border ' : ''}`}
                             >
                               {/* Glowing top line */}
-                              <div className={`absolute top-0 inset-x-0 h-0.5 bg-gradient-to-r from-yellow-500/40 via-yellow-500/10 to-transparent transition-opacity duration-500 ${isSelected ? 'opacity-100' : 'opacity-0'}`} />
+                              <div className={`absolute top-0 inset-x-0 h-0.5 club-surface transition-opacity duration-500 ${isSelected ? 'opacity-100' : 'opacity-0'}`} />
 
                               <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-5">
                                 <div className="space-y-1">
-                                  <h4 className="font-heading text-2xl font-black text-white group-hover:text-yellow-400 transition-colors uppercase tracking-tight">{t.title}</h4>
-                                  <p className="font-heading text-white/40 text-xs font-semibold uppercase tracking-wider leading-relaxed">{t.description}</p>
+                                  <h4 className="font-heading text-2xl font-black club-ink club-accent transition-colors uppercase tracking-tight">{t.title}</h4>
+                                  <p className="font-heading club-muted text-xs font-semibold uppercase tracking-wider leading-relaxed">{t.description}</p>
                                 </div>
-                                <Badge className={`px-3 py-1 font-black uppercase text-[8px] tracking-widest border-none shrink-0 ${t.status === 'active' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]' : 'bg-red-500'}`}>
+                                <Badge className={`px-3 py-1 font-black uppercase text-[8px] tracking-widest border-none shrink-0 ${t.status === 'active' ? 'club-green ' : 'club-red'}`}>
                                   {t.status}
                                 </Badge>
                               </div>
 
-                              <div className="flex flex-wrap items-center gap-4 border-t border-white/5 pt-4">
-                                <div className="flex items-center gap-2 bg-black/40 rounded-xl px-4 py-2 border border-white/5">
-                                  <CoinsIcon className="w-4 h-4 text-yellow-500" />
-                                  <span className="font-heading text-yellow-400 text-xs font-black tabular-nums">{t.prize_tokens?.toLocaleString() || 0}</span>
+                              <div className="flex flex-wrap items-center gap-4 border-t club-border pt-4">
+                                <div className="flex items-center gap-2 club-well rounded-xl px-4 py-2 border club-border">
+                                  <CoinsIcon className="w-4 h-4 club-accent" />
+                                  <span className="font-heading club-accent text-xs font-black tabular-nums">{t.prize_tokens?.toLocaleString() || 0}</span>
                                 </div>
                                 {t.prize_boom_name && (
-                                  <div className="flex items-center gap-2 bg-black/40 rounded-xl px-4 py-2 border border-white/5">
+                                  <div className="flex items-center gap-2 club-well rounded-xl px-4 py-2 border club-border">
                                     <BoomAvatar name={t.prize_boom_name} className="w-5 h-5 object-contain" />
-                                    <span className="font-heading text-white font-black uppercase text-[10px] tracking-wider">{t.prize_boom_name}</span>
+                                    <span className="font-heading club-ink font-black uppercase text-xs tracking-wider">{t.prize_boom_name}</span>
                                   </div>
                                 )}
-                                <div className="flex items-center gap-2 bg-black/40 rounded-xl px-4 py-2 border border-white/5 sm:ml-auto">
-                                  <CalendarIcon className="w-3.5 h-3.5 text-white/30" />
-                                  <span className="font-heading text-white/40 text-[9px] font-black uppercase tracking-widest">Ends: {new Date(t.end_time).toLocaleDateString()}</span>
+                                <div className="flex items-center gap-2 club-well rounded-xl px-4 py-2 border club-border sm:ml-auto">
+                                  <CalendarIcon className="w-3.5 h-3.5 club-muted" />
+                                  <span className="font-heading club-muted text-xs font-black uppercase tracking-wide">Ends: {new Date(t.end_time).toLocaleDateString()}</span>
                                 </div>
                               </div>
 
@@ -7406,9 +5972,9 @@ const handlePackAction = async (packId: string) => {
                                       toast.error("You must join or create a Clan first to participate in tournaments!")
                                       setCurrentPage("clans")
                                     }}
-                                    className="w-full mt-5 bg-white/5 hover:bg-white/10 text-white font-black rounded-xl h-11 border border-white/10 uppercase text-xs tracking-wider transition-all"
+                                    className="club-action w-full mt-5 club-well club-well club-ink font-black rounded-xl h-11 border club-border uppercase text-xs tracking-wider transition-all"
                                   >
-                                    Enlist division to unlock operations
+                                    Join a clan to enter tournaments
                                   </Button>
                                 ) : (
                                   (() => {
@@ -7417,9 +5983,9 @@ const handlePackAction = async (packId: string) => {
                                       return (
                                         <Button
                                           onClick={(e) => { e.stopPropagation(); handleJoinTournament(t.id) }}
-                                          className="w-full mt-5 bg-gradient-to-r from-yellow-600 to-amber-600 hover:from-yellow-500 hover:to-amber-500 text-white font-black rounded-xl h-12 shadow-lg shadow-yellow-600/20 uppercase text-xs tracking-wider border-none transition-all active:scale-95"
+                                          className="club-action w-full mt-5 club-surface club-ink font-black rounded-xl h-12 uppercase text-xs tracking-wider border-none transition-all active:scale-95"
                                         >
-                                          Register Division for Operation
+                                          Enter tournament
                                         </Button>
                                       );
                                     }
@@ -7434,49 +6000,49 @@ const handlePackAction = async (packId: string) => {
 
                                     // Motivational status based on rank
                                     let motivation = "Ascend the leaderboard to claim sector dominance. ⚡";
-                                    if (myClanRank === 1) motivation = "Defending Sector Dominance! Leader of the Circuit. 👑";
+                                    if (myClanRank === 1) motivation = "Your clan is in first place!";
                                     else if (myClanRank === 2 || myClanRank === 3) motivation = "Podium lock confirmed. Deploy additional assets. 🚀";
                                     else if (myClanRank !== "Unranked" && myClanRank <= 5) motivation = "Top 5 threshold bypassed. Target absolute lead. 🔥";
 
                                     return (
                                       <div 
                                         onClick={(e) => e.stopPropagation()}
-                                        className="mt-5 p-4 rounded-2xl bg-purple-500/5 border border-purple-500/20 flex flex-col gap-4 relative overflow-hidden group/arena cursor-default"
+                                        className="mt-5 p-4 rounded-xl club-purple border club-border flex flex-col gap-4 relative overflow-hidden group/arena cursor-default"
                                       >
-                                        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-pink-500/5 opacity-0 group-hover/arena:opacity-100 transition-all duration-500 pointer-events-none" />
+                                        <div className="absolute inset-0 club-surface opacity-0 group-hover/arena:opacity-100 transition-all duration-500 pointer-events-none" />
 
                                         <div className="flex justify-between items-center relative z-10">
                                           <div>
-                                            <span className="font-heading text-[8px] font-black uppercase text-purple-400 tracking-widest">DATALINK CONNECTION STATUS</span>
-                                            <div className="font-heading text-xs font-black text-white flex items-center gap-1.5 mt-0.5 uppercase">
-                                              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-ping" />
-                                              Division Synchronized
+                                            <span className="font-heading text-xs font-black uppercase club-accent tracking-wide">DATALINK CONNECTION STATUS</span>
+                                            <div className="font-heading text-xs font-black club-ink flex items-center gap-1.5 mt-0.5 uppercase">
+                                              <span className="w-1.5 h-1.5 rounded-full club-green " />
+                                              Clan entered
                                             </div>
                                           </div>
                                           <div className="font-heading text-right">
-                                            <span className="font-heading text-[8px] font-black uppercase text-white/30 tracking-widest">SECTOR RANK</span>
-                                            <div className="font-heading text-xl font-black text-yellow-400 tabular-nums">
+                                            <span className="font-heading text-xs font-black uppercase club-muted tracking-wide">CLAN RANK</span>
+                                            <div className="font-heading text-xl font-black club-accent tabular-nums">
                                               {myClanRank !== "Unranked" ? `#${myClanRank}` : myClanRank}
                                             </div>
                                           </div>
                                         </div>
 
-                                        <div className="grid grid-cols-3 gap-2 py-3 border-t border-b border-white/5 relative z-10 font-mono">
+                                        <div className="grid grid-cols-3 gap-2 py-3 border-t border-b club-border relative z-10 font-mono">
                                           <div className="font-heading text-center">
-                                            <div className="font-heading text-[8px] font-black text-white/30 uppercase">TOTAL SCORE</div>
-                                            <div className="font-heading text-sm font-black text-white tabular-nums mt-0.5">{totalScore.toLocaleString()}</div>
+                                            <div className="font-heading text-xs font-black club-muted uppercase">TOTAL SCORE</div>
+                                            <div className="font-heading text-sm font-black club-ink tabular-nums mt-0.5">{totalScore.toLocaleString()}</div>
                                           </div>
-                                          <div className="font-heading text-center border-l border-r border-white/5">
-                                            <div className="font-heading text-[8px] font-black text-white/30 uppercase">GAMES COMMITTED</div>
-                                            <div className="font-heading text-sm font-black text-white tabular-nums mt-0.5">{gamesPlayed}</div>
+                                          <div className="font-heading text-center border-l border-r club-border">
+                                            <div className="font-heading text-xs font-black club-muted uppercase">GAMES COMMITTED</div>
+                                            <div className="font-heading text-sm font-black club-ink tabular-nums mt-0.5">{gamesPlayed}</div>
                                           </div>
                                           <div className="font-heading text-center">
-                                            <div className="font-heading text-[8px] font-black text-white/30 uppercase">AVG YIELD</div>
-                                            <div className="font-heading text-sm font-black text-white tabular-nums mt-0.5">{avgScore}</div>
+                                            <div className="font-heading text-xs font-black club-muted uppercase">AVG YIELD</div>
+                                            <div className="font-heading text-sm font-black club-ink tabular-nums mt-0.5">{avgScore}</div>
                                           </div>
                                         </div>
 
-                                        <p className="font-heading text-[9px] text-white/40 font-semibold uppercase tracking-wider relative z-10 leading-relaxed">
+                                        <p className="font-heading text-xs club-muted font-semibold uppercase tracking-wider relative z-10 leading-relaxed">
                                           {motivation}
                                         </p>
 
@@ -7486,7 +6052,7 @@ const handlePackAction = async (packId: string) => {
                                             toast.success("Entering Tournament Arena! Play discover quizzes to earn points for your clan.");
                                             setCurrentPage("discover");
                                           }}
-                                          className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black rounded-xl h-10 text-xs shadow-md shadow-purple-600/20 relative z-10 transition-all hover:scale-[1.02] uppercase tracking-wider border-none active:scale-95"
+                                          className="club-action w-full club-surface club-ink font-black rounded-xl h-10 text-xs relative z-10 transition-all hover:scale-[1.02] uppercase tracking-wider border-none active:scale-95"
                                         >
                                           ⚡ ENTER CIRCUIT CHAMBERS
                                         </Button>
@@ -7508,32 +6074,32 @@ const handlePackAction = async (packId: string) => {
             {currentPage === "fusion" && (
               <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
                 {/* Fusion Hero Banner */}
-                <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-slate-950 via-blue-950/20 to-slate-950 border border-white/10 p-8 shadow-[0_12px_40px_rgba(0,0,0,0.6)]">
-                  <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-blue-500/5 rounded-full blur-[100px] pointer-events-none" />
-                  <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-purple-500/5 rounded-full blur-[100px] pointer-events-none" />
+                <div className="relative overflow-hidden rounded-xl club-surface border club-border p-8 ">
+                  <div className="club-decoration absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 club-blue rounded-full pointer-events-none" />
+                  <div className="club-decoration absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 club-purple rounded-full pointer-events-none" />
 
                   <div className="relative flex flex-col md:flex-row justify-between items-center gap-6 z-10">
                     <div className="space-y-2 text-center md:text-left">
-                      <h1 className="font-heading text-4xl md:text-5xl font-black text-white tracking-tighter">
-                        FUSION <span className="font-heading text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 drop-shadow-sm">LAB</span>
+                      <h1 className="font-heading text-4xl md:text-5xl font-black club-ink tracking-tighter">
+                        FUSION <span className="font-heading club-accent ">LAB</span>
                       </h1>
-                      <p className="font-heading text-white/40 text-xs md:text-sm font-semibold uppercase tracking-wider">
+                      <p className="font-heading club-muted text-xs md:text-sm font-semibold uppercase tracking-wider">
                         Reconstruct atomic bonds by fusing duplicate units. Molecular loss hazard present.
                       </p>
                     </div>
 
-                    <div className="shrink-0 flex items-center gap-6 bg-slate-900/60 backdrop-blur-2xl border border-white/10 px-6 py-4 rounded-3xl shadow-xl">
-                      <div className="font-heading text-center border-r border-white/5 pr-6">
-                        <div className="font-heading text-2xl font-black text-blue-400 tabular-nums">
+                    <div className="shrink-0 flex items-center gap-6 club-well border club-border px-6 py-4 rounded-xl ">
+                      <div className="font-heading text-center border-r club-border pr-6">
+                        <div className="font-heading text-2xl font-black club-accent tabular-nums">
                           {Object.values(currentUser?.booms || {}).reduce((a, b) => (a as number) + (b as number), 0)}
                         </div>
-                        <div className="font-heading text-[8px] text-white/30 font-black uppercase tracking-widest mt-0.5">Assets</div>
+                        <div className="font-heading text-xs club-muted font-black uppercase tracking-wide mt-0.5">Assets</div>
                       </div>
                       <div className="font-heading text-center">
-                        <div className="font-heading text-2xl font-black text-purple-400 tabular-nums">
+                        <div className="font-heading text-2xl font-black club-accent tabular-nums">
                           {currentUser?.consecutive_fusions || 0}
                         </div>
-                        <div className="font-heading text-[8px] text-white/30 font-black uppercase tracking-widest mt-0.5">Consecutive</div>
+                        <div className="font-heading text-xs club-muted font-black uppercase tracking-wide mt-0.5">Consecutive</div>
                       </div>
                     </div>
                   </div>
@@ -7542,9 +6108,9 @@ const handlePackAction = async (packId: string) => {
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   {/* Fusion Slots */}
                   <div className="lg:col-span-2 space-y-8">
-                    <div className="blooket-card p-12 flex flex-col items-center justify-center relative overflow-hidden group shadow-2xl min-h-[380px]">
-                      <div className="absolute inset-0 bg-[linear-gradient(rgba(59,130,246,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(59,130,246,0.01)_1px,transparent_1px)] bg-[size:30px_30px]" />
-                      <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/5 rounded-full blur-[80px] pointer-events-none" />
+                    <div className="club-panel p-12 flex flex-col items-center justify-center relative overflow-hidden group min-h-[380px]">
+                      <div className="club-decoration absolute inset-0 bg-[size:30px_30px]" />
+                      <div className="club-decoration absolute top-0 right-0 w-80 h-80 club-blue rounded-full pointer-events-none" />
 
                       {currentUser?.active_fusion_boom1 ? (
                         /* Active Fusion Ongoing / Claim View */
@@ -7567,17 +6133,17 @@ const handlePackAction = async (packId: string) => {
 
                           return (
                             <div className="w-full flex flex-col items-center justify-center relative z-10 space-y-6">
-                              <h3 className="font-heading text-sm font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 uppercase tracking-[0.25em] animate-pulse">
+                              <h3 className="font-heading text-sm font-black club-accent uppercase tracking-wide ">
                                 {activeFusionRemaining > 0 ? "Molecular restructuring in progress" : "Structure Stabilized"}
                               </h3>
 
                               <div className="flex items-center gap-6 sm:gap-12 py-6">
                                 {/* Boom 1 */}
                                 <div className="relative group/slot">
-                                  <div className="absolute -inset-0.5 bg-blue-500 rounded-2xl blur opacity-25" />
-                                  <div className="relative flex flex-col items-center bg-slate-900/80 border border-blue-500/30 rounded-2xl p-4 w-28 h-28 justify-center shadow-lg">
+                                  <div className="absolute -inset-0.5 club-blue rounded-xl blur opacity-25" />
+                                  <div className="relative flex flex-col items-center club-well border club-border rounded-xl p-4 w-28 h-28 justify-center ">
                                     <BoomAvatar name={boom1} className="w-16 h-16 object-contain drop-shadow-md" />
-                                    <span className="font-heading text-[8px] font-black text-white/50 mt-3 uppercase truncate w-full text-center tracking-wider">{boom1}</span>
+                                    <span className="font-heading text-xs font-black club-muted mt-3 uppercase truncate w-full text-center tracking-wider">{boom1}</span>
                                   </div>
                                 </div>
 
@@ -7597,10 +6163,10 @@ const handlePackAction = async (packId: string) => {
                                           </linearGradient>
                                         </defs>
                                       </svg>
-                                      <BeakerIcon className="w-6 h-6 text-blue-400 animate-bounce" />
+                                      <BeakerIcon className="w-6 h-6 club-accent animate-bounce" />
                                     </div>
                                   ) : (
-                                    <div className="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500 flex items-center justify-center animate-bounce shadow-[0_0_20px_rgba(16,185,129,0.3)]">
+                                    <div className="w-16 h-16 rounded-full club-green border club-border flex items-center justify-center ">
                                       <span className="font-heading text-2xl">✨</span>
                                     </div>
                                   )}
@@ -7608,10 +6174,10 @@ const handlePackAction = async (packId: string) => {
 
                                 {/* Boom 2 */}
                                 <div className="relative group/slot">
-                                  <div className="absolute -inset-0.5 bg-purple-500 rounded-2xl blur opacity-25" />
-                                  <div className="relative flex flex-col items-center bg-slate-900/80 border border-purple-500/30 rounded-2xl p-4 w-28 h-28 justify-center shadow-lg">
+                                  <div className="absolute -inset-0.5 club-purple rounded-xl blur opacity-25" />
+                                  <div className="relative flex flex-col items-center club-well border club-border rounded-xl p-4 w-28 h-28 justify-center ">
                                     <BoomAvatar name={boom2} className="w-16 h-16 object-contain drop-shadow-md" />
-                                    <span className="font-heading text-[8px] font-black text-white/50 mt-3 uppercase truncate w-full text-center tracking-wider">{boom2}</span>
+                                    <span className="font-heading text-xs font-black club-muted mt-3 uppercase truncate w-full text-center tracking-wider">{boom2}</span>
                                   </div>
                                 </div>
                               </div>
@@ -7619,13 +6185,13 @@ const handlePackAction = async (packId: string) => {
                               {activeFusionRemaining > 0 ? (
                                 /* Counting Down */
                                 <div className="w-full max-w-md flex flex-col items-center space-y-4 font-mono">
-                                  <div className="w-full bg-white/5 rounded-full h-3 overflow-hidden border border-white/10 p-0.5">
+                                  <div className="w-full club-well rounded-full h-3 overflow-hidden border club-border p-0.5">
                                     <div 
-                                      className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500 h-full rounded-full transition-all duration-1000 shadow-md shadow-blue-500/50" 
+                                      className="club-surface h-full rounded-full transition-all duration-1000 "
                                       style={{ width: `${percentDone}%` }} 
                                     />
                                   </div>
-                                  <div className="flex justify-between w-full text-[10px] font-black text-white/40 uppercase tracking-widest">
+                                  <div className="flex justify-between w-full text-xs font-black club-muted uppercase tracking-wide">
                                     <span>Time Left: {formatTime(activeFusionRemaining)}</span>
                                     <span>{percentDone}% Stabilized</span>
                                   </div>
@@ -7636,18 +6202,18 @@ const handlePackAction = async (packId: string) => {
                                   <Button
                                     onClick={handleClaimFusion}
                                     disabled={isFusing}
-                                    className="px-12 py-7 rounded-2xl font-black text-lg bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-white shadow-2xl shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all border-none"
+                                    className="club-action px-12 py-7 rounded-xl font-black text-lg club-surface club-ink hover:scale-105 active:scale-95 transition-all border-none"
                                   >
                                     {isFusing ? (
                                       <div className="flex items-center gap-3">
-                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        <div className="w-5 h-5 border-2 club-border border-t-white rounded-full animate-spin" />
                                         CLAIMING...
                                       </div>
                                     ) : (
                                       'RETRIEVE MOLECULAR RESULT'
                                     )}
                                   </Button>
-                                  <p className="font-heading text-emerald-400/80 text-[10px] font-black uppercase tracking-widest">
+                                  <p className="font-heading club-success text-[10px] font-black uppercase tracking-widest">
                                     stabilization complete. ready for vault transfer.
                                   </p>
                                 </div>
@@ -7673,15 +6239,15 @@ const handlePackAction = async (packId: string) => {
                                 {/* Slot 1 */}
                                 <div
                                   onClick={() => !cooldownRemaining && setFusionSlot1(null)}
-                                  className={`w-32 h-32 rounded-3xl border-2 border-dashed flex items-center justify-center transition-all ${cooldownRemaining ? 'border-white/5 bg-white/5 opacity-40 cursor-not-allowed' : fusionSlot1 ? 'border-blue-500 bg-blue-500/10 shadow-lg shadow-blue-500/20 cursor-pointer' : 'border-white/10 bg-white/5 hover:border-white/20 cursor-pointer'}`}
+                                  className={`w-32 h-32 rounded-3xl border-2 border-dashed flex items-center justify-center transition-all ${cooldownRemaining ? 'club-border club-well opacity-40 cursor-not-allowed' : fusionSlot1 ? 'club-border club-blue cursor-pointer' : 'club-border club-well club-border cursor-pointer'}`}
                                 >
                                   {fusionSlot1 ? (
                                     <div className="flex flex-col items-center">
                                       <BoomAvatar name={fusionSlot1} className="w-16 h-16 object-contain drop-shadow-md" />
-                                      <span className="font-heading text-[9px] font-black text-white mt-2 uppercase max-w-[110px] truncate">{fusionSlot1}</span>
+                                      <span className="font-heading text-xs font-black club-ink mt-2 uppercase max-w-[110px] truncate">{fusionSlot1}</span>
                                     </div>
                                   ) : (
-                                    <div className="flex flex-col items-center text-white/20">
+                                    <div className="flex flex-col items-center club-muted">
                                       <BeakerIcon className="w-7 h-7 mb-2" />
                                       <span className="font-heading text-[9px] font-black uppercase tracking-wider">Slot A</span>
                                     </div>
@@ -7689,20 +6255,20 @@ const handlePackAction = async (packId: string) => {
                                 </div>
 
                                 {/* Plus Icon */}
-                                <div className="font-heading text-white/20 text-4xl font-black shrink-0">+</div>
+                                <div className="font-heading club-muted text-4xl font-black shrink-0">+</div>
 
                                 {/* Slot 2 */}
                                 <div
                                   onClick={() => !cooldownRemaining && setFusionSlot2(null)}
-                                  className={`w-32 h-32 rounded-3xl border-2 border-dashed flex items-center justify-center transition-all ${cooldownRemaining ? 'border-white/5 bg-white/5 opacity-40 cursor-not-allowed' : fusionSlot2 ? 'border-purple-500 bg-purple-500/10 shadow-lg shadow-purple-500/20 cursor-pointer' : 'border-white/10 bg-white/5 hover:border-white/20 cursor-pointer'}`}
+                                  className={`w-32 h-32 rounded-3xl border-2 border-dashed flex items-center justify-center transition-all ${cooldownRemaining ? 'club-border club-well opacity-40 cursor-not-allowed' : fusionSlot2 ? 'club-border club-purple cursor-pointer' : 'club-border club-well club-border cursor-pointer'}`}
                                 >
                                   {fusionSlot2 ? (
                                     <div className="flex flex-col items-center">
                                       <BoomAvatar name={fusionSlot2} className="w-16 h-16 object-contain drop-shadow-md" />
-                                      <span className="font-heading text-[9px] font-black text-white mt-2 uppercase max-w-[110px] truncate">{fusionSlot2}</span>
+                                      <span className="font-heading text-xs font-black club-ink mt-2 uppercase max-w-[110px] truncate">{fusionSlot2}</span>
                                     </div>
                                   ) : (
-                                    <div className="flex flex-col items-center text-white/20">
+                                    <div className="flex flex-col items-center club-muted">
                                       <BeakerIcon className="w-7 h-7 mb-2" />
                                       <span className="font-heading text-[9px] font-black uppercase tracking-wider">Slot B</span>
                                     </div>
@@ -7712,15 +6278,15 @@ const handlePackAction = async (packId: string) => {
 
                               {cooldownRemaining > 0 ? (
                                 /* Cooldown Active Block */
-                                <div className="mt-8 flex flex-col items-center space-y-3 bg-red-500/10 border border-red-500/20 rounded-2xl p-4 max-w-sm w-full font-mono">
-                                  <div className="flex items-center gap-2 text-red-400 text-xs font-black uppercase tracking-wider">
+                                <div className="mt-8 flex flex-col items-center space-y-3 club-red border club-border rounded-xl p-4 max-w-sm w-full font-mono">
+                                  <div className="flex items-center gap-2 club-danger text-xs font-black uppercase tracking-wider">
                                     <ClockIcon className="w-4 h-4 animate-pulse" />
                                     Reactor Overheated
                                   </div>
-                                  <div className="font-heading text-2xl font-black text-white tabular-nums">
+                                  <div className="font-heading text-2xl font-black club-ink tabular-nums">
                                     {formatTime(cooldownRemaining)}
                                   </div>
-                                  <p className="font-heading text-[9px] text-white/40 text-center font-black uppercase tracking-wider">
+                                  <p className="font-heading text-xs club-muted text-center font-black uppercase tracking-wider">
                                     Next cooldown: {5 * Math.pow(2, currentUser?.consecutive_fusions || 0)}m
                                   </p>
                                 </div>
@@ -7729,11 +6295,11 @@ const handlePackAction = async (packId: string) => {
                                 <Button
                                   onClick={handleFusion}
                                   disabled={!fusionSlot1 || !fusionSlot2 || isFusing}
-                                  className={`mt-12 px-12 py-7 rounded-2xl font-black text-base uppercase tracking-wider transition-all relative z-10 border-none ${!fusionSlot1 || !fusionSlot2 ? 'bg-white/5 text-white/20 cursor-not-allowed' : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white shadow-2xl shadow-blue-900/40 hover:scale-105 active:scale-95'}`}
+                                  className={`club-action mt-12 px-12 py-7 rounded-2xl font-black text-base uppercase tracking-wider transition-all relative z-10 border-none ${!fusionSlot1 || !fusionSlot2 ? 'club-well club-muted cursor-not-allowed' : 'club-surface club-ink hover:scale-105 active:scale-95'}`}
                                 >
                                   {isFusing ? (
                                     <div className="flex items-center gap-3">
-                                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                      <div className="w-5 h-5 border-2 club-border border-t-white rounded-full animate-spin" />
                                       RESTRUCTURING...
                                     </div>
                                   ) : (
@@ -7743,7 +6309,7 @@ const handlePackAction = async (packId: string) => {
                               )}
 
                               {/* Warning */}
-                              <p className="mt-6 text-white/25 text-[9px] font-black uppercase tracking-[0.15em] text-center leading-relaxed">
+                              <p className="mt-6 club-muted text-xs font-black uppercase tracking-wide text-center leading-relaxed">
                                 Warning: Molecular collision has a 30% chance of total collapse.<br />Resulting entity is mapped within equivalent tiers.
                               </p>
                             </div>
@@ -7753,9 +6319,9 @@ const handlePackAction = async (packId: string) => {
                     </div>
 
                     {/* Inventory Helper for Fusion */}
-                    <div className="blooket-card p-6 md:p-8 space-y-6 shadow-2xl relative overflow-hidden">
-                      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:30px_30px]" />
-                      <h3 className="font-heading text-lg font-black text-white uppercase tracking-[0.15em] relative z-10">Vault Materials inventory</h3>
+                    <div className="club-panel p-6 md:p-8 space-y-6 relative overflow-hidden">
+                      <div className="club-decoration absolute inset-0 bg-[size:30px_30px]" />
+                      <h3 className="font-heading text-lg font-black club-ink uppercase tracking-wide relative z-10">Choose your Booms</h3>
 
                       <div className="relative z-10 space-y-6">
                         {(() => {
@@ -7780,19 +6346,19 @@ const handlePackAction = async (packId: string) => {
                           });
 
                           const rarityTiers = [
-                            { key: "uncommon", label: "Uncommon", color: "text-green-400 border-green-500/20 bg-green-500/5" },
-                            { key: "rare", label: "Rare", color: "text-blue-400 border-blue-500/20 bg-blue-500/5" },
-                            { key: "epic", label: "Epic", color: "text-purple-400 border-purple-500/20 bg-purple-500/5" },
-                            { key: "legendary", label: "Legendary", color: "text-orange-400 border-orange-500/20 bg-orange-500/5" },
-                            { key: "chroma", label: "Chroma", color: "text-pink-400 border-pink-500/20 bg-pink-500/5" },
-                            { key: "mystical", label: "Mystical", color: "text-cyan-400 border-cyan-500/20 bg-cyan-500/5" },
+                            { key: "uncommon", label: "Uncommon", color: "club-success club-border club-green" },
+                            { key: "rare", label: "Rare", color: "club-accent club-border club-blue" },
+                            { key: "epic", label: "Epic", color: "club-accent club-border club-purple" },
+                            { key: "legendary", label: "Legendary", color: "club-accent club-border club-yellow" },
+                            { key: "chroma", label: "Chroma", color: "club-accent club-border club-purple" },
+                            { key: "mystical", label: "Mystical", color: "club-accent club-border club-blue" },
                           ];
 
                           const hasAnyBooms = Object.values(boomsByRarity).some(arr => arr.length > 0);
 
                           if (!hasAnyBooms) {
                             return (
-                              <div className="font-heading text-center py-12 text-white/20 italic text-xs uppercase tracking-widest">
+                              <div className="font-heading text-center py-12 club-muted italic text-xs uppercase tracking-wide">
                                 Vault currently depleted. Procure assets first.
                               </div>
                             );
@@ -7827,13 +6393,13 @@ const handlePackAction = async (packId: string) => {
                                           setFusionSlot2(name)
                                         }
                                       }}
-                                      className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col items-center group/item hover:-translate-y-0.5 ${fusionSlot1 === name || fusionSlot2 === name ? 'bg-blue-600/25 border-blue-500 shadow-md shadow-blue-500/10' : 'bg-black/30 border-white/5 hover:border-white/20'}`}
+                                      className={`p-3.5 rounded-2xl border transition-all cursor-pointer flex flex-col items-center group/item hover:-translate-y-0.5 ${fusionSlot1 === name || fusionSlot2 === name ? 'club-blue club-border ' : 'club-well club-border club-border'}`}
                                     >
                                       <div className="mb-2 group-hover/item:scale-110 transition-transform duration-300 select-none">
                                         <BoomAvatar name={name} className="w-10 h-10 object-contain" />
                                       </div>
-                                      <div className="font-heading text-[9px] font-black text-white text-center uppercase truncate w-full tracking-wider">{name}</div>
-                                      <div className="font-heading text-[8px] font-black text-white/30 mt-1 uppercase tracking-widest">Qty: {count}</div>
+                                      <div className="font-heading text-xs font-black club-ink text-center uppercase truncate w-full tracking-wider">{name}</div>
+                                      <div className="font-heading text-xs font-black club-muted mt-1 uppercase tracking-wide">Qty: {count}</div>
                                     </div>
                                   ))}
                                 </div>
@@ -7847,40 +6413,40 @@ const handlePackAction = async (packId: string) => {
 
                   {/* Fusion History / Info Case */}
                   <div className="space-y-8 lg:col-span-1">
-                    <div className="bg-gradient-to-br from-indigo-950/20 to-purple-950/20 border border-purple-500/20 rounded-[2rem] p-6 shadow-xl space-y-4">
-                      <h3 className="font-heading text-sm font-black text-blue-400 uppercase tracking-widest">Reactor logs</h3>
+                    <div className="club-surface border club-border rounded-xl p-6 space-y-4">
+                      <h3 className="font-heading text-sm font-black club-accent uppercase tracking-widest">Fusion history</h3>
                       <ScrollArea className="h-44 pr-2 scrollbar-hide">
                         <div className="space-y-4">
                           {userActivity.filter(a => a.activity_type === 'fusion').slice(0, 5).map(a => (
-                            <div key={a.id} className="flex gap-3 text-[10px] bg-black/20 p-2.5 rounded-xl border border-white/5">
-                              <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 bg-blue-500 shadow-[0_0_8px_#3b82f6]" />
+                            <div key={a.id} className="flex gap-3 text-xs club-well p-2.5 rounded-xl border club-border">
+                              <div className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 club-blue " />
                               <div>
-                                <p className="font-heading text-white/80 font-bold leading-normal">{a.description}</p>
-                                <p className="font-heading text-white/20 font-black uppercase text-[8px] tracking-wider mt-0.5">{new Date(a.created_at).toLocaleTimeString()}</p>
+                                <p className="font-heading club-ink font-bold leading-normal">{a.description}</p>
+                                <p className="font-heading club-muted font-black uppercase text-xs tracking-wider mt-0.5">{new Date(a.created_at).toLocaleTimeString()}</p>
                               </div>
                             </div>
                           ))}
                           {userActivity.filter(a => a.activity_type === 'fusion').length === 0 && (
-                            <p className="font-heading text-white/20 italic text-xs uppercase tracking-widest text-center py-6">No reaction records.</p>
+                            <p className="font-heading club-muted italic text-xs uppercase tracking-wide text-center py-6">No reaction records.</p>
                           )}
                         </div>
                       </ScrollArea>
                     </div>
 
-                    <div className="blooket-card p-6 shadow-2xl">
-                      <h4 className="font-heading text-[10px] font-black text-white/50 mb-4 uppercase tracking-[0.2em]">Fusing Probability Matrix</h4>
+                    <div className="club-panel p-6 ">
+                      <h4 className="font-heading text-xs font-black club-muted mb-4 uppercase tracking-wide">Fusing Probability Matrix</h4>
                       <ul className="space-y-3 font-mono text-xs">
-                        <li className="flex justify-between items-center bg-black/20 p-2.5 rounded-xl border border-white/5">
-                          <span className="font-heading text-white/40 uppercase text-[9px] font-black tracking-widest">Ascend Tier</span>
-                          <span className="font-heading text-green-400 font-black">30%</span>
+                        <li className="flex justify-between items-center club-well p-2.5 rounded-xl border club-border">
+                          <span className="font-heading club-muted uppercase text-xs font-black tracking-wide">Ascend Tier</span>
+                          <span className="font-heading club-success font-black">30%</span>
                         </li>
-                        <li className="flex justify-between items-center bg-black/20 p-2.5 rounded-xl border border-white/5">
-                          <span className="font-heading text-white/40 uppercase text-[9px] font-black tracking-widest">Random Same Tier</span>
-                          <span className="font-heading text-blue-400 font-black">40%</span>
+                        <li className="flex justify-between items-center club-well p-2.5 rounded-xl border club-border">
+                          <span className="font-heading club-muted uppercase text-xs font-black tracking-wide">Random Same Tier</span>
+                          <span className="font-heading club-accent font-black">40%</span>
                         </li>
-                        <li className="flex justify-between items-center bg-black/20 p-2.5 rounded-xl border border-white/5">
-                          <span className="font-heading text-white/40 uppercase text-[9px] font-black tracking-widest">Collateral Loss</span>
-                          <span className="font-heading text-red-400 font-black">30%</span>
+                        <li className="flex justify-between items-center club-well p-2.5 rounded-xl border club-border">
+                          <span className="font-heading club-muted uppercase text-xs font-black tracking-wide">Collateral Loss</span>
+                          <span className="font-heading club-danger font-black">30%</span>
                         </li>
                       </ul>
                     </div>
@@ -7892,32 +6458,32 @@ const handlePackAction = async (packId: string) => {
             {currentPage === "shop" && (
               <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
                 {/* Shop Hero Banner */}
-                <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-slate-950 via-blue-950/20 to-slate-950 border border-white/10 p-8 md:p-12 shadow-[0_12px_40px_rgba(0,0,0,0.6)]">
-                  <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-blue-500/5 rounded-full blur-[100px] pointer-events-none" />
-                  <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-purple-500/5 rounded-full blur-[100px] pointer-events-none" />
+                <div className="relative overflow-hidden rounded-xl club-surface border club-border p-8 md:p-12 ">
+                  <div className="club-decoration absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 club-blue rounded-full pointer-events-none" />
+                  <div className="club-decoration absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 club-purple rounded-full pointer-events-none" />
 
                   <div className="relative flex flex-col md:flex-row justify-between items-center gap-8 z-10">
                     <div className="space-y-4 text-center md:text-left">
-                      <h1 className="font-heading text-5xl md:text-7xl font-black text-white tracking-tighter">
-                        BOOMKIT <span className="font-heading text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-400 to-orange-400 drop-shadow-sm">SHOP</span>
+                      <h1 className="font-heading text-4xl md:text-7xl font-black club-ink tracking-tighter">
+                        BOOMKIT <span className="font-heading club-accent ">SHOP</span>
                       </h1>
-                      <p className="font-heading text-white/40 text-base md:text-lg max-w-md font-medium leading-relaxed">
+                      <p className="font-heading club-muted text-base md:text-lg max-w-md font-medium leading-relaxed">
                         Acquire game tokens, booster credits, and unlock premium Boomkit Plus privileges instantly.
                       </p>
                     </div>
 
                     <div className="shrink-0 transform hover:scale-[1.02] transition-transform duration-300">
-                      <div className="bg-slate-900/60 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-8 shadow-2xl flex flex-col items-center gap-1.5 w-64 border-blue-500/20">
-                        <div className="font-heading text-white/40 text-[9px] uppercase tracking-[0.3em] font-black">Procurement Credits</div>
+                      <div className="club-well border club-border rounded-xl p-8 flex flex-col items-center gap-1.5 w-64 club-border">
+                        <div className="font-heading club-muted text-xs uppercase tracking-wide font-black">Procurement Credits</div>
                         <div className="flex items-center gap-3">
                           <span className="font-heading text-4xl drop-shadow-md">🪙</span>
-                          <span className="font-heading text-5xl font-black text-yellow-400 tabular-nums drop-shadow-[0_0_15px_rgba(234,179,8,0.3)]">
+                          <span className="font-heading text-5xl font-black club-accent tabular-nums drop-shadow-[0_0_15px_rgba(234,179,8,0.3)]">
                             {currentUser?.tokens.toLocaleString() || 0}
                           </span>
                         </div>
-                        <div className="mt-3 flex items-center gap-2 px-4 py-1.5 bg-blue-500/10 rounded-full border border-blue-500/20 shadow-inner">
-                          <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping" />
-                          <span className="font-heading text-blue-400 text-[9px] font-black uppercase tracking-widest">Interface Synced</span>
+                        <div className="mt-3 flex items-center gap-2 px-4 py-1.5 club-blue rounded-full border club-border ">
+                          <span className="w-1.5 h-1.5 rounded-full club-blue " />
+                          <span className="font-heading club-accent text-[9px] font-black uppercase tracking-widest">Interface Synced</span>
                         </div>
                       </div>
                     </div>
@@ -7925,15 +6491,15 @@ const handlePackAction = async (packId: string) => {
                 </div>
 
                 {/* Token Store Section */}
-                <div className="bg-gradient-to-r from-slate-900 via-indigo-950/20 to-slate-900 border border-white/10 rounded-[2rem] p-8 md:p-10 shadow-2xl relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/5 rounded-full blur-[80px] pointer-events-none" />
+                <div className="club-surface border club-border rounded-xl p-8 md:p-10 relative overflow-hidden">
+                  <div className="club-decoration absolute top-0 right-0 w-80 h-80 club-blue rounded-full pointer-events-none" />
                   <div className="relative flex flex-col md:flex-row justify-between items-center gap-8 z-10">
                     <div className="space-y-3 text-center md:text-left">
-                      <h3 className="font-heading text-3xl font-black text-white tracking-tight flex items-center gap-3 justify-center md:justify-start">
-                        <CreditCardIcon className="h-7 w-7 text-blue-400" />
-                        SECURE CREDIT BRIDGE
+                      <h3 className="font-heading text-3xl font-black club-ink tracking-tight flex items-center gap-3 justify-center md:justify-start">
+                        <CreditCardIcon className="h-7 w-7 club-accent" />
+                        Token top-up
                       </h3>
-                      <p className="font-heading text-white/40 text-sm font-semibold max-w-lg leading-relaxed uppercase tracking-wider">
+                      <p className="font-heading club-muted text-sm font-semibold max-w-lg leading-relaxed uppercase tracking-wider">
                         Deposit fiat credits to acquire game tokens instantly. Secure Lemon Squeezy checkout integration supporting global credit cards and local payment methods.
                       </p>
                     </div>
@@ -7959,45 +6525,45 @@ const handlePackAction = async (packId: string) => {
             {currentPage === "season" && (
               activeSeason ? (
               <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
-                <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-slate-950 via-orange-950/20 to-slate-950 border border-white/10 p-8 shadow-[0_12px_40px_rgba(0,0,0,0.6)]">
-                  <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-orange-500/5 rounded-full blur-[100px] pointer-events-none" />
-                  <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-yellow-500/5 rounded-full blur-[100px] pointer-events-none" />
+                <div className="relative overflow-hidden rounded-xl club-surface border club-border p-8 ">
+                  <div className="club-decoration absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 club-yellow rounded-full pointer-events-none" />
+                  <div className="club-decoration absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 club-yellow rounded-full pointer-events-none" />
 
                   <div className="relative flex flex-col md:flex-row justify-between items-center gap-6 z-10">
                     <div className="space-y-2 text-center md:text-left">
-                      <h1 className="font-heading text-4xl md:text-5xl font-black text-white tracking-tighter">
+                      <h1 className="font-heading text-4xl md:text-5xl font-black club-ink tracking-tighter">
                         {activeSeason.name.toUpperCase()}
                       </h1>
                       <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                        <Badge className="bg-orange-500 text-black border-none text-[9px] font-black uppercase tracking-widest px-3 py-1">Active Now</Badge>
-                        <span className="font-heading text-white/40 text-xs font-black uppercase tracking-wider">Ends on {new Date(activeSeason.end_date).toLocaleDateString()}</span>
+                        <Badge className="club-yellow club-ink border-none text-xs font-black uppercase tracking-wide px-3 py-1">Active Now</Badge>
+                        <span className="font-heading club-muted text-xs font-black uppercase tracking-wider">Ends on {new Date(activeSeason.end_date).toLocaleDateString()}</span>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-6 bg-slate-900/60 backdrop-blur-2xl border border-white/10 px-8 py-4 rounded-3xl">
-                      <div className="w-12 h-12 rounded-xl bg-orange-500 flex items-center justify-center text-2xl font-black text-black shadow-lg shadow-orange-500/20">
+                    <div className="flex items-center gap-6 club-well border club-border px-8 py-4 rounded-xl">
+                      <div className="w-12 h-12 rounded-xl club-yellow flex items-center justify-center text-2xl font-black club-ink ">
                         {Math.floor((currentUser?.season_xp || 0) / 100)}
                       </div>
                       <div className="font-heading text-left">
-                        <div className="font-heading text-[10px] text-white/40 font-black uppercase tracking-widest">Current Level</div>
-                        <div className="font-heading text-lg font-black text-orange-400">{currentUser?.season_xp || 0} XP</div>
+                        <div className="font-heading text-xs club-muted font-black uppercase tracking-wide">Current Level</div>
+                        <div className="font-heading text-lg font-black club-accent">{currentUser?.season_xp || 0} XP</div>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Linear Laser path timeline */}
-                <div className="blooket-card p-8 md:p-10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden">
-                  <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:30px_30px]" />
+                <div className="club-panel p-8 md:p-10 relative overflow-hidden">
+                  <div className="club-decoration absolute inset-0 bg-[size:30px_30px]" />
 
                   <div className="flex items-center justify-between mb-8 relative z-10">
-                    <h3 className="font-heading text-lg font-black text-white uppercase tracking-[0.2em] flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
-                      Laser rewards track
+                    <h3 className="font-heading text-lg font-black club-ink uppercase tracking-wide flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full club-yellow " />
+                      Season rewards
                     </h3>
 
                     {!currentUser?.has_plus_pass && (
-                      <Button className="bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-black px-6 py-5 rounded-2xl shadow-xl shadow-purple-600/30 hover:scale-[1.02] active:scale-95 transition-transform border-none text-xs uppercase tracking-wider">
+                      <Button className="club-action club-surface club-ink font-black px-6 py-5 rounded-xl hover:scale-[1.02] active:scale-95 transition-transform border-none text-xs uppercase tracking-wider">
                         Upgrade to Plus Pass
                       </Button>
                     )}
@@ -8006,7 +6572,7 @@ const handlePackAction = async (packId: string) => {
                   {/* Horizontal visual linear connector track for desktop / vertical list for mobile */}
                   <div className="relative grid grid-cols-1 gap-6 z-10 pt-4">
                     {/* Laser glow connector line background */}
-                    <div className="absolute left-[3.25rem] top-0 bottom-0 w-1 bg-gradient-to-b from-orange-500/20 via-orange-500/50 to-orange-500/20 pointer-events-none hidden md:block" />
+                    <div className="absolute left-[3.25rem] top-0 bottom-0 w-1 club-surface pointer-events-none hidden md:block" />
 
                     {seasonRewards.map((r) => {
                       const isUnlocked = (currentUser?.season_xp || 0) >= r.xp_required;
@@ -8015,12 +6581,12 @@ const handlePackAction = async (packId: string) => {
                       return (
                         <div key={r.id} className="relative flex items-center gap-6 group">
                           {/* Laser node indicator */}
-                          <div className={`w-11 h-11 rounded-full flex items-center justify-center font-black text-xs border relative z-20 shrink-0 transition-all duration-500 shadow-md ${
+                          <div className={`w-11 h-11 rounded-full flex items-center justify-center font-black text-xs border relative z-20 shrink-0 transition-all duration-500  ${
                             isClaimed
-                              ? 'bg-green-600/20 border-green-500 text-green-400 shadow-[0_0_15px_rgba(34,197,94,0.3)]'
+                              ? 'club-green club-border club-success '
                               : isUnlocked
-                                ? 'bg-orange-500 text-black border-orange-400 shadow-[0_0_15px_rgba(249,115,22,0.4)] animate-pulse'
-                                : 'bg-slate-900 border-white/10 text-white/30'
+                                ? 'club-yellow club-ink club-border '
+                                : 'club-well club-border club-muted'
                           }`}>
                             {isClaimed ? '✓' : `T${r.tier}`}
                           </div>
@@ -8028,39 +6594,39 @@ const handlePackAction = async (packId: string) => {
                           {/* Reward details card */}
                           <div className={`flex-grow flex flex-col sm:flex-row items-center justify-between gap-4 p-5 rounded-2xl border transition-all duration-300 ${
                             isClaimed
-                              ? 'bg-green-950/5 border-green-500/20 opacity-80'
+                              ? 'club-green club-border opacity-80'
                               : isUnlocked
-                                ? 'bg-orange-500/5 border-orange-500/30 shadow-lg'
-                                : 'bg-black/20 border-white/5 opacity-55 hover:border-white/10'
+                                ? 'club-yellow club-border '
+                                : 'club-well club-border opacity-55 club-border'
                           }`}>
                             <div className="flex items-center gap-4">
-                              <div className={`w-14 h-14 rounded-xl bg-slate-900 border flex items-center justify-center text-3xl shadow-inner relative overflow-hidden ${
-                                isUnlocked ? 'border-orange-500/20 shadow-[0_0_15px_rgba(249,115,22,0.1)]' : 'border-white/5'
+                              <div className={`w-14 h-14 rounded-xl club-well border flex items-center justify-center text-3xl relative overflow-hidden ${
+                                isUnlocked ? 'club-border ' : 'club-border'
                               }`}>
                                 {r.reward_type === 'boom' ? (
                                    <BoomAvatar name={r.reward_value} className="w-10 h-10 object-contain group-hover:scale-110 transition-transform duration-300" />
                                  ) : (
-                                  <CoinsIcon className="w-7 h-7 text-yellow-500 animate-pulse" />
+                                  <CoinsIcon className="w-7 h-7 club-accent animate-pulse" />
                                 )}
                               </div>
                               <div className="font-heading text-left">
                                 <div className="flex items-center gap-2">
-                                  <span className="font-heading text-base font-black text-white">{r.reward_value} {r.reward_type.toUpperCase()}</span>
-                                  {r.is_premium && <Badge className="bg-purple-600 text-white text-[8px] font-black uppercase tracking-widest px-2 py-0.5 border-none shadow-[0_0_10px_purple]">Plus</Badge>}
+                                  <span className="font-heading text-base font-black club-ink">{r.reward_value} {r.reward_type.toUpperCase()}</span>
+                                  {r.is_premium && <Badge className="club-purple club-ink text-xs font-black uppercase tracking-wide px-2 py-0.5 border-none ">Plus</Badge>}
                                 </div>
-                                <div className="font-heading text-[9px] font-black text-white/30 uppercase tracking-widest mt-1">Requires {r.xp_required} XP</div>
+                                <div className="font-heading text-xs font-black club-muted uppercase tracking-wide mt-1">Requires {r.xp_required} XP</div>
                               </div>
                             </div>
 
                             <Button
                               disabled={!isUnlocked || isClaimed || (r.is_premium && !currentUser?.has_plus_pass)}
                               onClick={() => handleClaimReward(r.id)}
-                              className={`rounded-xl font-black px-6 py-4.5 text-xs uppercase tracking-wider transition-all duration-300 active:scale-95 border-none h-11 ${
+                              className={`club-action rounded-xl font-black px-6 py-4.5 text-xs uppercase tracking-wider transition-all duration-300 active:scale-95 border-none h-11 ${
                                 isClaimed
-                                  ? 'bg-green-600/10 text-green-500 cursor-not-allowed'
+                                  ? 'club-green club-success cursor-not-allowed'
                                   : isUnlocked
-                                    ? 'bg-yellow-500 text-white hover:bg-orange-400 hover:text-black shadow-lg shadow-white/10'
-                                    : 'bg-white/5 text-white/20 cursor-not-allowed'
+                                    ? 'club-yellow club-ink club-yellow club-ink '
+                                    : 'club-well club-muted cursor-not-allowed'
                               }`}
                             >
                               {isClaimed ? 'Claimed' : isUnlocked ? 'Collect' : 'Locked'}
@@ -8073,13 +6639,13 @@ const handlePackAction = async (packId: string) => {
                 </div>
               </div>
               ) : (
-                <div className="py-20 flex flex-col items-center justify-center blooket-card max-w-xl mx-auto text-center animate-in fade-in duration-300">
-                  <div className="w-20 h-20 bg-orange-500/10 rounded-3xl flex items-center justify-center mb-6 animate-pulse">
-                    <FlameIcon className="w-10 h-10 text-orange-500" />
+                <div className="py-20 flex flex-col items-center justify-center club-panel max-w-xl mx-auto text-center animate-in fade-in duration-300">
+                  <div className="w-20 h-20 club-yellow rounded-xl flex items-center justify-center mb-6 ">
+                    <FlameIcon className="w-10 h-10 club-accent" />
                   </div>
-                  <h3 className="font-heading text-2xl font-black text-white mb-2 uppercase tracking-widest">No Active Season Pass</h3>
-                  <p className="font-heading text-white/40 text-xs font-semibold uppercase tracking-wider max-w-xs mx-auto leading-relaxed">
-                    System operations for seasons are currently offline. Next sector window opens shortly.
+                  <h3 className="font-heading text-2xl font-black club-ink mb-2 uppercase tracking-wide">No Active Season Pass</h3>
+                  <p className="font-heading club-muted text-xs font-semibold uppercase tracking-wider max-w-xs mx-auto leading-relaxed">
+                    There is no active season right now. Check back for the next one.
                   </p>
                 </div>
               )
@@ -8089,29 +6655,29 @@ const handlePackAction = async (packId: string) => {
             {currentPage === "achievements" && (
               <div className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
                 {/* Achievements Header with completion XP gauge */}
-                <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-slate-950 via-yellow-950/10 to-slate-950 border border-white/10 p-8 shadow-[0_12px_40px_rgba(0,0,0,0.6)]">
-                  <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-yellow-500/5 rounded-full blur-[100px] pointer-events-none" />
-                  <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-amber-500/5 rounded-full blur-[100px] pointer-events-none" />
+                <div className="relative overflow-hidden rounded-xl club-surface border club-border p-8 ">
+                  <div className="club-decoration absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 club-yellow rounded-full pointer-events-none" />
+                  <div className="club-decoration absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 club-yellow rounded-full pointer-events-none" />
 
                   <div className="relative flex flex-col md:flex-row justify-between items-center gap-6 z-10">
                     <div className="space-y-3 text-center md:text-left">
-                      <h1 className="font-heading text-5xl font-black text-white tracking-tighter">
-                        LEGEND <span className="font-heading text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-amber-400 to-yellow-600 drop-shadow-sm">ROSTER</span>
+                      <h1 className="font-heading text-4xl font-black club-ink tracking-tighter">
+                        Your <span className="font-heading club-accent ">achievements</span>
                       </h1>
-                      <p className="font-heading text-white/40 text-sm font-semibold uppercase tracking-wider">
-                        Track career benchmarks and quantum unlocks
+                      <p className="font-heading club-muted text-sm font-semibold uppercase tracking-wider">
+                        Every milestone deserves a little celebration.
                       </p>
                     </div>
 
-                    <div className="flex items-center gap-6 bg-slate-900/60 backdrop-blur-2xl border border-white/10 px-8 py-4.5 rounded-3xl">
+                    <div className="flex items-center gap-6 club-well border club-border px-8 py-4.5 rounded-xl">
                       <div className="font-heading text-center md:text-right">
-                        <div className="font-heading text-[10px] text-white/40 font-black uppercase tracking-widest mb-1">Roster Progress</div>
-                        <div className="font-heading text-3xl font-black text-white tabular-nums drop-shadow">
-                          {userAchievements.length} <span className="font-heading text-white/30 text-xl font-bold">/ {achievements.length}</span>
+                        <div className="font-heading text-xs club-muted font-black uppercase tracking-wide mb-1">Achievements earned</div>
+                        <div className="font-heading text-3xl font-black club-ink tabular-nums ">
+                          {userAchievements.length} <span className="font-heading club-muted text-xl font-bold">/ {achievements.length}</span>
                         </div>
                       </div>
-                      <div className="w-1 h-10 bg-white/10 rounded-full" />
-                      <div className="w-12 h-12 rounded-xl bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center text-2xl animate-pulse">
+                      <div className="w-1 h-10 club-well rounded-full" />
+                      <div className="w-12 h-12 rounded-xl club-yellow border club-border flex items-center justify-center text-2xl ">
                         ⭐
                       </div>
                     </div>
@@ -8123,34 +6689,34 @@ const handlePackAction = async (packId: string) => {
                   {achievements.map((ach) => {
                     const isCompleted = userAchievements.includes(ach.id);
                     return (
-                      <div key={ach.id} className={`relative p-7 rounded-[2rem] border transition-all duration-500 group shadow-xl overflow-hidden ${
+                      <div key={ach.id} className={`relative p-7 rounded-xl border transition-all duration-500 group  overflow-hidden ${
                         isCompleted 
-                          ? 'bg-gradient-to-br from-yellow-950/20 to-transparent border-yellow-500/40 shadow-[0_15px_30px_rgba(234,179,8,0.05)]' 
-                          : 'blooket-panel border-white/5 grayscale opacity-55 hover:opacity-85 hover:border-white/10'
+                          ? 'club-surface club-border '
+                          : 'club-panel club-border grayscale opacity-55 hover:opacity-85 club-border'
                       }`}>
                         {/* Internal hover glow */}
                         {isCompleted && (
-                          <div className="absolute inset-0 bg-gradient-to-tr from-yellow-500/0 via-yellow-500/0 to-yellow-500/5 group-hover:to-yellow-500/10 transition-colors pointer-events-none" />
+                          <div className="club-decoration" />
                         )}
 
                         <div className="flex items-start justify-between mb-5">
                           <div className="font-heading text-6xl drop-shadow-xl group-hover:scale-110 transition-transform duration-300 select-none">{ach.icon}</div>
                           {isCompleted && (
-                            <div className="bg-yellow-400 text-black rounded-xl p-1.5 shadow-md shadow-yellow-500/20">
+                            <div className="club-yellow club-ink rounded-xl p-1.5 ">
                               <CheckIcon className="w-4 h-4 stroke-[3]" />
                             </div>
                           )}
                         </div>
 
-                        <h4 className="font-heading text-xl font-black text-white mb-2 group-hover:text-yellow-400 transition-colors tracking-tight">{ach.name}</h4>
-                        <p className="font-heading text-sm text-white/50 mb-6 font-medium leading-relaxed min-h-[40px]">{ach.description}</p>
+                        <h4 className="font-heading text-xl font-black club-ink mb-2 club-accent transition-colors tracking-tight">{ach.name}</h4>
+                        <p className="font-heading text-sm club-muted mb-6 font-medium leading-relaxed min-h-[40px]">{ach.description}</p>
 
-                        <div className="flex items-center justify-between pt-4 border-t border-white/5">
+                        <div className="flex items-center justify-between pt-4 border-t club-border">
                           <div className="flex items-center gap-2">
-                            <CoinsIcon className="w-4 h-4 text-yellow-500" />
-                            <span className="font-heading text-white font-black text-sm">{ach.reward_tokens.toLocaleString()}</span>
+                            <CoinsIcon className="w-4 h-4 club-accent" />
+                            <span className="font-heading club-ink font-black text-sm">{ach.reward_tokens.toLocaleString()}</span>
                           </div>
-                          <Badge className="bg-white/10 text-white/40 text-[8px] font-black uppercase">{ach.requirement_type.replace('_', ' ')}</Badge>
+                          <Badge className="club-well club-muted text-xs font-black uppercase">{ach.requirement_type.replace('_', ' ')}</Badge>
                         </div>
                       </div>
                     );
@@ -8284,22 +6850,22 @@ const handlePackAction = async (packId: string) => {
             {/* Live Leaderboard Overlay during game */}
             {isMergingGameActive && activeGamePin && livePlayers.length > 0 && (
               <div className="fixed top-24 right-8 z-[60] w-64 animate-in slide-in-from-right-10 duration-500 hidden lg:block">
-                <Card className="bg-black/40 backdrop-blur-xl border-white/10 shadow-2xl overflow-hidden">
-                  <div className="bg-gradient-to-r from-purple-600/50 to-blue-600/50 p-3 border-b border-white/10">
-                    <h3 className="font-heading text-white font-black text-xs tracking-widest uppercase flex items-center gap-2">
-                      <TrophyIcon className="w-3 h-3 text-yellow-400" />
+                <Card className="club-well club-border overflow-hidden">
+                  <div className="club-surface p-3 border-b club-border">
+                    <h3 className="font-heading club-ink font-black text-xs tracking-wide uppercase flex items-center gap-2">
+                      <TrophyIcon className="w-3 h-3 club-accent" />
                       Live Rankings
                     </h3>
                   </div>
                   <CardContent className="p-0">
                     <div className="max-h-[300px] overflow-y-auto">
                       {[...livePlayers].filter(Boolean).sort((a, b) => (b.score || 0) - (a.score || 0)).slice(0, 5).map((player, idx) => (
-                        <div key={player.id} className="flex items-center justify-between p-3 border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
+                        <div key={player.id} className="flex items-center justify-between p-3 border-b club-border last:border-0 club-well transition-colors">
                           <div className="flex items-center gap-3">
-                            <span className={`text-[10px] font-black ${idx === 0 ? "text-yellow-400" : "text-white/40"}`}>#{idx + 1}</span>
-                            <span className="font-heading text-white font-bold text-sm truncate w-24">{player.username}</span>
+                            <span className={`text-[10px] font-black ${idx === 0 ? "club-accent" : "club-muted"}`}>#{idx + 1}</span>
+                            <span className="font-heading club-ink font-bold text-sm truncate w-24">{player.username}</span>
                           </div>
-                          <Badge variant="outline" className="bg-white/5 text-cyan-400 border-cyan-500/20 font-black text-[10px]">
+                          <Badge variant="outline" className="club-well club-accent club-border font-black text-xs">
                             {player.score || 0}
                           </Badge>
                         </div>
@@ -8319,21 +6885,21 @@ const handlePackAction = async (packId: string) => {
           <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 md:p-8 animate-in fade-in zoom-in-95 duration-300">
             {/* Backdrop with blur and dark tint */}
             <div
-              className="absolute inset-0 bg-black/85 backdrop-blur-md"
+              className="absolute inset-0 club-overlay "
               onClick={() => setShowV2NewsModal(false)}
             />
 
-            <Card className="w-full max-w-2xl bg-slate-900 border border-purple-500/30 shadow-[0_0_50px_rgba(168,85,247,0.2)] relative z-10 overflow-hidden flex flex-col max-h-[85vh] rounded-3xl">
-              <CardHeader className="border-b border-white/5 pb-4 bg-gradient-to-r from-purple-900/50 via-slate-900 to-indigo-900/50">
+            <Card className="w-full max-w-2xl club-well border club-border relative z-10 overflow-hidden flex flex-col max-h-[85vh] rounded-xl">
+              <CardHeader className="border-b club-border pb-4 club-surface ">
                 <div className="flex items-center justify-between">
                   <div>
-                    <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full mb-1">
+                    <Badge className="club-surface club-ink text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded-full mb-1">
                       Major Release
                     </Badge>
-                    <CardTitle className="font-heading text-2xl md:text-3xl font-black text-white tracking-tight flex items-center gap-3">
+                    <CardTitle className="font-heading text-2xl md:text-3xl font-black club-ink tracking-tight flex items-center gap-3">
                       🚀 BOOMKIT V2 IS OUT!
                     </CardTitle>
-                    <CardDescription className="font-heading text-purple-300/80 font-semibold tracking-wide text-xs">
+                    <CardDescription className="font-heading club-accent font-semibold tracking-wide text-xs">
                       The Ultimate Gamified Learning Adventure Upgrade
                     </CardDescription>
                   </div>
@@ -8341,14 +6907,14 @@ const handlePackAction = async (packId: string) => {
                     variant="ghost"
                     size="icon"
                     onClick={() => setShowV2NewsModal(false)}
-                    className="rounded-full bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-all"
+                    className="club-action rounded-full club-well club-well club-muted club-ink transition-all"
                   >
                     <XIcon className="w-5 h-5" />
                   </Button>
                 </div>
               </CardHeader>
 
-              <CardContent className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide text-slate-200">
+              <CardContent className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide club-ink">
                 <div className="space-y-3">
                   <p className="font-heading text-sm md:text-base font-medium leading-relaxed">
                     Welcome to **Boomkit V2**! We have completely overhauled the platform to bring you a premium, secure, and feature-rich educational arena. Here are the major additions and changes you can explore starting today:
@@ -8356,57 +6922,57 @@ const handlePackAction = async (packId: string) => {
                 </div>
 
                 <div className="space-y-4">
-                  <h4 className="font-heading text-sm font-black uppercase tracking-widest text-purple-400">
+                  <h4 className="font-heading text-sm font-black uppercase tracking-wide club-accent">
                     🛠️ v2.0.0 Patch Notes & Features
                   </h4>
 
                   <div className="grid gap-4">
-                    <div className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-purple-500/20 transition-all">
+                    <div className="p-4 club-well rounded-xl border club-border club-border transition-all">
                       <div className="flex items-center gap-2 mb-1.5">
                         <span className="font-heading text-lg">🛡️</span>
-                        <h5 className="font-bold text-white text-sm md:text-base">Clans & Teams</h5>
+                        <h5 className="font-bold club-ink text-sm md:text-base">Clans & Teams</h5>
                       </div>
-                      <p className="font-heading text-xs md:text-sm text-slate-400 leading-relaxed pl-7">
+                      <p className="font-heading text-xs md:text-sm club-muted leading-relaxed pl-7">
                         Create or join a Clan, set custom tag colors, manage recruitment requirements, chat in real-time with clan mates, and donate tokens to the shared bank to level up your clan!
                       </p>
                     </div>
 
-                    <div className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-purple-500/20 transition-all">
+                    <div className="p-4 club-well rounded-xl border club-border club-border transition-all">
                       <div className="flex items-center gap-2 mb-1.5">
                         <span className="font-heading text-lg">🧪</span>
-                        <h5 className="font-bold text-white text-sm md:text-base">High-Tier Fusion Lab</h5>
+                        <h5 className="font-bold club-ink text-sm md:text-base">High-Tier Fusion Lab</h5>
                       </div>
-                      <p className="font-heading text-xs md:text-sm text-slate-400 leading-relaxed pl-7">
+                      <p className="font-heading text-xs md:text-sm club-muted leading-relaxed pl-7">
                         Combine duplicate Booms (like *DeepSeek*, *Parrot*, or *Kraken*) in the upgraded Fusion Lab to roll for higher rarity tiers and clone rare items.
                       </p>
                     </div>
 
-                    <div className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-purple-500/20 transition-all">
+                    <div className="p-4 club-well rounded-xl border club-border club-border transition-all">
                       <div className="flex items-center gap-2 mb-1.5">
                         <span className="font-heading text-lg">🤝</span>
-                        <h5 className="font-bold text-white text-sm md:text-base">Secure Peer-to-Peer Trading</h5>
+                        <h5 className="font-bold club-ink text-sm md:text-base">Secure Peer-to-Peer Trading</h5>
                       </div>
-                      <p className="font-heading text-xs md:text-sm text-slate-400 leading-relaxed pl-7">
+                      <p className="font-heading text-xs md:text-sm club-muted leading-relaxed pl-7">
                         Trade Booms safely with friends. Secure database RPC functions and UI blocks prevent trades with banned or rejected users.
                       </p>
                     </div>
 
-                    <div className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-purple-500/20 transition-all">
+                    <div className="p-4 club-well rounded-xl border club-border club-border transition-all">
                       <div className="flex items-center gap-2 mb-1.5">
                         <span className="font-heading text-lg">🏆</span>
-                        <h5 className="font-bold text-white text-sm md:text-base">Staff Live Tournaments & Seasons</h5>
+                        <h5 className="font-bold club-ink text-sm md:text-base">Staff Live Tournaments & Seasons</h5>
                       </div>
-                      <p className="font-heading text-xs md:text-sm text-slate-400 leading-relaxed pl-7">
+                      <p className="font-heading text-xs md:text-sm club-muted leading-relaxed pl-7">
                         Staff members can now host live competitions and start new seasons complete with a custom Season Pass, powered by secure bypass-RLS operations.
                       </p>
                     </div>
 
-                    <div className="p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-purple-500/20 transition-all">
+                    <div className="p-4 club-well rounded-xl border club-border club-border transition-all">
                       <div className="flex items-center gap-2 mb-1.5">
                         <span className="font-heading text-lg">🤖</span>
-                        <h5 className="font-bold text-white text-sm md:text-base">Gemini 2.5 Quiz Generation</h5>
+                        <h5 className="font-bold club-ink text-sm md:text-base">Gemini 2.5 Quiz Generation</h5>
                       </div>
-                      <p className="font-heading text-xs md:text-sm text-slate-400 leading-relaxed pl-7">
+                      <p className="font-heading text-xs md:text-sm club-muted leading-relaxed pl-7">
                         Quizzes are now generated with Google's fast and smart `gemini-2.5-flash-lite` AI model for maximum topic relevance and progression.
                       </p>
                     </div>
@@ -8414,10 +6980,10 @@ const handlePackAction = async (packId: string) => {
                 </div>
               </CardContent>
 
-              <div className="p-6 blooket-panel border-t border-white/5">
+              <div className="p-6 club-panel border-t club-border">
                 <Button
                   onClick={() => setShowV2NewsModal(false)}
-                  className="w-full h-12 bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-black text-base rounded-xl shadow-[0_5px_15px_rgba(168,85,247,0.3)] transition-all hover:-translate-y-0.5 active:translate-y-0"
+                  className="club-action w-full h-12 club-surface club-ink font-black text-base rounded-xl transition-all hover:-translate-y-0.5 active:translate-y-0"
                 >
                   LET'S PLAY BOOMKIT V2!
                 </Button>
@@ -8431,42 +6997,42 @@ const handlePackAction = async (packId: string) => {
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-500">
             {/* Backdrop with extreme blur and dark tint */}
             <div
-              className="absolute inset-0 bg-black/90 backdrop-blur-3xl"
+              className="club-decoration absolute inset-0 club-overlay "
               onClick={() => setShowNews(false)}
             />
 
-            <Card className="w-full max-w-4xl blooket-card relative z-10 overflow-hidden flex flex-col md:flex-row h-[80vh] rounded-[2.5rem]">
+            <Card className="w-full max-w-4xl club-panel relative z-10 overflow-hidden flex flex-col md:flex-row h-[80vh] rounded-xl">
               {/* Left Side: Featured News Image / Gradient */}
-              <div className="md:w-1/3 shrink-0 relative bg-gradient-to-br from-purple-900 to-indigo-950 overflow-hidden hidden md:block border-r border-white/10">
+              <div className="md:w-1/3 shrink-0 relative club-surface overflow-hidden hidden md:block border-r club-border">
                 <div className="absolute inset-0 opacity-40 mix-blend-overlay">
                   <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_center,_var(--tw-gradient-from)_0%,_transparent_70%)]" />
                 </div>
-                <div className="absolute inset-0 flex flex-col justify-end p-8 text-white z-10">
-                  <Badge className="w-fit mb-4 bg-purple-500/20 backdrop-blur-md border border-purple-500/30 text-[9px] font-black uppercase tracking-widest text-purple-300">
+                <div className="absolute inset-0 flex flex-col justify-end p-8 club-ink z-10">
+                  <Badge className="w-fit mb-4 club-purple border club-border text-xs font-black uppercase tracking-wide club-accent">
                     Community Updates
                   </Badge>
-                  <h3 className="font-heading text-2xl font-black leading-none tracking-tight mb-4 text-pink-600 dark:text-pink-400 font-black">
+                  <h3 className="font-heading text-2xl font-black leading-none tracking-tight mb-4 club-accent dark:club-accent font-black">
                     WHAT'S NEW IN BOOMKIT
                   </h3>
-                  <p className="font-heading text-slate-300/80 font-medium text-xs leading-relaxed">
+                  <p className="font-heading club-muted font-medium text-xs leading-relaxed">
                     Stay ahead of the game with our latest features, patches, and community highlights.
                   </p>
                 </div>
                 {/* Decorative floating elements */}
-                <div className="absolute top-10 right-10 w-24 h-24 bg-purple-500/10 rounded-full blur-2xl animate-pulse" />
-                <div className="absolute bottom-40 left-10 w-16 h-16 bg-blue-500/10 rounded-full blur-xl animate-bounce-slow" />
+                <div className="absolute top-10 right-10 w-24 h-24 club-purple rounded-full " />
+                <div className="absolute bottom-40 left-10 w-16 h-16 club-blue rounded-full " />
               </div>
 
               {/* Right Side: News Feed */}
-              <div className="flex-grow flex flex-col bg-black/40 backdrop-blur-sm relative">
-                <CardHeader className="border-b border-white/5 pb-6">
+              <div className="flex-grow flex flex-col club-well relative">
+                <CardHeader className="border-b club-border pb-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <CardTitle className="font-heading text-3xl font-black text-white tracking-tight flex items-center gap-3">
-                        <NewspaperIcon className="w-8 h-8 text-purple-400" />
+                      <CardTitle className="font-heading text-3xl font-black club-ink tracking-tight flex items-center gap-3">
+                        <NewspaperIcon className="w-8 h-8 club-accent" />
                         The Daily Boom
                       </CardTitle>
-                      <CardDescription className="font-heading text-white/40 font-bold uppercase tracking-widest text-[9px] mt-1">
+                      <CardDescription className="font-heading club-muted font-bold uppercase tracking-wide text-xs mt-1">
                         Latest updates from the arena
                       </CardDescription>
                     </div>
@@ -8474,7 +7040,7 @@ const handlePackAction = async (packId: string) => {
                       variant="ghost"
                       size="icon"
                       onClick={() => setShowNews(false)}
-                      className="rounded-full bg-white/5 hover:bg-white/10 text-white/50 hover:text-white transition-all"
+                      className="club-action rounded-full club-well club-well club-muted club-ink transition-all"
                     >
                       <XIcon className="w-5 h-5" />
                     </Button>
@@ -8483,7 +7049,7 @@ const handlePackAction = async (packId: string) => {
 
                 <CardContent className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-hide premium-scrollbar">
                   {NEWS_ITEMS.map((news) => (
-                    <div key={news.id} className="group relative flex flex-col gap-4 bg-white/5 border border-white/5 hover:border-purple-500/20 hover:bg-white/10 rounded-2xl p-5 transition-all duration-300 animate-in slide-in-from-right-4">
+                    <div key={news.id} className="group relative flex flex-col gap-4 club-well border club-border club-border club-well rounded-xl p-5 transition-all duration-300 animate-in slide-in-from-right-4">
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
                           <span className="font-heading text-2xl filter drop-shadow-md group-hover:scale-125 transition-transform duration-300">
@@ -8491,16 +7057,16 @@ const handlePackAction = async (packId: string) => {
                           </span>
                           <div>
                             <div className="flex items-center gap-2 mb-1">
-                              <h4 className="font-heading text-xl font-black text-white tracking-tight group-hover:text-purple-400 transition-colors">
+                              <h4 className="font-heading text-xl font-black club-ink tracking-tight club-accent transition-colors">
                                 {news.title}
                               </h4>
                               {news.badge && (
-                                <Badge className={`${news.badgeColor || 'bg-purple-500'} text-white text-[9px] font-black border-none px-2 py-0.5 rounded-full`}>
+                                <Badge className={`${news.badgeColor || 'club-purple'} club-ink text-xs font-black border-none px-2 py-0.5 rounded-full`}>
                                   {news.badge}
                                 </Badge>
                               )}
                             </div>
-                            <p className="font-heading text-[10px] text-white/30 font-bold uppercase tracking-widest">
+                            <p className="font-heading text-xs club-muted font-bold uppercase tracking-wide">
                               {news.date}
                             </p>
                           </div>
@@ -8508,27 +7074,27 @@ const handlePackAction = async (packId: string) => {
                       </div>
 
                       {news.imageUrl && (
-                        <div className="relative aspect-[21/9] rounded-2xl overflow-hidden border border-white/5 group-hover:border-white/20 transition-all duration-300">
+                        <div className="relative aspect-[21/9] rounded-xl overflow-hidden border club-border club-border transition-all duration-300">
                           <img
                             src={news.imageUrl || "/placeholder.svg"}
                             alt={news.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent opacity-60" />
+                          <div className="absolute inset-0 club-surface opacity-60" />
                         </div>
                       )}
 
-                      <p className="font-heading text-slate-300/80 text-sm leading-relaxed font-medium pl-4 border-l-2 border-purple-500/20 group-hover:border-purple-500/50 transition-all duration-300">
+                      <p className="font-heading club-muted text-sm leading-relaxed font-medium pl-4 border-l-2 club-border club-border transition-all duration-300">
                         {news.content}
                       </p>
                     </div>
                   ))}
                 </CardContent>
 
-                <div className="p-6 bg-black/40 border-t border-white/5">
+                <div className="p-6 club-well border-t club-border">
                   <Button
                     onClick={() => setShowNews(false)}
-                    className="w-full h-14 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-black text-lg rounded-2xl shadow-lg hover:scale-[1.01] active:scale-[0.98] transition-all border-none"
+                    className="club-action w-full h-14 club-surface club-ink font-black text-lg rounded-xl hover:scale-[1.01] active:scale-[0.98] transition-all border-none"
                   >
                     RETURN TO ARENA
                   </Button>
@@ -8543,12 +7109,12 @@ const handlePackAction = async (packId: string) => {
       {
         soloFlow === "mode-select" && soloSubject && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8 animate-in zoom-in-95 duration-500">
-            <div className="absolute inset-0 bg-black/90 backdrop-blur-3xl" onClick={() => setSoloFlow(null)} />
+            <div className="club-decoration absolute inset-0 club-overlay " onClick={() => setSoloFlow(null)} />
             <div className="relative z-10 w-full max-w-5xl h-[85vh] flex flex-col">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="font-heading text-4xl font-black text-white tracking-tighter">Choose Your Solo Challenge</h2>
-                  <p className="font-heading text-purple-300/60 font-medium">
+                  <h2 className="font-heading text-4xl font-black club-ink tracking-tighter">Choose Your Solo Challenge</h2>
+                  <p className="font-heading club-accent font-medium">
                     Playing: {soloSubject.subject} (Grade {soloSubject.grade})
                   </p>
                 </div>
@@ -8556,7 +7122,7 @@ const handlePackAction = async (packId: string) => {
                   variant="ghost"
                   size="icon"
                   onClick={() => setSoloFlow(null)}
-                  className="rounded-full bg-white/5 hover:bg-white/10 text-white/50 hover:text-white"
+                  className="club-action rounded-full club-well club-well club-muted club-ink"
                 >
                   <XIcon className="w-6 h-6" />
                 </Button>
@@ -8609,16 +7175,16 @@ const handlePackAction = async (packId: string) => {
       {/* PUBLIC PLAYER PROFILE MODAL */}
       {
         showPlayerProfile && selectedProfileUser && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
-            <div className="bg-slate-900 border border-slate-700/50 rounded-2xl w-full max-w-md my-8 relative overflow-hidden shadow-2xl flex flex-col">
+          <div className="fixed inset-0 club-overlay z-50 flex items-center justify-center p-4 overflow-y-auto">
+            <div className="club-well border club-border rounded-xl w-full max-w-md my-8 relative overflow-hidden flex flex-col">
 
               {/* Banner & Close Button */}
-              <div className={`h-32 w-full bg-gradient-to-r ${selectedProfileUser.bannerColor || "from-slate-700 to-slate-800"} relative`}>
-                <div className="absolute inset-0 bg-black/20" />
+              <div className={`h-32 w-full club-surface ${selectedProfileUser.bannerColor || " "} relative`}>
+                <div className="absolute inset-0 club-well" />
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute top-4 right-4 text-white/70 hover:text-white bg-black/20 hover:bg-black/40 rounded-full"
+                  className="club-action absolute top-4 right-4 club-ink club-ink club-well club-well rounded-full"
                   onClick={() => setShowPlayerProfile(false)}
                 >
                   <XIcon className="h-5 w-5" />
@@ -8629,8 +7195,8 @@ const handlePackAction = async (packId: string) => {
               <div className="px-6 pb-6 relative flex flex-col items-center -mt-16">
 
                 {/* Avatar Outline */}
-                <div className="rounded-full p-1.5 bg-slate-900 relative">
-                  <Avatar className="h-28 w-28 border-4 border-slate-800 shadow-xl" style={{ backgroundColor: '#1a1d27' }}>
+                <div className="rounded-full p-1.5 club-well relative">
+                  <Avatar className="h-28 w-28 border-4 club-border " style={{ backgroundColor: '#1a1d27' }}>
                     <AvatarFallback className="font-heading text-5xl flex items-center justify-center p-3 overflow-hidden">
                       {renderProfilePicture(selectedProfileUser.profilePicture || "🎮", "w-full h-full object-contain")}
                     </AvatarFallback>
@@ -8638,7 +7204,7 @@ const handlePackAction = async (packId: string) => {
 
                   {/* Status Indicator */}
                   <div
-                    className={`absolute bottom-3 right-3 h-5 w-5 rounded-full border-4 border-slate-900 ${Date.now() - (selectedProfileUser.lastSeen || 0) < 5 * 60 * 1000 ? "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]" : "bg-slate-500"
+                    className={`absolute bottom-3 right-3 h-5 w-5 rounded-full border-4 border-slate-900 ${Date.now() - (selectedProfileUser.lastSeen || 0) < 5 * 60 * 1000 ? "club-green " : "club-well"
                       }`}
                     title={Date.now() - (selectedProfileUser.lastSeen || 0) < 5 * 60 * 1000 ? "Online" : "Offline"}
                   />
@@ -8646,9 +7212,9 @@ const handlePackAction = async (packId: string) => {
 
                 {/* Name & Role */}
                 <div className="font-heading text-center mt-3 mb-6">
-                  <h2 className={`text-2xl font-black ${selectedProfileUser.nameColor || "text-white"} flex items-center justify-center gap-2`}>
+                  <h2 className={`text-2xl font-black ${selectedProfileUser.nameColor || "club-ink"} flex items-center justify-center gap-2`}>
                     {selectedProfileUser.username}
-                    {selectedProfileUser.isPlusUser && <SparklesIcon className="font-heading text-yellow-400 h-5 w-5 fill-yellow-400/20" />}
+                    {selectedProfileUser.isPlusUser && <SparklesIcon className="font-heading club-accent h-5 w-5 fill-yellow-400/20" />}
                   </h2>
 
                   <div className="flex flex-wrap justify-center gap-2 mt-2">
@@ -8669,28 +7235,28 @@ const handlePackAction = async (packId: string) => {
 
                 {/* Core Stats Grid */}
                 <div className="w-full grid grid-cols-2 gap-3">
-                  <div className="bg-slate-800/80 rounded-xl p-4 flex flex-col items-center border border-white/5 hover:bg-slate-800 transition-colors">
-                    <CoinsIcon className="h-6 w-6 text-yellow-500 mb-2" />
-                    <span className="font-heading text-2xl font-black text-white">{selectedProfileUser.tokens.toLocaleString()}</span>
-                    <span className="font-heading text-[10px] uppercase font-bold text-slate-400">Tokens</span>
+                  <div className="club-well rounded-xl p-4 flex flex-col items-center border club-border club-well transition-colors">
+                    <CoinsIcon className="h-6 w-6 club-accent mb-2" />
+                    <span className="font-heading text-2xl font-black club-ink">{selectedProfileUser.tokens.toLocaleString()}</span>
+                    <span className="font-heading text-xs uppercase font-bold club-muted">Tokens</span>
                   </div>
 
-                  <div className="bg-slate-800/80 rounded-xl p-4 flex flex-col items-center border border-white/5 hover:bg-slate-800 transition-colors">
-                    <TrophyIcon className="h-6 w-6 text-purple-400 mb-2" />
-                    <span className="font-heading text-2xl font-black text-white">{selectedProfileUser.boomScore.toLocaleString()}</span>
-                    <span className="font-heading text-[10px] uppercase font-bold text-slate-400">Boom Score</span>
+                  <div className="club-well rounded-xl p-4 flex flex-col items-center border club-border club-well transition-colors">
+                    <TrophyIcon className="h-6 w-6 club-accent mb-2" />
+                    <span className="font-heading text-2xl font-black club-ink">{selectedProfileUser.boomScore.toLocaleString()}</span>
+                    <span className="font-heading text-xs uppercase font-bold club-muted">Boom Score</span>
                   </div>
 
-                  <div className="bg-slate-800/80 rounded-xl p-4 flex flex-col items-center border border-white/5 hover:bg-slate-800 transition-colors">
-                    <BoxIcon className="h-6 w-6 text-blue-400 mb-2" />
-                    <span className="font-heading text-2xl font-black text-white">{selectedProfileUser.packsOpened || 0}</span>
-                    <span className="font-heading text-[10px] uppercase font-bold text-slate-400">Packs Opened</span>
+                  <div className="club-well rounded-xl p-4 flex flex-col items-center border club-border club-well transition-colors">
+                    <BoxIcon className="h-6 w-6 club-accent mb-2" />
+                    <span className="font-heading text-2xl font-black club-ink">{selectedProfileUser.packsOpened || 0}</span>
+                    <span className="font-heading text-xs uppercase font-bold club-muted">Packs Opened</span>
                   </div>
 
-                  <div className="bg-slate-800/80 rounded-xl p-4 flex flex-col items-center border border-white/5 hover:bg-slate-800 transition-colors">
-                    <MessageCircleIcon className="h-6 w-6 text-green-400 mb-2" />
-                    <span className="font-heading text-sm font-black text-slate-200 text-center uppercase truncate w-full">Level {selectedProfileUser.level || 1}</span>
-                    <span className="font-heading text-[10px] uppercase font-bold text-slate-400">Player Rank</span>
+                  <div className="club-well rounded-xl p-4 flex flex-col items-center border club-border club-well transition-colors">
+                    <MessageCircleIcon className="h-6 w-6 club-success mb-2" />
+                    <span className="font-heading text-sm font-black club-ink text-center uppercase truncate w-full">Level {selectedProfileUser.level || 1}</span>
+                    <span className="font-heading text-xs uppercase font-bold club-muted">Player Rank</span>
                   </div>
                 </div>
 
@@ -8699,7 +7265,7 @@ const handlePackAction = async (packId: string) => {
                   <div className="w-full mt-6 grid grid-cols-2 gap-3">
                     <Button
                       variant="outline"
-                      className="w-full bg-white/5 border-white/10 hover:bg-white/10 text-white font-black h-12 rounded-xl transition-colors"
+                      className="club-action w-full club-well club-border club-well club-ink font-black h-12 rounded-xl transition-colors"
                       onClick={() => {
                         const amountStr = prompt(`How many tokens do you want to safely gift to ${selectedProfileUser.username}?`);
                         if (!amountStr) return;
@@ -8716,7 +7282,7 @@ const handlePackAction = async (packId: string) => {
                     </Button>
                     <Button
                       variant="outline"
-                      className="w-full bg-white/5 border-white/10 hover:bg-white/10 text-white font-black h-12 rounded-xl transition-colors"
+                      className="club-action w-full club-well club-border club-well club-ink font-black h-12 rounded-xl transition-colors"
                       onClick={() => {
                         const allBooms = Object.keys(currentUser?.booms || {}).filter(b => currentUser?.booms[b] > 0);
                         if (allBooms.length === 0) {
@@ -8745,8 +7311,8 @@ const handlePackAction = async (packId: string) => {
                 )}
 
                 {/* Footer Info */}
-                <div className="w-full mt-6 pt-4 border-t border-white/10 flex justify-between items-center text-xs text-slate-500 font-medium">
-                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-slate-600"></span> Joined {new Date(selectedProfileUser.joinDate).toLocaleDateString()}</span>
+                <div className="w-full mt-6 pt-4 border-t club-border flex justify-between items-center text-xs club-muted font-medium">
+                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full club-well"></span> Joined {new Date(selectedProfileUser.joinDate).toLocaleDateString()}</span>
                   <span>ID: {selectedProfileUser.username.toLowerCase()}</span>
                 </div>
 
@@ -8757,70 +7323,70 @@ const handlePackAction = async (packId: string) => {
       }
       {/* CLAN PROFILE OVERLAY POPUP */}
       {showClanProfileModal && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-[120] flex items-center justify-center p-4">
-          <div className="bg-[#0c0c0e]/95 border border-purple-500/20 rounded-[2.5rem] w-full max-w-lg relative overflow-hidden shadow-2xl p-8 space-y-6">
+        <div className="fixed inset-0 club-overlay z-[120] flex items-center justify-center p-4">
+          <div className="club-surface border club-border rounded-xl w-full max-w-lg relative overflow-hidden p-8 space-y-6">
             <Button
               variant="ghost"
               size="icon"
-              className="absolute top-6 right-6 text-white/40 hover:text-white bg-white/5 hover:bg-white/10 rounded-full"
+              className="club-action absolute top-6 right-6 club-muted club-ink club-well club-well rounded-full"
               onClick={() => setShowClanProfileModal(null)}
             >
               <XIcon className="h-5 w-5" />
             </Button>
 
             <div className="flex items-center gap-5">
-              <div className="w-20 h-20 bg-purple-500/10 rounded-2xl flex items-center justify-center text-5xl border border-purple-500/20">
+              <div className="w-20 h-20 club-purple rounded-xl flex items-center justify-center text-4xl border club-border">
                 {showClanProfileModal.logo}
               </div>
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <h2 className="font-heading text-3xl font-black text-white tracking-tight">{showClanProfileModal.name}</h2>
-                  <span className="inline-block text-sm font-black px-2 py-0.5 rounded-lg bg-black/40 border border-white/5">
+                  <h2 className="font-heading text-3xl font-black club-ink tracking-tight">{showClanProfileModal.name}</h2>
+                  <span className="inline-block text-sm font-black px-2 py-0.5 rounded-lg club-well border club-border">
                     <span className={showClanProfileModal.tag_color}>
                       [{showClanProfileModal.tag}]
                     </span>
                   </span>
                 </div>
-                <p className="font-heading text-[10px] text-white/40 font-bold uppercase tracking-wider">
+                <p className="font-heading text-xs club-muted font-bold uppercase tracking-wider">
                   Level {showClanProfileModal.level} Clan • {showClanProfileModal.members?.length || 0} members
                 </p>
               </div>
             </div>
 
-            <div className="bg-white/5 rounded-2xl p-5 border border-white/5 space-y-2">
-              <span className="font-heading text-[10px] font-black uppercase text-purple-400 tracking-wider">Description</span>
-              <p className="font-heading text-white/70 text-xs leading-relaxed">
+            <div className="club-well rounded-xl p-5 border club-border space-y-2">
+              <span className="font-heading text-xs font-black uppercase club-accent tracking-wider">Description</span>
+              <p className="font-heading club-ink text-xs leading-relaxed">
                 {showClanProfileModal.description || "This clan has no description yet."}
               </p>
             </div>
 
             <div className="grid grid-cols-2 gap-4 text-xs">
-              <div className="bg-black/30 border border-white/5 rounded-xl p-3.5 flex flex-col justify-center">
-                <span className="font-heading text-[10px] font-black uppercase text-white/30 tracking-wider mb-1">Leader</span>
-                <span className="font-bold text-yellow-400">{showClanProfileModal.leader}</span>
+              <div className="club-well border club-border rounded-xl p-3.5 flex flex-col justify-center">
+                <span className="font-heading text-xs font-black uppercase club-muted tracking-wider mb-1">Leader</span>
+                <span className="font-bold club-accent">{showClanProfileModal.leader}</span>
               </div>
-              <div className="bg-black/30 border border-white/5 rounded-xl p-3.5 flex flex-col justify-center">
-                <span className="font-heading text-[10px] font-black uppercase text-white/30 tracking-wider mb-1">XP Progression</span>
-                <span className="font-bold text-purple-400">{showClanProfileModal.xp?.toLocaleString()} Total XP</span>
+              <div className="club-well border club-border rounded-xl p-3.5 flex flex-col justify-center">
+                <span className="font-heading text-xs font-black uppercase club-muted tracking-wider mb-1">XP Progression</span>
+                <span className="font-bold club-accent">{showClanProfileModal.xp?.toLocaleString()} Total XP</span>
               </div>
             </div>
 
             {/* Roster Preview */}
             <div className="space-y-3">
-              <span className="font-heading text-[10px] font-black uppercase text-purple-400 tracking-wider ml-1">Members List</span>
-              <ScrollArea className="h-44 pr-2 bg-black/20 rounded-2xl border border-white/5 p-4 scrollbar-hide">
+              <span className="font-heading text-xs font-black uppercase club-accent tracking-wider ml-1">Members List</span>
+              <ScrollArea className="h-44 pr-2 club-well rounded-xl border club-border p-4 scrollbar-hide">
                 <div className="space-y-2">
                   {showClanProfileModal.members?.map((member: any) => (
-                    <div key={member.id} className="flex items-center justify-between text-xs py-1.5 border-b border-white/5 last:border-0">
+                    <div key={member.id} className="flex items-center justify-between text-xs py-1.5 border-b club-border last:border-0">
                       <div className="flex items-center gap-2">
                         <div className="w-6 h-6 flex items-center justify-center shrink-0">
                           {renderProfilePicture(member.profile_picture || "🎮", "w-full h-full object-contain")}
                         </div>
-                        <span className={`font-bold ${member.name_color || 'text-white'}`}>{member.username}</span>
+                        <span className={`font-bold ${member.name_color || 'club-ink'}`}>{member.username}</span>
                       </div>
                       <span className={`text-[9px] font-black uppercase tracking-wider ${
-                        member.clan_role === 'leader' ? 'text-yellow-500' :
-                        member.clan_role === 'co_leader' ? 'text-purple-400' : 'text-white/40'
+                        member.clan_role === 'leader' ? 'club-accent' :
+                        member.clan_role === 'co_leader' ? 'club-accent' : 'club-muted'
                       }`}>
                         {member.clan_role}
                       </span>
@@ -8837,7 +7403,7 @@ const handlePackAction = async (packId: string) => {
                   handleJoinClan(showClanProfileModal.id);
                   setShowClanProfileModal(null);
                 }}
-                className="w-full h-12 bg-purple-600 hover:bg-purple-500 text-white font-black rounded-xl border-none text-xs"
+                className="club-action w-full h-12 club-purple club-purple club-ink font-black rounded-xl border-none text-xs"
               >
                 Join Clan
               </Button>
@@ -8849,16 +7415,16 @@ const handlePackAction = async (packId: string) => {
       {/* Global Loading Overlay */}
       {
         isGeneratingSet && (
-          <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center flex-col gap-6 animate-in fade-in duration-300">
+          <div className="fixed inset-0 z-[100] club-overlay flex items-center justify-center flex-col gap-6 animate-in fade-in duration-300">
             <div className="relative">
-              <div className="w-24 h-24 rounded-full border-t-4 border-b-4 border-purple-500 animate-spin"></div>
+              <div className="w-24 h-24 rounded-full border-t-4 border-b-4 club-border animate-spin"></div>
               <div className="absolute inset-0 flex items-center justify-center">
-                <SparklesIcon className="w-8 h-8 text-purple-400 animate-pulse" />
+                <SparklesIcon className="w-8 h-8 club-accent " />
               </div>
             </div>
             <div className="font-heading text-center space-y-2">
-              <h2 className="font-heading text-3xl font-black text-white tracking-tight animate-pulse">GENERATING ARENA</h2>
-              <p className="font-heading text-white/60 font-medium">Using AI to craft unique questions...</p>
+              <h2 className="font-heading text-3xl font-black club-ink tracking-tight ">GENERATING ARENA</h2>
+              <p className="font-heading club-muted font-medium">Using AI to craft unique questions...</p>
             </div>
           </div>
         )
@@ -8867,7 +7433,7 @@ const handlePackAction = async (packId: string) => {
       {
         packAnimation.show && (
           <div
-            className={`fixed inset-0 bg-black/95 backdrop-blur-xl flex items-center justify-center z-50 overflow-hidden ${isInstantOpen ? "instant-open-active" : ""} ${packAnimation.stage === "done" ? "cursor-pointer" : "cursor-default"}`}
+            className={`fixed inset-0 club-overlay flex items-center justify-center z-50 overflow-hidden ${isInstantOpen ? "instant-open-active" : ""} ${packAnimation.stage === "done" ? "cursor-pointer" : "cursor-default"}`}
             onClick={() => {
               if (packAnimation.stage === "done") {
                 closePackAnimation()
@@ -8876,8 +7442,8 @@ const handlePackAction = async (packId: string) => {
           >
             {/* Ambient Background Nebulas for immersion */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-              <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full bg-purple-600/10 blur-[150px] nebula-float-1" />
-              <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] rounded-full bg-cyan-600/10 blur-[150px] nebula-float-2" />
+              <div className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full club-purple nebula-float-1" />
+              <div className="absolute -bottom-40 -right-40 w-[600px] h-[600px] rounded-full club-blue nebula-float-2" />
             </div>
 
             {/* Confetti particles - colored by rarity */}
@@ -8914,21 +7480,21 @@ const handlePackAction = async (packId: string) => {
               <div className="font-heading text-center relative z-10">
                 <div className="animate-pack-shake relative">
                   {/* Rotating Outer Rings */}
-                  <div className="absolute -inset-8 rounded-full border border-purple-500/20 animate-spin" style={{ animationDuration: '4s' }} />
+                  <div className="absolute -inset-8 rounded-full border club-border animate-spin" style={{ animationDuration: '4s' }} />
                   <div className="absolute -inset-12 rounded-full border border-cyan-500/10 animate-spin" style={{ animationDuration: '8s', animationDirection: 'reverse' }} />
 
-                  <div className="w-56 h-56 blooket-card rounded-full shadow-[0_0_50px_rgba(168,85,247,0.2)] flex flex-col items-center justify-center relative overflow-hidden group">
-                    <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-transparent pointer-events-none" />
+                  <div className="w-56 h-56 club-panel rounded-full flex flex-col items-center justify-center relative overflow-hidden group">
+                    <div className="absolute inset-0 club-surface pointer-events-none" />
 
                     {/* Inner spinning core */}
-                    <div className="absolute inset-4 rounded-full border border-dashed border-white/10 animate-spin" style={{ animationDuration: '12s' }} />
+                    <div className="absolute inset-4 rounded-full border border-dashed club-border animate-spin" style={{ animationDuration: '12s' }} />
 
                     <div className="font-heading text-9xl drop-shadow-[0_8px_16px_rgba(168,85,247,0.3)] z-10 select-none animate-pulse">
                       {PACKS.find(p => p.name === packAnimation.packName)?.emoji || "📦"}
                     </div>
                   </div>
                 </div>
-                <h3 className="font-heading text-white text-2xl font-black mt-8 tracking-wider uppercase animate-pulse drop-shadow-[0_0_10px_purple]">
+                <h3 className="font-heading club-ink text-2xl font-black mt-8 tracking-wider uppercase ">
                   Decoding Database...
                 </h3>
               </div>
@@ -8938,8 +7504,8 @@ const handlePackAction = async (packId: string) => {
             {packAnimation.stage === "burst" && (
               <div className="font-heading text-center relative z-10">
                 <div className="animate-pack-burst relative">
-                  <div className="w-64 h-64 rounded-full bg-[#5b21b6] flex items-center justify-center shadow-[0_0_100px_#fff]">
-                    <div className="absolute inset-0 rounded-full border-8 border-white animate-ping opacity-75" />
+                  <div className="w-64 h-64 rounded-full club-surface flex items-center justify-center ">
+                    <div className="absolute inset-0 rounded-full border-8 club-border opacity-75" />
                     <div className="font-heading text-7xl">💥</div>
                   </div>
                 </div>
@@ -8960,46 +7526,46 @@ const handlePackAction = async (packId: string) => {
                           "animate-reveal-uncommon"
 
               const borderGlowColor =
-                packAnimation.boom.rarity === "mystical" ? "border-cyan-500 shadow-[0_0_40px_rgba(6,182,212,0.4)]" :
-                packAnimation.boom.rarity === "chroma" ? "border-pink-500 shadow-[0_0_40px_rgba(236,72,153,0.4)]" :
-                packAnimation.boom.rarity === "legendary" ? "border-orange-500 shadow-[0_0_35px_rgba(249,115,22,0.35)]" :
-                packAnimation.boom.rarity === "epic" ? "border-purple-500 shadow-[0_0_30px_rgba(168,85,247,0.3)]" :
-                packAnimation.boom.rarity === "rare" ? "border-blue-500 shadow-[0_0_25px_rgba(59,130,246,0.25)]" :
-                "border-green-500 shadow-[0_0_25px_rgba(34,197,94,0.25)]"
+                packAnimation.boom.rarity === "mystical" ? "club-border " :
+                packAnimation.boom.rarity === "chroma" ? "club-border " :
+                packAnimation.boom.rarity === "legendary" ? "club-border " :
+                packAnimation.boom.rarity === "epic" ? "club-border " :
+                packAnimation.boom.rarity === "rare" ? "club-border " :
+                "club-border "
 
               return (
                 <div className="flex flex-col items-center justify-center w-full h-full relative z-10">
                   <div
-                    className={`relative w-[380px] h-[520px] rounded-[2.5rem] border-2 blooket-panel/70 backdrop-blur-2xl overflow-hidden ${revealAnimationClass} ${borderGlowColor} ${
+                    className={`relative w-[380px] h-[520px] rounded-xl border-2 blooket-panel/70  overflow-hidden ${revealAnimationClass} ${borderGlowColor} ${
                       packAnimation.boom.rarity === "mystical" ? "animate-mystical-aura" : ""
                     }`}
                   >
                     {/* Scanline overlay */}
-                    <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0)_95%,rgba(255,255,255,0.03)_95%)] bg-[size:100%_4px] pointer-events-none" />
+                    <div className="club-decoration absolute inset-0 bg-[size:100%_4px] pointer-events-none" />
 
                     {/* Laser shine sweep */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-[100%] animate-legendary-shine pointer-events-none" />
+                    <div className="absolute inset-0 club-surface -translate-x-[100%] animate-legendary-shine pointer-events-none" />
 
                     <div className="absolute inset-x-6 top-6 bottom-6 flex flex-col justify-between items-center z-10">
                       {/* Name - Top */}
                       <div className="font-heading text-center space-y-1">
-                        <h2 className="font-heading text-3xl font-black text-white tracking-tight drop-shadow-md">
+                        <h2 className="font-heading text-3xl font-black club-ink tracking-tight ">
                           {packAnimation.boom.name}
                         </h2>
                         <Badge className={`uppercase font-black text-[9px] tracking-widest px-3 py-1 rounded-full ${
-                          packAnimation.boom.rarity === "uncommon" ? "bg-green-500 text-white border-none" :
-                          packAnimation.boom.rarity === "rare" ? "bg-blue-500 text-white border-none" :
-                          packAnimation.boom.rarity === "epic" ? "bg-purple-500 text-white border-none" :
-                          packAnimation.boom.rarity === "legendary" ? "bg-orange-500 text-white border-none" :
-                          packAnimation.boom.rarity === "hidden" ? "bg-slate-800 text-slate-100 border border-slate-700" :
-                          packAnimation.boom.rarity === "chroma" ? "bg-gradient-to-r from-red-500 via-yellow-500 to-purple-500 text-white border-none" :
-                          "bg-gradient-to-r from-purple-900 via-pink-500 to-indigo-900 text-white border-none"
+                          packAnimation.boom.rarity === "uncommon" ? "club-green club-ink border-none" :
+                          packAnimation.boom.rarity === "rare" ? "club-blue club-ink border-none" :
+                          packAnimation.boom.rarity === "epic" ? "club-purple club-ink border-none" :
+                          packAnimation.boom.rarity === "legendary" ? "club-yellow club-ink border-none" :
+                          packAnimation.boom.rarity === "hidden" ? "club-well club-ink border club-border" :
+                          packAnimation.boom.rarity === "chroma" ? "club-surface club-ink border-none" :
+                          "club-surface club-ink border-none"
                         }`}>
                           {packAnimation.boom.rarity}
                         </Badge>
                       </div>
 
-                      <div className="w-48 h-48 rounded-[2rem] bg-black/40 border border-white/5 flex items-center justify-center text-8xl shadow-inner relative overflow-hidden group">
+                      <div className="w-48 h-48 rounded-xl club-well border club-border flex items-center justify-center text-8xl relative overflow-hidden group">
                         <BoomAvatar
                           name={packAnimation.boom.name}
                           className={`w-36 h-36 object-contain drop-shadow-2xl group-hover:scale-105 transition-transform duration-500 ${
@@ -9010,12 +7576,12 @@ const handlePackAction = async (packId: string) => {
 
                       {/* Drop rate + NEW stamp */}
                       <div className="font-heading text-center space-y-3 w-full">
-                        <div className="flex justify-between items-center bg-white/5 border border-white/5 rounded-2xl px-5 py-3">
-                          <span className="font-heading text-white/40 text-[9px] font-black uppercase tracking-wider">Drop Rate</span>
-                          <span className="font-heading text-white font-black text-sm">{dropRate}%</span>
+                        <div className="flex justify-between items-center club-well border club-border rounded-xl px-5 py-3">
+                          <span className="font-heading club-muted text-xs font-black uppercase tracking-wider">Drop Rate</span>
+                          <span className="font-heading club-ink font-black text-sm">{dropRate}%</span>
                         </div>
                         {isNew && (
-                          <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white font-black border-none text-[9px] tracking-widest px-4 py-1.5 rounded-xl shadow-md uppercase animate-pulse">
+                          <Badge className="club-surface club-ink font-black border-none text-xs tracking-wide px-4 py-1.5 rounded-xl uppercase ">
                             NEW ACQUISITION
                           </Badge>
                         )}
@@ -9029,7 +7595,7 @@ const handlePackAction = async (packId: string) => {
                   </div>
 
                   {packAnimation.stage === "done" && (
-                    <p className="font-heading text-white/30 text-xs font-black uppercase tracking-[0.25em] mt-8 animate-pulse">
+                    <p className="font-heading club-muted text-xs font-black uppercase tracking-wide mt-8 ">
                       Click Anywhere to Continue
                     </p>
                   )}
@@ -9039,7 +7605,7 @@ const handlePackAction = async (packId: string) => {
                         e.stopPropagation()
                         setIsAutoOpen(false)
                       }}
-                      className="mt-6 px-6 py-2.5 bg-red-600 hover:bg-red-500 text-white font-black uppercase text-[10px] tracking-widest rounded-xl border border-red-500/30 shadow-lg shadow-red-950/50 z-20 animate-pulse animate-duration-1000"
+                      className="club-action mt-6 px-6 py-2.5 club-red club-red club-ink font-black uppercase text-xs tracking-wide rounded-xl border club-border z-20 animate-duration-1000"
                     >
                       🛑 Stop Auto Open
                     </Button>
@@ -9052,13 +7618,13 @@ const handlePackAction = async (packId: string) => {
       }
       {
         showProfilePicker && (
-          <div className="fixed top-0 left-0 w-full h-full bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
-            <Card className="w-full max-w-lg bg-slate-900 border border-white/10 rounded-3xl p-6 text-white overflow-hidden shadow-2xl relative">
+          <div className="fixed top-0 left-0 w-full h-full club-well flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
+            <Card className="w-full max-w-lg club-well border club-border rounded-xl p-6 club-ink overflow-hidden relative">
               <CardHeader className="pb-4">
-                <CardTitle className="font-heading text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-500">
+                <CardTitle className="font-heading text-2xl font-bold club-accent ">
                   Select Profile Avatar
                 </CardTitle>
-                <CardDescription className="font-heading text-slate-400">
+                <CardDescription className="font-heading club-muted">
                   Express yourself by using a classic emoji or any Boom from your collection!
                 </CardDescription>
               </CardHeader>
@@ -9069,7 +7635,7 @@ const handlePackAction = async (packId: string) => {
                   <button
                     onClick={() => setProfilePickerTab("emojis")}
                     className={`py-2.5 rounded-lg font-black uppercase text-xs transition-all ${
-                      profilePickerTab === "emojis" ? "bg-purple-600 text-white shadow-lg" : "text-white/40 hover:text-white/80"
+                      profilePickerTab === "emojis" ? "club-purple club-ink " : "club-muted club-ink"
                     }`}
                   >
                     Emojis
@@ -9077,7 +7643,7 @@ const handlePackAction = async (packId: string) => {
                   <button
                     onClick={() => setProfilePickerTab("booms")}
                     className={`py-2.5 rounded-lg font-black uppercase text-xs transition-all ${
-                      profilePickerTab === "booms" ? "bg-purple-600 text-white shadow-lg" : "text-white/40 hover:text-white/80"
+                      profilePickerTab === "booms" ? "club-purple club-ink " : "club-muted club-ink"
                     }`}
                   >
                     My Booms
@@ -9094,7 +7660,7 @@ const handlePackAction = async (packId: string) => {
                             updateProfilePicture(picture)
                             setShowProfilePicker(false)
                           }}
-                          className="aspect-square rounded-2xl bg-white/5 hover:bg-purple-600/20 hover:scale-105 active:scale-95 text-3xl flex items-center justify-center transition-all duration-200 border border-white/5 hover:border-purple-500/30"
+                          className="aspect-square rounded-xl club-well club-purple hover:scale-105 active:scale-95 text-3xl flex items-center justify-center transition-all duration-200 border club-border club-border"
                         >
                           {picture}
                         </button>
@@ -9107,10 +7673,10 @@ const handlePackAction = async (packId: string) => {
                       const owned = Object.keys(currentUser?.booms || {}).filter(name => (currentUser?.booms[name] || 0) > 0);
                       if (owned.length === 0) {
                         return (
-                          <div className="flex flex-col items-center justify-center h-48 text-center text-slate-500">
+                          <div className="flex flex-col items-center justify-center h-48 text-center club-muted">
                             <span className="font-heading text-3xl mb-2">📦</span>
-                            <p className="font-heading text-sm font-bold text-white/80">No Booms in your collection yet.</p>
-                            <p className="font-heading text-xs text-slate-400">Open some packs from the Market first!</p>
+                            <p className="font-heading text-sm font-bold club-ink">No Booms in your collection yet.</p>
+                            <p className="font-heading text-xs club-muted">Open some packs from the Market first!</p>
                           </div>
                         );
                       }
@@ -9123,13 +7689,13 @@ const handlePackAction = async (packId: string) => {
                                 updateProfilePicture(boomName)
                                 setShowProfilePicker(false)
                               }}
-                              className="aspect-square rounded-2xl blooket-panel/60 hover:bg-purple-600/20 hover:scale-105 active:scale-95 flex flex-col items-center justify-center p-2 transition-all duration-200 border border-white/5 hover:border-purple-500/30 group relative overflow-hidden"
+                              className="aspect-square rounded-xl blooket-panel/60 club-purple hover:scale-105 active:scale-95 flex flex-col items-center justify-center p-2 transition-all duration-200 border club-border club-border group relative overflow-hidden"
                               title={boomName}
                             >
                               <div className="w-12 h-12 flex items-center justify-center mb-1">
                                 <BoomAvatar name={boomName} className="w-full h-full object-contain" />
                               </div>
-                              <span className="font-heading text-[8px] font-black uppercase text-slate-400 truncate max-w-full group-hover:text-purple-300">
+                              <span className="font-heading text-xs font-black uppercase club-muted truncate max-w-full club-accent">
                                 {boomName}
                               </span>
                             </button>
@@ -9142,7 +7708,7 @@ const handlePackAction = async (packId: string) => {
 
                 <Button 
                   onClick={() => setShowProfilePicker(false)} 
-                  className="w-full h-12 bg-white/5 hover:bg-white/10 text-white font-bold rounded-2xl border border-white/5 transition-all mt-4"
+                  className="club-action w-full h-12 club-well club-well club-ink font-bold rounded-xl border club-border transition-all mt-4"
                 >
                   Cancel
                 </Button>
@@ -9153,7 +7719,7 @@ const handlePackAction = async (packId: string) => {
       }
       {
         showNameEdit && (
-          <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
+          <div className="fixed top-0 left-0 w-full h-full club-well flex items-center justify-center z-50">
             <Card className="w-full max-w-md p-6">
               <CardHeader>
                 <CardTitle className="font-heading text-2xl font-bold">Change Username</CardTitle>
@@ -9166,11 +7732,11 @@ const handlePackAction = async (packId: string) => {
                     updateUserInfo("username", newName)
                     setShowNameEdit(false)
                   }}
-                  className="w-full bg-green-600 hover:bg-green-700"
+                  className="club-action w-full club-green club-green"
                 >
                   Save
                 </Button>
-                <Button onClick={() => setShowNameEdit(false)} className="w-full bg-gray-600 hover:bg-gray-700">
+                <Button onClick={() => setShowNameEdit(false)} className="club-action w-full club-well club-well">
                   Cancel
                 </Button>
               </CardContent>
@@ -9180,7 +7746,7 @@ const handlePackAction = async (packId: string) => {
       }
       {
         showEmailEdit && (
-          <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
+          <div className="fixed top-0 left-0 w-full h-full club-well flex items-center justify-center z-50">
             <Card className="w-full max-w-md p-6">
               <CardHeader>
                 <CardTitle className="font-heading text-2xl font-bold">Change Email</CardTitle>
@@ -9198,11 +7764,11 @@ const handlePackAction = async (packId: string) => {
                     updateUserInfo("email", newEmail)
                     setShowEmailEdit(false)
                   }}
-                  className="w-full bg-green-600 hover:bg-green-700"
+                  className="club-action w-full club-green club-green"
                 >
                   Save
                 </Button>
-                <Button onClick={() => setShowEmailEdit(false)} className="w-full bg-gray-600 hover:bg-gray-700">
+                <Button onClick={() => setShowEmailEdit(false)} className="club-action w-full club-well club-well">
                   Cancel
                 </Button>
               </CardContent>
@@ -9212,7 +7778,7 @@ const handlePackAction = async (packId: string) => {
       }
       {
         showPasswordEdit && (
-          <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
+          <ClubDialog title="Change password" onClose={() => setShowPasswordEdit(false)} theme={themeMode} accent={customThemeColor}>
             <Card className="w-full max-w-md p-6">
               <CardHeader>
                 <CardTitle className="font-heading text-2xl font-bold">Change Password</CardTitle>
@@ -9230,24 +7796,24 @@ const handlePackAction = async (packId: string) => {
                     alert("Password change functionality not implemented in this demo.")
                     setShowPasswordEdit(false)
                   }}
-                  className="w-full bg-green-600 hover:bg-green-700"
+                  className="club-action w-full club-green club-green"
                 >
                   Save
                 </Button>
-                <Button onClick={() => setShowPasswordEdit(false)} className="w-full bg-gray-600 hover:bg-gray-700">
+                <Button onClick={() => setShowPasswordEdit(false)} className="club-action w-full club-well club-well">
                   Cancel
                 </Button>
               </CardContent>
             </Card>
-          </div>
+          </ClubDialog>
         )
       }
       {
         showDeleteConfirm && (
-          <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
+          <ClubDialog title="Delete account" onClose={() => setShowDeleteConfirm(false)} theme={themeMode} accent={customThemeColor}>
             <Card className="w-full max-w-md p-6">
               <CardHeader>
-                <CardTitle className="font-heading text-2xl font-bold text-red-500">Delete Account</CardTitle>
+                <CardTitle className="font-heading text-2xl font-bold club-danger">Delete Account</CardTitle>
                 <CardDescription>
                   Are you sure you want to delete your account? This action cannot be undone.
                 </CardDescription>
@@ -9258,21 +7824,21 @@ const handlePackAction = async (packId: string) => {
                     alert("Account deletion functionality not implemented in this demo.")
                     setShowDeleteConfirm(false)
                   }}
-                  className="w-full bg-red-600 hover:bg-red-700"
+                  className="club-action w-full club-red club-red"
                 >
                   Confirm Delete
                 </Button>
-                <Button onClick={() => setShowDeleteConfirm(false)} className="w-full bg-gray-600 hover:bg-gray-700">
+                <Button onClick={() => setShowDeleteConfirm(false)} className="club-action w-full club-well club-well">
                   Cancel
                 </Button>
               </CardContent>
             </Card>
-          </div>
+          </ClubDialog>
         )
       }
       {
         showPrivacyPolicy && (
-          <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <ClubDialog title="Privacy policy" onClose={() => setShowPrivacyPolicy(false)} theme={themeMode} accent={customThemeColor}>
             <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
               <CardHeader>
                 <CardTitle className="font-heading text-2xl font-bold">Privacy Policy</CardTitle>
@@ -9343,17 +7909,17 @@ const handlePackAction = async (packId: string) => {
                   </p>
                 </section>
 
-                <Button onClick={() => setShowPrivacyPolicy(false)} className="w-full bg-gray-600 hover:bg-gray-700 mt-4">
+                <Button onClick={() => setShowPrivacyPolicy(false)} className="club-action w-full club-well club-well mt-4">
                   Close
                 </Button>
               </CardContent>
             </Card>
-          </div>
+          </ClubDialog>
         )
       }
       {
         showTermsOfService && (
-          <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-4">
+          <ClubDialog title="Terms of Service" onClose={() => setShowTermsOfService(false)} theme={themeMode} accent={customThemeColor}>
             <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
               <CardHeader>
                 <CardTitle className="font-heading text-2xl font-bold">Terms of Service</CardTitle>
@@ -9434,30 +8000,30 @@ const handlePackAction = async (packId: string) => {
 
                 <Button
                   onClick={() => setShowTermsOfService(false)}
-                  className="w-full bg-gray-600 hover:bg-gray-700 mt-4"
+                  className="club-action w-full club-well club-well mt-4"
                 >
                   Close
                 </Button>
               </CardContent>
             </Card>
-          </div>
+          </ClubDialog>
         )
       }
       {
         showUserStats && selectedUserStats && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center z-[100] p-4 transition-all duration-300">
+          <div className="fixed inset-0 club-overlay flex items-center justify-center z-[100] p-4 transition-all duration-300">
             <Card
-              className="w-full max-w-2xl blooket-card overflow-hidden relative animate-in zoom-in-95 duration-300"
+              className="w-full max-w-2xl club-panel overflow-hidden relative animate-in zoom-in-95 duration-300"
             >
               {/* Header Banner */}
               <div className={`h-32 w-full relative ${selectedUserStats.bannerColor === "rainbow"
-                ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 animate-pulse"
-                : selectedUserStats.bannerColor || "bg-gradient-to-r from-purple-600 to-pink-600"
+                ? "club-surface "
+                : selectedUserStats.bannerColor || "club-surface "
                 }`}>
-                <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-black/60" />
+                <div className="absolute inset-0 club-surface " />
                 <button
                   onClick={() => setShowUserStats(false)}
-                  className="absolute top-6 right-6 w-10 h-10 rounded-full bg-black/40 hover:bg-black/60 text-white flex items-center justify-center transition-colors z-20 border border-white/5"
+                  className="absolute top-6 right-6 w-10 h-10 rounded-full club-well club-well club-ink flex items-center justify-center transition-colors z-20 border club-border"
                 >
                   ✕
                 </button>
@@ -9468,14 +8034,14 @@ const handlePackAction = async (packId: string) => {
                   {/* Left Column: Profile Picture & Primary Info */}
                   <div className="flex flex-col items-center md:items-start space-y-5 md:w-1/3">
                     <div className="relative group">
-                      <div className="w-32 h-32 rounded-[2rem] bg-black/40 border-4 border-slate-950 flex items-center justify-center text-6xl shadow-2xl relative overflow-hidden ring-4 ring-purple-500/25 p-2">
+                      <div className="w-32 h-32 rounded-xl club-well border-4 club-border flex items-center justify-center text-4xl relative overflow-hidden ring-4 p-2">
                         {renderProfilePicture(selectedUserStats.profilePicture || "🎮", "w-full h-full object-contain")}
                         {selectedUserStats.role === "owner" && (
                           <div className="absolute inset-0 border-4 border-yellow-500/40 animate-pulse rounded-[2rem]" />
                         )}
                       </div>
                       {selectedUserStats.isPlusUser && (
-                        <div className="absolute -top-2 -right-2 bg-gradient-to-r from-cyan-400 to-blue-500 text-white text-[9px] font-black px-2.5 py-1 rounded-full shadow-lg shadow-cyan-900/40 tracking-wider">
+                        <div className="absolute -top-2 -right-2 club-surface club-ink text-xs font-black px-2.5 py-1 rounded-full tracking-wider">
                           PLUS
                         </div>
                       )}
@@ -9483,43 +8049,43 @@ const handlePackAction = async (packId: string) => {
 
                     <div className="font-heading text-center md:text-left space-y-1.5 w-full">
                       <h2 className={`text-3xl font-black tracking-tight ${selectedUserStats.nameColor === "rainbow"
-                        ? "bg-gradient-to-r from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500 bg-clip-text text-transparent animate-pulse"
-                        : "text-white"
+                        ? " club-accent "
+                        : "club-ink"
                         }`}>
                         {selectedUserStats.username}
                       </h2>
-                      <Badge variant="outline" className="border-white/5 text-white/40 bg-white/5 uppercase tracking-widest text-[9px] font-black px-2.5 py-1 rounded-lg">
+                      <Badge variant="outline" className="club-border club-muted club-well uppercase tracking-wide text-xs font-black px-2.5 py-1 rounded-lg">
                         ID: {selectedUserStats.id.slice(0, 8)}
                       </Badge>
                     </div>
 
                     <div className="flex flex-wrap gap-2 justify-center md:justify-start">
-                      <Badge className={`${getRoleColor(selectedUserStats.role)} text-white px-3 py-1.5 text-[10px] font-black uppercase tracking-wider border-none shadow-lg`}>
+                      <Badge className={`${getRoleColor(selectedUserStats.role)} club-ink px-3 py-1.5 text-xs font-black uppercase tracking-wider border-none `}>
                         {getUserRoleName(selectedUserStats)}
                       </Badge>
                       {selectedUserStats.isOwner && (
-                        <Badge className="bg-emerald-500 text-white px-3 py-1.5 text-[10px] font-black uppercase tracking-wider border-none shadow-lg">
+                        <Badge className="club-green club-ink px-3 py-1.5 text-xs font-black uppercase tracking-wider border-none ">
                           Official
                         </Badge>
                       )}
                     </div>
 
                     <div className="w-full pt-2">
-                      <div className="bg-black/40 rounded-2xl p-4 border border-white/5">
-                        <p className="font-heading text-white/40 text-[9px] font-black uppercase tracking-widest mb-3">Active Badges</p>
+                      <div className="club-well rounded-xl p-4 border club-border">
+                        <p className="font-heading club-muted text-xs font-black uppercase tracking-wide mb-3">Active Badges</p>
                         <div className="flex flex-wrap gap-2">
                           {(selectedUserStats.badges ?? []).length > 0 ? (
                             selectedUserStats.badges.map((badgeId) => {
                               const badge = AVAILABLE_BADGES.find((b) => b.id === badgeId)
                               return badge ? (
-                                <div key={badgeId} className="flex items-center gap-1 bg-black/60 px-2.5 py-1 rounded-xl border border-white/5" title={badge.name}>
+                                <div key={badgeId} className="flex items-center gap-1 club-well px-2.5 py-1 rounded-xl border club-border" title={badge.name}>
                                   <span className="font-heading text-sm">{badge.emoji}</span>
-                                  <span className="font-heading text-[9px] text-white/80 font-bold">{badge.name}</span>
+                                  <span className="font-heading text-xs club-ink font-bold">{badge.name}</span>
                                 </div>
                               ) : null
                             })
                           ) : (
-                            <p className="font-heading text-white/20 text-xs italic">No badges earned yet</p>
+                            <p className="font-heading club-muted text-xs italic">No badges earned yet</p>
                           )}
                         </div>
                       </div>
@@ -9529,72 +8095,72 @@ const handlePackAction = async (packId: string) => {
                   {/* Right Column: Key Statistics */}
                   <div className="flex-1 space-y-6">
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-gradient-to-br from-yellow-500/5 to-orange-500/5 border border-yellow-500/10 rounded-2xl p-4 transition-all hover:scale-[1.02] cursor-default shadow-md">
+                      <div className="club-surface border club-border rounded-xl p-4 transition-all hover:scale-[1.02] cursor-default ">
                         <div className="flex items-center gap-2 mb-1.5">
                           <span className="font-heading text-lg">💰</span>
-                          <span className="font-heading text-white/40 text-[9px] font-black uppercase tracking-widest">Tokens</span>
+                          <span className="font-heading club-muted text-xs font-black uppercase tracking-wide">Tokens</span>
                         </div>
-                        <div className="font-heading text-3xl font-black text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.2)]">
+                        <div className="font-heading text-3xl font-black club-accent drop-shadow-[0_0_8px_rgba(234,179,8,0.2)]">
                           {selectedUserStats.tokens.toLocaleString()}
                         </div>
                       </div>
 
-                      <div className="bg-gradient-to-br from-purple-500/5 to-pink-500/5 border border-purple-500/10 rounded-2xl p-4 transition-all hover:scale-[1.02] cursor-default shadow-md">
+                      <div className="club-surface border club-border rounded-xl p-4 transition-all hover:scale-[1.02] cursor-default ">
                         <div className="flex items-center gap-2 mb-1.5">
                           <span className="font-heading text-lg">⭐</span>
-                          <span className="font-heading text-white/40 text-[9px] font-black uppercase tracking-widest">Score</span>
+                          <span className="font-heading club-muted text-xs font-black uppercase tracking-wide">Score</span>
                         </div>
-                        <div className="font-heading text-3xl font-black text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.2)]">
+                        <div className="font-heading text-3xl font-black club-accent ">
                           {selectedUserStats.boomScore.toLocaleString()}
                         </div>
                       </div>
 
-                      <div className="bg-gradient-to-br from-blue-500/5 to-cyan-500/5 border border-blue-500/10 rounded-2xl p-4 transition-all hover:scale-[1.02] cursor-default shadow-md">
+                      <div className="club-surface border club-border rounded-xl p-4 transition-all hover:scale-[1.02] cursor-default ">
                         <div className="flex items-center gap-2 mb-1.5">
                           <span className="font-heading text-lg">📦</span>
-                          <span className="font-heading text-white/40 text-[9px] font-black uppercase tracking-widest">Opened</span>
+                          <span className="font-heading club-muted text-xs font-black uppercase tracking-wide">Opened</span>
                         </div>
-                        <div className="font-heading text-3xl font-black text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.2)]">
+                        <div className="font-heading text-3xl font-black club-accent drop-shadow-[0_0_8px_rgba(59,130,246,0.2)]">
                           {selectedUserStats.packsOpened || 0}
                         </div>
                       </div>
 
-                      <div className="bg-gradient-to-br from-emerald-500/5 to-teal-500/5 border border-emerald-500/10 rounded-2xl p-4 transition-all hover:scale-[1.02] cursor-default shadow-md">
+                      <div className="club-surface border club-border rounded-xl p-4 transition-all hover:scale-[1.02] cursor-default ">
                         <div className="flex items-center gap-2 mb-1.5">
                           <span className="font-heading text-lg">🎆</span>
-                          <span className="font-heading text-white/40 text-[9px] font-black uppercase tracking-widest">Unique</span>
+                          <span className="font-heading club-muted text-xs font-black uppercase tracking-wide">Unique</span>
                         </div>
-                        <div className="font-heading text-3xl font-black text-emerald-400 drop-shadow-[0_0_8px_rgba(16,185,129,0.2)]">
+                        <div className="font-heading text-3xl font-black club-success drop-shadow-[0_0_8px_rgba(16,185,129,0.2)]">
                           {Object.keys(selectedUserStats.booms).length}
                         </div>
                       </div>
                     </div>
 
-                    <div className="bg-black/40 rounded-2xl p-5 border border-white/5 space-y-4">
-                      <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                        <p className="font-heading text-white/40 text-[9px] font-black uppercase tracking-widest">Timeline Registry</p>
-                        <Badge className="bg-white/5 text-white/40 border-white/10 text-[8px] font-black tracking-widest uppercase">REALTIME SYNC</Badge>
+                    <div className="club-well rounded-xl p-5 border club-border space-y-4">
+                      <div className="flex justify-between items-center border-b club-border pb-2">
+                        <p className="font-heading club-muted text-xs font-black uppercase tracking-wide">Timeline Registry</p>
+                        <Badge className="club-well club-muted club-border text-xs font-black tracking-wide uppercase">REALTIME SYNC</Badge>
                       </div>
                       <div className="space-y-4">
                         <div className="flex gap-3">
                           <div className="flex flex-col items-center">
-                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]" />
-                            <div className="w-0.5 h-6 bg-white/10 my-0.5" />
+                            <span className="w-2.5 h-2.5 rounded-full club-green " />
+                            <div className="w-0.5 h-6 club-well my-0.5" />
                           </div>
-                          <p className="font-heading text-white/60 text-xs font-medium">Joined the Arena on <span className="font-heading text-emerald-400 font-bold">{new Date(selectedUserStats.joinDate).toLocaleDateString()}</span></p>
+                          <p className="font-heading club-muted text-xs font-medium">Joined the Arena on <span className="font-heading club-success font-bold">{new Date(selectedUserStats.joinDate).toLocaleDateString()}</span></p>
                         </div>
                         <div className="flex gap-3">
                           <div className="flex flex-col items-center">
-                            <span className="w-2.5 h-2.5 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]" />
+                            <span className="w-2.5 h-2.5 rounded-full club-yellow " />
                           </div>
-                          <p className="font-heading text-white/60 text-xs font-medium">Earned a total value of <span className="font-heading text-yellow-400 font-bold">{selectedUserStats.tokens.toLocaleString()}</span> tokens</p>
+                          <p className="font-heading club-muted text-xs font-medium">Earned a total value of <span className="font-heading club-accent font-bold">{selectedUserStats.tokens.toLocaleString()}</span> tokens</p>
                         </div>
                       </div>
                     </div>
 
                     <Button
                       onClick={() => setShowUserStats(false)}
-                      className="w-full h-14 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-black uppercase tracking-widest text-xs border-none rounded-2xl transition-all hover:scale-[1.01] active:scale-95 shadow-lg shadow-purple-900/40"
+                      className="club-action w-full h-14 club-surface club-ink font-black uppercase tracking-wide text-xs border-none rounded-xl transition-all hover:scale-[1.01] active:scale-95 "
                     >
                       Close Profile
                     </Button>
@@ -9607,28 +8173,28 @@ const handlePackAction = async (packId: string) => {
       }
       {
         showEditUserDialog && userToEdit && (
-          <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
-            <Card className="w-full max-w-md p-6 bg-slate-900 border-purple-500/50">
+          <div className="fixed top-0 left-0 w-full h-full club-well flex items-center justify-center z-50">
+            <Card className="w-full max-w-md p-6 club-well club-border">
               <CardHeader>
-                <CardTitle className="font-heading text-2xl font-bold text-purple-400">Edit User: {userToEdit.username}</CardTitle>
-                <CardDescription className="font-heading text-slate-400">Manage user tokens and details.</CardDescription>
+                <CardTitle className="font-heading text-2xl font-bold club-accent">Edit User: {userToEdit.username}</CardTitle>
+                <CardDescription className="font-heading club-muted">Manage user tokens and details.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 pt-4">
                 <div className="space-y-2">
-                  <Label htmlFor="editTokens" className="font-heading text-white">User Tokens</Label>
+                  <Label htmlFor="editTokens" className="font-heading club-ink">User Tokens</Label>
                   <Input
                     id="editTokens"
                     type="number"
                     value={editTokenValue}
                     onChange={(e) => setEditTokenValue(e.target.value)}
-                    className="bg-black/50 border-purple-500/30 text-white"
+                    className="club-well club-border club-ink"
                   />
                 </div>
                 <div className="flex justify-end space-x-2 mt-4">
-                  <Button variant="ghost" onClick={() => setShowEditUserDialog(false)} className="font-heading text-slate-400 hover:text-white">
+                  <Button variant="ghost" onClick={() => setShowEditUserDialog(false)} className="club-action font-heading club-muted club-ink">
                     Cancel
                   </Button>
-                  <Button onClick={handleSaveUserTokens} className="bg-purple-600 hover:bg-purple-700">
+                  <Button onClick={handleSaveUserTokens} className="club-action club-purple club-purple">
                     Save Changes
                   </Button>
                 </div>
@@ -9639,10 +8205,10 @@ const handlePackAction = async (packId: string) => {
       }
       {
         showMuteDialog && userToModerate && (
-          <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
+          <div className="fixed top-0 left-0 w-full h-full club-well flex items-center justify-center z-50">
             <Card className="w-full max-w-md p-6">
               <CardHeader>
-                <CardTitle className="font-heading text-2xl font-bold text-yellow-400">Mute {userToModerate.username}</CardTitle>
+                <CardTitle className="font-heading text-2xl font-bold club-accent">Mute {userToModerate.username}</CardTitle>
                 <CardDescription>Set a duration for the mute.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -9654,10 +8220,10 @@ const handlePackAction = async (packId: string) => {
                   onChange={(e) => setMuteDuration(e.target.value)}
                   placeholder="e.g., 24 for 1 day"
                 />
-                <Button onClick={handleConfirmMute} className="w-full bg-yellow-600 hover:bg-yellow-700">
+                <Button onClick={handleConfirmMute} className="club-action w-full club-yellow club-yellow">
                   Apply Mute
                 </Button>
-                <Button onClick={() => setShowMuteDialog(false)} className="w-full bg-gray-600 hover:bg-gray-700">
+                <Button onClick={() => setShowMuteDialog(false)} className="club-action w-full club-well club-well">
                   Cancel
                 </Button>
               </CardContent>
@@ -9667,10 +8233,10 @@ const handlePackAction = async (packId: string) => {
       }
       {
         showBanDialog && userToModerate && (
-          <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
+          <div className="fixed top-0 left-0 w-full h-full club-well flex items-center justify-center z-50">
             <Card className="w-full max-w-md p-6">
               <CardHeader>
-                <CardTitle className="font-heading text-2xl font-bold text-red-500">Ban {userToModerate.username}</CardTitle>
+                <CardTitle className="font-heading text-2xl font-bold club-danger">Ban {userToModerate.username}</CardTitle>
                 <CardDescription>This action is permanent.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -9681,10 +8247,10 @@ const handlePackAction = async (packId: string) => {
                   onChange={(e) => setBanReason(e.target.value)}
                   placeholder="Reason for permanent ban..."
                 />
-                <Button onClick={handleConfirmBan} className="w-full bg-red-600 hover:bg-red-700">
+                <Button onClick={handleConfirmBan} className="club-action w-full club-red club-red">
                   Confirm Permanent Ban
                 </Button>
-                <Button onClick={() => setShowBanDialog(false)} className="w-full bg-gray-600 hover:bg-gray-700">
+                <Button onClick={() => setShowBanDialog(false)} className="club-action w-full club-well club-well">
                   Cancel
                 </Button>
               </CardContent>
@@ -9695,7 +8261,7 @@ const handlePackAction = async (packId: string) => {
       {/* Custom role manager removed for security */}
       {
         showBadgeManager && (
-          <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50">
+          <div className="fixed top-0 left-0 w-full h-full club-well flex items-center justify-center z-50">
             <Card className="w-full max-w-md p-6">
               <CardHeader>
                 <CardTitle className="font-heading text-2xl font-bold">Manage Badges</CardTitle>
@@ -9707,11 +8273,11 @@ const handlePackAction = async (packId: string) => {
                   id="userForBadge"
                   value={selectedUserForBadge}
                   onChange={(e) => setSelectedUserForBadge(e.target.value)}
-                  className="w-full bg-white/20 text-white text-sm rounded px-2 py-1 border border-white/30"
+                  className="w-full club-well club-ink text-sm rounded px-2 py-1 border club-border"
                 >
                   <option value="">Select User</option>
                   {users.map((user) => (
-                    <option key={user.id} value={user.username} className="bg-gray-800 text-white">
+                    <option key={user.id} value={user.username} className="club-well club-ink">
                       {user.username}
                     </option>
                   ))}
@@ -9722,20 +8288,20 @@ const handlePackAction = async (packId: string) => {
                   id="badge"
                   value={selectedBadge}
                   onChange={(e) => setSelectedBadge(e.target.value)}
-                  className="w-full bg-white/20 text-white text-sm rounded px-2 py-1 border border-white/30"
+                  className="w-full club-well club-ink text-sm rounded px-2 py-1 border club-border"
                 >
                   <option value="">Select Badge</option>
                   {AVAILABLE_BADGES.map((badge) => (
-                    <option key={badge.id} value={badge.id} className="bg-gray-800 text-white">
+                    <option key={badge.id} value={badge.id} className="club-well club-ink">
                       {badge.emoji} {badge.name}
                     </option>
                   ))}
                 </select>
 
-                <Button onClick={assignBadge} className="w-full bg-green-600 hover:bg-green-700">
+                <Button onClick={assignBadge} className="club-action w-full club-green club-green">
                   Assign Badge
                 </Button>
-                <Button onClick={() => setShowBadgeManager(false)} className="w-full bg-gray-600 hover:bg-gray-700">
+                <Button onClick={() => setShowBadgeManager(false)} className="club-action w-full club-well club-well">
                   Cancel
                 </Button>
               </CardContent>
@@ -9745,47 +8311,47 @@ const handlePackAction = async (packId: string) => {
       }
       {
         showBoomAction && selectedBoom && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-xl flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
-            <Card className="w-full max-w-md blooket-card overflow-hidden relative">
+          <div className="fixed inset-0 club-overlay flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
+            <Card className="w-full max-w-md club-panel overflow-hidden relative">
               <div className="absolute top-0 right-0 p-4">
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setShowBoomAction(false)}
-                  className="rounded-full text-white/40 hover:text-white hover:bg-white/5"
+                  aria-label="Close Boom actions" onClick={() => setShowBoomAction(false)}
+                  className="club-action rounded-full club-muted club-ink club-well"
                 >
                   <XIcon className="h-5 w-5" />
                 </Button>
               </div>
 
               <CardHeader className="font-heading text-center pb-2 pt-8">
-                <CardTitle className="font-heading text-3xl font-black text-white tracking-tight">Boom Actions</CardTitle>
-                <CardDescription className="font-heading text-white/40 font-medium">Manage your digital assets</CardDescription>
+                <CardTitle className="font-heading text-3xl font-black club-ink tracking-tight">Boom Actions</CardTitle>
+                <CardDescription className="font-heading club-muted font-medium">Sell or list this Boom.</CardDescription>
               </CardHeader>
 
               <CardContent className="space-y-6 px-8 pb-8 pt-4">
                 <div className="flex flex-col items-center gap-4">
-                  <div className="w-32 h-32 rounded-3xl bg-black/40 border border-white/10 flex items-center justify-center text-6xl shadow-inner relative overflow-hidden group">
+                  <div className="w-32 h-32 rounded-xl club-well border club-border flex items-center justify-center text-4xl relative overflow-hidden group">
                     <BoomAvatar name={selectedBoom} className="w-24 h-24 object-contain drop-shadow-xl group-hover:scale-110 transition-transform duration-300" />
                     <div className={`absolute inset-0 border-2 rounded-3xl opacity-30 ${
                       getBoomRarity(selectedBoom) === 'uncommon' ? 'border-green-500' :
                       getBoomRarity(selectedBoom) === 'rare' ? 'border-blue-500' :
-                      getBoomRarity(selectedBoom) === 'epic' ? 'border-purple-500' :
+                      getBoomRarity(selectedBoom) === 'epic' ? 'club-border' :
                       getBoomRarity(selectedBoom) === 'legendary' ? 'border-orange-500' :
                       getBoomRarity(selectedBoom) === 'chroma' ? 'border-pink-500 animate-pulse' :
                       'border-cyan-500 animate-pulse'
                     }`} />
                   </div>
                   <div className="font-heading text-center">
-                    <h3 className="font-heading text-2xl font-black text-white">{selectedBoom}</h3>
+                    <h3 className="font-heading text-2xl font-black club-ink">{selectedBoom}</h3>
                     <Badge className={`mt-2 uppercase font-black text-[9px] tracking-widest border-none px-3.5 py-1.5 rounded-full ${
-                      getBoomRarity(selectedBoom) === 'uncommon' ? 'bg-green-500' :
-                      getBoomRarity(selectedBoom) === 'rare' ? 'bg-blue-500' :
-                      getBoomRarity(selectedBoom) === 'epic' ? 'bg-purple-500' :
-                      getBoomRarity(selectedBoom) === 'legendary' ? 'bg-orange-500' :
-                      getBoomRarity(selectedBoom) === 'chroma' ? 'bg-pink-500' :
-                      'bg-cyan-500'
-                    } text-white`}>
+                      getBoomRarity(selectedBoom) === 'uncommon' ? 'club-green' :
+                      getBoomRarity(selectedBoom) === 'rare' ? 'club-blue' :
+                      getBoomRarity(selectedBoom) === 'epic' ? 'club-purple' :
+                      getBoomRarity(selectedBoom) === 'legendary' ? 'club-yellow' :
+                      getBoomRarity(selectedBoom) === 'chroma' ? 'club-purple' :
+                      'club-blue'
+                    } club-ink`}>
                       {getBoomRarity(selectedBoom)}
                     </Badge>
                   </div>
@@ -9793,16 +8359,16 @@ const handlePackAction = async (packId: string) => {
 
                 <div className="space-y-3">
                   <div className="flex justify-between items-center px-1">
-                    <Label className="font-heading text-white/60 font-black uppercase text-[10px] tracking-wider">Quantity to Sell</Label>
-                    <span className="font-heading text-white font-black text-sm">{sellQuantity} / {currentUser?.booms[selectedBoom] || 1}</span>
+                    <Label className="font-heading club-muted font-black uppercase text-xs tracking-wider">Quantity to Sell</Label>
+                    <span className="font-heading club-ink font-black text-sm">{sellQuantity} / {currentUser?.booms[selectedBoom] || 1}</span>
                   </div>
-                  <div className="flex items-center gap-4 bg-black/40 border border-white/5 rounded-2xl p-3">
+                  <div className="flex items-center gap-4 club-well border club-border rounded-xl p-3">
                     <Button
                       variant="ghost"
                       size="icon"
                       disabled={sellQuantity <= 1}
                       onClick={() => setSellQuantity(prev => Math.max(1, prev - 1))}
-                      className="h-10 w-10 rounded-xl bg-white/5 hover:bg-white/10 text-white disabled:opacity-30 disabled:hover:bg-white/5"
+                      className="club-action h-10 w-10 rounded-xl club-well club-well club-ink disabled:opacity-30 club-well"
                     >
                       -
                     </Button>
@@ -9819,16 +8385,16 @@ const handlePackAction = async (packId: string) => {
                       size="icon"
                       disabled={sellQuantity >= (currentUser?.booms[selectedBoom] || 1)}
                       onClick={() => setSellQuantity(prev => Math.min(currentUser?.booms[selectedBoom] || 1, prev + 1))}
-                      className="h-10 w-10 rounded-xl bg-white/5 hover:bg-white/10 text-white disabled:opacity-30 disabled:hover:bg-white/5"
+                      className="club-action h-10 w-10 rounded-xl club-well club-well club-ink disabled:opacity-30 club-well"
                     >
                       +
                     </Button>
                   </div>
                 </div>
 
-                <div className="bg-purple-500/5 border border-purple-500/10 rounded-2xl p-4 text-center">
-                  <p className="font-heading text-white/40 text-[9px] font-black uppercase tracking-wider mb-1">Estimated Return Value</p>
-                  <p className="font-heading text-yellow-400 font-black text-3xl drop-shadow-[0_0_10px_rgba(234,179,8,0.2)] flex items-center justify-center gap-2">
+                <div className="club-purple border club-border rounded-xl p-4 text-center">
+                  <p className="font-heading club-muted text-xs font-black uppercase tracking-wider mb-1">Sale value</p>
+                  <p className="font-heading club-accent font-black text-3xl drop-shadow-[0_0_10px_rgba(234,179,8,0.2)] flex items-center justify-center gap-2">
                     <span>🪙</span>
                     <span>{(getBoomSellPrice(selectedBoom) * sellQuantity).toLocaleString()}</span>
                   </p>
@@ -9837,15 +8403,15 @@ const handlePackAction = async (packId: string) => {
                 <div className="space-y-3 pt-2">
                   {/* Prevent selling rented booms */}
                   {rentalListings.some(r => r.renter_username === currentUser?.username && r.boom_name === selectedBoom && r.status === "rented") ? (
-                    <div className="bg-blue-950/20 border border-blue-500/20 rounded-2xl p-4 text-center text-xs text-blue-300 font-medium">
+                    <div className="club-blue border club-border rounded-xl p-4 text-center text-xs club-accent font-medium">
                       ⚠️ This is a rented Boom and cannot be sold.
                     </div>
                   ) : (
                     <Button
                       onClick={() => handleConfirmSell()}
-                      className="w-full h-14 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black rounded-2xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all border-none"
+                      className="club-action w-full h-14 club-surface club-ink font-black rounded-xl hover:scale-[1.02] active:scale-95 transition-all border-none"
                     >
-                      Confirm Asset Disposal
+                      Sell Booms
                     </Button>
                   )}
 
@@ -9854,14 +8420,14 @@ const handlePackAction = async (packId: string) => {
                       setShowBoomAction(false)
                       updateProfilePicture(selectedBoom)
                     }}
-                    className="w-full h-14 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-black rounded-2xl shadow-lg hover:scale-[1.02] active:scale-95 transition-all border-none"
+                    className="club-action w-full h-14 club-surface club-ink font-black rounded-xl hover:scale-[1.02] active:scale-95 transition-all border-none"
                   >
                     👤 Set as Profile Picture
                   </Button>
 
                   <Button
                     onClick={() => setShowBoomAction(false)}
-                    className="w-full h-12 bg-white/5 hover:bg-white/10 text-white/60 hover:text-white font-bold rounded-2xl border border-white/5 transition-all"
+                    className="club-action w-full h-12 club-well club-well club-muted club-ink font-bold rounded-xl border club-border transition-all"
                   >
                     Cancel Action
                   </Button>
@@ -9873,14 +8439,14 @@ const handlePackAction = async (packId: string) => {
       }
       {
         showAiSetCreator && (
-          <div className="fixed top-0 left-0 w-full h-full bg-black/50 backdrop-blur-md flex items-center justify-center z-50 p-4">
-            <Card className="w-full max-w-md bg-slate-900 border-purple-500/50">
+          <div className="fixed top-0 left-0 w-full h-full club-well flex items-center justify-center z-50 p-4">
+            <Card className="w-full max-w-md club-well club-border">
               <CardHeader>
-                <CardTitle className="font-heading text-2xl font-bold text-white flex items-center gap-2">
-                  <SparklesIcon className="w-6 h-6 text-purple-400" />
+                <CardTitle className="font-heading text-2xl font-bold club-ink flex items-center gap-2">
+                  <SparklesIcon className="w-6 h-6 club-accent" />
                   Create Set with AI
                 </CardTitle>
-                <CardDescription className="font-heading text-slate-400">
+                <CardDescription className="font-heading club-muted">
                   Tell the AI what you want to learn about, and it will create a question set for you!
                 </CardDescription>
               </CardHeader>
@@ -9898,16 +8464,16 @@ const handlePackAction = async (packId: string) => {
                       if (count >= 5 && count <= 50) setAiQuestionCount(count)
                     }
                   }}
-                  className="bg-black/50 border-purple-500/30 text-white min-h-[100px]"
+                  className="club-well club-border club-ink min-h-[100px]"
                 />
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <label className="font-heading text-white/70 text-sm font-bold block">Grade Level</label>
+                    <label className="font-heading club-ink text-sm font-bold block">Grade Level</label>
                     <select
                       value={aiGrade}
                       onChange={(e) => setAiGrade(parseInt(e.target.value))}
-                      className="w-full bg-black/50 border-purple-500/30 text-white rounded-md p-2 text-sm outline-none focus:border-purple-500"
+                      className="w-full club-well club-border club-ink rounded-md p-2 text-sm outline-none club-border"
                     >
                       {gradingGroups.map(g => (
                         <option key={g.grade} value={g.grade}>{g.label}</option>
@@ -9915,11 +8481,11 @@ const handlePackAction = async (packId: string) => {
                     </select>
                   </div>
                   <div className="space-y-2">
-                    <label className="font-heading text-white/70 text-sm font-bold block">Subject</label>
+                    <label className="font-heading club-ink text-sm font-bold block">Subject</label>
                     <select
                       value={aiSubject}
                       onChange={(e) => setAiSubject(e.target.value)}
-                      className="w-full bg-black/50 border-purple-500/30 text-white rounded-md p-2 text-sm outline-none focus:border-purple-500"
+                      className="w-full club-well club-border club-ink rounded-md p-2 text-sm outline-none club-border"
                     >
                       <option value="Math">Math</option>
                       <option value="Science">Science</option>
@@ -9931,7 +8497,7 @@ const handlePackAction = async (packId: string) => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="font-heading text-white/70 text-sm font-bold block">
+                  <label className="font-heading club-ink text-sm font-bold block">
                     Number of Questions
                   </label>
                   <Input
@@ -9940,15 +8506,15 @@ const handlePackAction = async (packId: string) => {
                     max={50}
                     value={aiQuestionCount}
                     onChange={(e) => setAiQuestionCount(parseInt(e.target.value) || 30)}
-                    className="bg-black/50 border-purple-500/30 text-white"
+                    className="club-well club-border club-ink"
                   />
-                  <p className="font-heading text-[10px] text-white/30 italic">Default is 30 questions (Recommended for best experience).</p>
+                  <p className="font-heading text-xs club-muted italic">Default is 30 questions (Recommended for best experience).</p>
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl border border-white/10">
+                <div className="flex items-center justify-between p-3 club-well rounded-xl border club-border">
                   <div>
-                    <Label className="font-heading text-white font-bold block">Public Visibility</Label>
-                    <p className="font-heading text-[10px] text-white/50">Allow others to find and host this set.</p>
+                    <Label className="font-heading club-ink font-bold block">Public Visibility</Label>
+                    <p className="font-heading text-xs club-muted">Allow others to find and host this set.</p>
                   </div>
                   <input
                     type="checkbox"
@@ -9960,14 +8526,14 @@ const handlePackAction = async (packId: string) => {
                 <div className="flex gap-2">
                   <Button
                     onClick={() => setShowAiSetCreator(false)}
-                    className="flex-1 bg-white/10 hover:bg-white/20 text-white rounded-xl"
+                    className="club-action flex-1 club-well club-well club-ink rounded-xl"
                   >
                     Cancel
                   </Button>
                   <Button
                     onClick={handleGenerateAiSet}
                     disabled={!aiSetPrompt || isGeneratingSet}
-                    className="flex-1 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold rounded-xl"
+                    className="club-action flex-1 club-surface club-ink font-bold rounded-xl"
                   >
                     {isGeneratingSet ? "Generating..." : "Generate Set"}
                   </Button>
@@ -10137,43 +8703,43 @@ const handlePackAction = async (packId: string) => {
       }
 
       {modalNotification?.show && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-300">
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] bg-[size:32px_32px] pointer-events-none" />
-          <div className="relative w-full max-w-md bg-gradient-to-b from-slate-900 to-slate-950 border border-white/10 rounded-[2rem] p-6 text-center shadow-[0_0_50px_rgba(168,85,247,0.15)] overflow-hidden animate-in zoom-in-95 duration-300">
+        <div className="fixed inset-0 club-overlay flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-300">
+          <div className="club-decoration absolute inset-0 bg-[size:32px_32px] pointer-events-none" />
+          <div className="relative w-full max-w-md club-surface border club-border rounded-xl p-6 text-center overflow-hidden animate-in zoom-in-95 duration-300">
             {/* Holographic glowing lights */}
             <div className={`absolute -top-20 left-1/2 -translate-x-1/2 w-40 h-40 rounded-full blur-3xl opacity-20 pointer-events-none ${
-              modalNotification.type === "success" ? "bg-emerald-500" :
-              modalNotification.type === "error" ? "bg-rose-500" : "bg-cyan-500"
+              modalNotification.type === "success" ? "club-green" :
+              modalNotification.type === "error" ? "club-red" : "club-blue"
             }`} />
 
             {/* Header Icon */}
-            <div className="mx-auto w-16 h-16 rounded-2xl bg-black/40 border border-white/5 flex items-center justify-center text-3xl shadow-inner mb-4">
+            <div className="mx-auto w-16 h-16 rounded-xl club-well border club-border flex items-center justify-center text-3xl mb-4">
               {modalNotification.type === "success" ? "🎉" :
                modalNotification.type === "error" ? "⚠️" : "📡"}
             </div>
 
             {/* Title */}
             <h3 className={`text-xl font-black uppercase tracking-wider mb-2 ${
-              modalNotification.type === "success" ? "text-emerald-400" :
-              modalNotification.type === "error" ? "text-rose-400" : "text-cyan-400"
+              modalNotification.type === "success" ? "club-success" :
+              modalNotification.type === "error" ? "club-danger" : "club-accent"
             }`}>
               {modalNotification.title}
             </h3>
 
             {/* Message */}
-            <p className="font-heading text-sm text-slate-300 font-medium leading-relaxed px-2 mb-6 whitespace-pre-wrap break-words">
+            <p className="font-heading text-sm club-muted font-medium leading-relaxed px-2 mb-6 whitespace-pre-wrap break-words">
               {modalNotification.message}
             </p>
 
             {/* Action Buttons */}
             <Button
               onClick={() => setModalNotification(null)}
-              className={`w-full h-12 text-sm font-black uppercase tracking-widest rounded-xl transition-all duration-300 ${
+              className={`club-action w-full h-12 text-sm font-black uppercase tracking-widest rounded-xl transition-all duration-300 ${
                 modalNotification.type === "success" 
-                  ? "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-[0_0_20px_rgba(16,185,129,0.2)] text-white"
+                  ? "club-surface club-ink"
                   : modalNotification.type === "error"
-                  ? "bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 shadow-[0_0_20px_rgba(244,63,94,0.2)] text-white"
-                  : "bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 shadow-[0_0_20px_rgba(6,182,212,0.2)] text-white"
+                  ? "club-surface club-ink"
+                  : "club-surface club-ink"
               } border-none hover:scale-[1.02] active:scale-95`}
             >
               Acknowledge
