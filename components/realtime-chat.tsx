@@ -28,21 +28,21 @@ const LS_KEY = "boomkit_chat_messages"
 const getRoleColor = (role: string) => {
   switch (role) {
     case "owner":
-      return "bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.4)] text-white"
+      return "club-yellow club-ink"
     case "admin":
-      return "bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.4)] text-white"
+      return "club-purple club-ink"
     case "senior_moderator":
-      return "bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.4)] text-white"
+      return "club-blue club-ink"
     case "moderator":
-      return "bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.4)] text-white"
+      return "club-green club-ink"
     case "tester":
-      return "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)] text-white"
+      return "club-green club-ink"
     case "staff":
-      return "bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.4)] text-white"
+      return "club-blue club-ink"
     case "system":
-      return "bg-gradient-to-r from-red-600 to-orange-500 shadow-[0_0_12px_rgba(239,68,68,0.5)] text-white font-extrabold"
+      return "club-surface club-ink font-extrabold"
     default:
-      return "bg-slate-600 text-white"
+      return "club-well club-ink"
   }
 }
 
@@ -91,7 +91,7 @@ const renderMessageText = (text: string, userRoles: Record<string, string>) => {
         return (
           <span
             key={idx}
-            className="font-heading text-red-500 font-extrabold bg-red-500/15 px-1.5 py-0.5 rounded border border-red-500/20"
+            className="font-heading club-danger font-extrabold club-red px-1.5 py-0.5 rounded border club-border"
             title={`Mentioned ${actualUsername}`}
           >
             @{actualUsername}
@@ -450,30 +450,30 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
       {deleteConfirmId && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-300"
+            className="absolute inset-0 club-overlay animate-in fade-in duration-300"
             onClick={() => setDeleteConfirmId(null)}
           />
-          <div className="relative bg-zinc-900/90 backdrop-blur-2xl border border-white/10 rounded-3xl p-8 max-w-sm w-full shadow-2xl animate-in zoom-in-95 duration-300">
+          <div className="relative club-well border club-border rounded-xl p-8 max-w-sm w-full animate-in zoom-in-95 duration-300">
             <div className="flex flex-col items-center text-center space-y-4">
-              <div className="w-16 h-16 bg-red-500/20 rounded-2xl flex items-center justify-center border border-red-500/30">
-                <AlertTriangleIcon className="w-8 h-8 text-red-500 animate-pulse" />
+              <div className="w-16 h-16 club-red rounded-xl flex items-center justify-center border club-border">
+                <AlertTriangleIcon className="w-8 h-8 club-danger animate-pulse" />
               </div>
               <div className="space-y-2">
-                <h3 className="font-heading text-xl font-black text-white tracking-tight">Delete Message?</h3>
-                <p className="font-heading text-white/40 text-sm leading-relaxed">
+                <h3 className="font-heading text-xl font-black club-ink tracking-tight">Delete Message?</h3>
+                <p className="font-heading club-muted text-sm leading-relaxed">
                   This action cannot be undone. Are you sure you want to remove this message from the arena?
                 </p>
               </div>
               <div className="flex gap-3 w-full pt-2">
                 <Button
                   variant="ghost"
-                  className="flex-1 rounded-xl border border-[#3b0764] bg-[#3b0764] text-white hover:bg-[#2e054e]"
+                  className="club-action flex-1 rounded-xl border club-border club-surface club-ink club-surface"
                   onClick={() => setDeleteConfirmId(null)}
                 >
                   Cancel
                 </Button>
                 <Button
-                  className="flex-1 bg-red-600 hover:bg-red-500 text-white rounded-xl shadow-lg shadow-red-900/40"
+                  className="club-action flex-1 club-red club-red club-ink rounded-xl "
                   onClick={() => handleDelete(deleteConfirmId)}
                 >
                   Delete
@@ -485,41 +485,41 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
       )}
 
       {/* Cyber Communications Console Header */}
-      <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-slate-950 via-purple-950/20 to-slate-950 border border-white/10 p-6 md:p-8 shadow-[0_12px_40px_rgba(0,0,0,0.6)]">
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-purple-500/5 rounded-full blur-[100px] pointer-events-none" />
-        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-blue-500/5 rounded-full blur-[100px] pointer-events-none" />
+      <div className="relative overflow-hidden rounded-xl club-surface border club-border p-6 md:p-8 ">
+        <div className="club-decoration absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 club-purple rounded-full pointer-events-none" />
+        <div className="club-decoration absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 club-blue rounded-full pointer-events-none" />
 
         <div className="relative flex flex-col sm:flex-row justify-between items-center gap-4 z-10">
           <div className="space-y-1 text-center sm:text-left">
-            <h1 className="font-heading text-3xl md:text-5xl font-black text-white tracking-tighter">
-              COMMS <span className="font-heading text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 drop-shadow-sm">TERMINAL</span>
+            <h1 className="font-heading text-3xl md:text-5xl font-black club-ink tracking-tighter">
+              Club <span className="font-heading club-accent ">chat</span>
             </h1>
-            <p className="font-heading text-white/40 text-xs md:text-sm font-semibold uppercase tracking-wider">
-              Secure System Channel • Real-time Broadcast
+            <p className="font-heading club-muted text-xs md:text-sm font-semibold uppercase tracking-wider">
+              A place to talk packs, games, and everything Boomkit.
             </p>
           </div>
 
-          <div className="flex items-center gap-4 bg-slate-900/60 backdrop-blur-xl border border-white/10 px-6 py-3 rounded-2xl">
+          <div className="flex items-center gap-4 club-well border club-border px-6 py-3 rounded-xl">
             <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+              <span className=" absolute inline-flex h-full w-full rounded-full club-green opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 club-green"></span>
             </span>
             <div className="font-heading text-left">
-              <div className="font-heading text-[10px] text-white/40 font-black uppercase tracking-wider">Network Status</div>
-              <div className="font-heading text-xs font-black text-emerald-400 uppercase tracking-widest">ONLINE</div>
+              <div className="font-heading text-xs club-muted font-black uppercase tracking-wider">Network Status</div>
+              <div className="font-heading text-xs font-black club-success uppercase tracking-widest">ONLINE</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="blooket-panel p-6">
+      <div className="club-panel p-6">
         <ScrollArea className="h-[550px] w-full pr-4 mb-6">
           <div className="space-y-6">
             {messages.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-white/20 p-20 border border-dashed border-white/10 rounded-[2rem] bg-black/20">
-                <MessageCircleIcon className="w-12 h-12 mb-4 opacity-20 text-purple-400 animate-pulse" />
-                <p className="font-bold uppercase tracking-widest text-sm text-white/60">No Transmissions Found</p>
-                <p className="font-heading text-xs text-white/30 mt-1">Initiate conversation to establish downlink.</p>
+              <div className="h-full flex flex-col items-center justify-center club-muted p-20 border border-dashed club-border rounded-xl club-well">
+                <MessageCircleIcon className="w-12 h-12 mb-4 opacity-20 club-accent " />
+                <p className="font-bold uppercase tracking-wide text-sm club-muted">No Transmissions Found</p>
+                <p className="font-heading text-xs club-muted mt-1">Be the first to say hello.</p>
               </div>
             ) : (
               messages.map((msg) => {
@@ -542,14 +542,14 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                     key={msg.id}
                     className={`group flex items-start gap-4 ${isMe ? "flex-row-reverse text-right" : "text-left"} transition-all duration-300 p-3 rounded-2xl ${
                       isPinged 
-                        ? "bg-red-500/10 border-l-4 border-red-500 shadow-[inset_0_0_15px_rgba(239,68,68,0.08)]" 
+                        ? "club-red border-l-4 club-border "
                         : "border-l-4 border-transparent"
                     }`}
                   >
                     {/* User Avatar with Rarity glow */}
                     <div 
-                      className={`w-11 h-11 rounded-2xl flex items-center justify-center text-2xl border bg-slate-900 relative cursor-pointer flex-shrink-0 group-hover:scale-105 transition-transform duration-300 shadow-md overflow-hidden ${
-                        isMe ? "border-purple-500/30 shadow-[0_0_10px_rgba(168,85,247,0.15)]" : "border-white/10"
+                      className={`w-11 h-11 rounded-xl flex items-center justify-center text-2xl border club-well relative cursor-pointer flex-shrink-0 group-hover:scale-105 transition-transform duration-300 overflow-hidden ${
+                        isMe ? "club-border " : "club-border"
                       }`}
                       onClick={() => !isSystem && onUsernameClick(msg.username)}
                     >
@@ -560,7 +560,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                           <BoomAvatar name={avatar} className="w-full h-full object-contain" />
                         </div>
                       )}
-                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-white/5 to-transparent pointer-events-none" />
+                      <div className="absolute inset-0 rounded-xl club-surface pointer-events-none" />
                     </div>
 
                     <div className={`flex flex-col max-w-[75%] ${isMe ? "items-end" : "items-start"}`}>
@@ -581,7 +581,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                             }}
                             className={`inline-block text-xs font-black tracking-tight ${userClanData[msg.username]?.clan_id ? 'cursor-pointer hover:underline' : ''}`}
                           >
-                            <span className={userClanData[msg.username]?.color || 'text-purple-400'}>
+                            <span className={userClanData[msg.username]?.color || 'club-accent'}>
                               [{userClanData[msg.username]?.tag}]
                             </span>
                           </span>
@@ -590,10 +590,10 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                         <span
                           className={`text-xs font-bold tracking-wide transition-all ${
                             isSystem
-                              ? "text-red-400 drop-shadow-[0_0_6px_rgba(239,68,68,0.6)] font-black"
+                              ? "club-danger drop-shadow-[0_0_6px_rgba(239,68,68,0.6)] font-black"
                               : isMe
-                                ? "text-purple-400 cursor-pointer hover:underline"
-                                : "text-white/80 cursor-pointer hover:underline"
+                                ? "club-accent cursor-pointer hover:underline"
+                                : "club-ink cursor-pointer hover:underline"
                           }`}
                           onClick={() => !isSystem && onUsernameClick(msg.username)}
                         >
@@ -611,7 +611,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                           {isMe && (
                             <button
                               onClick={() => startEditing(msg)}
-                              className="p-1 hover:bg-[#5b21b6]/10 rounded-md text-white/40 hover:text-white transition-colors"
+                              className="p-1 club-surface rounded-md club-muted club-ink transition-colors"
                               title="Edit Message"
                             >
                               <PencilIcon className="w-3.5 h-3.5" />
@@ -620,7 +620,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                           {canDelete && (
                             <button
                               onClick={() => setDeleteConfirmId(msg.id)}
-                              className="p-1 hover:bg-red-500/20 rounded-md text-white/40 hover:text-red-400 transition-colors"
+                              className="p-1 club-red rounded-md club-muted club-danger transition-colors"
                               title="Delete Message"
                             >
                               <Trash2Icon className="w-3.5 h-3.5" />
@@ -631,12 +631,12 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
 
                       {/* Bubble Text */}
                       <div className={`
-                        px-5 py-3.5 rounded-3xl border transition-all duration-300 relative shadow-lg
+                        px-5 py-3.5 rounded-xl border transition-all duration-300 relative
                         ${isSystem
-                          ? "bg-gradient-to-br from-red-950/50 via-orange-950/25 to-slate-950/70 border-red-500/30 text-red-200 rounded-tl-none shadow-[0_0_20px_rgba(239,68,68,0.15)] w-full"
+                          ? "club-surface club-border club-danger rounded-tl-none w-full"
                           : isMe
-                            ? "bg-gradient-to-br from-purple-900/20 to-indigo-950/20 border-purple-500/30 text-white rounded-tr-none shadow-[0_0_20px_rgba(168,85,247,0.05)]"
-                            : "bg-gradient-to-br from-slate-900/60 to-slate-950/80 border-white/10 text-white/95 rounded-tl-none hover:border-white/20"
+                            ? "club-surface club-border club-ink rounded-tr-none "
+                            : "club-surface club-border club-ink rounded-tl-none club-border"
                         }
                         ${isEditing ? "ring-2 ring-purple-500 border-transparent w-full" : ""}
                       `}>
@@ -645,7 +645,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                             <textarea
                               value={editText}
                               onChange={(e) => setEditText(e.target.value)}
-                              className="bg-transparent border-none text-white focus:ring-0 text-sm resize-none w-full min-h-[60px] outline-none"
+                              className="bg-transparent border-none club-ink focus:ring-0 text-sm resize-none w-full min-h-[60px] outline-none"
                               autoFocus
                               onKeyDown={(e) => {
                                 if (e.key === "Enter" && !e.shiftKey) {
@@ -658,13 +658,13 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                             <div className="flex justify-end gap-2">
                               <button
                                 onClick={() => setEditingId(null)}
-                                className="p-1.5 hover:bg-[#5b21b6]/10 rounded-lg text-white/40 hover:text-white transition-colors"
+                                className="p-1.5 club-surface rounded-lg club-muted club-ink transition-colors"
                               >
                                 <XIcon className="w-4 h-4" />
                               </button>
                               <button
                                 onClick={handleUpdate}
-                                className="p-1.5 bg-purple-500 hover:bg-purple-400 rounded-lg text-white shadow-lg transition-colors"
+                                className="p-1.5 club-purple club-purple rounded-lg club-ink transition-colors"
                               >
                                 <CheckIcon className="w-4 h-4" />
                               </button>
@@ -687,8 +687,8 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                               onClick={() => toggleReaction(msg.id, emoji)}
                               className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs transition-all duration-300 ${
                                 reacted 
-                                  ? 'bg-purple-500/20 border border-purple-500/40 text-purple-300 shadow-[0_0_10px_rgba(168,85,247,0.1)]' 
-                                  : 'bg-[#5b21b6]/5 border border-white/5 hover:bg-[#5b21b6]/10 hover:border-white/10 text-white/60'
+                                  ? 'club-purple border club-border club-accent '
+                                  : 'club-surface border club-border club-surface club-border club-muted'
                               }`}
                             >
                               <span>{emoji}</span>
@@ -699,10 +699,10 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
 
                         {/* Floating mini-reaction popover */}
                         <div className="relative group/reactbtn">
-                          <button className="opacity-0 group-hover:opacity-100 flex items-center justify-center w-6 h-6 rounded-full bg-[#5b21b6]/5 hover:bg-[#5b21b6]/10 text-white/40 hover:text-white text-xs border border-white/5 transition-all duration-300">
+                          <button className="opacity-0 group-hover:opacity-100 flex items-center justify-center w-6 h-6 rounded-full club-surface club-surface club-muted club-ink text-xs border club-border transition-all duration-300">
                             +
                           </button>
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/reactbtn:flex blooket-panel rounded-2xl p-1.5 gap-1.5 shadow-2xl z-40 animate-in fade-in slide-in-from-bottom-2 duration-200">
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/reactbtn:flex club-panel rounded-xl p-1.5 gap-1.5 z-40 animate-in fade-in slide-in-from-bottom-2 duration-200">
                             {REACTION_EMOJIS.map(emoji => (
                               <button
                                 key={emoji}
@@ -716,7 +716,7 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
                         </div>
                       </div>
 
-                      <span className="font-heading text-[9px] text-white/20 mt-1 px-1 font-bold">
+                      <span className="font-heading text-xs club-muted mt-1 px-1 font-bold">
                         {new Date(isNaN(Number(msg.timestamp)) ? msg.timestamp : Number(msg.timestamp)).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                       </span>
                     </div>
@@ -730,24 +730,24 @@ export default function RealtimeChat({ currentUser, roleName, onUsernameClick, o
 
         {/* Input Dock */}
         <div className="relative group">
-          <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 rounded-[2rem] blur opacity-15 group-focus-within:opacity-30 transition duration-500" />
-          <div className="relative flex items-center bg-black/60 backdrop-blur-xl border border-white/10 rounded-[1.8rem] p-2.5 pl-5 shadow-2xl">
+          <div className="absolute -inset-1 club-surface rounded-xl blur opacity-15 group-focus-within:opacity-30 transition duration-500" />
+          <div className="relative flex items-center club-well border club-border rounded-[1.8rem] p-2.5 pl-5 ">
             <Input
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder={isMuted ? "SYSTEM BLOCKED • MUTED" : "Interface terminal input..."}
+              placeholder={isMuted ? "You are muted" : "Write a message..."}
               disabled={isMuted}
-              className="flex-1 bg-transparent border-none text-white placeholder:text-white/20 focus-visible:ring-0 focus-visible:ring-offset-0 h-11 text-sm font-medium"
+              className="flex-1 bg-transparent border-none club-ink placeholder:text-white/20 focus-visible:ring-0 focus-visible:ring-offset-0 h-11 text-sm font-medium"
               onKeyDown={(e) => e.key === "Enter" && !isMuted && send()}
             />
             <Button
               onClick={send}
               disabled={isMuted || !text.trim()}
-              className={`
-                ml-3 rounded-2xl h-11 px-6 font-black uppercase tracking-wider text-xs transition-all duration-300
-                ${isMuted || !text.trim()
-                  ? "bg-[#5b21b6]/5 text-white/20 cursor-not-allowed border-none"
-                  : "bg-[#5b21b6] text-white hover:bg-[#6d28d9] hover:bg-gradient-to-r hover:from-purple-500 hover:to-indigo-500 hover:text-white shadow-xl hover:shadow-[0_0_20px_rgba(168,85,247,0.3)] active:scale-95 border-none"
+              className={`club-action
+ ml-3 rounded-2xl h-11 px-6 font-black uppercase tracking-wider text-xs transition-all duration-300
+ ${isMuted || !text.trim()
+                  ? "club-surface club-muted cursor-not-allowed border-none"
+                  : "club-surface club-ink club-surface club-surface club-ink active:scale-95 border-none"
                 }
               `}
             >

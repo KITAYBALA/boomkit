@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Nunito, Fredoka } from "next/font/google"
 import "./globals.css"
+import "./clubhouse.css"
 import { Toaster } from "sonner"
 
 const nunito = Nunito({ subsets: ["latin"], variable: "--font-sans" })

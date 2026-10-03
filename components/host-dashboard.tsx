@@ -97,30 +97,30 @@ export default function HostDashboard({
     }
 
     return (
-        <div className="fixed inset-0 z-50 bg-[#0f101a] text-white flex flex-col">
+        <div className="fixed inset-0 z-50 club-surface club-ink flex flex-col">
             {/* Top Bar */}
-            <div className="h-24 bg-[#141521] border-b border-white/10 px-8 flex items-center justify-between shadow-lg">
+            <div className="h-24 club-surface border-b club-border px-8 flex items-center justify-between ">
                 <div className="flex items-center gap-6">
-                    <div className="w-14 h-14 rounded-2xl bg-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
+                    <div className="w-14 h-14 rounded-xl club-purple flex items-center justify-center ">
                         <BarChart3 className="w-8 h-8" />
                     </div>
                     <div>
                         <h1 className="font-heading text-2xl font-black tracking-tight">{subject}</h1>
-                        <p className="font-heading text-white/40 text-sm font-bold uppercase tracking-widest">{gameMode}</p>
+                        <p className="font-heading club-muted text-sm font-bold uppercase tracking-wide">{gameMode}</p>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-12">
                     <div className="font-heading text-center">
-                        <p className="font-heading text-white/30 text-[10px] font-black uppercase tracking-widest mb-1">Time Left</p>
+                        <p className="font-heading club-muted text-xs font-black uppercase tracking-wide mb-1">Time Left</p>
                         <div className="flex items-center gap-2 text-3xl font-black font-mono">
-                            <Timer className="w-6 h-6 text-cyan-400" />
+                            <Timer className="w-6 h-6 club-accent" />
                             {formatTime(timeLeft)}
                         </div>
                     </div>
                     <div className="font-heading text-center">
-                        <p className="font-heading text-white/30 text-[10px] font-black uppercase tracking-widest mb-1">Join PIN</p>
-                        <div className="font-heading text-4xl font-black text-purple-400 tracking-tighter">
+                        <p className="font-heading club-muted text-xs font-black uppercase tracking-wide mb-1">Join PIN</p>
+                        <div className="font-heading text-4xl font-black club-accent tracking-tighter">
                             {pin}
                         </div>
                     </div>
@@ -130,14 +130,14 @@ export default function HostDashboard({
                     <Button
                         variant="outline"
                         onClick={() => setIsPaused(!isPaused)}
-                        className="bg-white/5 border-white/10 hover:bg-white/10 text-white rounded-xl"
+                        className="club-action club-well club-border club-well club-ink rounded-xl"
                     >
                         {isPaused ? <Play className="w-4 h-4 mr-2" /> : <Pause className="w-4 h-4 mr-2" />}
                         {isPaused ? "Resume" : "Pause"}
                     </Button>
                     <Button
                         onClick={onEndGame}
-                        className="bg-rose-600 hover:bg-rose-500 text-white font-bold rounded-xl shadow-lg shadow-rose-500/20"
+                        className="club-action club-red club-red club-ink font-bold rounded-xl "
                     >
                         <XCircle className="w-4 h-4 mr-2" />
                         End Game
@@ -151,51 +151,51 @@ export default function HostDashboard({
                 <div className="flex-1 flex flex-col gap-6">
                     <div className="flex items-center justify-between">
                         <h2 className="font-heading text-3xl font-black flex items-center gap-2">
-                            <Trophy className="w-8 h-8 text-amber-400" />
+                            <Trophy className="w-8 h-8 club-accent" />
                             Leaderboard
                         </h2>
-                        <Badge variant="outline" className="font-heading text-white/40 border-white/10">
+                        <Badge variant="outline" className="font-heading club-muted club-border">
                             {players.length} Players
                         </Badge>
                     </div>
 
-                    <div className="flex-1 bg-white/5 rounded-[2rem] border border-white/10 p-6 overflow-y-auto space-y-3">
+                    <div className="flex-1 club-well rounded-xl border club-border p-6 overflow-y-auto space-y-3">
                         {sortedPlayers.length > 0 ? (
                             sortedPlayers.map((player, index) => (
                                 <div
                                     key={player.id}
                                     className={`
                                         flex items-center justify-between p-4 rounded-2xl transition-all duration-500 animate-in fade-in slide-in-from-left-4
-                                        ${index === 0 ? "bg-amber-500/10 border border-amber-500/30" : "bg-white/5 border border-white/5"}
+                                        ${index === 0 ? "club-yellow border club-border" : "club-well border club-border"}
                                     `}
                                 >
                                     <div className="flex items-center gap-4">
                                         <div className={`
                                             w-10 h-10 rounded-full flex items-center justify-center font-black text-lg
-                                            ${index === 0 ? "bg-amber-500 text-black" :
-                                                index === 1 ? "bg-slate-300 text-black" :
-                                                    index === 2 ? "bg-orange-400 text-black" : "bg-white/10 text-white/40"}
+                                            ${index === 0 ? "club-yellow club-ink" :
+                                                index === 1 ? "club-well club-ink" :
+                                                    index === 2 ? "club-yellow club-ink" : "club-well club-muted"}
                                         `}>
                                             {index + 1}
                                         </div>
                                         <div>
                                             <p className="font-black text-xl flex items-center gap-2">
                                                 {player.username}
-                                                {index === 0 && <Crown className="w-4 h-4 text-amber-400" />}
+                                                {index === 0 && <Crown className="w-4 h-4 club-accent" />}
                                             </p>
-                                            <p className="font-heading text-[10px] text-white/30 uppercase font-bold tracking-widest">Rank {index + 1}</p>
+                                            <p className="font-heading text-xs club-muted uppercase font-bold tracking-wide">Rank {index + 1}</p>
                                         </div>
                                     </div>
                                     <div className="font-heading text-right">
-                                        <p className="font-heading text-2xl font-black text-white">{(player.score || 0).toLocaleString()}</p>
-                                        <p className="font-heading text-[10px] text-purple-400 font-bold uppercase tracking-widest">
+                                        <p className="font-heading text-2xl font-black club-ink">{(player.score || 0).toLocaleString()}</p>
+                                        <p className="font-heading text-xs club-accent font-bold uppercase tracking-wide">
                                             {gameMode === "fishing-frenzy" ? "LBS" : "Points"}
                                         </p>
                                     </div>
                                 </div>
                             ))
                         ) : (
-                            <div className="h-full flex flex-col items-center justify-center text-white/20 gap-4">
+                            <div className="h-full flex flex-col items-center justify-center club-muted gap-4">
                                 <Users className="w-16 h-16 opacity-20" />
                                 <p className="font-heading text-xl font-bold">Waiting for players...</p>
                             </div>
@@ -205,12 +205,12 @@ export default function HostDashboard({
 
                 {/* Right: Stats & Overview */}
                 <div className="w-[350px] space-y-6">
-                    <Card className="bg-gradient-to-br from-purple-600 to-indigo-700 border-none rounded-[2rem] p-8 text-white shadow-2xl">
-                        <p className="font-heading text-white/60 text-sm font-bold uppercase tracking-widest mb-1">In the Lead</p>
+                    <Card className="club-surface border-none rounded-xl p-8 club-ink ">
+                        <p className="font-heading club-muted text-sm font-bold uppercase tracking-wide mb-1">In the Lead</p>
                         <h3 className="font-heading text-4xl font-black truncate mb-4">{topPlayer?.username || "---"}</h3>
-                        <div className="flex items-center justify-between bg-white/10 rounded-xl p-4">
+                        <div className="flex items-center justify-between club-well rounded-xl p-4">
                             <div>
-                                <p className="font-heading text-[10px] text-white/60 font-bold uppercase">
+                                <p className="font-heading text-xs club-muted font-bold uppercase">
                                     {gameMode === "fishing-frenzy" ? "Current Weight" : "Current Score"}
                                 </p>
                                 <p className="font-heading text-2xl font-black">
@@ -218,53 +218,53 @@ export default function HostDashboard({
                                     {gameMode === "fishing-frenzy" && <span className="font-heading text-sm ml-1 opacity-60">lbs</span>}
                                 </p>
                             </div>
-                            <Trophy className="w-10 h-10 text-amber-300" />
+                            <Trophy className="w-10 h-10 club-accent" />
                         </div>
                     </Card>
 
-                    <Card className="bg-white/5 border-white/10 rounded-[2rem] p-6 space-y-4">
+                    <Card className="club-well club-border rounded-xl p-6 space-y-4">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center text-cyan-400">
+                            <div className="w-10 h-10 rounded-xl club-blue flex items-center justify-center club-accent">
                                 <Zap className="w-6 h-6" />
                             </div>
                             <div>
-                                <p className="font-heading text-white/40 text-[10px] font-bold uppercase">Game Activity</p>
-                                <p className="font-heading text-lg font-black text-white">Normal</p>
+                                <p className="font-heading club-muted text-xs font-bold uppercase">Game Activity</p>
+                                <p className="font-heading text-lg font-black club-ink">Normal</p>
                             </div>
                         </div>
                         <div className="h-[100px] flex items-end gap-1 px-2">
                             {[...Array(20)].map((_, i) => (
                                 <div
                                     key={i}
-                                    className="flex-1 bg-cyan-500/30 rounded-t-sm"
+                                    className="flex-1 club-blue rounded-t-sm"
                                     style={{ height: `${Math.random() * 100}%` }}
                                 />
                             ))}
                         </div>
                     </Card>
 
-                    <div className="bg-white/5 border border-white/10 rounded-[2rem] p-6 flex-1 flex flex-col min-h-0">
-                        <h4 className="font-heading text-white/40 text-[10px] font-black uppercase tracking-widest mb-4">Recent Activity</h4>
+                    <div className="club-well border club-border rounded-xl p-6 flex-1 flex flex-col min-h-0">
+                        <h4 className="font-heading club-muted text-xs font-black uppercase tracking-wide mb-4">Recent Activity</h4>
                         <div className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-hide">
                             {recentActivity.map((activity) => (
                                 <div key={activity.id} className="flex items-start gap-2 text-xs animate-in slide-in-from-right-2 duration-300">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500 mt-1 flex-shrink-0" />
+                                    <div className="w-1.5 h-1.5 rounded-full club-purple mt-1 flex-shrink-0" />
                                     <div>
-                                        <p className="font-heading text-white/80 font-medium">{activity.message}</p>
-                                        <p className="font-heading text-white/20 text-[9px] uppercase font-bold">{activity.time}</p>
+                                        <p className="font-heading club-ink font-medium">{activity.message}</p>
+                                        <p className="font-heading club-muted text-xs uppercase font-bold">{activity.time}</p>
                                     </div>
                                 </div>
                             ))}
                         </div>
                     </div>
 
-                    <div className="bg-white/5 border border-white/10 rounded-[2rem] p-6">
-                        <h4 className="font-heading text-white/40 text-[10px] font-black uppercase tracking-widest mb-4">Host Controls</h4>
+                    <div className="club-well border club-border rounded-xl p-6">
+                        <h4 className="font-heading club-muted text-xs font-black uppercase tracking-wide mb-4">Host Controls</h4>
                         <div className="grid grid-cols-2 gap-3">
-                            <Button variant="outline" className="w-full bg-white/5 border-white/10 text-white text-xs h-10 rounded-xl">
+                            <Button variant="outline" className="club-action w-full club-well club-border club-ink text-xs h-10 rounded-xl">
                                 Hide PIN
                             </Button>
-                            <Button variant="outline" className="w-full bg-white/5 border-white/10 text-white text-xs h-10 rounded-xl">
+                            <Button variant="outline" className="club-action w-full club-well club-border club-ink text-xs h-10 rounded-xl">
                                 Scores Off
                             </Button>
                         </div>

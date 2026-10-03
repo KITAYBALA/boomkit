@@ -13,14 +13,14 @@ interface DailySpinWheelProps {
 }
 
 const SECTORS = [
-    { amount: 100, color: '#4F46E5' }, // Indigo
-    { amount: 150, color: '#7C3AED' }, // Violet
-    { amount: 200, color: '#2563EB' }, // Blue
-    { amount: 250, color: '#DB2777' }, // Pink
-    { amount: 300, color: '#9333EA' }, // Purple
-    { amount: 350, color: '#059669' }, // Emerald
-    { amount: 400, color: '#D97706' }, // Amber
-    { amount: 500, color: '#DC2626' }, // Red (Jackpot)
+    { amount: 100, color: '#226653' }, // Indigo
+    { amount: 150, color: '#4d7180' }, // Violet
+    { amount: 200, color: '#a65b37' }, // Blue
+    { amount: 250, color: '#74634b' }, // Pink
+    { amount: 300, color: '#785c80' }, // Purple
+    { amount: 350, color: '#427350' }, // Emerald
+    { amount: 400, color: '#946522' }, // Amber
+    { amount: 500, color: '#8c4240' }, // Red (Jackpot)
 ]
 
 export default function DailySpinWheel({ onSpin, onWin, isSpinning, setIsSpinning, canSpin }: DailySpinWheelProps) {
@@ -85,16 +85,16 @@ export default function DailySpinWheel({ onSpin, onWin, isSpinning, setIsSpinnin
     }
 
     return (
-        <div className="flex flex-col items-center gap-8 py-10">
-            <div className="relative w-80 h-80">
+        <div className="club-wheel">
+            <div className="club-wheel-disc">
                 {/* Pointer */}
-                <div className="absolute top-[-10px] left-1/2 -translate-x-1/2 z-20 w-8 h-8 bg-[#5b21b6] shadow-xl flex items-center justify-center rounded-b-full">
+                <div className="absolute top-[-10px] left-1/2 -translate-x-1/2 z-20 w-8 h-8 club-surface flex items-center justify-center rounded-b-full">
                     <div className="w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[15px] border-t-slate-900 mb-1" />
                 </div>
 
                 {/* The Wheel */}
                 <div
-                    className="w-full h-full rounded-full border-8 border-slate-800 shadow-2xl relative transition-transform"
+                    className="w-full h-full rounded-full border-8 club-border relative transition-transform"
                     style={{ transform: `rotate(${rotation}deg)`, transitionDuration: "8000ms", transitionTimingFunction: "cubic-bezier(0.15, 0, 0.15, 1)" }}
                 >
                     <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90">
@@ -139,17 +139,17 @@ export default function DailySpinWheel({ onSpin, onWin, isSpinning, setIsSpinnin
             <Button
                 onClick={handleSpin}
                 disabled={isSpinning || !canSpin}
-                className="h-16 px-12 text-2xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-black rounded-2xl shadow-xl shadow-purple-500/20 active:scale-95 transition-all"
+                className="club-action h-11 px-6 text-sm club-surface club-ink font-black rounded-xl active:scale-95 transition-all"
             >
                 {isSpinning ? 'SPINNING...' : !canSpin ? 'SPUN TODAY' : 'SPIN NOW!'}
             </Button>
 
             {result && (
                 <div className="animate-bounce flex flex-col items-center gap-2">
-                    <p className="font-heading text-white/60 font-bold uppercase tracking-widest text-sm">You won</p>
+                    <p className="font-heading club-muted font-bold uppercase tracking-wide text-sm">You won</p>
                     <div className="flex items-center gap-3">
-                        <CoinsIcon className="w-8 h-8 text-yellow-500" />
-                        <span className="font-heading text-5xl font-black text-white">{result}</span>
+                        <CoinsIcon className="w-8 h-8 club-accent" />
+                        <span className="font-heading text-4xl font-black club-ink">{result}</span>
                     </div>
                 </div>
             )}

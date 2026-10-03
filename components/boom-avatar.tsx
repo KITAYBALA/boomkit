@@ -2358,15 +2358,16 @@ function parseGradientStops(bgClass: string) {
 
 // Blook SVG builder
 export function BlookSvg({ name, className = "w-12 h-12" }: { name: string; className?: string }) {
+  const instanceId = React.useId().replace(/:/g, "")
   const blook = BLOOKS[name]
 
   // Fallback if not configured
   if (!blook) {
     return (
       <svg viewBox="0 0 100 100" className={`${className} select-none overflow-visible`}>
-        <rect x="12" y="12" width="76" height="76" rx="16" fill="url(#fallbackGrad)" stroke="#475569" strokeWidth="3" />
+        <rect x="12" y="12" width="76" height="76" rx="16" fill={`url(#fallback-${instanceId})`} stroke="#475569" strokeWidth="3" />
         <defs>
-          <linearGradient id="fallbackGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <linearGradient id={`fallback-${instanceId}`} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#3b82f6" />
             <stop offset="100%" stopColor="#1d4ed8" />
           </linearGradient>
@@ -2478,8 +2479,8 @@ export function BlookSvg({ name, className = "w-12 h-12" }: { name: string; clas
   }
 
   const { fromColor, toColor, viaColor } = parseGradientStops(blook.bg)
-  const gradId = `grad-${name.replace(/[^a-zA-Z0-9]/g, "")}`
-  const clipId = `clip-${name.replace(/[^a-zA-Z0-9]/g, "")}`
+  const gradId = `grad-${instanceId}`
+  const clipId = `clip-${instanceId}`
 
   return (
     <svg viewBox="0 0 100 100" className={`${className} select-none overflow-visible drop-shadow-md`}>
